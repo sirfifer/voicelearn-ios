@@ -123,3 +123,59 @@ xcodebuild test -project VoiceLearn.xcodeproj -scheme VoiceLearn \
 - Cost-optimized: <$1.50/hour
 
 See `docs/VoiceLearn_TDD.md` for complete specifications.
+
+---
+
+## Multi-Agent Coordination
+
+This project may have multiple AI agents working on it simultaneously (Claude Code, Cursor, Windsurf, ChatGPT, etc.). To prevent duplicate work and ensure smooth collaboration, all agents must follow this protocol.
+
+### Task Status Document
+
+**Location:** `docs/TASK_STATUS.md`
+
+This document is the single source of truth for what's being worked on.
+
+### Protocol for ALL AI Agents
+
+1. **Before ANY work**: Read `docs/TASK_STATUS.md` first
+2. **Claim your task**: Add an entry to "Currently Active" with your agent/tool name and timestamp
+3. **Check for conflicts**: Do not work on tasks another agent has already claimed
+4. **Update on completion**: Move your task to "Completed" section with notes
+5. **Note blockers**: If you hit a blocker, add it to "Blocked/Pending" section
+
+### Why This Matters
+
+Without coordination:
+- Two agents might implement the same feature differently
+- One agent might break code another is actively working on
+- Time gets wasted on duplicate effort
+
+With coordination:
+- Clear visibility into who's doing what
+- Async collaboration between different AI tools
+- Audit trail of progress
+
+---
+
+## Writing Style Guidelines
+
+All AI agents must follow these style rules when writing documentation, comments, and any text in this project.
+
+### Punctuation Rules
+
+**Never use em dashes or en dashes as sentence interrupters.** This is a strict rule.
+
+- Wrong: "The feature — which was added last week — improves performance"
+- Wrong: "The feature – which was added last week – improves performance"
+- Correct: "The feature, which was added last week, improves performance"
+- Also correct: "The feature improves performance. It was added last week."
+
+Use commas for parenthetical phrases. Use periods to break up long sentences. Do not use dashes as a substitute for commas or to set off phrases.
+
+### General Style
+
+- Be concise and direct
+- Use active voice
+- Avoid jargon unless it's standard in the domain
+- Match the existing tone and style of the codebase
