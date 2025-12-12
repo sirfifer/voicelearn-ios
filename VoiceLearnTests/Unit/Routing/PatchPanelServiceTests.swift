@@ -39,7 +39,7 @@ final class PatchPanelServiceTests: XCTestCase {
 
     // MARK: - Routing Resolution Tests
 
-    func testRouteUsesDefa ultForSimpleTask() async {
+    func testRouteUsesDefaultForSimpleTask() async {
         let decision = await patchPanel.resolveRouting(
             taskType: .acknowledgment,
             context: RoutingContext()
