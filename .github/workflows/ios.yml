@@ -21,7 +21,7 @@ concurrency:
 jobs:
   lint:
     name: Lint
-    runs-on: macos-26
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
@@ -47,13 +47,13 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: macos-26
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Select Xcode 26
-      run: sudo xcode-select -s /Applications/Xcode_26.app
+    - name: Select Xcode 16
+      run: sudo xcode-select -s /Applications/Xcode_16.app
 
     - name: Show Xcode version
       run: xcodebuild -version
@@ -76,7 +76,7 @@ jobs:
         set -o pipefail
         xcodebuild build \
           -scheme VoiceLearn \
-          -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
           -skipPackagePluginValidation \
           CODE_SIGNING_ALLOWED=NO \
           | xcbeautify --renderer github-actions
@@ -86,7 +86,7 @@ jobs:
         set -o pipefail
         xcodebuild test \
           -scheme VoiceLearn \
-          -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
           -only-testing:VoiceLearnTests/Unit \
           -enableCodeCoverage YES \
           -resultBundlePath UnitTestResults.xcresult \
@@ -130,14 +130,14 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: macos-26
+    runs-on: macos-14
     if: github.ref == 'refs/heads/main' || github.event.inputs.run_integration == 'true'
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Select Xcode 26
-      run: sudo xcode-select -s /Applications/Xcode_26.app
+    - name: Select Xcode 16
+      run: sudo xcode-select -s /Applications/Xcode_16.app
 
     - name: Install xcbeautify
       run: brew install xcbeautify
@@ -157,7 +157,7 @@ jobs:
         set -o pipefail
         xcodebuild build \
           -scheme VoiceLearn \
-          -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
           -skipPackagePluginValidation \
           CODE_SIGNING_ALLOWED=NO \
           | xcbeautify --renderer github-actions
@@ -167,7 +167,7 @@ jobs:
         set -o pipefail
         xcodebuild test \
           -scheme VoiceLearn \
-          -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
           -only-testing:VoiceLearnTests/Integration \
           -resultBundlePath IntegrationTestResults.xcresult \
           CODE_SIGNING_ALLOWED=NO \
