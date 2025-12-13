@@ -6,40 +6,82 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-and-test:
-    runs-on: macos-14
-    
+  lint:
+    name: Lint
+    runs-on: macos-15
+
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Select Xcode
-      run: sudo xcode-select -s /Applications/Xcode_15.2.app
-    
-    - name: Install dependencies
-      run: |
-        brew install swiftlint swiftformat
-    
+
+    - name: Install linting tools
+      run: brew install swiftlint swiftformat
+
     - name: SwiftLint
-      run: swiftlint lint --strict
-    
+      run: swiftlint lint --strict --reporter github-actions-logging
+
     - name: SwiftFormat Check
       run: swiftformat --lint .
-    
+
+  build-and-test:
+    name: Build & Test
+    runs-on: macos-15
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Select Xcode 16
+      run: sudo xcode-select -s /Applications/Xcode_16.1.app
+
+    - name: Show Xcode version
+      run: xcodebuild -version
+
+    - name: Install xcbeautify
+      run: brew install xcbeautify
+
+    - name: Cache SPM packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved', '**/project.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+
+    - name: List available simulators
+      run: xcrun simctl list devices available | grep iPhone | head -20
+
     - name: Build
       run: |
-        xcodebuild -scheme VoiceLearn \
-          -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max' \
-          build
-    
+        set -o pipefail
+        xcodebuild build \
+          -scheme VoiceLearn \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+          -skipPackagePluginValidation \
+          CODE_SIGNING_ALLOWED=NO \
+          | xcbeautify --renderer github-actions
+
     - name: Run Unit Tests
       run: |
+        set -o pipefail
         xcodebuild test \
           -scheme VoiceLearn \
-          -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max' \
-          -only-testing:VoiceLearnTests/Unit
-    
-    - name: Upload Coverage
-      uses: codecov/codecov-action@v3
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+          -enableCodeCoverage YES \
+          -resultBundlePath TestResults.xcresult \
+          CODE_SIGNING_ALLOWED=NO \
+          | xcbeautify --renderer github-actions
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
       with:
-        files: ./coverage.lcov
+        name: test-results
+        path: TestResults.xcresult
+        retention-days: 7
