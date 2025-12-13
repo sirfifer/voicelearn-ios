@@ -5,6 +5,13 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      run_integration:
+        description: 'Run integration tests'
+        required: false
+        default: false
+        type: boolean
 
 # Cancel in-progress runs for the same branch
 concurrency:
@@ -28,8 +35,8 @@ jobs:
     - name: SwiftFormat Check
       run: swiftformat --lint .
 
-  build-and-test:
-    name: Build & Test
+  unit-tests:
+    name: Unit Tests
     runs-on: macos-26
 
     steps:
@@ -54,9 +61,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-spm-
 
-    - name: List available simulators
-      run: xcrun simctl list devices available | grep iPhone | head -20
-
     - name: Build
       run: |
         set -o pipefail
@@ -73,15 +77,69 @@ jobs:
         xcodebuild test \
           -scheme VoiceLearn \
           -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+          -only-testing:VoiceLearnTests/Unit \
           -enableCodeCoverage YES \
-          -resultBundlePath TestResults.xcresult \
+          -resultBundlePath UnitTestResults.xcresult \
           CODE_SIGNING_ALLOWED=NO \
           | xcbeautify --renderer github-actions
 
-    - name: Upload Test Results
+    - name: Upload Unit Test Results
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-results
-        path: TestResults.xcresult
+        name: unit-test-results
+        path: UnitTestResults.xcresult
+        retention-days: 7
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: macos-26
+    if: github.ref == 'refs/heads/main' || github.event.inputs.run_integration == 'true'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Select Xcode 26
+      run: sudo xcode-select -s /Applications/Xcode_26.app
+
+    - name: Install xcbeautify
+      run: brew install xcbeautify
+
+    - name: Cache SPM packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved', '**/project.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+
+    - name: Build
+      run: |
+        set -o pipefail
+        xcodebuild build \
+          -scheme VoiceLearn \
+          -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+          -skipPackagePluginValidation \
+          CODE_SIGNING_ALLOWED=NO \
+          | xcbeautify --renderer github-actions
+
+    - name: Run Integration Tests
+      run: |
+        set -o pipefail
+        xcodebuild test \
+          -scheme VoiceLearn \
+          -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+          -only-testing:VoiceLearnTests/Integration \
+          -resultBundlePath IntegrationTestResults.xcresult \
+          CODE_SIGNING_ALLOWED=NO \
+          | xcbeautify --renderer github-actions
+
+    - name: Upload Integration Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: integration-test-results
+        path: IntegrationTestResults.xcresult
         retention-days: 7
