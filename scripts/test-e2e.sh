@@ -12,7 +12,7 @@ fi
 echo "Running E2E tests (this may take 10-30 minutes)..."
 xcodebuild test \
   -scheme VoiceLearn \
-  -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
   -only-testing:VoiceLearnTests/E2E \
   CODE_SIGNING_ALLOWED=NO \
   | xcbeautify
