@@ -76,7 +76,8 @@ public actor PatchPanelService {
         self.endpointRegistry = customRegistry ?? LLMEndpoint.defaultRegistry
         self.routingTable = customTable ?? RoutingTable.default
 
-        logger.info("PatchPanelService initialized with \(endpointRegistry.count) endpoints")
+        let count = endpointRegistry.count
+        logger.info("PatchPanelService initialized with \(count) endpoints")
     }
 
     // MARK: - Routing Resolution

@@ -50,3 +50,18 @@ Tests/Recordings/
 
 # Logs
 *.log
+
+# Python virtual environment
+.venv/
+venv/
+*.pyc
+__pycache__/
+
+# ML Models (too large for git)
+models/
+*.mlmodel
+*.mlpackage
+*.safetensors
+*.onnx
+*.pt
+*.pth

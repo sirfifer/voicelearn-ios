@@ -9,7 +9,7 @@
 // Related: docs/GLM_ASR_SERVER_TRD.md
 
 import Foundation
-import AVFoundation
+@preconcurrency import AVFoundation
 import Logging
 
 /// Routes STT requests to appropriate provider with automatic failover
@@ -31,31 +31,43 @@ public actor STTProviderRouter: STTService {
     private var healthStatus: GLMASRHealthMonitor.HealthStatus = .healthy
     private var healthMonitorTask: Task<Void, Never>?
 
+    // MARK: - Cached Protocol Properties
+    // These are cached to satisfy the non-async protocol requirements
+
+    private var _metrics: STTMetrics = STTMetrics(medianLatency: 0, p99Latency: 0, wordEmissionRate: 0)
+    private var _costPerHour: Decimal = 0
+    private var _isStreaming: Bool = false
+
     /// Current provider identifier for debugging/telemetry
     public var currentProviderIdentifier: String {
-        get async {
-            if healthStatus == .unhealthy {
-                return "deepgram"
-            }
-            return "glm-asr"
+        if healthStatus == .unhealthy {
+            return "deepgram"
         }
+        return "glm-asr"
     }
 
     // MARK: - STTService Protocol Properties
 
     /// Performance metrics from active provider
     public var metrics: STTMetrics {
-        get async { await activeProvider.metrics }
+        _metrics
     }
 
     /// Cost per hour from active provider
     public var costPerHour: Decimal {
-        get async { await activeProvider.costPerHour }
+        _costPerHour
     }
 
     /// Whether currently streaming
     public var isStreaming: Bool {
-        get async { await activeProvider.isStreaming }
+        _isStreaming
+    }
+
+    /// Update cached metrics from active provider
+    private func updateCachedMetrics() async {
+        _metrics = await activeProvider.metrics
+        _costPerHour = await activeProvider.costPerHour
+        _isStreaming = await activeProvider.isStreaming
     }
 
     // MARK: - Initialization
@@ -83,25 +95,6 @@ public actor STTProviderRouter: STTService {
         }
     }
 
-    /// Initialize with mock health monitor (for testing)
-    public init(
-        glmASRService: any STTService,
-        deepgramService: any STTService,
-        healthMonitor: MockHealthMonitor
-    ) {
-        self.glmASRService = glmASRService
-        self.deepgramService = deepgramService
-
-        // Create a real health monitor but we'll use the mock's status
-        self.healthMonitor = GLMASRHealthMonitor(configuration: .default)
-        self.activeProvider = glmASRService
-
-        // Set up monitoring with mock
-        Task {
-            await self.startMockHealthMonitoring(mock: healthMonitor)
-        }
-    }
-
     deinit {
         healthMonitorTask?.cancel()
     }
@@ -114,11 +107,14 @@ public actor STTProviderRouter: STTService {
     public func startStreaming(audioFormat: AVAudioFormat) async throws -> AsyncStream<STTResult> {
         // Select provider based on health
         activeProvider = selectProvider()
+        _isStreaming = true
 
-        let providerName = await currentProviderIdentifier
+        let providerName = currentProviderIdentifier
         logger.info("Starting streaming with provider: \(providerName)")
 
-        return try await activeProvider.startStreaming(audioFormat: audioFormat)
+        let stream = try await activeProvider.startStreaming(audioFormat: audioFormat)
+        await updateCachedMetrics()
+        return stream
     }
 
     /// Send audio buffer for transcription
@@ -130,11 +126,15 @@ public actor STTProviderRouter: STTService {
     /// Stop streaming and get final result
     public func stopStreaming() async throws {
         try await activeProvider.stopStreaming()
+        _isStreaming = false
+        await updateCachedMetrics()
     }
 
     /// Cancel streaming without finalizing
     public func cancelStreaming() async {
         await activeProvider.cancelStreaming()
+        _isStreaming = false
+        await updateCachedMetrics()
     }
 
     // MARK: - Private Methods
@@ -149,17 +149,6 @@ public actor STTProviderRouter: STTService {
         }
     }
 
-    private func startMockHealthMonitoring(mock: MockHealthMonitor) async {
-        // For testing, poll the mock's status
-        healthMonitorTask = Task {
-            while !Task.isCancelled {
-                let status = await mock.currentStatus
-                await self.handleHealthStatusChange(status)
-                try? await Task.sleep(nanoseconds: 100_000_000)  // 100ms
-            }
-        }
-    }
-
     private func handleHealthStatusChange(_ status: GLMASRHealthMonitor.HealthStatus) async {
         let previousStatus = healthStatus
         healthStatus = status
@@ -169,7 +158,8 @@ public actor STTProviderRouter: STTService {
 
             // If currently streaming and provider changed, log but don't interrupt
             // Next streaming session will use new provider
-            if status == .unhealthy && await activeProvider.isStreaming {
+            let isCurrentlyStreaming = await activeProvider.isStreaming
+            if status == .unhealthy && isCurrentlyStreaming {
                 logger.warning("GLM-ASR became unhealthy during streaming - will switch on next session")
             }
         }
