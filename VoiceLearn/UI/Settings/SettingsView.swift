@@ -9,25 +9,39 @@ import AVFoundation
 /// Settings view for app configuration
 public struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
-    
+
     public init() { }
-    
+
     public var body: some View {
         NavigationStack {
             List {
                 // API Keys Section
                 Section {
                     ForEach(APIKeyManager.KeyType.allCases, id: \.rawValue) { keyType in
-                        APIKeyRow(
-                            keyType: keyType,
-                            isConfigured: viewModel.keyStatus[keyType] ?? false,
-                            onTap: { viewModel.editKey(keyType) }
-                        )
+                        NavigationLink {
+                            APIProviderDetailView(
+                                keyType: keyType,
+                                isConfigured: viewModel.keyStatus[keyType] ?? false,
+                                onSave: viewModel.saveKey
+                            )
+                        } label: {
+                            APIKeyRow(
+                                keyType: keyType,
+                                isConfigured: viewModel.keyStatus[keyType] ?? false
+                            )
+                        }
+                    }
+
+                    NavigationLink {
+                        SessionCostOverviewView()
+                    } label: {
+                        Label("Session Cost Estimates", systemImage: "dollarsign.circle")
+                            .foregroundStyle(.secondary)
                     }
                 } header: {
-                    Text("API Keys")
+                    Text("API Providers")
                 } footer: {
-                    Text("API keys are stored securely in the Keychain.")
+                    Text("Tap a provider to see details, pricing, and configure your API key.")
                 }
                 
                 // Audio Settings Section
@@ -161,9 +175,6 @@ public struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
-            .sheet(item: $viewModel.editingKeyType) { keyType in
-                APIKeyEditSheet(keyType: keyType, onSave: viewModel.saveKey)
-            }
         }
     }
 }
@@ -173,25 +184,50 @@ public struct SettingsView: View {
 struct APIKeyRow: View {
     let keyType: APIKeyManager.KeyType
     let isConfigured: Bool
-    let onTap: () -> Void
-    
+
+    private var info: LMAPIProviderInfo {
+        LMAPIProviderRegistry.info(for: keyType)
+    }
+
     var body: some View {
-        Button(action: onTap) {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(keyType.displayName)
-                    Text(isConfigured ? "Configured" : "Not set")
+        HStack(spacing: 12) {
+            // Category icons
+            HStack(spacing: 4) {
+                ForEach(info.categories, id: \.rawValue) { category in
+                    Image(systemName: category.icon)
                         .font(.caption)
-                        .foregroundStyle(isConfigured ? .green : .red)
+                        .foregroundStyle(category.color)
                 }
-                
-                Spacer()
-                
-                Image(systemName: isConfigured ? "checkmark.circle.fill" : "exclamationmark.circle")
-                    .foregroundStyle(isConfigured ? .green : .red)
             }
+            .frame(width: 44, alignment: .leading)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(keyType.displayName)
+                    .font(.body)
+
+                HStack(spacing: 6) {
+                    // Category labels
+                    Text(info.categories.map { $0.shortLabel }.joined(separator: " + "))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Text("•")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    // Status
+                    Text(isConfigured ? "Ready" : "Not set")
+                        .font(.caption)
+                        .foregroundStyle(isConfigured ? .green : .orange)
+                }
+            }
+
+            Spacer()
+
+            // Status indicator
+            Image(systemName: isConfigured ? "checkmark.circle.fill" : "circle.dashed")
+                .foregroundStyle(isConfigured ? .green : .secondary)
         }
-        .foregroundStyle(.primary)
     }
 }
 
@@ -256,8 +292,7 @@ struct APIKeyEditSheet: View {
 class SettingsViewModel: ObservableObject {
     // API Keys
     @Published var keyStatus: [APIKeyManager.KeyType: Bool] = [:]
-    @Published var editingKeyType: APIKeyManager.KeyType?
-    
+
     // Audio
     @Published var sampleRate: Double = 48000
     @Published var enableVoiceProcessing = true
@@ -318,11 +353,7 @@ class SettingsViewModel: ObservableObject {
             keyStatus = status
         }
     }
-    
-    func editKey(_ keyType: APIKeyManager.KeyType) {
-        editingKeyType = keyType
-    }
-    
+
     func saveKey(_ keyType: APIKeyManager.KeyType, value: String) {
         Task {
             try? await APIKeyManager.shared.setKey(keyType, value: value)
