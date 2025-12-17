@@ -43,7 +43,7 @@ public struct SettingsView: View {
                 } footer: {
                     Text("Tap a provider to see details, pricing, and configure your API key.")
                 }
-                
+
                 // Audio Settings Section
                 Section("Audio") {
                     Picker("Sample Rate", selection: $viewModel.sampleRate) {
@@ -51,27 +51,27 @@ public struct SettingsView: View {
                         Text("24 kHz").tag(24000.0)
                         Text("48 kHz").tag(48000.0)
                     }
-                    
+
                     Toggle("Voice Processing", isOn: $viewModel.enableVoiceProcessing)
                     Toggle("Echo Cancellation", isOn: $viewModel.enableEchoCancellation)
                     Toggle("Noise Suppression", isOn: $viewModel.enableNoiseSuppression)
                 }
-                
+
                 // VAD Settings Section
                 Section("Voice Detection") {
                     VStack(alignment: .leading) {
                         Text("Detection Threshold: \(viewModel.vadThreshold, specifier: "%.2f")")
                         Slider(value: $viewModel.vadThreshold, in: 0.3...0.9)
                     }
-                    
+
                     VStack(alignment: .leading) {
                         Text("Interruption Threshold: \(viewModel.bargeInThreshold, specifier: "%.2f")")
                         Slider(value: $viewModel.bargeInThreshold, in: 0.5...0.95)
                     }
-                    
+
                     Toggle("Enable Interruptions", isOn: $viewModel.enableBargeIn)
                 }
-                
+
                 // Self-Hosted Servers Section
                 Section {
                     NavigationLink {
@@ -93,41 +93,85 @@ public struct SettingsView: View {
                     Text("Configure local servers for zero-cost AI inference.")
                 }
 
+                // STT Settings Section
+                Section("Speech Recognition") {
+                    Picker("Provider", selection: $viewModel.sttProvider) {
+                        Text("GLM-ASR (On-Device)").tag(STTProvider.glmASROnDevice)
+                        Text("Deepgram Nova-3").tag(STTProvider.deepgramNova3)
+                        Text("AssemblyAI").tag(STTProvider.assemblyAI)
+                        Text("Apple Speech").tag(STTProvider.appleSpeech)
+                    }
+
+                    if !viewModel.sttProvider.requiresNetwork {
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                            Text("Works offline")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
                 // LLM Settings Section
                 Section("Language Model") {
                     Picker("Provider", selection: $viewModel.llmProvider) {
+                        Text("On-Device (llama.cpp)").tag(LLMProvider.localMLX)
+                        Text("Anthropic Claude").tag(LLMProvider.anthropic)
                         Text("OpenAI").tag(LLMProvider.openAI)
-                        Text("Anthropic").tag(LLMProvider.anthropic)
                         Text("Self-Hosted").tag(LLMProvider.selfHosted)
                     }
-                    
-                    Picker("Model", selection: $viewModel.llmModel) {
-                        ForEach(viewModel.availableModels, id: \.self) { model in
-                            Text(model).tag(model)
+
+                    if viewModel.llmProvider != .localMLX {
+                        Picker("Model", selection: $viewModel.llmModel) {
+                            ForEach(viewModel.availableModels, id: \.self) { model in
+                                Text(model).tag(model)
+                            }
                         }
                     }
-                    
+
                     VStack(alignment: .leading) {
                         Text("Temperature: \(viewModel.temperature, specifier: "%.1f")")
                         Slider(value: $viewModel.temperature, in: 0...1)
                     }
-                    
+
                     Stepper("Max Tokens: \(viewModel.maxTokens)", value: $viewModel.maxTokens, in: 256...4096, step: 256)
+
+                    if !viewModel.llmProvider.requiresNetwork {
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                            Text("Works offline - Free")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
-                
+
                 // TTS Settings Section
                 Section("Voice") {
                     Picker("Provider", selection: $viewModel.ttsProvider) {
-                        Text("Deepgram Aura").tag(TTSProvider.deepgramAura2)
+                        Text("Apple TTS (On-Device)").tag(TTSProvider.appleTTS)
                         Text("ElevenLabs").tag(TTSProvider.elevenLabsFlash)
+                        Text("Deepgram Aura").tag(TTSProvider.deepgramAura2)
                     }
-                    
+
                     VStack(alignment: .leading) {
                         Text("Speaking Rate: \(viewModel.speakingRate, specifier: "%.1f")x")
                         Slider(value: $viewModel.speakingRate, in: 0.5...2.0)
                     }
+
+                    if !viewModel.ttsProvider.requiresNetwork {
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                            Text("Works offline - Free")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
-                
+
                 // Presets Section
                 Section("Presets") {
                     Button("Balanced (Default)") {
@@ -146,7 +190,7 @@ public struct SettingsView: View {
                         viewModel.applyPreset(.selfHosted)
                     }
                 }
-                
+
                 // Debug & Testing Section
                 Section {
                     NavigationLink {
@@ -169,6 +213,20 @@ public struct SettingsView: View {
 
                     Toggle("Debug Mode", isOn: $viewModel.debugMode)
                     Toggle("Verbose Logging", isOn: $viewModel.verboseLogging)
+
+                    // Remote logging configuration
+                    VStack(alignment: .leading) {
+                        Text("Remote Log Server IP")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        TextField("e.g., 192.168.1.100", text: $viewModel.logServerIP)
+                            .textFieldStyle(.roundedBorder)
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
+                            .keyboardType(.numbersAndPunctuation)
+                    }
+
+                    Toggle("Remote Logging", isOn: $viewModel.remoteLoggingEnabled)
 
                     Button("Load Sample Curriculum") {
                         Task { await viewModel.loadSampleCurriculum() }
@@ -261,11 +319,11 @@ struct APIKeyRow: View {
 struct APIKeyEditSheet: View {
     let keyType: APIKeyManager.KeyType
     let onSave: (APIKeyManager.KeyType, String) -> Void
-    
+
     @Environment(\.dismiss) private var dismiss
     @State private var keyValue = ""
     @State private var showKey = false
-    
+
     var body: some View {
         NavigationStack {
             Form {
@@ -278,7 +336,7 @@ struct APIKeyEditSheet: View {
                         } else {
                             SecureField("API Key", text: $keyValue)
                         }
-                        
+
                         Button {
                             showKey.toggle()
                         } label: {
@@ -317,38 +375,90 @@ struct APIKeyEditSheet: View {
 class SettingsViewModel: ObservableObject {
     // API Keys
     @Published var keyStatus: [APIKeyManager.KeyType: Bool] = [:]
+    @Published var editingKeyType: APIKeyManager.KeyType?
 
     // Audio
-    @Published var sampleRate: Double = 48000
-    @Published var enableVoiceProcessing = true
-    @Published var enableEchoCancellation = true
-    @Published var enableNoiseSuppression = true
-    
+    @AppStorage("sampleRate") var sampleRate: Double = 48000
+    @AppStorage("enableVoiceProcessing") var enableVoiceProcessing = true
+    @AppStorage("enableEchoCancellation") var enableEchoCancellation = true
+    @AppStorage("enableNoiseSuppression") var enableNoiseSuppression = true
+
     // VAD
-    @Published var vadThreshold: Float = 0.5
-    @Published var bargeInThreshold: Float = 0.7
-    @Published var enableBargeIn = true
-    
-    // LLM
-    @Published var llmProvider: LLMProvider = .openAI
-    @Published var llmModel = "gpt-4o"
-    @Published var temperature: Float = 0.7
-    @Published var maxTokens = 1024
-    
-    // TTS
-    @Published var ttsProvider: TTSProvider = .deepgramAura2
-    @Published var speakingRate: Float = 1.0
+    @AppStorage("vadThreshold") var vadThreshold: Double = 0.5
+    @AppStorage("bargeInThreshold") var bargeInThreshold: Double = 0.7
+    @AppStorage("enableBargeIn") var enableBargeIn = true
+
+    // STT - Default to on-device
+    @Published var sttProvider: STTProvider {
+        didSet { UserDefaults.standard.set(sttProvider.rawValue, forKey: "sttProvider") }
+    }
+
+    // LLM - Default to on-device
+    @Published var llmProvider: LLMProvider {
+        didSet { UserDefaults.standard.set(llmProvider.rawValue, forKey: "llmProvider") }
+    }
+    @AppStorage("llmModel") var llmModel = "gpt-4o"
+    @AppStorage("temperature") var temperature: Double = 0.7
+    @AppStorage("maxTokens") var maxTokens = 1024
+
+    // TTS - Default to on-device
+    @Published var ttsProvider: TTSProvider {
+        didSet { UserDefaults.standard.set(ttsProvider.rawValue, forKey: "ttsProvider") }
+    }
+    @AppStorage("speakingRate") var speakingRate: Double = 1.0
 
     // Debug
-    @Published var debugMode = false
-    @Published var verboseLogging = false
+    @AppStorage("debugMode") var debugMode = false
+    @AppStorage("verboseLogging") var verboseLogging = false
     @Published var hasSampleCurriculum = false
 
     // Self-hosted servers
     @Published var selfHostedServerCount = 0
     @Published var healthySelfHostedCount = 0
 
+    // Remote Logging
+    @AppStorage("logServerIP") var logServerIP: String = ""
+    @Published var remoteLoggingEnabled: Bool = true {
+        didSet {
+            if remoteLoggingEnabled {
+                RemoteLogging.enable()
+            } else {
+                RemoteLogging.disable()
+            }
+        }
+    }
+
     private let curriculumSeeder = SampleCurriculumSeeder()
+
+    init() {
+        // Load persisted provider settings
+        if let sttRaw = UserDefaults.standard.string(forKey: "sttProvider"),
+           let stt = STTProvider(rawValue: sttRaw) {
+            self.sttProvider = stt
+        } else {
+            self.sttProvider = .glmASROnDevice  // Default to on-device
+        }
+
+        if let llmRaw = UserDefaults.standard.string(forKey: "llmProvider"),
+           let llm = LLMProvider(rawValue: llmRaw) {
+            self.llmProvider = llm
+        } else {
+            self.llmProvider = .localMLX  // Default to on-device
+        }
+
+        if let ttsRaw = UserDefaults.standard.string(forKey: "ttsProvider"),
+           let tts = TTSProvider(rawValue: ttsRaw) {
+            self.ttsProvider = tts
+        } else {
+            self.ttsProvider = .appleTTS  // Default to on-device
+        }
+
+        Task {
+            await loadKeyStatus()
+            await checkSampleCurriculum()
+            await loadServerStatus()
+        }
+    }
 
     /// Available models for current provider
     var availableModels: [String] {
@@ -359,16 +469,8 @@ class SettingsViewModel: ObservableObject {
             return ["claude-3-5-sonnet-20241022", "claude-3-haiku-20240307"]
         case .selfHosted:
             return ["qwen2.5:7b", "qwen2.5:3b", "llama3.2:3b", "llama3.2:1b", "mistral:7b"]
-        default:
-            return ["gpt-4o"]
-        }
-    }
-
-    init() {
-        Task {
-            await loadKeyStatus()
-            await checkSampleCurriculum()
-            await loadServerStatus()
+        case .localMLX:
+            return ["ministral-3b (on-device)"]
         }
     }
 

@@ -60,3 +60,16 @@ extension Topic {
 // MARK: - Identifiable Conformance
 
 extension Topic: Identifiable { }
+
+// MARK: - Hashable Conformance (for NavigationLink)
+
+extension Topic {
+    public override var hash: Int {
+        return id?.hashValue ?? objectID.hashValue
+    }
+
+    public override func isEqual(_ object: Any?) -> Bool {
+        guard let other = object as? Topic else { return false }
+        return self.id == other.id || self.objectID == other.objectID
+    }
+}

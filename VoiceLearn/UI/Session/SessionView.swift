@@ -527,39 +527,119 @@ class SessionViewModel: ObservableObject {
     private func startSession(appState: AppState) async {
         isLoading = true
         defer { isLoading = false }
-        
-        // 1. Check/Get API Keys
-        guard let deepgramKey = await appState.apiKeys.getKey(.deepgram),
-              let elevenLabsKey = await appState.apiKeys.getKey(.elevenLabs),
-              let anthropicKey = await appState.apiKeys.getKey(.anthropic) else {
-            errorMessage = "Missing required API keys. Please configure Deepgram, ElevenLabs, and Anthropic keys."
-            showError = true
-            return
+
+        // Read user settings from UserDefaults
+        let sttProviderSetting = UserDefaults.standard.string(forKey: "sttProvider")
+            .flatMap { STTProvider(rawValue: $0) } ?? .glmASROnDevice
+        let llmProviderSetting = UserDefaults.standard.string(forKey: "llmProvider")
+            .flatMap { LLMProvider(rawValue: $0) } ?? .localMLX
+        let ttsProviderSetting = UserDefaults.standard.string(forKey: "ttsProvider")
+            .flatMap { TTSProvider(rawValue: $0) } ?? .appleTTS
+
+        let sttService: any STTService
+        let ttsService: any TTSService
+        let llmService: any LLMService
+        let vadService: any VADService = SileroVADService()
+
+        // Configure STT based on settings
+        switch sttProviderSetting {
+        case .glmASROnDevice, .appleSpeech:
+            if GLMASROnDeviceSTTService.isDeviceSupported {
+                sttService = GLMASROnDeviceSTTService()
+            } else {
+                errorMessage = "On-device STT not available on this device. Please select a cloud provider in Settings."
+                showError = true
+                return
+            }
+        case .deepgramNova3:
+            guard let apiKey = await appState.apiKeys.getKey(.deepgram) else {
+                errorMessage = "Deepgram API key not configured. Please add it in Settings or switch to on-device mode."
+                showError = true
+                return
+            }
+            sttService = DeepgramSTTService(apiKey: apiKey)
+        case .assemblyAI:
+            guard let apiKey = await appState.apiKeys.getKey(.assemblyAI) else {
+                errorMessage = "AssemblyAI API key not configured. Please add it in Settings or switch to on-device mode."
+                showError = true
+                return
+            }
+            sttService = AssemblyAISTTService(apiKey: apiKey)
+        default:
+            // Fallback to on-device if available
+            if GLMASROnDeviceSTTService.isDeviceSupported {
+                sttService = GLMASROnDeviceSTTService()
+            } else {
+                errorMessage = "No STT provider available. Please configure API keys in Settings."
+                showError = true
+                return
+            }
         }
-        
-        // 2. Initialize Services
-        let sttService = DeepgramSTTService(apiKey: deepgramKey)
-        // Use default voice (Jessica) or configurable one
-        let ttsService = ElevenLabsTTSService(apiKey: elevenLabsKey) 
-        let llmService = AnthropicLLMService(apiKey: anthropicKey)
-        let vadService = SileroVADService()
-        
+
+        // Configure TTS based on settings
+        switch ttsProviderSetting {
+        case .appleTTS:
+            ttsService = AppleTTSService()
+        case .elevenLabsFlash, .elevenLabsTurbo:
+            guard let apiKey = await appState.apiKeys.getKey(.elevenLabs) else {
+                errorMessage = "ElevenLabs API key not configured. Please add it in Settings or switch to Apple TTS."
+                showError = true
+                return
+            }
+            ttsService = ElevenLabsTTSService(apiKey: apiKey)
+        case .deepgramAura2:
+            guard let apiKey = await appState.apiKeys.getKey(.deepgram) else {
+                errorMessage = "Deepgram API key not configured. Please add it in Settings or switch to Apple TTS."
+                showError = true
+                return
+            }
+            ttsService = DeepgramTTSService(apiKey: apiKey)
+        default:
+            ttsService = AppleTTSService()
+        }
+
+        // Configure LLM based on settings
+        switch llmProviderSetting {
+        case .localMLX:
+            if OnDeviceLLMService.areModelsAvailable {
+                llmService = OnDeviceLLMService()
+            } else {
+                errorMessage = "On-device LLM models not found. Please add models to the app bundle or select a cloud provider in Settings."
+                showError = true
+                return
+            }
+        case .anthropic:
+            guard let apiKey = await appState.apiKeys.getKey(.anthropic) else {
+                errorMessage = "Anthropic API key not configured. Please add it in Settings or switch to on-device mode."
+                showError = true
+                return
+            }
+            llmService = AnthropicLLMService(apiKey: apiKey)
+        case .openAI:
+            guard let apiKey = await appState.apiKeys.getKey(.openAI) else {
+                errorMessage = "OpenAI API key not configured. Please add it in Settings or switch to on-device mode."
+                showError = true
+                return
+            }
+            llmService = OpenAILLMService(apiKey: apiKey)
+        }
+
         do {
-            // 3. Create SessionManager
+            // Create SessionManager
             let manager = try await appState.createSessionManager()
             self.sessionManager = manager
-            
-            // 4. Bind State
+
+            // Bind State
             bindToSessionManager(manager)
-            
-            // 5. Start Session
+
+            // Start Session
             try await manager.startSession(
                 sttService: sttService,
                 ttsService: ttsService,
                 llmService: llmService,
                 vadService: vadService
             )
-            
+
         } catch {
             errorMessage = "Failed to start session: \(error.localizedDescription)"
             showError = true

@@ -11,13 +11,40 @@ import Logging
 struct VoiceLearnApp: App {
     /// Application state container
     @StateObject private var appState = AppState()
-    
+
     /// Configure logging on app launch
     init() {
+        // Configure remote logging server
+        // For simulator: localhost works automatically
+        // For device: set the IP of your Mac running log_server.py
+        #if DEBUG
+        // Read server IP from UserDefaults or use localhost
+        if let serverIP = UserDefaults.standard.string(forKey: "logServerIP"), !serverIP.isEmpty {
+            RemoteLogging.configure(serverIP: serverIP)
+        } else {
+            RemoteLogging.configure() // Uses localhost for simulator
+        }
+        #endif
+
+        // Bootstrap logging with both console and remote handlers
         LoggingSystem.bootstrap { label in
+            #if DEBUG
+            // In debug builds, send logs to both console and remote server
+            var consoleHandler = StreamLogHandler.standardOutput(label: label)
+            consoleHandler.logLevel = .debug
+
+            let remoteHandler = RemoteLogHandler(label: label)
+
+            return MultiplexLogHandler([
+                consoleHandler,
+                remoteHandler
+            ])
+            #else
+            // In release builds, only use console handler with info level
             var handler = StreamLogHandler.standardOutput(label: label)
-            handler.logLevel = .debug
+            handler.logLevel = .info
             return handler
+            #endif
         }
     }
     

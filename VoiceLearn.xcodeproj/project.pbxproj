@@ -3,10 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EB5A625F5A1349779774AA1D /* OnDeviceLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A5FAF92F7D4CAAB8251DB7 /* OnDeviceLLMService.swift */; };
+		EBBEFFBD92DF41ABB08AB5A8 /* AppleTTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CFC3D773DE48BE9A239642 /* AppleTTSService.swift */; };
 		000CCBD668C2818134BBB9D8 /* SessionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D356C6AB03EB875128D5945B /* SessionManagerTests.swift */; };
 		01E12BE332E2E3ED3B56C918 /* CurriculumModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEF1C26EA42FA0CC980DB14 /* CurriculumModels.swift */; };
 		025290442B034FB27FF10B18 /* STTProviderRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642F2F56F4708A528BA96651 /* STTProviderRouter.swift */; };
@@ -25,6 +27,7 @@
 		3B1F6045E2D8996D3EF258A7 /* RoutingConditionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F9A00D61E988856333CEBDB /* RoutingConditionTests.swift */; };
 		3C9687BB5ED088E5CFB137A3 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC0F774D8EC0E30A1EC2D96 /* LLMService.swift */; };
 		41B2ED1A4802336BD4E0DEB8 /* DeepgramSTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D987AE5ED4862C62290270 /* DeepgramSTTService.swift */; };
+		42BA877D2EF2401100E33EC6 /* SampleCurriculumSeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42BA877C2EF2401100E33EC6 /* SampleCurriculumSeeder.swift */; };
 		494EF7B0DF519CC02B6BA5C1 /* VoiceLearnApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB8E188DAEEF291DE3D8717F /* VoiceLearnApp.swift */; };
 		4EF17C8315F0F06267492967 /* GLMASRSTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8536D559854F89B9630C6F2 /* GLMASRSTTService.swift */; };
 		4FD6E2915CC0F88F817B2E9D /* LLMEndpointTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC219C1820A1E178A680D115 /* LLMEndpointTests.swift */; };
@@ -36,6 +39,7 @@
 		61D0586DDED7EFC311050437 /* ElevenLabsTTSServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FE1485B0B0AE8F52678656C /* ElevenLabsTTSServiceTests.swift */; };
 		63F3D9D850D9235A2A45C6E8 /* STTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8998E9A5A77C8479C6840EC9 /* STTService.swift */; };
 		645B75E6E4117EEF61541600 /* TelemetryEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47903B0E20EAF003FA79E708 /* TelemetryEngine.swift */; };
+		645B75E6E4117EEF61541601 /* RemoteLogHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A1B2C3D4E5F6789ABCDEF0 /* RemoteLogHandler.swift */; };
 		6544D5BDFF62389EE39CF048 /* LiveKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2B2AF5164826C00D3745FA7A /* LiveKit */; };
 		67AAFF06599079A85D50BDD1 /* ProgressTrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 796649153218922464580B05 /* ProgressTrackerTests.swift */; };
 		6D7A2DF632E0DC9E1D7FD41F /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 979A0008641BECA9718FB660 /* Logging */; };
@@ -72,6 +76,12 @@
 		F6FB88EE88B2200BFEDB700F /* AnthropicLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509B24E559CC29015119472E /* AnthropicLLMService.swift */; };
 		F95E852719059B9493C11973 /* GLMASRSTTServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9693B0FF6F177A8F54F08D6F /* GLMASRSTTServiceTests.swift */; };
 		FB933B4BB3E2F055E8146AC5 /* APIKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF8A71F6E29B1A60EB657AC /* APIKeyManager.swift */; };
+		5D72476C21591F8B6C9DF20B /* GLMASROnDeviceSTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF0F3F3ECBAA9BCC660EE2A /* GLMASROnDeviceSTTService.swift */; };
+		11D25569398E18C5A69C1F2E /* GLMASRWhisperEncoder.mlpackage in Resources */ = {isa = PBXBuildFile; fileRef = E5D9DF73C02D794B3E6741EF /* GLMASRWhisperEncoder.mlpackage */; };
+		FB19A9D122B98B7D04F9892D /* GLMASRAudioAdapter.mlpackage in Resources */ = {isa = PBXBuildFile; fileRef = 4E91AEC22D68484F00EF94BF /* GLMASRAudioAdapter.mlpackage */; };
+		F76F6C4C62EF8E2C3D26A3E2 /* GLMASREmbedHead.mlpackage in Resources */ = {isa = PBXBuildFile; fileRef = 93CFCB10F2F7E18E9601B7C6 /* GLMASREmbedHead.mlpackage */; };
+		829A837E56683C5565CF3503 /* GLMASRConvEncoder.mlpackage in Resources */ = {isa = PBXBuildFile; fileRef = 4F91F02F561DEEA9EDE7582A /* GLMASRConvEncoder.mlpackage */; };
+		578631E7004813442C299330 /* glm-asr-nano-q4km.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 9CD2011AC4ED7A6615ABA709 /* glm-asr-nano-q4km.gguf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,14 +113,17 @@
 		3A9B2D01533457DA47F7C663 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		3FE1485B0B0AE8F52678656C /* ElevenLabsTTSServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevenLabsTTSServiceTests.swift; sourceTree = "<group>"; };
 		411F0D12EF1ABAE2430E579A /* CurriculumEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurriculumEngine.swift; sourceTree = "<group>"; };
+		42BA877C2EF2401100E33EC6 /* SampleCurriculumSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCurriculumSeeder.swift; sourceTree = "<group>"; };
 		47903B0E20EAF003FA79E708 /* TelemetryEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryEngine.swift; sourceTree = "<group>"; };
+		47A1B2C3D4E5F6789ABCDEF0 /* RemoteLogHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteLogHandler.swift; sourceTree = "<group>"; };
 		49FC2289A12508DE51EA8F66 /* OpenAIEmbeddingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIEmbeddingServiceTests.swift; sourceTree = "<group>"; };
 		4BA68771D0D75A21B107BC24 /* OpenAILLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAILLMService.swift; sourceTree = "<group>"; };
 		509B24E559CC29015119472E /* AnthropicLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicLLMService.swift; sourceTree = "<group>"; };
+		50A5FAF92F7D4CAAB8251DB7 /* OnDeviceLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceLLMService.swift; sourceTree = "<group>"; };
 		5C3D0F50423CA0804E8D2323 /* SileroVADService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SileroVADService.swift; sourceTree = "<group>"; };
 		642F2F56F4708A528BA96651 /* STTProviderRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTProviderRouter.swift; sourceTree = "<group>"; };
 		649A4C232D5F60B29F8A3CC2 /* DeepgramSTTServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepgramSTTServiceTests.swift; sourceTree = "<group>"; };
-		68BEF421B3B705117D9CA31A /* VoiceLearn.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = VoiceLearn.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		68BEF421B3B705117D9CA31A /* VoiceLearn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceLearn.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6B6839806CB0A8B4C586FF10 /* AssemblyAISTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssemblyAISTTService.swift; sourceTree = "<group>"; };
 		6FFA7F1BC8578438E8C65E54 /* VoiceLearnTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceLearnTests.swift; sourceTree = "<group>"; };
 		71599E323CA773F8A514E7D3 /* CurriculumEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurriculumEngineTests.swift; sourceTree = "<group>"; };
@@ -139,6 +152,7 @@
 		CBAD08FD4974B8C9BCA8CF6C /* LLMEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMEndpoint.swift; sourceTree = "<group>"; };
 		CC219C1820A1E178A680D115 /* LLMEndpointTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMEndpointTests.swift; sourceTree = "<group>"; };
 		CDECFDD641B04BF76BFF029D /* ElevenLabsTTSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevenLabsTTSService.swift; sourceTree = "<group>"; };
+		A8CFC3D773DE48BE9A239642 /* AppleTTSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleTTSService.swift; sourceTree = "<group>"; };
 		D356C6AB03EB875128D5945B /* SessionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManagerTests.swift; sourceTree = "<group>"; };
 		DBA2D86265CB6660E6A1E540 /* RoutingTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutingTable.swift; sourceTree = "<group>"; };
 		DF622CC8ADFDC3237C1CD43E /* GLMASRIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLMASRIntegrationTests.swift; sourceTree = "<group>"; };
@@ -152,6 +166,18 @@
 		F675DF09C93DE1D58FF8C993 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		FB8E188DAEEF291DE3D8717F /* VoiceLearnApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceLearnApp.swift; sourceTree = "<group>"; };
 		FE3B47E47DB31A33003803B6 /* STTProviderRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTProviderRouterTests.swift; sourceTree = "<group>"; };
+		4DF0F3F3ECBAA9BCC660EE2A /* GLMASROnDeviceSTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLMASROnDeviceSTTService.swift; sourceTree = "<group>"; };
+
+		E5D9DF73C02D794B3E6741EF /* GLMASRWhisperEncoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "models/glm-asr-nano/GLMASRWhisperEncoder.mlpackage"; sourceTree = SOURCE_ROOT; };
+
+		4E91AEC22D68484F00EF94BF /* GLMASRAudioAdapter.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "models/glm-asr-nano/GLMASRAudioAdapter.mlpackage"; sourceTree = SOURCE_ROOT; };
+
+		93CFCB10F2F7E18E9601B7C6 /* GLMASREmbedHead.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "models/glm-asr-nano/GLMASREmbedHead.mlpackage"; sourceTree = SOURCE_ROOT; };
+
+		4F91F02F561DEEA9EDE7582A /* GLMASRConvEncoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "models/glm-asr-nano/GLMASRConvEncoder.mlpackage"; sourceTree = SOURCE_ROOT; };
+
+		9CD2011AC4ED7A6615ABA709 /* glm-asr-nano-q4km.gguf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "models/glm-asr-nano/glm-asr-nano-q4km.gguf"; sourceTree = SOURCE_ROOT; };
+
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -174,6 +200,7 @@
 				DF709A56B7FF381C465F855A /* Audio */,
 				B78890780AE69D4DDECFF6B9 /* Config */,
 				E61AE6B1A06A1DB78410A897 /* Curriculum */,
+				59CA1F942D31E904EBE7B784 /* Logging */,
 				ED34CFC03EFE602822B57520 /* Persistence */,
 				755FB46B45BC00E809777EF8 /* Routing */,
 				B9F47C307E237497AA574428 /* Session */,
@@ -189,6 +216,7 @@
 				A3D987AE5ED4862C62290270 /* DeepgramSTTService.swift */,
 				1D75D9A149FC47EEFAD80F8B /* GLMASRHealthMonitor.swift */,
 				E8536D559854F89B9630C6F2 /* GLMASRSTTService.swift */,
+				4DF0F3F3ECBAA9BCC660EE2A /* GLMASROnDeviceSTTService.swift */,
 				642F2F56F4708A528BA96651 /* STTProviderRouter.swift */,
 			);
 			path = STT;
@@ -199,6 +227,7 @@
 			children = (
 				C2F47CEED72DFFD39384E43C /* DeepgramTTSService.swift */,
 				CDECFDD641B04BF76BFF029D /* ElevenLabsTTSService.swift */,
+				A8CFC3D773DE48BE9A239642 /* AppleTTSService.swift */,
 			);
 			path = TTS;
 			sourceTree = "<group>";
@@ -249,6 +278,7 @@
 			isa = PBXGroup;
 			children = (
 				509B24E559CC29015119472E /* AnthropicLLMService.swift */,
+				50A5FAF92F7D4CAAB8251DB7 /* OnDeviceLLMService.swift */,
 				4BA68771D0D75A21B107BC24 /* OpenAILLMService.swift */,
 			);
 			path = LLM;
@@ -277,6 +307,14 @@
 				47903B0E20EAF003FA79E708 /* TelemetryEngine.swift */,
 			);
 			path = Telemetry;
+			sourceTree = "<group>";
+		};
+		59CA1F942D31E904EBE7B784 /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				47A1B2C3D4E5F6789ABCDEF0 /* RemoteLogHandler.swift */,
+			);
+			path = Logging;
 			sourceTree = "<group>";
 		};
 		64A184CDD818EB21E5B9DB3E /* VAD */ = {
@@ -464,6 +502,7 @@
 		E61AE6B1A06A1DB78410A897 /* Curriculum */ = {
 			isa = PBXGroup;
 			children = (
+				42BA877C2EF2401100E33EC6 /* SampleCurriculumSeeder.swift */,
 				411F0D12EF1ABAE2430E579A /* CurriculumEngine.swift */,
 				EAEF1C26EA42FA0CC980DB14 /* CurriculumModels.swift */,
 				F2029AB53CA1A018B6452858 /* DocumentProcessor.swift */,
@@ -507,6 +546,7 @@
 			);
 			name = VoiceLearnTests;
 			packageProductDependencies = (
+					540FA9A8CD3A4244947FD6A9 /* llama */,
 			);
 			productName = VoiceLearnTests;
 			productReference = 9223C07C58411F6BB3AE7182 /* VoiceLearnTests.xctest */;
@@ -518,6 +558,7 @@
 			buildPhases = (
 				DD10BEA50CFD383A4EBFE45F /* Sources */,
 				7C36E467CAC54F81D5C17931 /* Frameworks */,
+				A3B4D567890C1234ABCD5678 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -525,6 +566,7 @@
 			);
 			name = VoiceLearn;
 			packageProductDependencies = (
+					540FA9A8CD3A4244947FD6A9 /* llama */,
 				2B2AF5164826C00D3745FA7A /* LiveKit */,
 				979A0008641BECA9718FB660 /* Logging */,
 				E47F4D79C318BDBE1EF4A727 /* Collections */,
@@ -545,9 +587,6 @@
 					AD40FD102870715F99DDA61A = {
 						DevelopmentTeam = "";
 					};
-					F3A617C1E824546C188FE132 = {
-						DevelopmentTeam = "";
-					};
 				};
 			};
 			buildConfigurationList = 3564F834BDCDAF14C11CBC9C /* Build configuration list for PBXProject "VoiceLearn" */;
@@ -561,11 +600,11 @@
 			mainGroup = 447C0C055EDE0CF3C43929BC;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				5F8B1DF371E4418FB07B2754 /* XCRemoteSwiftPackageReference "llama.cpp" */,
 				494D4645F6EED41C7F942ECC /* XCRemoteSwiftPackageReference "swift-collections" */,
 				F0265842A78D3BED995F1309 /* XCRemoteSwiftPackageReference "client-sdk-swift" */,
 				4951890113EB170D07DBC23A /* XCRemoteSwiftPackageReference "swift-log" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -625,8 +664,12 @@
 				E5D418DA141E14B8F59D496F /* DeepgramTTSService.swift in Sources */,
 				0E42DB2A515DB5894FBC9A3A /* DocumentProcessor.swift in Sources */,
 				E6002B3D9EDF1E4CDC6AF6F6 /* ElevenLabsTTSService.swift in Sources */,
+				EBBEFFBD92DF41ABB08AB5A8 /* AppleTTSService.swift in Sources */,
+				EB5A625F5A1349779774AA1D /* OnDeviceLLMService.swift in Sources */,
 				9F857CCCA1A3413160008F39 /* GLMASRHealthMonitor.swift in Sources */,
+				42BA877D2EF2401100E33EC6 /* SampleCurriculumSeeder.swift in Sources */,
 				4EF17C8315F0F06267492967 /* GLMASRSTTService.swift in Sources */,
+				5D72476C21591F8B6C9DF20B /* GLMASROnDeviceSTTService.swift in Sources */,
 				AD59AB97320E3A82409B6F91 /* HistoryView.swift in Sources */,
 				C1C82D7C3C5767FC4AB506F1 /* LLMEndpoint.swift in Sources */,
 				3C9687BB5ED088E5CFB137A3 /* LLMService.swift in Sources */,
@@ -646,6 +689,7 @@
 				939A4CD598021E7D2608076F /* SileroVADService.swift in Sources */,
 				BBBBBD2EA90859E56F2F0F34 /* TTSService.swift in Sources */,
 				645B75E6E4117EEF61541600 /* TelemetryEngine.swift in Sources */,
+				645B75E6E4117EEF61541601 /* RemoteLogHandler.swift in Sources */,
 				396D2F55A0D16F01C4091404 /* VADService.swift in Sources */,
 				91CFFCECF8519999A8A37ECC /* VoiceLearn.xcdatamodeld in Sources */,
 				494EF7B0DF519CC02B6BA5C1 /* VoiceLearnApp.swift in Sources */,
@@ -653,6 +697,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A3B4D567890C1234ABCD5678 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11D25569398E18C5A69C1F2E /* GLMASRWhisperEncoder.mlpackage in Resources */,
+				FB19A9D122B98B7D04F9892D /* GLMASRAudioAdapter.mlpackage in Resources */,
+				F76F6C4C62EF8E2C3D26A3E2 /* GLMASREmbedHead.mlpackage in Resources */,
+				829A837E56683C5565CF3503 /* GLMASRConvEncoder.mlpackage in Resources */,
+				578631E7004813442C299330 /* glm-asr-nano-q4km.gguf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
 		15224179207A751A6EF4EA68 /* PBXTargetDependency */ = {
@@ -669,6 +728,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = VoiceLearn/VoiceLearn.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = W7C9Y763AX;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VoiceLearn/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -680,6 +740,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+							OTHER_SWIFT_FLAGS = "";
 			};
 			name = Debug;
 		};
@@ -699,6 +760,7 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoiceLearn.app/VoiceLearn";
+							OTHER_SWIFT_FLAGS = "";
 			};
 			name = Release;
 		};
@@ -708,6 +770,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = VoiceLearn/VoiceLearn.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = W7C9Y763AX;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VoiceLearn/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -719,6 +782,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+							OTHER_SWIFT_FLAGS = "";
 			};
 			name = Release;
 		};
@@ -781,10 +845,12 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG LLAMA_AVAILABLE";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				TARGETED_DEVICE_FAMILY = 1;
+							OTHER_SWIFT_FLAGS = "";
 			};
 			name = Debug;
 		};
@@ -840,11 +906,13 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = LLAMA_AVAILABLE;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				TARGETED_DEVICE_FAMILY = 1;
+							OTHER_SWIFT_FLAGS = "";
 			};
 			name = Release;
 		};
@@ -864,6 +932,7 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoiceLearn.app/VoiceLearn";
+							OTHER_SWIFT_FLAGS = "";
 			};
 			name = Debug;
 		};
@@ -924,7 +993,15 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-/* End XCRemoteSwiftPackageReference section */
+		5F8B1DF371E4418FB07B2754 /* XCRemoteSwiftPackageReference "llama.cpp" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/StanfordBDHG/llama.cpp.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.3;
+			};
+		};
+		/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		2B2AF5164826C00D3745FA7A /* LiveKit */ = {
@@ -942,7 +1019,12 @@
 			package = 494D4645F6EED41C7F942ECC /* XCRemoteSwiftPackageReference "swift-collections" */;
 			productName = Collections;
 		};
-/* End XCSwiftPackageProductDependency section */
+		540FA9A8CD3A4244947FD6A9 /* llama */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5F8B1DF371E4418FB07B2754 /* XCRemoteSwiftPackageReference "llama.cpp" */;
+			productName = llama;
+		};
+		/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		37108704C22D2AF176240356 /* VoiceLearn.xcdatamodeld */ = {
