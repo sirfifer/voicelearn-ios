@@ -17,6 +17,34 @@ The key insight driving this research: **The curriculum defines WHAT to teach, b
 
 ---
 
+## ⚠️ Open Design Questions (To Be Resolved)
+
+Before implementation, these questions need decisions:
+
+### 1. Profile vs. Curriculum Location
+Should audience be stored at the **profile level** (user setting) or **curriculum level** (content metadata), or both with merge rules?
+
+### 2. Override Hierarchy
+When curriculum specifies "intended for adults" but user profile says "child," which wins?
+- Curriculum wins (content author knows best)
+- Profile wins (user knows their needs)
+- Warn user of mismatch
+- Hybrid (use curriculum difficulty but profile delivery style)
+
+### 3. Transcript Adaptation
+For curricula with fixed transcripts, how do we adapt delivery?
+- TTS-only adaptation (rate, voice)
+- Post-processing text simplification via LLM
+- Flag as "not adaptable" and warn
+
+### 4. Output Validation
+Should we validate AI output readability against target? Could reject and regenerate if Flesch score is too far off.
+
+### 5. Progressive Adaptation
+Should we track user performance and auto-adjust difficulty? (IEEE P2247.2 Adaptive Instructional Systems addresses this)
+
+---
+
 ## 1. Learner Profile Standards
 
 ### 1.1 IMS Learner Information Package (LIP)
@@ -493,28 +521,7 @@ The system should generate AI instructions by:
 
 ---
 
-## 7. Open Questions for Design Phase
-
-1. **Profile vs. Curriculum:** Should audience be stored at the profile level (user setting) or curriculum level (content metadata), or both with merge rules?
-
-2. **Override Hierarchy:** When curriculum specifies "intended for adults" but user profile says "child," which wins? Options:
-   - Curriculum wins (content author knows best)
-   - Profile wins (user knows their needs)
-   - Warn user of mismatch
-   - Hybrid (use curriculum difficulty but profile delivery style)
-
-3. **Transcript Adaptation:** For curricula with fixed transcripts, how do we adapt delivery? Options:
-   - TTS-only adaptation (rate, voice)
-   - Post-processing text simplification via LLM
-   - Flag as "not adaptable" and warn
-
-4. **Validation:** Should we validate AI output readability against target? Could reject and regenerate if Flesch score is too far off.
-
-5. **Progressive Adaptation:** Should we track user performance and auto-adjust difficulty? (IEEE P2247.2 Adaptive Instructional Systems addresses this)
-
----
-
-## 8. References
+## 7. References
 
 ### Standards Organizations
 - [1EdTech (formerly IMS Global)](https://www.1edtech.org/)
@@ -542,7 +549,7 @@ The system should generate AI instructions by:
 
 ---
 
-## 9. Next Steps
+## 8. Next Steps
 
 1. **Design Decision:** Choose which standards to formally align with (recommend Schema.org/LRMI + CEFR)
 2. **VLCF Update:** Draft schema extensions for audience metadata
