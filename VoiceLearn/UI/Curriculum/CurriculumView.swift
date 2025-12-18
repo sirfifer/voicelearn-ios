@@ -5,6 +5,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import CoreData
 
 struct CurriculumView: View {
     @EnvironmentObject var appState: AppState
@@ -163,47 +164,57 @@ struct CurriculumView: View {
         isLoading = true
         print("DEBUG: loadCurriculumAndTopics called")
 
-        // Load curriculum and topics directly from Core Data
-        let context = PersistenceController.shared.viewContext
+        // Perform Core Data fetch on a background context to avoid blocking main thread
+        let result = await Task.detached(priority: .userInitiated) { () -> (name: String?, topicIDs: [NSManagedObjectID]) in
+            let backgroundContext = PersistenceController.shared.newBackgroundContext()
 
-        do {
-            // Fetch the most recent curriculum
-            let curriculumRequest = Curriculum.fetchRequest()
-            curriculumRequest.fetchLimit = 1
-            curriculumRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Curriculum.createdAt, ascending: false)]
+            return await backgroundContext.perform {
+                do {
+                    // Fetch the most recent curriculum
+                    let curriculumRequest = Curriculum.fetchRequest()
+                    curriculumRequest.fetchLimit = 1
+                    curriculumRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Curriculum.createdAt, ascending: false)]
 
-            let curriculums = try context.fetch(curriculumRequest)
-            print("DEBUG: Found \(curriculums.count) curriculums")
+                    let curriculums = try backgroundContext.fetch(curriculumRequest)
+                    print("DEBUG: Found \(curriculums.count) curriculums")
 
-            if let curriculum = curriculums.first {
-                print("DEBUG: Curriculum name: \(curriculum.name ?? "nil")")
+                    if let curriculum = curriculums.first {
+                        print("DEBUG: Curriculum name: \(curriculum.name ?? "nil")")
 
-                // Get topics from the curriculum's relationship (it's an NSOrderedSet)
-                var topicsList: [Topic] = []
-                if let orderedSet = curriculum.topics {
-                    topicsList = orderedSet.array as? [Topic] ?? []
+                        // Get topics from the curriculum's relationship (it's an NSOrderedSet)
+                        var topicsList: [Topic] = []
+                        if let orderedSet = curriculum.topics {
+                            topicsList = orderedSet.array as? [Topic] ?? []
+                        }
+                        print("DEBUG: Found \(topicsList.count) topics")
+
+                        // Sort and get object IDs to pass back to main context
+                        let sortedTopics = topicsList.sorted { ($0.orderIndex) < ($1.orderIndex) }
+                        let topicIDs = sortedTopics.map { $0.objectID }
+
+                        return (curriculum.name, topicIDs)
+                    } else {
+                        print("DEBUG: No curriculum found")
+                        return (nil, [])
+                    }
+                } catch {
+                    print("DEBUG: Failed to load curriculum: \(error)")
+                    return (nil, [])
                 }
-                print("DEBUG: Found \(topicsList.count) topics")
-
-                let sortedTopics = topicsList.sorted { ($0.orderIndex) < ($1.orderIndex) }
-
-                self.topics = sortedTopics
-                self.curriculumName = curriculum.name
-                self.isLoading = false
-                // Note: CurriculumEngine.loadCurriculum() is called when starting a session,
-                // not when viewing the curriculum list (avoids actor isolation deadlock)
-            } else {
-                print("DEBUG: No curriculum found")
-                self.topics = []
-                self.curriculumName = nil
-                self.isLoading = false
             }
-        } catch {
-            print("DEBUG: Failed to load curriculum: \(error)")
-            self.topics = []
-            self.curriculumName = nil
-            self.isLoading = false
+        }.value
+
+        // Now fetch the actual Topic objects on the main context using the IDs
+        let viewContext = PersistenceController.shared.viewContext
+        let fetchedTopics: [Topic] = result.topicIDs.compactMap { objectID in
+            try? viewContext.existingObject(with: objectID) as? Topic
         }
+
+        self.topics = fetchedTopics
+        self.curriculumName = result.name
+        self.isLoading = false
+        // Note: CurriculumEngine.loadCurriculum() is called when starting a session,
+        // not when viewing the curriculum list (avoids actor isolation deadlock)
     }
 }
 
