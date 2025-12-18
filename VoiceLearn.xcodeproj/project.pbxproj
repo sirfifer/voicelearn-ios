@@ -12,6 +12,7 @@
 		025290442B034FB27FF10B18 /* STTProviderRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642F2F56F4708A528BA96651 /* STTProviderRouter.swift */; };
 		098AA76289CAF765C05E5F4D /* AnalyticsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF288D2538186C5B5000DD2 /* AnalyticsViewModelTests.swift */; };
 		0AE83EBF84D987413DD880EF /* llama-3.2-3b-instruct-q4_k_m.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 39E4F2055DE2CE3BAAF263DD /* llama-3.2-3b-instruct-q4_k_m.gguf */; };
+		LAUNCH5CREEN5T0RYBF1LE002 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = LAUNCH5CREEN5T0RYB0ARD001 /* LaunchScreen.storyboard */; };
 		0E42DB2A515DB5894FBC9A3A /* DocumentProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2029AB53CA1A018B6452858 /* DocumentProcessor.swift */; };
 		15666863F2687AEA80E96602 /* GLMASRIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF622CC8ADFDC3237C1CD43E /* GLMASRIntegrationTests.swift */; };
 		1A0E8F973F5E24C429F420B3 /* RoutingTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B220AE176B031B0C84966D /* RoutingTableTests.swift */; };
@@ -177,6 +178,7 @@
 		F675DF09C93DE1D58FF8C993 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		FB8E188DAEEF291DE3D8717F /* VoiceLearnApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceLearnApp.swift; sourceTree = "<group>"; };
 		FE3B47E47DB31A33003803B6 /* STTProviderRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTProviderRouterTests.swift; sourceTree = "<group>"; };
+		LAUNCH5CREEN5T0RYB0ARD001 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -476,6 +478,7 @@
 				1422944EA437B2FFC57CE4B0 /* VoiceLearn.entitlements */,
 				37108704C22D2AF176240356 /* VoiceLearn.xcdatamodeld */,
 				FB8E188DAEEF291DE3D8717F /* VoiceLearnApp.swift */,
+				LAUNCH5CREEN5T0RYB0ARD001 /* LaunchScreen.storyboard */,
 			);
 			path = VoiceLearn;
 			sourceTree = "<group>";
@@ -634,6 +637,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0AE83EBF84D987413DD880EF /* llama-3.2-3b-instruct-q4_k_m.gguf in Resources */,
+				LAUNCH5CREEN5T0RYBF1LE002 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
