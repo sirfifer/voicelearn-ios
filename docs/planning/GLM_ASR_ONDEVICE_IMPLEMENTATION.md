@@ -7,7 +7,7 @@
 
 ## Overview
 
-This document tracks the implementation of GLM-ASR-Nano-2512 as an **on-device** speech recognition solution for VoiceLearn iOS. The primary target is iPhone 17 Pro Max (12GB RAM) with server fallback for older devices.
+This document tracks the implementation of GLM-ASR-Nano-2512 as an **on-device** speech recognition solution for UnaMentis iOS. The primary target is iPhone 17 Pro Max (12GB RAM) with server fallback for older devices.
 
 ---
 

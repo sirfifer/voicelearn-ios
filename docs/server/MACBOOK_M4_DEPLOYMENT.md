@@ -1,6 +1,6 @@
 # MacBook Pro M4 Max Server Deployment
 
-This guide covers deploying VoiceLearn's AI services on a MacBook Pro with M4 Max chip, leveraging Apple Silicon's exceptional AI inference capabilities.
+This guide covers deploying UnaMentis's AI services on a MacBook Pro with M4 Max chip, leveraging Apple Silicon's exceptional AI inference capabilities.
 
 ## Hardware Profile
 
@@ -469,7 +469,7 @@ pip install -r requirements.txt
 #!/bin/bash
 # ~/voicelearn-server/start-all.sh
 
-echo "Starting VoiceLearn AI Server Stack..."
+echo "Starting UnaMentis AI Server Stack..."
 
 # Start Ollama (or MLX server)
 echo "Starting LLM server..."
@@ -496,7 +496,7 @@ echo "TTS: http://localhost:8082"
 
 ### Launchd Service (Auto-start on Boot)
 
-Create `~/Library/LaunchAgents/com.voicelearn.server.plist`:
+Create `~/Library/LaunchAgents/com.unamentis.server.plist`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -504,7 +504,7 @@ Create `~/Library/LaunchAgents/com.voicelearn.server.plist`:
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.voicelearn.server</string>
+    <string>com.unamentis.server</string>
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
@@ -525,7 +525,7 @@ Create `~/Library/LaunchAgents/com.voicelearn.server.plist`:
 
 Load with:
 ```bash
-launchctl load ~/Library/LaunchAgents/com.voicelearn.server.plist
+launchctl load ~/Library/LaunchAgents/com.unamentis.server.plist
 ```
 
 ---

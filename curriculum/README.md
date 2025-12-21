@@ -1,4 +1,4 @@
-# VoiceLearn Curriculum Format (VLCF)
+# UnaMentis Curriculum Format (VLCF)
 
 **A Standards-Based Curriculum Format for Conversational AI Tutoring**
 
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-The VoiceLearn Curriculum Format (VLCF) is a JSON-based specification for representing educational content optimized for **conversational AI tutoring**. Unlike traditional e-learning formats designed for Learning Management Systems (LMS), VLCF is purpose-built for voice-first, real-time tutoring interactions.
+The UnaMentis Curriculum Format (VLCF) is a JSON-based specification for representing educational content optimized for **conversational AI tutoring**. Unlike traditional e-learning formats designed for Learning Management Systems (LMS), VLCF is purpose-built for voice-first, real-time tutoring interactions.
 
 **Key Differentiators:**
 - **Voice-native**: Every text field has optional `spokenText` variants optimized for TTS
@@ -79,7 +79,7 @@ VLCF serves as the **canonical internal format** for tutoring systems, with esta
                            │ Tutoring Engine
                            ▼
                 ┌─────────────────────┐
-                │   VoiceLearn App    │
+                │   UnaMentis App    │
                 │   (or any tutor)    │
                 └─────────────────────┘
 ```
@@ -485,7 +485,7 @@ curriculum/
 VLCF may be spun off into its own repository to enable:
 
 1. **Community adoption**: Other tutoring systems could adopt the format
-2. **Independent governance**: Standards evolution separate from VoiceLearn
+2. **Independent governance**: Standards evolution separate from UnaMentis
 3. **Cross-platform tooling**: Validation, editing, conversion tools
 4. **Academic publication**: Formal specification for peer review
 
@@ -502,7 +502,7 @@ VLCF may be spun off into its own repository to enable:
 - Example importers
 
 **Phase 3: Integration**
-- VoiceLearn iOS integration
+- UnaMentis iOS integration
 - Web-based curriculum editor
 - Public curriculum repository
 
@@ -539,7 +539,7 @@ VLCF may be spun off into its own repository to enable:
 
 ## Contributing
 
-VLCF is currently part of the VoiceLearn project. Contributions are welcome:
+VLCF is currently part of the UnaMentis project. Contributions are welcome:
 
 1. **Schema improvements**: Propose changes via issues
 2. **Example content**: Submit new curriculum examples
@@ -581,7 +581,7 @@ See the main project [CONTRIBUTING.md](../docs/CONTRIBUTING.md) for guidelines.
 
 ## License
 
-This specification is released under the MIT License as part of the VoiceLearn project.
+This specification is released under the MIT License as part of the UnaMentis project.
 
 Copyright (c) 2025 Richard Amerman
 
@@ -590,7 +590,7 @@ Copyright (c) 2025 Richard Amerman
 ## Contact
 
 For questions about VLCF:
-- Open an issue on the VoiceLearn GitHub repository
+- Open an issue on the UnaMentis GitHub repository
 - See the main project README for contact information
 
 ---

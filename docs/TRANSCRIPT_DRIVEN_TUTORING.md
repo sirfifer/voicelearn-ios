@@ -457,7 +457,7 @@ User generates transcript in Claude/ChatGPT (their own credits)
                     │
                     ▼
          ┌──────────────────────┐
-         │ VoiceLearn Import    │
+         │ UnaMentis Import    │
          │ - Validate schema    │
          │ - Index for search   │
          │ - Generate embeddings│

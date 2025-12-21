@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoiceLearn Management Console</title>
+    <title>UnaMentis Management Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
@@ -146,7 +146,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h1 class="text-xl font-bold gradient-text">VoiceLearn</h1>
+                                <h1 class="text-xl font-bold gradient-text">UnaMentis</h1>
                                 <p class="text-xs text-dark-400">Management Console</p>
                             </div>
                         </div>
@@ -221,6 +221,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
                         </svg>
                         Models
+                    </button>
+                    <button class="nav-tab" data-tab="services">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Services
                     </button>
                 </div>
             </div>
@@ -764,6 +771,120 @@
                     <!-- Model cards will be inserted here -->
                 </div>
             </div>
+
+            <!-- Services Tab -->
+            <div id="tab-services" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold">Managed Services</h2>
+                    <div class="flex gap-2">
+                        <button class="btn-secondary" onclick="refreshServices()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Refresh
+                        </button>
+                        <button class="btn-success" onclick="startAllServices()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Start All
+                        </button>
+                        <button class="btn-danger" onclick="stopAllServices()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                            </svg>
+                            Stop All
+                        </button>
+                    </div>
+                </div>
+
+                <style>
+                    .btn-success {
+                        @apply flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-accent-success hover:bg-accent-success/80 text-white transition-all;
+                    }
+                    .btn-danger {
+                        @apply flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-accent-danger hover:bg-accent-danger/80 text-white transition-all;
+                    }
+                    .btn-success-sm {
+                        @apply flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg bg-accent-success hover:bg-accent-success/80 text-white transition-all;
+                    }
+                    .btn-danger-sm {
+                        @apply flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg bg-accent-danger hover:bg-accent-danger/80 text-white transition-all;
+                    }
+                    .btn-secondary-sm {
+                        @apply flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-dark-700 text-dark-300 hover:text-dark-100 hover:bg-dark-700/50 transition-all;
+                    }
+                </style>
+
+                <!-- Service Stats -->
+                <div class="grid md:grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-accent-success/20 text-accent-success">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="services-running">0</div>
+                            <div class="stat-label">Running</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-dark-500/20 text-dark-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="services-stopped">0</div>
+                            <div class="stat-label">Stopped</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-accent-danger/20 text-accent-danger">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="services-error">0</div>
+                            <div class="stat-label">Error</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-accent-warning/20 text-accent-warning">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="services-memory-used">0 MB</div>
+                            <div class="stat-label">Service Memory</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Memory Bar -->
+                <div class="mb-6 p-4 rounded-xl bg-dark-800/50 border border-dark-700/50">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-dark-200">Unified Memory</span>
+                        <span class="text-sm text-dark-400">
+                            <span id="services-memory-percent">0%</span> used of <span id="services-memory-total">0 GB</span>
+                        </span>
+                    </div>
+                    <div class="w-full h-3 bg-dark-700 rounded-full overflow-hidden">
+                        <div id="services-memory-bar" class="h-full bg-gradient-to-r from-accent-warning to-accent-danger transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Services Grid -->
+                <div class="grid md:grid-cols-2 gap-4" id="services-grid">
+                    <!-- Service cards will be inserted here -->
+                </div>
+            </div>
         </main>
 
         <style>
@@ -803,7 +924,7 @@
                             <option value="ollama">Ollama (LLM)</option>
                             <option value="whisper">Whisper (STT)</option>
                             <option value="piper">Piper (TTS)</option>
-                            <option value="voicelearnGateway">VoiceLearn Gateway</option>
+                            <option value="unamentisGateway">UnaMentis Gateway</option>
                             <option value="custom">Custom</option>
                         </select>
                     </div>

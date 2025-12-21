@@ -6,20 +6,20 @@ Verify and finalize the Curriculum Management System implementation by enabling/
 ## Proposed Changes
 
 ### Tests
-#### [NEW] [CurriculumEngineTests.swift](file:///Users/ramerman/dev/voicelearn-ios/VoiceLearnTests/Unit/CurriculumEngineTests.swift)
+#### [NEW] [CurriculumEngineTests.swift](file:///Users/ramerman/dev/voicelearn-ios/UnaMentisTests/Unit/CurriculumEngineTests.swift)
 - Create unit tests for `CurriculumEngine` actor.
 - Test context generation, progress updates, and data loading.
 
-#### [NEW] [DocumentProcessorTests.swift](file:///Users/ramerman/dev/voicelearn-ios/VoiceLearnTests/Unit/DocumentProcessorTests.swift)
+#### [NEW] [DocumentProcessorTests.swift](file:///Users/ramerman/dev/voicelearn-ios/UnaMentisTests/Unit/DocumentProcessorTests.swift)
 - Create unit tests for `DocumentProcessor`.
 - Test text extraction and summary generation (mocked LLM if needed).
 
-#### [MODIFY] [ProgressTrackerTests.swift](file:///Users/ramerman/dev/voicelearn-ios/VoiceLearnTests/Unit/ProgressTrackerTests.swift.disabled)
+#### [MODIFY] [ProgressTrackerTests.swift](file:///Users/ramerman/dev/voicelearn-ios/UnaMentisTests/Unit/ProgressTrackerTests.swift.disabled)
 - Rename from `ProgressTrackerTests.swift.disabled` to `ProgressTrackerTests.swift`.
 - Run and fix any failures.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `xcodebuild test -scheme VoiceLearn -destination 'platform=iOS Simulator,name=iPhone 16 Pro'` (or available simulator)
+- Run `xcodebuild test -scheme UnaMentis -destination 'platform=iOS Simulator,name=iPhone 16 Pro'` (or available simulator)
 - Verify all Curriculum tests pass.

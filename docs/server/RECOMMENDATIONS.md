@@ -1,6 +1,6 @@
 # Server Deployment Recommendations
 
-This document provides concrete recommendations for deploying VoiceLearn's self-hosted server infrastructure.
+This document provides concrete recommendations for deploying UnaMentis's self-hosted server infrastructure.
 
 ## Executive Summary
 
@@ -19,7 +19,7 @@ This document provides concrete recommendations for deploying VoiceLearn's self-
 
 **Yes, with appropriate expectations.**
 
-The Proxmox server is a viable deployment target for VoiceLearn, but model selection must be constrained to what CPUs can handle efficiently.
+The Proxmox server is a viable deployment target for UnaMentis, but model selection must be constrained to what CPUs can handle efficiently.
 
 ### Recommended Models for CPU
 
@@ -81,7 +81,7 @@ Given both targets, the optimal approach is a **hybrid architecture**:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    VoiceLearn iOS App                           │
+│                    UnaMentis iOS App                           │
 │                                                                 │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │                    Patch Panel Router                     │  │
@@ -145,7 +145,7 @@ Week focus: Get full stack running locally
 2. Install whisper.cpp with Metal
 3. Install Piper TTS
 4. Test all three services
-5. Update VoiceLearn app to point to localhost
+5. Update UnaMentis app to point to localhost
 6. Verify end-to-end flow
 ```
 
@@ -297,7 +297,7 @@ enum ServerPriority: Int {
 
 ## What You Can Build Today
 
-Without any server setup, VoiceLearn can still:
+Without any server setup, UnaMentis can still:
 
 1. **Run completely on-device** (with limitations)
 2. **Use scripted curriculum** with AVSpeechSynthesizer
@@ -344,7 +344,7 @@ With self-hosted servers:
    curl http://localhost:11434/api/generate -d '{"model":"qwen2.5:7b","prompt":"Hello"}'
    ```
 
-3. **Update VoiceLearn** to point to `http://localhost:11434`
+3. **Update UnaMentis** to point to `http://localhost:11434`
 
 ### Short-term (Next Few Weeks)
 

@@ -4,15 +4,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "VoiceLearn",
+    name: "UnaMentis",
     platforms: [
         .iOS(.v18),
         .macOS(.v14)
     ],
     products: [
         .library(
-            name: "VoiceLearn",
-            targets: ["VoiceLearn"]
+            name: "UnaMentis",
+            targets: ["UnaMentis"]
         ),
     ],
     dependencies: [
@@ -32,17 +32,17 @@ let package = Package(
     targets: [
         // Main library target
         .target(
-            name: "VoiceLearn",
+            name: "UnaMentis",
             dependencies: [
                 .product(name: "LiveKit", package: "client-sdk-swift"),
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "Collections", package: "swift-collections"),
                 .product(name: "llama", package: "llama.cpp"),
             ],
-            path: "VoiceLearn",
+            path: "UnaMentis",
             resources: [
                 // Core Data model for persistence
-                .copy("VoiceLearn.xcdatamodeld")
+                .copy("UnaMentis.xcdatamodeld")
             ],
             swiftSettings: [
                 // Enable C++ interop for llama.cpp
@@ -54,9 +54,9 @@ let package = Package(
 
         // Unit tests
         .testTarget(
-            name: "VoiceLearnTests",
-            dependencies: ["VoiceLearn"],
-            path: "VoiceLearnTests"
+            name: "UnaMentisTests",
+            dependencies: ["UnaMentis"],
+            path: "UnaMentisTests"
         ),
     ]
 )

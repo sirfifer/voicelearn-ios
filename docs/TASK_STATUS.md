@@ -1,6 +1,6 @@
-# VoiceLearn Task Status
+# UnaMentis Task Status
 
-This document tracks all tasks for completing the VoiceLearn iOS project. Tasks are divided into:
+This document tracks all tasks for completing the UnaMentis iOS project. Tasks are divided into:
 - **Part 1**: Autonomous tasks (AI agent can complete independently)
 - **Part 2**: Collaborative tasks (requires user participation - API keys, device testing)
 
@@ -31,51 +31,51 @@ This document tracks all tasks for completing the VoiceLearn iOS project. Tasks 
 
 | ID | Task | Status | File(s) | Notes |
 |----|------|--------|---------|-------|
-| 1.1 | Fix SessionManagerTests MainActor errors | completed | VoiceLearnTests/Unit/SessionManagerTests.swift:23,43 | Added @MainActor to test methods |
+| 1.1 | Fix SessionManagerTests MainActor errors | completed | UnaMentisTests/Unit/SessionManagerTests.swift:23,43 | Added @MainActor to test methods |
 | 1.2 | Restore deleted docs | completed | docs/implementation_plan.md, docs/task.md, docs/parallel_agent_curriculum_prompt.md | git checkout HEAD -- |
 | 1.3 | Run full test suite | completed | - | All 103 tests pass |
-| 1.4 | Fix Core Data SPM compatibility | completed | VoiceLearn/Core/Persistence/ManagedObjects/*.swift | Created manual NSManagedObject subclasses |
+| 1.4 | Fix Core Data SPM compatibility | completed | UnaMentis/Core/Persistence/ManagedObjects/*.swift | Created manual NSManagedObject subclasses |
 | 1.5 | Fix macOS API compatibility | completed | Multiple UI files | Added #if os(iOS) guards |
 
 ### 2. UI Data Binding
 
 | ID | Task | Status | File(s) | Notes |
 |----|------|--------|---------|-------|
-| 2.1 | HistoryView - loadFromCoreData() | completed | VoiceLearn/UI/History/HistoryView.swift | Fetch Session entities from Core Data |
-| 2.2 | HistoryView - exportSession() | completed | VoiceLearn/UI/History/HistoryView.swift | JSON export with ShareSheet |
-| 2.3 | HistoryView - clearCoreData() | completed | VoiceLearn/UI/History/HistoryView.swift | Delete all sessions |
-| 2.4 | SessionSettingsView - audio controls | completed | VoiceLearn/UI/Session/SessionView.swift | Sample rate, buffer size, voice processing |
-| 2.5 | SessionSettingsView - voice selection | completed | VoiceLearn/UI/Session/SessionView.swift | TTS provider and rate controls |
-| 2.6 | SessionSettingsView - model selection | completed | VoiceLearn/UI/Session/SessionView.swift | LLM provider/model/temperature/tokens |
-| 2.7 | AnalyticsView - connect telemetry | completed | VoiceLearn/UI/Analytics/AnalyticsView.swift | Already connected to TelemetryEngine |
-| 2.8 | AnalyticsView - latency charts | completed | VoiceLearn/UI/Analytics/AnalyticsView.swift | STT/LLM/TTS/E2E with targets |
-| 2.9 | AnalyticsView - cost breakdown | completed | VoiceLearn/UI/Analytics/AnalyticsView.swift | Provider breakdown with totals |
-| 2.10 | SettingsView - API key entry | completed | VoiceLearn/UI/Settings/SettingsView.swift | SecureField with edit sheet |
-| 2.11 | SettingsView - preset selector | completed | VoiceLearn/UI/Settings/SettingsView.swift | 4 presets implemented |
-| 2.12 | Debug/Testing UI | completed | VoiceLearn/UI/Settings/SettingsView.swift | DiagnosticsView, AudioTestView, ProviderTestView |
+| 2.1 | HistoryView - loadFromCoreData() | completed | UnaMentis/UI/History/HistoryView.swift | Fetch Session entities from Core Data |
+| 2.2 | HistoryView - exportSession() | completed | UnaMentis/UI/History/HistoryView.swift | JSON export with ShareSheet |
+| 2.3 | HistoryView - clearCoreData() | completed | UnaMentis/UI/History/HistoryView.swift | Delete all sessions |
+| 2.4 | SessionSettingsView - audio controls | completed | UnaMentis/UI/Session/SessionView.swift | Sample rate, buffer size, voice processing |
+| 2.5 | SessionSettingsView - voice selection | completed | UnaMentis/UI/Session/SessionView.swift | TTS provider and rate controls |
+| 2.6 | SessionSettingsView - model selection | completed | UnaMentis/UI/Session/SessionView.swift | LLM provider/model/temperature/tokens |
+| 2.7 | AnalyticsView - connect telemetry | completed | UnaMentis/UI/Analytics/AnalyticsView.swift | Already connected to TelemetryEngine |
+| 2.8 | AnalyticsView - latency charts | completed | UnaMentis/UI/Analytics/AnalyticsView.swift | STT/LLM/TTS/E2E with targets |
+| 2.9 | AnalyticsView - cost breakdown | completed | UnaMentis/UI/Analytics/AnalyticsView.swift | Provider breakdown with totals |
+| 2.10 | SettingsView - API key entry | completed | UnaMentis/UI/Settings/SettingsView.swift | SecureField with edit sheet |
+| 2.11 | SettingsView - preset selector | completed | UnaMentis/UI/Settings/SettingsView.swift | 4 presets implemented |
+| 2.12 | Debug/Testing UI | completed | UnaMentis/UI/Settings/SettingsView.swift | DiagnosticsView, AudioTestView, ProviderTestView |
 
 ### 3. Audio Playback
 
 | ID | Task | Status | File(s) | Notes |
 |----|------|--------|---------|-------|
-| 3.1 | AudioEngine.playAudio() | completed | VoiceLearn/Core/Audio/AudioEngine.swift | AVAudioEngine playback with AVAudioPlayerNode |
-| 3.2 | TTS streaming support | completed | VoiceLearn/Core/Audio/AudioEngine.swift | Handle chunked audio from TTS, format conversion |
+| 3.1 | AudioEngine.playAudio() | completed | UnaMentis/Core/Audio/AudioEngine.swift | AVAudioEngine playback with AVAudioPlayerNode |
+| 3.2 | TTS streaming support | completed | UnaMentis/Core/Audio/AudioEngine.swift | Handle chunked audio from TTS, format conversion |
 
 ### 4. Integration Tests
 
 | ID | Task | Status | File(s) | Notes |
 |----|------|--------|---------|-------|
-| 4.1 | Create VoiceSessionIntegrationTests | completed | VoiceLearnTests/Integration/VoiceSessionIntegrationTests.swift | 16 integration tests added |
-| 4.2 | Telemetry integration test | completed | VoiceLearnTests/Integration/ | Latency, cost, event tracking |
-| 4.3 | Audio pipeline test | completed | VoiceLearnTests/Integration/ | VAD, playback, thermal |
-| 4.4 | Curriculum context test | completed | VoiceLearnTests/Integration/ | Context generation, navigation |
-| 4.5 | Core Data persistence test | completed | VoiceLearnTests/Integration/ | Curriculum, topic, document persistence |
+| 4.1 | Create VoiceSessionIntegrationTests | completed | UnaMentisTests/Integration/VoiceSessionIntegrationTests.swift | 16 integration tests added |
+| 4.2 | Telemetry integration test | completed | UnaMentisTests/Integration/ | Latency, cost, event tracking |
+| 4.3 | Audio pipeline test | completed | UnaMentisTests/Integration/ | VAD, playback, thermal |
+| 4.4 | Curriculum context test | completed | UnaMentisTests/Integration/ | Context generation, navigation |
+| 4.5 | Core Data persistence test | completed | UnaMentisTests/Integration/ | Curriculum, topic, document persistence |
 
 ### 5. Code Quality
 
 | ID | Task | Status | File(s) | Notes |
 |----|------|--------|---------|-------|
-| 5.1 | Verify Core Data models | completed | VoiceLearn/VoiceLearn.xcdatamodeld | Session, Topic, Curriculum, Document, TopicProgress, TranscriptEntry all present |
+| 5.1 | Verify Core Data models | completed | UnaMentis/UnaMentis.xcdatamodeld | Session, Topic, Curriculum, Document, TopicProgress, TranscriptEntry all present |
 | 5.2 | Clean up Swift warnings | pending | - | Minor async/await warnings remain (non-critical) |
 | 5.3 | Update documentation | completed | docs/*.md | Comprehensive documentation update |
 
@@ -83,10 +83,10 @@ This document tracks all tasks for completing the VoiceLearn iOS project. Tasks 
 
 | ID | Task | Status | File(s) | Notes |
 |----|------|--------|---------|-------|
-| 6.1 | GLMASRSTTService (server) | completed | VoiceLearn/Services/STT/GLMASRSTTService.swift | WebSocket-based server STT |
-| 6.2 | GLMASRHealthMonitor | completed | VoiceLearn/Services/STT/GLMASRHealthMonitor.swift | Server health monitoring |
-| 6.3 | STTProviderRouter | completed | VoiceLearn/Services/STT/STTProviderRouter.swift | Intelligent provider routing |
-| 6.4 | GLMASROnDeviceSTTService | completed | VoiceLearn/Services/STT/GLMASROnDeviceSTTService.swift | On-device CoreML + llama.cpp |
+| 6.1 | GLMASRSTTService (server) | completed | UnaMentis/Services/STT/GLMASRSTTService.swift | WebSocket-based server STT |
+| 6.2 | GLMASRHealthMonitor | completed | UnaMentis/Services/STT/GLMASRHealthMonitor.swift | Server health monitoring |
+| 6.3 | STTProviderRouter | completed | UnaMentis/Services/STT/STTProviderRouter.swift | Intelligent provider routing |
+| 6.4 | GLMASROnDeviceSTTService | completed | UnaMentis/Services/STT/GLMASROnDeviceSTTService.swift | On-device CoreML + llama.cpp |
 | 6.5 | Enable simulator testing | completed | GLMASROnDeviceSTTService.swift | Allow simulator when models present |
 
 ### 7. Infrastructure
@@ -241,7 +241,7 @@ This document tracks all tasks for completing the VoiceLearn iOS project. Tasks 
 - **Core**: SessionManager.swift, AudioEngine.swift, CurriculumEngine.swift, TelemetryEngine.swift
 - **STT**: GLMASRSTTService.swift, GLMASROnDeviceSTTService.swift, STTProviderRouter.swift
 - **UI**: SessionView.swift, HistoryView.swift, AnalyticsView.swift, SettingsView.swift
-- **Docs**: VoiceLearn_TDD.md, GLM_ASR_ON_DEVICE_GUIDE.md, AI_SIMULATOR_TESTING.md
+- **Docs**: UnaMentis_TDD.md, GLM_ASR_ON_DEVICE_GUIDE.md, AI_SIMULATOR_TESTING.md
 
 ### New Documentation
 | Document | Purpose |
@@ -270,7 +270,7 @@ This document tracks all tasks for completing the VoiceLearn iOS project. Tasks 
 ### Test Environment
 - **Simulator**: iPhone 17 Pro (iOS 26.1)
 - **Build**: Debug (xcodebuild)
-- **Bundle ID**: com.voicelearn.app
+- **Bundle ID**: com.unamentis.app
 - **Test Method**: AppleScript automation + xcrun simctl screenshots
 
 ### Tests Performed

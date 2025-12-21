@@ -1,4 +1,4 @@
-# Contributing to VoiceLearn
+# Contributing to UnaMentis
 
 ## Development Workflow
 
@@ -251,7 +251,7 @@ What actually happens
 **Environment**
 - iOS version:
 - Device:
-- VoiceLearn version:
+- UnaMentis version:
 
 **Screenshots**
 If applicable
@@ -297,4 +297,4 @@ Any other relevant info
 
 ---
 
-Thank you for contributing to VoiceLearn! 🎉
+Thank you for contributing to UnaMentis! 🎉

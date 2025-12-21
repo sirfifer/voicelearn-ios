@@ -1,11 +1,11 @@
 # Technical Requirements Document: GLM-ASR-Nano Server Integration
 
-**Purpose:** Detailed technical specification for implementing GLM-ASR-Nano-2512 as a self-hosted STT provider in VoiceLearn iOS.
+**Purpose:** Detailed technical specification for implementing GLM-ASR-Nano-2512 as a self-hosted STT provider in UnaMentis iOS.
 
 **Version:** 1.0
 **Date:** December 2025
 **Status:** Draft
-**Related:** `GLM_ASR_NANO_2512.md`, `VoiceLearn_TDD.md`
+**Related:** `GLM_ASR_NANO_2512.md`, `UnaMentis_TDD.md`
 
 ---
 
@@ -33,7 +33,7 @@
 
 Implement a self-hosted GLM-ASR-Nano-2512 speech-to-text service that:
 
-1. Integrates seamlessly with VoiceLearn's existing `STTServiceProtocol`
+1. Integrates seamlessly with UnaMentis's existing `STTServiceProtocol`
 2. Provides streaming transcription via WebSocket
 3. Achieves latency parity with Deepgram (~300ms)
 4. Reduces STT costs to near-zero at scale
@@ -67,7 +67,7 @@ Implement a self-hosted GLM-ASR-Nano-2512 speech-to-text service that:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           VoiceLearn System                                 │
+│                           UnaMentis System                                 │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │   iOS App                                    GLM-ASR Server                 │
@@ -446,7 +446,7 @@ wss://your-server.com/v1/audio/stream?token=<jwt_token>
 ### 5.1 GLMASRSTTService
 
 ```swift
-// VoiceLearn/Services/STT/GLMASRSTTService.swift
+// UnaMentis/Services/STT/GLMASRSTTService.swift
 
 import Foundation
 import AVFoundation
@@ -841,7 +841,7 @@ public enum STTError: Error {
 ### 5.2 Health Check & Failover
 
 ```swift
-// VoiceLearn/Services/STT/GLMASRHealthMonitor.swift
+// UnaMentis/Services/STT/GLMASRHealthMonitor.swift
 
 import Foundation
 
@@ -971,7 +971,7 @@ public actor GLMASRHealthMonitor {
 ### 5.3 STT Provider Router
 
 ```swift
-// VoiceLearn/Services/STT/STTProviderRouter.swift
+// UnaMentis/Services/STT/STTProviderRouter.swift
 
 import Foundation
 import AVFoundation
@@ -1342,7 +1342,7 @@ struct GLMASRAuthConfig {
 ### 10.1 Unit Tests
 
 ```swift
-// VoiceLearnTests/Unit/GLMASRSTTServiceTests.swift
+// UnaMentisTests/Unit/GLMASRSTTServiceTests.swift
 
 final class GLMASRSTTServiceTests: XCTestCase {
 
@@ -1402,7 +1402,7 @@ final class GLMASRSTTServiceTests: XCTestCase {
 ### 10.2 Integration Tests
 
 ```swift
-// VoiceLearnTests/Integration/GLMASRIntegrationTests.swift
+// UnaMentisTests/Integration/GLMASRIntegrationTests.swift
 
 final class GLMASRIntegrationTests: XCTestCase {
 

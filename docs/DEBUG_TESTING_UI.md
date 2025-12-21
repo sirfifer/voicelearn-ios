@@ -1,6 +1,6 @@
-# VoiceLearn - Debug & Testing UI
+# UnaMentis - Debug & Testing UI
 
-VoiceLearn includes built-in debugging and testing tools accessible from the Settings screen. These tools help validate subsystems independently before running full voice sessions.
+UnaMentis includes built-in debugging and testing tools accessible from the Settings screen. These tools help validate subsystems independently before running full voice sessions.
 
 ## Accessing Debug Tools
 
@@ -119,7 +119,7 @@ When voice sessions aren't working:
 
 ## Implementation Details
 
-The debug UI is implemented in `VoiceLearn/UI/Settings/SettingsView.swift`:
+The debug UI is implemented in `UnaMentis/UI/Settings/SettingsView.swift`:
 
 - `DiagnosticsView` - System diagnostics
 - `DiagnosticsViewModel` - Diagnostic logic

@@ -1,6 +1,6 @@
-# VoiceLearn Enterprise Architecture Guide
+# UnaMentis Enterprise Architecture Guide
 
-> **Purpose**: This document defines architectural patterns and decisions that ensure VoiceLearn remains compatible with enterprise features. All development—iOS, web, and backend—should follow these guidelines to prevent architectural debt.
+> **Purpose**: This document defines architectural patterns and decisions that ensure UnaMentis remains compatible with enterprise features. All development—iOS, web, and backend—should follow these guidelines to prevent architectural debt.
 
 > **Last Updated**: December 2024
 > **Status**: Living Document
@@ -27,7 +27,7 @@
 
 ### 1.1 Vision
 
-VoiceLearn will evolve from a single-user iOS application to an enterprise-ready platform supporting educational institutions, government agencies, and enterprises. This requires:
+UnaMentis will evolve from a single-user iOS application to an enterprise-ready platform supporting educational institutions, government agencies, and enterprises. This requires:
 
 - **Single Sign-On (SSO)** with existing identity providers
 - **Role-Based Access Control (RBAC)** at granular levels
@@ -85,11 +85,11 @@ VoiceLearn will evolve from a single-user iOS application to an enterprise-ready
 
 ### 2.1 SSO Architecture Overview
 
-VoiceLearn supports BOTH OIDC/OAuth2 AND SAML2 through an identity broker pattern that normalizes different identity providers into a standard internal token format.
+UnaMentis supports BOTH OIDC/OAuth2 AND SAML2 through an identity broker pattern that normalizes different identity providers into a standard internal token format.
 
 ```
 ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│   Enterprise     │     │   Identity       │     │   VoiceLearn     │
+│   Enterprise     │     │   Identity       │     │   UnaMentis     │
 │   IdP            │────▶│   Broker         │────▶│   Services       │
 │   (Okta, Azure,  │     │   (Keycloak)     │     │                  │
 │    Google, etc.) │     │                  │     │                  │
@@ -154,7 +154,7 @@ VoiceLearn supports BOTH OIDC/OAuth2 AND SAML2 through an identity broker patter
 
 ### 2.3 MFA Integration
 
-MFA is enforced at the identity provider level. VoiceLearn must:
+MFA is enforced at the identity provider level. UnaMentis must:
 
 1. **Verify MFA Status**: Check `amr` (Authentication Methods References) claim
 2. **Require Step-Up**: Request re-authentication for sensitive operations
@@ -326,7 +326,7 @@ services:
 
 ### 3.1 Permission Model
 
-VoiceLearn uses a **Resource:Action:Scope** permission model supporting fine-grained access control.
+UnaMentis uses a **Resource:Action:Scope** permission model supporting fine-grained access control.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -1112,7 +1112,7 @@ class TenantQuotas(BaseModel):
 │  │                    Customer Network                          │   │
 │  │                                                              │   │
 │  │  ┌──────────────┐       ┌────────────────────────────────┐  │   │
-│  │  │   Customer   │       │      VoiceLearn Cluster        │  │   │
+│  │  │   Customer   │       │      UnaMentis Cluster        │  │   │
 │  │  │   Identity   │◀─────▶│                                │  │   │
 │  │  │   (AD/LDAP/  │ SAML/ │  ┌─────────┐   ┌─────────┐    │  │   │
 │  │  │   Keycloak)  │ OIDC  │  │ API Pod │   │ API Pod │    │  │   │
@@ -1218,7 +1218,7 @@ voicelearn:
     "id": "user-uuid",
     "email": "teacher@acme.edu",
     "ip_address": "192.168.1.100",
-    "user_agent": "VoiceLearn/1.0 iOS/18.0",
+    "user_agent": "UnaMentis/1.0 iOS/18.0",
     "session_id": "session-uuid"
   },
 
@@ -1332,7 +1332,7 @@ async def enforce_retention():
 #### Add AuthenticatedService Protocol
 
 ```swift
-// New file: VoiceLearn/Services/Protocols/AuthenticatedService.swift
+// New file: UnaMentis/Services/Protocols/AuthenticatedService.swift
 
 /// Protocol for services that support authentication context
 public protocol AuthenticatedService: Actor {
@@ -1467,7 +1467,7 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 app = FastAPI(
-    title="VoiceLearn API",
+    title="UnaMentis API",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -1835,7 +1835,7 @@ actor SessionManager {
 **Key Files:**
 - `server/web/src/app/(auth)/` - Auth pages
 - `server/api/middleware/auth.py` - JWT validation
-- `VoiceLearn/Core/Auth/` - New iOS auth module
+- `UnaMentis/Core/Auth/` - New iOS auth module
 
 ### Phase 3: Authorization & RBAC
 
@@ -1851,7 +1851,7 @@ actor SessionManager {
 
 **Key Files:**
 - `server/api/authz/` - Authorization module
-- `VoiceLearn/Core/Auth/PermissionService.swift`
+- `UnaMentis/Core/Auth/PermissionService.swift`
 
 ### Phase 4: Multi-Tenancy
 
@@ -1926,4 +1926,4 @@ actor SessionManager {
 
 ---
 
-*This document is maintained by the VoiceLearn architecture team. For questions or updates, create an issue in the repository.*
+*This document is maintained by the UnaMentis architecture team. For questions or updates, create an issue in the repository.*

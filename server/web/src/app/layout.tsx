@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VoiceLearn Management Console",
-  description: "Management interface for monitoring and configuring VoiceLearn services",
+  title: "UnaMentis Management Console",
+  description: "Management interface for monitoring and configuring UnaMentis services",
   icons: {
     icon: "/favicon.ico",
   },

@@ -1,6 +1,6 @@
 # AI-Driven iOS Simulator Testing Guide
 
-**Purpose:** Guide for using Claude Code with the iOS Simulator MCP server to autonomously test and iterate on VoiceLearn iOS.
+**Purpose:** Guide for using Claude Code with the iOS Simulator MCP server to autonomously test and iterate on UnaMentis iOS.
 
 **Last Updated:** December 2025
 
@@ -22,7 +22,7 @@
 
 ### 1.1 What is AI Simulator Testing?
 
-VoiceLearn uses the **ios-simulator-mcp** server to enable Claude Code to directly interact with the iOS Simulator. This allows:
+UnaMentis uses the **ios-simulator-mcp** server to enable Claude Code to directly interact with the iOS Simulator. This allows:
 
 - **Autonomous UI testing** - Navigate, tap, type without human intervention
 - **Visual verification** - Take screenshots to verify UI state
@@ -139,7 +139,7 @@ After restarting Claude Code, verify the MCP server is active:
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  1. BUILD                                                       │
-│     ├─ xcodebuild -scheme VoiceLearn                           │
+│     ├─ xcodebuild -scheme UnaMentis                           │
 │     └─ Verify build succeeds                                    │
 │                                                                 │
 │  2. PREPARE                                                     │
@@ -172,14 +172,14 @@ After restarting Claude Code, verify the MCP server is active:
 
 ```
 1. Build the app
-   → xcodebuild build -scheme VoiceLearn
+   → xcodebuild build -scheme UnaMentis
 
 2. Boot simulator
    → ios-simulator: boot "iPhone 17 Pro"
 
 3. Install and launch
-   → ios-simulator: install /path/to/VoiceLearn.app
-   → ios-simulator: launch com.voicelearn.VoiceLearn
+   → ios-simulator: install /path/to/UnaMentis.app
+   → ios-simulator: launch com.unamentis.UnaMentis
 
 4. Navigate to Curriculum
    → ios-simulator: screenshot (capture home screen)
@@ -216,12 +216,12 @@ When making UI changes:
 ```bash
 # Debug build for simulator
 xcodebuild build \
-    -scheme VoiceLearn \
+    -scheme UnaMentis \
     -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
     -configuration Debug
 
 # Find the built app
-find ~/Library/Developer/Xcode/DerivedData -name "VoiceLearn.app" -type d
+find ~/Library/Developer/Xcode/DerivedData -name "UnaMentis.app" -type d
 ```
 
 ### 5.2 Simulator Commands
@@ -234,10 +234,10 @@ xcrun simctl list devices
 xcrun simctl boot "iPhone 17 Pro"
 
 # Install app
-xcrun simctl install booted /path/to/VoiceLearn.app
+xcrun simctl install booted /path/to/UnaMentis.app
 
 # Launch app
-xcrun simctl launch booted com.voicelearn.VoiceLearn
+xcrun simctl launch booted com.unamentis.UnaMentis
 
 # Take screenshot
 xcrun simctl io booted screenshot screenshot.png
@@ -347,7 +347,7 @@ For automated testing in CI:
   run: xcrun simctl boot "iPhone 17 Pro"
 
 - name: Run UI Tests
-  run: xcodebuild test -scheme VoiceLearn -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+  run: xcodebuild test -scheme UnaMentis -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 ```
 
 ---
@@ -410,10 +410,10 @@ xcrun simctl boot "iPhone 17 Pro"
 ls ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Debug-iphonesimulator/*.app
 
 # Uninstall first
-xcrun simctl uninstall booted com.voicelearn.VoiceLearn
+xcrun simctl uninstall booted com.unamentis.UnaMentis
 
 # Install again
-xcrun simctl install booted /path/to/VoiceLearn.app
+xcrun simctl install booted /path/to/UnaMentis.app
 ```
 
 ### Issue: Tap not registering

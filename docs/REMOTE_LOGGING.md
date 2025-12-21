@@ -1,4 +1,4 @@
-# VoiceLearn Remote Logging Infrastructure
+# UnaMentis Remote Logging Infrastructure
 
 This document describes the remote logging system that enables real-time log viewing from iOS simulator and physical devices.
 
@@ -99,7 +99,7 @@ Logs work automatically - localhost:8765 is used by default.
 {
   "timestamp": "2025-12-17T04:58:10.405Z",
   "level": "INFO",
-  "label": "com.voicelearn.telemetry",
+  "label": "com.unamentis.telemetry",
   "message": "TelemetryEngine initialized",
   "file": "TelemetryEngine.swift",
   "function": "init()",
@@ -112,10 +112,10 @@ Logs work automatically - localhost:8765 is used by default.
 
 | File | Description |
 |------|-------------|
-| `VoiceLearn/Core/Logging/RemoteLogHandler.swift` | Swift log handler |
+| `UnaMentis/Core/Logging/RemoteLogHandler.swift` | Swift log handler |
 | `scripts/log_server.py` | Python log server with web UI |
 | `scripts/setup_log_service.sh` | Service installer script |
-| `scripts/com.voicelearn.logserver.plist` | launchd template |
+| `scripts/com.unamentis.logserver.plist` | launchd template |
 
 ## Troubleshooting
 

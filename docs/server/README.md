@@ -1,10 +1,10 @@
-# VoiceLearn Server Deployment Guide
+# UnaMentis Server Deployment Guide
 
-This documentation explores self-hosted server options for VoiceLearn, enabling zero-cost or low-cost AI inference without relying on cloud API providers.
+This documentation explores self-hosted server options for UnaMentis, enabling zero-cost or low-cost AI inference without relying on cloud API providers.
 
 ## Overview
 
-VoiceLearn requires three core AI services:
+UnaMentis requires three core AI services:
 
 | Service | Purpose | Latency Target |
 |---------|---------|----------------|
@@ -165,7 +165,7 @@ Server Unavailable → Fall back to on-device or cloud
 
 - [GLM_ASR_SERVER_TRD.md](../GLM_ASR_SERVER_TRD.md) - GPU-based STT server (requires CUDA)
 - [PATCH_PANEL_ARCHITECTURE.md](../PATCH_PANEL_ARCHITECTURE.md) - LLM routing system
-- [VoiceLearn_TDD.md](../VoiceLearn_TDD.md) - Complete technical design
+- [UnaMentis_TDD.md](../UnaMentis_TDD.md) - Complete technical design
 
 ---
 
@@ -176,6 +176,6 @@ Server Unavailable → Fall back to on-device or cloud
 1. Install Ollama on your MacBook: `brew install ollama`
 2. Start Ollama: `ollama serve`
 3. Pull a model: `ollama pull llama3.2:3b`
-4. Update VoiceLearn to point to `http://localhost:11434`
+4. Update UnaMentis to point to `http://localhost:11434`
 
 See the detailed guides for production-ready setups.

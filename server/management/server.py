@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
-VoiceLearn Web Management Server
-A next-generation management interface for monitoring and configuring VoiceLearn services.
+UnaMentis Web Management Server
+A next-generation management interface for monitoring and configuring UnaMentis services.
 """
 
 import asyncio
 import json
 import logging
 import os
+import signal
+import subprocess
 import sys
 import time
 import uuid
@@ -33,6 +35,11 @@ HOST = os.environ.get("VOICELEARN_MGMT_HOST", "0.0.0.0")
 PORT = int(os.environ.get("VOICELEARN_MGMT_PORT", "8766"))
 MAX_LOG_ENTRIES = 10000
 MAX_METRICS_HISTORY = 1000
+
+# Service paths (relative to unamentis-ios root)
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+VIBEVOICE_DIR = PROJECT_ROOT.parent / "vibevoice-realtime-openai-api"
+NEXTJS_DIR = PROJECT_ROOT / "server" / "web"
 
 # Setup logging
 logging.basicConfig(
@@ -141,6 +148,24 @@ class ModelInfo:
     usage_count: int = 0
 
 
+@dataclass
+class ManagedService:
+    """Represents a managed subprocess service."""
+    id: str
+    name: str
+    service_type: str  # vibevoice, nextjs
+    command: List[str]
+    cwd: str
+    port: int
+    health_url: str
+    process: Optional[subprocess.Popen] = None
+    status: str = "stopped"  # stopped, starting, running, error
+    pid: Optional[int] = None
+    started_at: Optional[float] = None
+    error_message: str = ""
+    auto_restart: bool = True
+
+
 class ManagementState:
     """Global state for the management server."""
 
@@ -150,6 +175,7 @@ class ManagementState:
         self.clients: Dict[str, RemoteClient] = {}
         self.servers: Dict[str, ServerStatus] = {}
         self.models: Dict[str, ModelInfo] = {}
+        self.managed_services: Dict[str, ManagedService] = {}
         self.websockets: Set[web.WebSocketResponse] = set()
         self.stats = {
             "total_logs_received": 0,
@@ -160,14 +186,18 @@ class ManagementState:
         }
         # Initialize default servers
         self._init_default_servers()
+        # Initialize managed services
+        self._init_managed_services()
 
     def _init_default_servers(self):
         """Initialize default server configurations."""
         default_servers = [
-            ("gateway", "VoiceLearn Gateway", "voicelearnGateway", "localhost", 11400),
+            ("gateway", "UnaMentis Gateway", "unamentisGateway", "localhost", 11400),
             ("ollama", "Ollama LLM", "ollama", "localhost", 11434),
             ("whisper", "Whisper STT", "whisper", "localhost", 11401),
             ("piper", "Piper TTS", "piper", "localhost", 11402),
+            ("vibevoice", "VibeVoice TTS", "vibevoice", "localhost", 8880),
+            ("nextjs", "Web Dashboard", "nextjs", "localhost", 3000),
         ]
         for server_id, name, server_type, host, port in default_servers:
             self.servers[server_id] = ServerStatus(
@@ -176,6 +206,40 @@ class ManagementState:
                 type=server_type,
                 url=f"http://{host}:{port}",
                 port=port
+            )
+
+    def _init_managed_services(self):
+        """Initialize managed service configurations."""
+        # VibeVoice TTS Server
+        vibevoice_venv = VIBEVOICE_DIR / ".venv" / "bin" / "python"
+        vibevoice_script = VIBEVOICE_DIR / "vibevoice_realtime_openai_api.py"
+
+        if VIBEVOICE_DIR.exists():
+            self.managed_services["vibevoice"] = ManagedService(
+                id="vibevoice",
+                name="VibeVoice TTS",
+                service_type="vibevoice",
+                command=[
+                    str(vibevoice_venv) if vibevoice_venv.exists() else "python3",
+                    str(vibevoice_script),
+                    "--port", "8880",
+                    "--device", "mps"
+                ],
+                cwd=str(VIBEVOICE_DIR),
+                port=8880,
+                health_url="http://localhost:8880/health"
+            )
+
+        # Next.js Dashboard
+        if NEXTJS_DIR.exists():
+            self.managed_services["nextjs"] = ManagedService(
+                id="nextjs",
+                name="Web Dashboard",
+                service_type="nextjs",
+                command=["npx", "next", "dev"],
+                cwd=str(NEXTJS_DIR),
+                port=3000,
+                health_url="http://localhost:3000"
             )
 
 
@@ -634,44 +698,134 @@ async def handle_delete_server(request: web.Request) -> web.Response:
 # API Handlers - Models
 # =============================================================================
 
+async def get_ollama_model_details() -> dict:
+    """Get detailed model info from Ollama including sizes and loaded status."""
+    model_details = {}
+    loaded_models = {}
+
+    try:
+        timeout = aiohttp.ClientTimeout(total=5)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            # Get model tags (includes sizes)
+            async with session.get("http://localhost:11434/api/tags") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    for model in data.get("models", []):
+                        name = model.get("name", "")
+                        model_details[name] = {
+                            "size_bytes": model.get("size", 0),
+                            "size_gb": round(model.get("size", 0) / (1024**3), 2),
+                            "parameter_size": model.get("details", {}).get("parameter_size", ""),
+                            "quantization": model.get("details", {}).get("quantization_level", ""),
+                            "family": model.get("details", {}).get("family", "")
+                        }
+
+            # Get currently loaded models (includes VRAM usage)
+            async with session.get("http://localhost:11434/api/ps") as response:
+                if response.status == 200:
+                    data = await response.json()
+                    for model in data.get("models", []):
+                        name = model.get("name", "")
+                        loaded_models[name] = {
+                            "loaded": True,
+                            "size_vram": model.get("size_vram", 0),
+                            "size_vram_gb": round(model.get("size_vram", 0) / (1024**3), 2),
+                            "expires_at": model.get("expires_at", "")
+                        }
+    except Exception as e:
+        logger.debug(f"Failed to get Ollama model details: {e}")
+
+    return {"details": model_details, "loaded": loaded_models}
+
+
 async def handle_get_models(request: web.Request) -> web.Response:
     """Get all available models from servers."""
     try:
         models = []
+        total_size_bytes = 0
+        total_loaded_vram = 0
 
-        for server in state.servers.values():
-            if server.status == "healthy":
-                if server.type == "ollama":
-                    for model_name in server.models:
+        # Get Ollama model details
+        ollama_info = await get_ollama_model_details()
+
+        for srv in state.servers.values():
+            if srv.status == "healthy":
+                if srv.type == "ollama":
+                    for model_name in srv.models:
+                        details = ollama_info["details"].get(model_name, {})
+                        loaded_info = ollama_info["loaded"].get(model_name, {})
+                        is_loaded = model_name in ollama_info["loaded"]
+
+                        size_bytes = details.get("size_bytes", 0)
+                        total_size_bytes += size_bytes
+                        if is_loaded:
+                            total_loaded_vram += loaded_info.get("size_vram", 0)
+
                         models.append({
-                            "id": f"{server.id}:{model_name}",
+                            "id": f"{srv.id}:{model_name}",
                             "name": model_name,
                             "type": "llm",
-                            "server_id": server.id,
-                            "server_name": server.name,
-                            "status": "available"
+                            "server_id": srv.id,
+                            "server_name": srv.name,
+                            "status": "loaded" if is_loaded else "available",
+                            "size_bytes": size_bytes,
+                            "size_gb": details.get("size_gb", 0),
+                            "parameter_size": details.get("parameter_size", ""),
+                            "quantization": details.get("quantization", ""),
+                            "family": details.get("family", ""),
+                            "vram_bytes": loaded_info.get("size_vram", 0) if is_loaded else 0,
+                            "vram_gb": loaded_info.get("size_vram_gb", 0) if is_loaded else 0
                         })
-                elif server.type == "whisper":
+                elif srv.type == "whisper":
                     models.append({
-                        "id": f"{server.id}:whisper",
+                        "id": f"{srv.id}:whisper",
                         "name": "Whisper",
                         "type": "stt",
-                        "server_id": server.id,
-                        "server_name": server.name,
-                        "status": "available"
+                        "server_id": srv.id,
+                        "server_name": srv.name,
+                        "status": "available",
+                        "size_bytes": 0,
+                        "size_gb": 0
                     })
-                elif server.type == "piper":
-                    voices = server.capabilities.get("voices", [])
-                    for voice in voices[:10]:  # Limit to 10 voices
-                        voice_name = voice if isinstance(voice, str) else voice.get("name", "unknown")
-                        models.append({
-                            "id": f"{server.id}:{voice_name}",
-                            "name": voice_name,
-                            "type": "tts",
-                            "server_id": server.id,
-                            "server_name": server.name,
-                            "status": "available"
-                        })
+                elif srv.type == "piper":
+                    # Piper voices can be nested: {"voices": {"voices": [...]}}
+                    try:
+                        voices_data = srv.capabilities.get("voices", {})
+                        if isinstance(voices_data, dict):
+                            voices = voices_data.get("voices", [])
+                        else:
+                            voices = voices_data if isinstance(voices_data, list) else []
+
+                        if not isinstance(voices, list):
+                            voices = []
+
+                        for voice in list(voices)[:10]:  # Limit to 10 voices
+                            voice_name = voice if isinstance(voice, str) else voice.get("name", "unknown")
+                            models.append({
+                                "id": f"{srv.id}:{voice_name}",
+                                "name": voice_name,
+                                "type": "tts",
+                                "server_id": srv.id,
+                                "server_name": srv.name,
+                                "status": "available",
+                                "size_bytes": 0,
+                                "size_gb": 0
+                            })
+                    except Exception as e:
+                        logger.warning(f"Failed to parse piper voices: {e}")
+                elif srv.type == "vibevoice":
+                    # VibeVoice model info
+                    models.append({
+                        "id": f"{srv.id}:vibevoice",
+                        "name": "VibeVoice-Realtime-0.5B",
+                        "type": "tts",
+                        "server_id": srv.id,
+                        "server_name": srv.name,
+                        "status": "loaded",
+                        "size_bytes": 2 * 1024**3,  # ~2GB
+                        "size_gb": 2.0,
+                        "parameter_size": "0.5B"
+                    })
 
         return web.json_response({
             "models": models,
@@ -680,7 +834,10 @@ async def handle_get_models(request: web.Request) -> web.Response:
                 "llm": sum(1 for m in models if m["type"] == "llm"),
                 "stt": sum(1 for m in models if m["type"] == "stt"),
                 "tts": sum(1 for m in models if m["type"] == "tts")
-            }
+            },
+            "total_size_gb": round(total_size_bytes / (1024**3), 2),
+            "loaded_vram_gb": round(total_loaded_vram / (1024**3), 2),
+            "system_memory": get_system_memory()
         })
 
     except Exception as e:
@@ -735,6 +892,387 @@ async def handle_get_stats(request: web.Request) -> web.Response:
 
     except Exception as e:
         logger.error(f"Error getting stats: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
+
+# =============================================================================
+# API Handlers - Managed Services
+# =============================================================================
+
+def get_process_memory(pid: int) -> dict:
+    """Get memory usage for a process by PID."""
+    try:
+        result = subprocess.run(
+            ["ps", "-o", "rss=,vsz=", "-p", str(pid)],
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            parts = result.stdout.strip().split()
+            if len(parts) >= 2:
+                rss_kb = int(parts[0])
+                vsz_kb = int(parts[1])
+                return {
+                    "rss_mb": round(rss_kb / 1024, 1),
+                    "vsz_mb": round(vsz_kb / 1024, 1),
+                    "rss_bytes": rss_kb * 1024,
+                    "vsz_bytes": vsz_kb * 1024
+                }
+    except Exception as e:
+        logger.debug(f"Failed to get memory for PID {pid}: {e}")
+    return {"rss_mb": 0, "vsz_mb": 0, "rss_bytes": 0, "vsz_bytes": 0}
+
+
+def get_system_memory() -> dict:
+    """Get system memory info (unified memory on Apple Silicon)."""
+    try:
+        # Use vm_stat for macOS
+        result = subprocess.run(["vm_stat"], capture_output=True, text=True)
+        if result.returncode == 0:
+            lines = result.stdout.strip().split('\n')
+            stats = {}
+            page_size = 16384  # Default for Apple Silicon
+            for line in lines:
+                if ':' in line:
+                    key, value = line.split(':', 1)
+                    value = value.strip().rstrip('.')
+                    try:
+                        stats[key.strip()] = int(value)
+                    except ValueError:
+                        pass
+
+            # Calculate memory in bytes
+            free_pages = stats.get('Pages free', 0)
+            active_pages = stats.get('Pages active', 0)
+            inactive_pages = stats.get('Pages inactive', 0)
+            wired_pages = stats.get('Pages wired down', 0)
+            compressed_pages = stats.get('Pages occupied by compressor', 0)
+
+            # Also get total memory from sysctl
+            sysctl_result = subprocess.run(
+                ["sysctl", "-n", "hw.memsize"],
+                capture_output=True,
+                text=True
+            )
+            total_bytes = int(sysctl_result.stdout.strip()) if sysctl_result.returncode == 0 else 0
+
+            used_bytes = (active_pages + wired_pages + compressed_pages) * page_size
+            free_bytes = free_pages * page_size
+
+            return {
+                "total_gb": round(total_bytes / (1024**3), 1),
+                "used_gb": round(used_bytes / (1024**3), 1),
+                "free_gb": round(free_bytes / (1024**3), 1),
+                "percent_used": round((used_bytes / total_bytes) * 100, 1) if total_bytes > 0 else 0,
+                "total_bytes": total_bytes,
+                "used_bytes": used_bytes
+            }
+    except Exception as e:
+        logger.debug(f"Failed to get system memory: {e}")
+    return {"total_gb": 0, "used_gb": 0, "free_gb": 0, "percent_used": 0}
+
+
+def service_to_dict(service: ManagedService) -> dict:
+    """Convert ManagedService to JSON-serializable dict."""
+    memory = get_process_memory(service.pid) if service.pid else {"rss_mb": 0, "vsz_mb": 0}
+    return {
+        "id": service.id,
+        "name": service.name,
+        "service_type": service.service_type,
+        "port": service.port,
+        "status": service.status,
+        "pid": service.pid,
+        "started_at": service.started_at,
+        "error_message": service.error_message,
+        "auto_restart": service.auto_restart,
+        "health_url": service.health_url,
+        "memory": memory
+    }
+
+
+async def check_service_running(service: ManagedService) -> bool:
+    """Check if a service is running by checking its health endpoint."""
+    try:
+        timeout = aiohttp.ClientTimeout(total=2)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(service.health_url) as response:
+                return response.status == 200
+    except Exception:
+        return False
+
+
+async def detect_existing_processes():
+    """Detect if managed services are already running (started externally)."""
+    for service_id, service in state.managed_services.items():
+        if service.status == "stopped":
+            is_running = await check_service_running(service)
+            if is_running:
+                service.status = "running"
+                service.started_at = time.time()
+                # Try to find the PID
+                try:
+                    result = subprocess.run(
+                        ["lsof", "-t", "-i", f":{service.port}"],
+                        capture_output=True,
+                        text=True
+                    )
+                    if result.stdout.strip():
+                        service.pid = int(result.stdout.strip().split()[0])
+                except Exception:
+                    pass
+                logger.info(f"Detected running service: {service.name} on port {service.port}")
+
+
+async def start_service(service_id: str) -> tuple[bool, str]:
+    """Start a managed service."""
+    if service_id not in state.managed_services:
+        return False, f"Service {service_id} not found"
+
+    service = state.managed_services[service_id]
+
+    # Check if already running
+    if service.process and service.process.poll() is None:
+        return False, "Service is already running"
+
+    # Check if port is in use
+    is_running = await check_service_running(service)
+    if is_running:
+        service.status = "running"
+        return False, "Service is already running on port"
+
+    try:
+        service.status = "starting"
+        service.error_message = ""
+        await broadcast_message("service_update", service_to_dict(service))
+
+        # Prepare environment
+        env = os.environ.copy()
+        if service.service_type == "vibevoice":
+            env["CFG_SCALE"] = "1.25"
+
+        # Start the process
+        logger.info(f"Starting service: {service.name}")
+        logger.info(f"Command: {' '.join(service.command)}")
+        logger.info(f"CWD: {service.cwd}")
+
+        service.process = subprocess.Popen(
+            service.command,
+            cwd=service.cwd,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            start_new_session=True  # Detach from parent
+        )
+        service.pid = service.process.pid
+        service.started_at = time.time()
+
+        # Wait a bit and check if it's running
+        await asyncio.sleep(2)
+
+        if service.process.poll() is not None:
+            # Process exited
+            output = service.process.stdout.read().decode() if service.process.stdout else ""
+            service.status = "error"
+            service.error_message = f"Process exited with code {service.process.returncode}: {output[:500]}"
+            await broadcast_message("service_update", service_to_dict(service))
+            return False, service.error_message
+
+        service.status = "running"
+        await broadcast_message("service_update", service_to_dict(service))
+        logger.info(f"Service {service.name} started with PID {service.pid}")
+        return True, f"Service started with PID {service.pid}"
+
+    except Exception as e:
+        service.status = "error"
+        service.error_message = str(e)
+        await broadcast_message("service_update", service_to_dict(service))
+        logger.error(f"Failed to start service {service.name}: {e}")
+        return False, str(e)
+
+
+async def stop_service(service_id: str) -> tuple[bool, str]:
+    """Stop a managed service."""
+    if service_id not in state.managed_services:
+        return False, f"Service {service_id} not found"
+
+    service = state.managed_services[service_id]
+
+    try:
+        # Try to kill by PID if we have it
+        if service.pid:
+            try:
+                os.kill(service.pid, signal.SIGTERM)
+                await asyncio.sleep(1)
+                # Check if still running
+                try:
+                    os.kill(service.pid, 0)
+                    # Still running, force kill
+                    os.kill(service.pid, signal.SIGKILL)
+                except OSError:
+                    pass  # Process already dead
+            except OSError as e:
+                logger.warning(f"Could not kill PID {service.pid}: {e}")
+
+        # Also try to kill by port
+        try:
+            result = subprocess.run(
+                ["lsof", "-t", "-i", f":{service.port}"],
+                capture_output=True,
+                text=True
+            )
+            if result.stdout.strip():
+                for pid_str in result.stdout.strip().split():
+                    try:
+                        pid = int(pid_str)
+                        os.kill(pid, signal.SIGTERM)
+                    except (ValueError, OSError):
+                        pass
+        except Exception:
+            pass
+
+        # Clean up process reference
+        if service.process:
+            try:
+                service.process.terminate()
+                service.process.wait(timeout=5)
+            except Exception:
+                try:
+                    service.process.kill()
+                except Exception:
+                    pass
+            service.process = None
+
+        service.status = "stopped"
+        service.pid = None
+        service.started_at = None
+        await broadcast_message("service_update", service_to_dict(service))
+        logger.info(f"Service {service.name} stopped")
+        return True, "Service stopped"
+
+    except Exception as e:
+        service.error_message = str(e)
+        await broadcast_message("service_update", service_to_dict(service))
+        logger.error(f"Failed to stop service {service.name}: {e}")
+        return False, str(e)
+
+
+async def handle_get_services(request: web.Request) -> web.Response:
+    """Get all managed services and their status."""
+    try:
+        # Update status of all services
+        for service in state.managed_services.values():
+            if service.status == "running":
+                is_running = await check_service_running(service)
+                if not is_running:
+                    # Check if process is still alive
+                    if service.process and service.process.poll() is not None:
+                        service.status = "error"
+                        service.error_message = f"Process exited with code {service.process.returncode}"
+                    else:
+                        service.status = "error"
+                        service.error_message = "Health check failed"
+
+        services = [service_to_dict(s) for s in state.managed_services.values()]
+
+        # Calculate total memory used by services
+        total_memory_mb = sum(s.get("memory", {}).get("rss_mb", 0) for s in services)
+
+        return web.json_response({
+            "services": services,
+            "total": len(services),
+            "running": sum(1 for s in state.managed_services.values() if s.status == "running"),
+            "stopped": sum(1 for s in state.managed_services.values() if s.status == "stopped"),
+            "error": sum(1 for s in state.managed_services.values() if s.status == "error"),
+            "total_memory_mb": round(total_memory_mb, 1),
+            "system_memory": get_system_memory()
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting services: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
+
+async def handle_start_service(request: web.Request) -> web.Response:
+    """Start a managed service."""
+    try:
+        service_id = request.match_info.get("service_id")
+        success, message = await start_service(service_id)
+
+        if success:
+            return web.json_response({"status": "ok", "message": message})
+        else:
+            return web.json_response({"status": "error", "message": message}, status=400)
+
+    except Exception as e:
+        logger.error(f"Error starting service: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
+
+async def handle_stop_service(request: web.Request) -> web.Response:
+    """Stop a managed service."""
+    try:
+        service_id = request.match_info.get("service_id")
+        success, message = await stop_service(service_id)
+
+        if success:
+            return web.json_response({"status": "ok", "message": message})
+        else:
+            return web.json_response({"status": "error", "message": message}, status=400)
+
+    except Exception as e:
+        logger.error(f"Error stopping service: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
+
+async def handle_restart_service(request: web.Request) -> web.Response:
+    """Restart a managed service."""
+    try:
+        service_id = request.match_info.get("service_id")
+
+        # Stop first
+        await stop_service(service_id)
+        await asyncio.sleep(1)
+
+        # Then start
+        success, message = await start_service(service_id)
+
+        if success:
+            return web.json_response({"status": "ok", "message": message})
+        else:
+            return web.json_response({"status": "error", "message": message}, status=400)
+
+    except Exception as e:
+        logger.error(f"Error restarting service: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
+
+async def handle_start_all_services(request: web.Request) -> web.Response:
+    """Start all managed services."""
+    try:
+        results = {}
+        for service_id in state.managed_services:
+            success, message = await start_service(service_id)
+            results[service_id] = {"success": success, "message": message}
+
+        return web.json_response({"status": "ok", "results": results})
+
+    except Exception as e:
+        logger.error(f"Error starting all services: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
+
+async def handle_stop_all_services(request: web.Request) -> web.Response:
+    """Stop all managed services."""
+    try:
+        results = {}
+        for service_id in state.managed_services:
+            success, message = await stop_service(service_id)
+            results[service_id] = {"success": success, "message": message}
+
+        return web.json_response({"status": "ok", "results": results})
+
+    except Exception as e:
+        logger.error(f"Error stopping all services: {e}")
         return web.json_response({"error": str(e)}, status=500)
 
 
@@ -859,6 +1397,14 @@ def create_app() -> web.Application:
     # Models
     app.router.add_get("/api/models", handle_get_models)
 
+    # Managed Services
+    app.router.add_get("/api/services", handle_get_services)
+    app.router.add_post("/api/services/{service_id}/start", handle_start_service)
+    app.router.add_post("/api/services/{service_id}/stop", handle_stop_service)
+    app.router.add_post("/api/services/{service_id}/restart", handle_restart_service)
+    app.router.add_post("/api/services/start-all", handle_start_all_services)
+    app.router.add_post("/api/services/stop-all", handle_stop_all_services)
+
     # WebSocket
     app.router.add_get("/ws", handle_websocket)
 
@@ -867,6 +1413,12 @@ def create_app() -> web.Application:
     if static_dir.exists():
         app.router.add_static("/static", static_dir)
     app.router.add_get("/", handle_dashboard)
+
+    # Startup hook to detect existing services
+    async def on_startup(app):
+        await detect_existing_processes()
+
+    app.on_startup.append(on_startup)
 
     return app
 

@@ -1,0 +1,1154 @@
+{
+  "vlcf": "1.0.0",
+  "id": {
+    "catalog": "UUID",
+    "value": "d4e5f6a7-b8c9-0123-def4-567890123456"
+  },
+  "title": "Introduction to Neural Networks",
+  "description": "A theoretical exploration of neural networks from biological inspiration to modern architectures. This curriculum covers the foundational concepts of deep learning without requiring programming, focusing on intuition, mathematics, and conceptual understanding.",
+  "version": {
+    "number": "1.0.0",
+    "date": "2025-12-20T00:00:00Z",
+    "changelog": "Initial release - comprehensive theoretical neural networks curriculum"
+  },
+  "lifecycle": {
+    "status": "final",
+    "contributors": [
+      {
+        "name": "VoiceLearn Curriculum Team",
+        "role": "author",
+        "organization": "VoiceLearn"
+      },
+      {
+        "name": "AI Education Specialists",
+        "role": "subject matter expert",
+        "organization": "VoiceLearn"
+      }
+    ],
+    "created": "2025-12-20T00:00:00Z"
+  },
+  "metadata": {
+    "language": "en-US",
+    "keywords": ["neural networks", "deep learning", "machine learning", "artificial intelligence", "backpropagation", "perceptron", "activation functions", "gradient descent"],
+    "structure": "hierarchical",
+    "aggregationLevel": 3
+  },
+  "educational": {
+    "interactivityType": "mixed",
+    "interactivityLevel": "high",
+    "learningResourceType": ["tutorial", "conversation", "self assessment", "lecture"],
+    "intendedEndUserRole": ["learner"],
+    "context": ["higher education", "training"],
+    "typicalAgeRange": "18+",
+    "difficulty": "difficult",
+    "typicalLearningTime": "PT8H",
+    "educationalAlignment": [
+      {
+        "alignmentType": "teaches",
+        "educationalFramework": "ACM Computing Curricula",
+        "targetName": "Machine Learning Fundamentals",
+        "targetDescription": "Core concepts in machine learning and neural computation"
+      },
+      {
+        "alignmentType": "teaches",
+        "educationalFramework": "IEEE CS2023",
+        "targetName": "Artificial Intelligence",
+        "targetDescription": "Foundational understanding of neural network architectures and learning algorithms"
+      }
+    ],
+    "audienceProfile": {
+      "educationLevel": "undergraduate",
+      "prerequisites": [
+        {
+          "description": "Basic calculus (derivatives and partial derivatives)",
+          "required": true
+        },
+        {
+          "description": "Linear algebra (vectors, matrices, matrix multiplication)",
+          "required": true
+        },
+        {
+          "description": "Basic probability and statistics",
+          "required": false
+        },
+        {
+          "description": "Programming experience (helpful but not required)",
+          "required": false
+        }
+      ]
+    }
+  },
+  "rights": {
+    "cost": false,
+    "license": {
+      "type": "CC-BY-4.0",
+      "url": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "holder": "VoiceLearn Inc."
+  },
+  "glossary": {
+    "terms": [
+      {
+        "id": "term-neuron",
+        "term": "neuron",
+        "pronunciation": "/ˈn(j)o͝oˌrän/",
+        "definition": "A computational unit in a neural network that receives inputs, applies weights and a bias, and produces an output through an activation function.",
+        "spokenDefinition": "A neuron is the basic building block of a neural network. It takes in numbers, multiplies each by a weight, adds them up with a bias, and then applies an activation function to produce its output. Think of it as a tiny decision-maker that learns how important each input is.",
+        "relatedTerms": ["perceptron", "activation function", "weights"]
+      },
+      {
+        "id": "term-weights",
+        "term": "weights",
+        "pronunciation": "/wāts/",
+        "definition": "Learnable parameters that determine how much influence each input has on a neuron's output.",
+        "spokenDefinition": "Weights are the numbers that a neural network learns during training. Each weight controls how strongly one neuron's output affects another. Higher weights mean more influence, and negative weights mean the input pushes the output in the opposite direction.",
+        "relatedTerms": ["parameters", "learning", "gradient"]
+      },
+      {
+        "id": "term-bias",
+        "term": "bias",
+        "pronunciation": "/ˈbīəs/",
+        "definition": "A learnable parameter added to the weighted sum in a neuron, allowing the activation function to shift left or right.",
+        "spokenDefinition": "A bias is like a threshold adjustment for a neuron. It's a number added before the activation function that helps the neuron decide when to 'fire.' Without biases, every neuron would have to pass through zero, which would limit what the network can learn.",
+        "relatedTerms": ["weights", "threshold", "activation"]
+      },
+      {
+        "id": "term-activation",
+        "term": "activation function",
+        "pronunciation": "/ˌaktəˈvāSH(ə)n ˈfəNG(k)SH(ə)n/",
+        "definition": "A nonlinear function applied to a neuron's output that enables the network to learn complex patterns.",
+        "spokenDefinition": "An activation function adds nonlinearity to neural networks. Without it, stacking layers would be pointless because linear functions of linear functions are still just linear. Common ones include ReLU, which outputs zero for negative inputs and the input itself for positive ones, and sigmoid, which squashes everything between zero and one.",
+        "synonyms": ["transfer function"],
+        "relatedTerms": ["ReLU", "sigmoid", "nonlinearity"]
+      },
+      {
+        "id": "term-gradient",
+        "term": "gradient",
+        "pronunciation": "/ˈɡrādēənt/",
+        "definition": "A vector of partial derivatives indicating the direction of steepest increase of a function.",
+        "spokenDefinition": "The gradient tells you which direction is uphill on a surface. In machine learning, we use it to find which direction is downhill toward lower error. By moving opposite to the gradient, we can gradually find better weights for our network.",
+        "relatedTerms": ["derivative", "loss function", "optimization"]
+      },
+      {
+        "id": "term-backprop",
+        "term": "backpropagation",
+        "pronunciation": "/ˌbakˌpräpəˈɡāSH(ə)n/",
+        "definition": "An algorithm for efficiently computing gradients in a neural network by applying the chain rule backwards through the network.",
+        "spokenDefinition": "Backpropagation is how neural networks figure out which weights to adjust and by how much. It works backwards from the output error, using the chain rule from calculus to calculate how much each weight contributed to the mistake. It's the key algorithm that made training deep networks practical.",
+        "synonyms": ["backprop", "backward propagation of errors"],
+        "relatedTerms": ["chain rule", "gradient", "training"]
+      },
+      {
+        "id": "term-loss",
+        "term": "loss function",
+        "pronunciation": "/lôs ˈfəNG(k)SH(ə)n/",
+        "definition": "A function that measures how far the network's predictions are from the correct answers.",
+        "spokenDefinition": "A loss function is like a score that tells you how wrong your network is. Lower is better. During training, the goal is to adjust the weights to minimize this loss. Common loss functions include mean squared error for regression and cross-entropy for classification.",
+        "synonyms": ["cost function", "objective function", "error function"],
+        "relatedTerms": ["optimization", "training", "gradient descent"]
+      },
+      {
+        "id": "term-epoch",
+        "term": "epoch",
+        "pronunciation": "/ˈēˌpäk/",
+        "definition": "One complete pass through the entire training dataset.",
+        "spokenDefinition": "An epoch is one full cycle through all your training examples. Networks typically need many epochs to learn well, like how you might read a textbook multiple times to really understand it. Too few epochs means underfitting; too many can lead to overfitting.",
+        "relatedTerms": ["training", "batch", "iteration"]
+      },
+      {
+        "id": "term-overfitting",
+        "term": "overfitting",
+        "pronunciation": "/ˌōvərˈfidiNG/",
+        "definition": "When a model learns the training data too well, including its noise, and fails to generalize to new data.",
+        "spokenDefinition": "Overfitting happens when your network memorizes the training examples instead of learning the underlying patterns. It's like a student who memorizes test answers but can't solve new problems. The network performs great on training data but poorly on anything it hasn't seen before.",
+        "relatedTerms": ["regularization", "generalization", "validation"]
+      },
+      {
+        "id": "term-hidden-layer",
+        "term": "hidden layer",
+        "pronunciation": "/ˈhidən ˈlā(ə)r/",
+        "definition": "A layer of neurons between the input and output layers that learns intermediate representations.",
+        "spokenDefinition": "Hidden layers are the secret sauce of deep learning. They sit between what goes in and what comes out, learning to represent the data in increasingly abstract ways. The first hidden layer might detect edges in an image, while deeper layers might recognize faces or objects.",
+        "relatedTerms": ["deep learning", "representation learning", "features"]
+      },
+      {
+        "id": "term-learning-rate",
+        "term": "learning rate",
+        "pronunciation": "/ˈlərniNG rāt/",
+        "definition": "A hyperparameter that controls how much the weights change in response to the estimated error.",
+        "spokenDefinition": "The learning rate controls how big of steps we take when adjusting weights. Too high, and we might overshoot the optimal values and never converge. Too low, and training takes forever. Finding the right learning rate is one of the most important parts of training neural networks.",
+        "relatedTerms": ["hyperparameter", "gradient descent", "optimization"]
+      },
+      {
+        "id": "term-regularization",
+        "term": "regularization",
+        "pronunciation": "/ˌreɡ(y)ələrəˈzāSH(ə)n/",
+        "definition": "Techniques that prevent overfitting by adding constraints or penalties to the learning process.",
+        "spokenDefinition": "Regularization is a set of techniques that help networks generalize better. It's like telling the network, 'don't get too clever with your weights.' Methods include L2 regularization, which penalizes large weights, dropout, which randomly turns off neurons during training, and early stopping, which halts training before overfitting begins.",
+        "relatedTerms": ["overfitting", "dropout", "L2 penalty"]
+      }
+    ]
+  },
+  "content": [
+    {
+      "id": { "value": "course-neural-networks" },
+      "title": "Introduction to Neural Networks",
+      "type": "curriculum",
+      "description": "A comprehensive theoretical foundation in neural networks, from biological inspiration to modern deep learning architectures.",
+      "learningObjectives": [
+        {
+          "id": { "value": "obj-understand-neurons" },
+          "statement": "Explain how artificial neurons model biological neurons and process information",
+          "bloomsLevel": "understand"
+        },
+        {
+          "id": { "value": "obj-analyze-architectures" },
+          "statement": "Analyze how different network architectures are suited to different types of problems",
+          "bloomsLevel": "analyze"
+        },
+        {
+          "id": { "value": "obj-apply-backprop" },
+          "statement": "Apply the chain rule to compute gradients in a multi-layer network",
+          "bloomsLevel": "apply"
+        },
+        {
+          "id": { "value": "obj-evaluate-training" },
+          "statement": "Evaluate training strategies and recognize signs of underfitting and overfitting",
+          "bloomsLevel": "evaluate"
+        }
+      ],
+      "tutoringConfig": {
+        "contentDepth": "intermediate",
+        "adaptiveDepth": true,
+        "interactionMode": "socratic",
+        "allowTangents": true,
+        "checkpointFrequency": "medium"
+      },
+      "children": [
+        {
+          "id": { "value": "topic-biological-inspiration" },
+          "title": "The Biological Inspiration",
+          "type": "topic",
+          "orderIndex": 0,
+          "description": "Explore how the human brain inspired artificial neural networks and the key differences between biological and artificial neurons.",
+          "timeEstimates": {
+            "overview": "PT5M",
+            "introductory": "PT20M",
+            "intermediate": "PT40M",
+            "advanced": "PT1H",
+            "graduate": "PT1H30M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-bio-intro",
+                "type": "introduction",
+                "content": "The human brain is the most complex object we know of in the universe. It contains roughly 86 billion neurons, each connected to thousands of others, forming a network of staggering complexity. In the 1940s, scientists began asking: could we build machines that learn the way brains do?",
+                "speakingNotes": {
+                  "emotionalTone": "curious",
+                  "emphasis": ["86 billion neurons", "learn the way brains do"],
+                  "pace": "normal"
+                }
+              },
+              {
+                "id": "seg-bio-neuron",
+                "type": "explanation",
+                "content": "A biological neuron has three main parts. Dendrites receive signals from other neurons. The cell body, or soma, processes these signals. And the axon transmits the output to other neurons. When the combined input signals exceed a threshold, the neuron 'fires' and sends an electrical pulse down its axon.",
+                "glossaryRefs": ["term-neuron"],
+                "speakingNotes": {
+                  "pace": "slow",
+                  "emphasis": ["dendrites", "cell body", "axon", "fires"]
+                },
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true,
+                  "suggestedPrompt": "Does this model of how neurons work make sense so far?"
+                }
+              },
+              {
+                "id": "seg-artificial-neuron",
+                "type": "explanation",
+                "content": "An artificial neuron simplifies this dramatically. It takes numerical inputs, multiplies each by a weight, sums them up, adds a bias, and passes the result through an activation function. The weights represent the strength of connections, like how some synapses in your brain are stronger than others. The bias shifts the activation threshold.",
+                "glossaryRefs": ["term-weights", "term-bias", "term-activation"],
+                "alternativeExplanations": [
+                  {
+                    "style": "simpler",
+                    "content": "Think of an artificial neuron as a very simple voting machine. Each input is a vote, and the weight says how much that vote counts. The bias is like a minimum number of votes needed before anything happens. The activation function decides the final output based on the total."
+                  },
+                  {
+                    "style": "technical",
+                    "content": "Mathematically, an artificial neuron computes y equals f of the sum over i of w sub i times x sub i plus b, where x sub i are inputs, w sub i are weights, b is the bias, and f is the activation function."
+                  },
+                  {
+                    "style": "analogy",
+                    "content": "Imagine you're deciding whether to go outside. Temperature is one input, weighted highly because you hate the cold. Whether it's raining is another input. Your mood is the bias, shifting your threshold. The activation function is your final decision: go or stay."
+                  }
+                ]
+              },
+              {
+                "id": "seg-differences",
+                "type": "lecture",
+                "content": "It's crucial to understand that artificial neural networks are only loosely inspired by biology. Real neurons are vastly more complex. They communicate through electrochemical signals with precise timing. Dendrites perform sophisticated computations on their own. Synapses can change in ways we're still discovering. Our artificial neurons are mathematical abstractions that capture the essence of learning through adjustable connections, but they're not brain simulations.",
+                "speakingNotes": {
+                  "emotionalTone": "serious",
+                  "emphasis": ["loosely inspired", "not brain simulations"]
+                },
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "Why do we say artificial neural networks are only 'inspired by' biology rather than being brain simulations?",
+                  "expectedResponsePatterns": ["simplified", "abstract", "not the same", "different", "mathematical"],
+                  "fallbackBehavior": "simplify"
+                }
+              },
+              {
+                "id": "seg-bio-summary",
+                "type": "summary",
+                "content": "The brain inspired the idea of learning machines with adjustable connections. Artificial neurons capture the essence: weighted inputs, a summing operation, and a nonlinear output. But real brains are far more complex, and neural networks are mathematical tools, not brain replicas. This distinction matters because it frees us to design architectures that work well computationally, even if they have no biological counterpart.",
+                "speakingNotes": {
+                  "pace": "slow"
+                }
+              }
+            ],
+            "voiceProfile": {
+              "tone": "conversational",
+              "pace": "moderate"
+            }
+          },
+          "misconceptions": [
+            {
+              "id": "misc-brain-simulation",
+              "misconception": "Neural networks simulate how the brain actually works",
+              "triggerPhrases": ["just like the brain", "brain simulation", "works exactly like neurons", "replicates the brain"],
+              "correction": "Neural networks are mathematical abstractions inspired by biological neurons but vastly simplified. Real neurons are far more complex and we don't fully understand how the brain learns. NNs are computational tools, not neuroscience models.",
+              "spokenCorrection": "That's a really common misconception. While neural networks were inspired by the brain, they're actually quite different. Real neurons communicate through complex electrochemical signals, and each one is far more sophisticated than an artificial neuron. We don't fully understand how biological learning works. Think of artificial neural networks as mathematical tools that borrowed a good idea from biology, not as brain simulations.",
+              "severity": "moderate",
+              "explanation": "This misconception is common because of the name 'neural network' and the historical connection to neuroscience."
+            }
+          ],
+          "examples": [
+            {
+              "id": "ex-mcculloch-pitts",
+              "type": "historical",
+              "title": "The McCulloch-Pitts Neuron (1943)",
+              "description": "The first mathematical model of a neuron",
+              "content": "Warren McCulloch and Walter Pitts proposed a binary threshold neuron: if the weighted sum of inputs exceeds a threshold, output 1; otherwise, output 0. This simple model could compute logical operations like AND, OR, and NOT.",
+              "spokenContent": "In 1943, McCulloch and Pitts created the first mathematical neuron model. It was incredibly simple: add up the weighted inputs, and if the total exceeds a threshold, output 1; otherwise, output 0. Despite its simplicity, this model could compute logical operations like AND and OR. It was a revolutionary idea that machines could be built from neuron-like components.",
+              "complexity": "simple"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-bio-parts" },
+              "type": "multiple_choice",
+              "prompt": "Which components does an artificial neuron have? Select all that apply.",
+              "choices": [
+                { "id": "a", "text": "Weights for each input", "correct": true },
+                { "id": "b", "text": "Dendrites and axons", "correct": false, "feedback": "Those are parts of biological neurons, not artificial ones" },
+                { "id": "c", "text": "A bias term", "correct": true },
+                { "id": "d", "text": "An activation function", "correct": true }
+              ],
+              "difficulty": 0.3,
+              "objectivesAssessed": ["obj-understand-neurons"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-perceptron" },
+          "title": "The Perceptron",
+          "type": "topic",
+          "orderIndex": 1,
+          "description": "Learn about the perceptron, the simplest neural network, and understand its capabilities and fundamental limitations.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-biological-inspiration",
+              "required": true
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT5M",
+            "introductory": "PT25M",
+            "intermediate": "PT50M",
+            "advanced": "PT1H15M",
+            "graduate": "PT2H"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-perceptron-intro",
+                "type": "introduction",
+                "content": "In 1958, Frank Rosenblatt built a machine called the Mark I Perceptron. It could learn to recognize simple patterns. The perceptron algorithm was one of the first machine learning algorithms, and understanding it is essential because it contains the seeds of everything that came later.",
+                "speakingNotes": {
+                  "emphasis": ["1958", "learn to recognize"],
+                  "emotionalTone": "excited"
+                }
+              },
+              {
+                "id": "seg-perceptron-math",
+                "type": "explanation",
+                "content": "A perceptron takes a vector of inputs and computes a weighted sum plus a bias. If this value is positive, it outputs 1; if negative, it outputs 0 or negative 1, depending on the formulation. Mathematically, the output equals the sign of the dot product of weights and inputs plus bias. This draws a decision boundary, a hyperplane that separates the input space into two regions.",
+                "glossaryRefs": ["term-weights", "term-bias"],
+                "speakingNotes": {
+                  "pace": "slow"
+                },
+                "alternativeExplanations": [
+                  {
+                    "style": "simpler",
+                    "content": "A perceptron draws a straight line (or flat surface in higher dimensions) to separate two types of things. Everything on one side gets one label, everything on the other side gets another label."
+                  },
+                  {
+                    "style": "analogy",
+                    "content": "Imagine sorting apples by weight and color. A perceptron is like drawing a single straight line on a scatter plot to separate 'good' apples from 'bad' ones. The weights determine the angle of the line, and the bias determines where it sits."
+                  }
+                ],
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true
+                }
+              },
+              {
+                "id": "seg-perceptron-learning",
+                "type": "lecture",
+                "content": "The perceptron learning algorithm is beautifully simple. Start with random weights. For each training example, if the prediction is correct, do nothing. If it predicts positive when it should be negative, subtract the input from the weights. If it predicts negative when it should be positive, add the input to the weights. Repeat until all examples are classified correctly or we give up.",
+                "speakingNotes": {
+                  "emphasis": ["subtract", "add"],
+                  "pace": "slow"
+                }
+              },
+              {
+                "id": "seg-convergence",
+                "type": "explanation",
+                "content": "Here's a remarkable theorem: if the data is linearly separable, meaning a hyperplane can perfectly separate the classes, the perceptron algorithm is guaranteed to find it in a finite number of steps. This is the Perceptron Convergence Theorem, proved by Rosenblatt. However, if the data is not linearly separable, the algorithm will never converge. It will keep adjusting forever.",
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "What happens if you run the perceptron algorithm on data that cannot be separated by a straight line?",
+                  "expectedResponsePatterns": ["never converge", "keeps adjusting", "won't stop", "infinite", "doesn't work"],
+                  "fallbackBehavior": "continue"
+                }
+              },
+              {
+                "id": "seg-xor-problem",
+                "type": "lecture",
+                "content": "The famous XOR problem exposed the perceptron's limitation. XOR is exclusive or: true if exactly one input is true. If you plot the four cases, you'll see no straight line can separate the true outputs from the false outputs. In 1969, Minsky and Papert published a book showing that single-layer perceptrons couldn't solve XOR or other non-linearly-separable problems. This temporarily killed interest in neural networks.",
+                "speakingNotes": {
+                  "emotionalTone": "serious",
+                  "emphasis": ["no straight line", "killed interest"]
+                }
+              },
+              {
+                "id": "seg-perceptron-summary",
+                "type": "summary",
+                "content": "The perceptron showed that machines could learn from examples by adjusting weights. Its learning rule is simple and has a convergence guarantee for linearly separable data. But its limitation, the inability to handle non-linear patterns like XOR, seemed fatal. The solution would come from stacking multiple layers, but that required a way to train them. That's where backpropagation comes in, which we'll cover soon.",
+                "speakingNotes": {
+                  "pace": "slow"
+                }
+              }
+            ]
+          },
+          "examples": [
+            {
+              "id": "ex-and-gate",
+              "type": "worked_problem",
+              "title": "Perceptron for AND Gate",
+              "description": "Training a perceptron to compute logical AND",
+              "content": "Inputs: (0,0), (0,1), (1,0), (1,1). Target outputs: 0, 0, 0, 1.\nSolution: weights = [1, 1], bias = -1.5\nFor (1,1): 1*1 + 1*1 - 1.5 = 0.5 > 0 → output 1 ✓\nFor (0,1): 0*1 + 1*1 - 1.5 = -0.5 < 0 → output 0 ✓",
+              "spokenContent": "Let's work through an AND gate. We have four input pairs: both zero, zero-one, one-zero, and both ones. Only when both inputs are one should the output be one. With weights of one and one, and a bias of negative 1.5, let's check: for inputs one and one, the sum is one plus one minus 1.5, which is 0.5 positive, so we output 1, correct! For zero and one, the sum is negative 0.5, so we output 0, also correct.",
+              "complexity": "simple"
+            }
+          ],
+          "misconceptions": [
+            {
+              "id": "misc-perceptron-useless",
+              "misconception": "Perceptrons are obsolete and have no modern relevance",
+              "triggerPhrases": ["useless now", "outdated", "nobody uses perceptrons"],
+              "correction": "While single perceptrons have limited power, their learning rule is the foundation of gradient-based learning. The final layer of many neural networks is essentially a perceptron. Understanding perceptrons builds intuition for deeper networks.",
+              "severity": "minor"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-linear-sep" },
+              "type": "choice",
+              "prompt": "A perceptron can solve which type of classification problem?",
+              "choices": [
+                { "id": "a", "text": "Any classification problem", "correct": false, "feedback": "Perceptrons can only solve linearly separable problems" },
+                { "id": "b", "text": "Linearly separable problems only", "correct": true, "feedback": "Correct! The decision boundary is a hyperplane" },
+                { "id": "c", "text": "XOR and similar patterns", "correct": false, "feedback": "XOR is not linearly separable, so perceptrons fail on it" },
+                { "id": "d", "text": "Only binary classification", "correct": false, "feedback": "While often used for binary, the limitation is linearity, not the number of classes" }
+              ],
+              "difficulty": 0.4,
+              "objectivesAssessed": ["obj-understand-neurons"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-multilayer" },
+          "title": "Multi-Layer Networks",
+          "type": "topic",
+          "orderIndex": 2,
+          "description": "Discover how stacking layers of neurons enables learning complex, nonlinear patterns that single perceptrons cannot capture.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-perceptron",
+              "required": true
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT5M",
+            "introductory": "PT20M",
+            "intermediate": "PT45M",
+            "advanced": "PT1H15M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-multi-intro",
+                "type": "introduction",
+                "content": "The solution to the XOR problem was hiding in plain sight: use more than one layer. By stacking layers of neurons, we can create decision boundaries of arbitrary complexity. This is the key insight of deep learning.",
+                "speakingNotes": {
+                  "emotionalTone": "excited",
+                  "emphasis": ["more than one layer", "arbitrary complexity"]
+                }
+              },
+              {
+                "id": "seg-hidden-layers",
+                "type": "explanation",
+                "content": "A multi-layer network has an input layer, one or more hidden layers, and an output layer. The input layer just passes the data forward. Each hidden layer transforms its input through weighted sums and activations. The output layer produces the final prediction. The magic happens in those hidden layers, where the network learns intermediate representations.",
+                "glossaryRefs": ["term-hidden-layer"],
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true
+                }
+              },
+              {
+                "id": "seg-xor-solved",
+                "type": "example",
+                "content": "Let's see how a two-layer network solves XOR. The hidden layer has two neurons. One learns to detect 'at least one input is on.' The other learns to detect 'both inputs are on.' The output neuron then computes 'at least one is on' AND NOT 'both are on.' This is exactly XOR! The hidden layer creates new features that make the problem linearly separable.",
+                "speakingNotes": {
+                  "pace": "slow",
+                  "emphasis": ["new features", "linearly separable"]
+                }
+              },
+              {
+                "id": "seg-universal",
+                "type": "lecture",
+                "content": "Here's a profound result: the Universal Approximation Theorem. A network with just one hidden layer, given enough neurons and a nonlinear activation, can approximate any continuous function to arbitrary precision. This means multi-layer networks are incredibly powerful, at least in theory. In practice, deeper networks often work better than wide shallow ones, but the theorem tells us the capacity is there.",
+                "speakingNotes": {
+                  "emotionalTone": "excited",
+                  "emphasis": ["Universal Approximation Theorem", "any continuous function"]
+                },
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "What does the Universal Approximation Theorem tell us about neural networks?",
+                  "expectedResponsePatterns": ["any function", "approximate", "powerful", "one hidden layer"],
+                  "fallbackBehavior": "simplify"
+                }
+              },
+              {
+                "id": "seg-depth-width",
+                "type": "explanation",
+                "content": "Why do we prefer deep networks over wide shallow ones? Deeper networks can represent certain functions with exponentially fewer parameters. They learn hierarchical features, with early layers detecting simple patterns and later layers combining them into complex concepts. In image recognition, early layers might detect edges, middle layers detect shapes, and later layers recognize objects.",
+                "alternativeExplanations": [
+                  {
+                    "style": "analogy",
+                    "content": "Think of a company. A flat organization with thousands of workers reporting to one manager is hard to coordinate. A hierarchical structure with managers, directors, and VPs can efficiently solve complex problems by breaking them into subproblems. Deep networks work similarly, with each layer solving part of the problem."
+                  }
+                ]
+              }
+            ]
+          },
+          "misconceptions": [
+            {
+              "id": "misc-more-layers-better",
+              "misconception": "More layers are always better",
+              "triggerPhrases": ["deeper is better", "just add more layers", "more layers more power"],
+              "correction": "Very deep networks face challenges like vanishing gradients and are harder to train. The optimal depth depends on the problem and available data. Modern techniques like residual connections help train deeper networks, but more isn't always better.",
+              "severity": "moderate"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-hidden-purpose" },
+              "type": "choice",
+              "prompt": "What is the primary purpose of hidden layers in a neural network?",
+              "choices": [
+                { "id": "a", "text": "To hide the computations from users", "correct": false },
+                { "id": "b", "text": "To learn intermediate representations that make the problem easier to solve", "correct": true },
+                { "id": "c", "text": "To slow down training for better accuracy", "correct": false },
+                { "id": "d", "text": "To reduce the number of parameters needed", "correct": false }
+              ],
+              "difficulty": 0.4,
+              "objectivesAssessed": ["obj-analyze-architectures"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-activations" },
+          "title": "Activation Functions",
+          "type": "topic",
+          "orderIndex": 3,
+          "description": "Understand why nonlinearity is essential and explore common activation functions: sigmoid, tanh, ReLU, and softmax.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-multilayer",
+              "required": true
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT5M",
+            "introductory": "PT25M",
+            "intermediate": "PT45M",
+            "advanced": "PT1H"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-act-intro",
+                "type": "introduction",
+                "content": "Activation functions are the secret ingredient that gives neural networks their power. Without them, a multi-layer network would collapse to a single linear transformation, no matter how many layers you stack. Let's understand why and explore the most important activation functions.",
+                "glossaryRefs": ["term-activation"]
+              },
+              {
+                "id": "seg-why-nonlinear",
+                "type": "explanation",
+                "content": "Suppose we have two layers without activation functions: y equals W2 times W1 times x. Matrix multiplication is linear, so W2 times W1 is just another matrix. Call it W. Then y equals W times x, a single linear transformation. All those layers collapse to one! Nonlinear activations break this collapse, allowing each layer to genuinely transform the data.",
+                "speakingNotes": {
+                  "pace": "slow",
+                  "emphasis": ["collapse", "genuinely transform"]
+                },
+                "stoppingPoint": {
+                  "type": "mandatory",
+                  "promptForContinue": true,
+                  "suggestedPrompt": "Does it make sense why we need nonlinearity to make multiple layers meaningful?"
+                }
+              },
+              {
+                "id": "seg-sigmoid",
+                "type": "lecture",
+                "content": "The sigmoid function squashes any input to a value between 0 and 1. Its formula is 1 divided by 1 plus e to the negative x. It was popular historically because it resembles a neuron's firing rate and outputs probabilities. But it has problems: its gradients vanish for large inputs, and its outputs aren't centered at zero, which can cause optimization issues.",
+                "speakingNotes": {
+                  "emphasis": ["between 0 and 1", "gradients vanish"]
+                }
+              },
+              {
+                "id": "seg-tanh",
+                "type": "lecture",
+                "content": "Tanh, or hyperbolic tangent, is similar to sigmoid but outputs values between negative 1 and positive 1. It's zero-centered, which helps optimization. The formula is e to the x minus e to the negative x, divided by e to the x plus e to the negative x. Like sigmoid, it still suffers from vanishing gradients at the extremes.",
+                "speakingNotes": {
+                  "emphasis": ["zero-centered", "still suffers"]
+                }
+              },
+              {
+                "id": "seg-relu",
+                "type": "lecture",
+                "content": "ReLU, the Rectified Linear Unit, changed everything. It's simply: output the input if it's positive, otherwise output zero. Mathematically, max of 0 and x. It's computationally trivial, doesn't saturate for positive values, and gradients flow freely. ReLU enabled training much deeper networks and is now the default choice for hidden layers.",
+                "speakingNotes": {
+                  "emotionalTone": "excited",
+                  "emphasis": ["changed everything", "default choice"]
+                },
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "What is the ReLU function? Can you describe it simply?",
+                  "expectedResponsePatterns": ["max", "zero", "positive", "negative becomes zero"],
+                  "fallbackBehavior": "continue"
+                }
+              },
+              {
+                "id": "seg-softmax",
+                "type": "lecture",
+                "content": "Softmax is special, used in the output layer for multi-class classification. It takes a vector of values and converts them to probabilities that sum to 1. Each output is e to the power of that value, divided by the sum of e to the power of all values. It's like asking: given these scores, what's the probability distribution over classes?",
+                "speakingNotes": {
+                  "emphasis": ["probabilities", "sum to 1"]
+                }
+              },
+              {
+                "id": "seg-act-summary",
+                "type": "summary",
+                "content": "Activation functions introduce nonlinearity, preventing layer collapse. Sigmoid and tanh were early choices but suffer from vanishing gradients. ReLU solved this for hidden layers and is now standard. Softmax is used in output layers for classification to produce probability distributions. The choice of activation affects how well gradients flow and thus how easily the network trains."
+              }
+            ]
+          },
+          "examples": [
+            {
+              "id": "ex-relu-gradient",
+              "type": "worked_problem",
+              "title": "ReLU Gradient Flow",
+              "content": "For ReLU(x) = max(0, x):\n- If x > 0: derivative = 1 (gradient flows unchanged)\n- If x < 0: derivative = 0 (gradient is blocked)\n- At x = 0: technically undefined, typically set to 0 or 1",
+              "spokenContent": "Let's look at why ReLU helps gradient flow. When the input is positive, the derivative is exactly 1, so gradients pass through unchanged. When the input is negative, the derivative is 0, which blocks the gradient. This is called a 'dead ReLU' if a neuron always outputs zero. But for positive inputs, gradients flow perfectly, which is much better than sigmoid where gradients get squashed.",
+              "complexity": "moderate"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-softmax-use" },
+              "type": "choice",
+              "prompt": "When is softmax typically used?",
+              "choices": [
+                { "id": "a", "text": "In every hidden layer", "correct": false },
+                { "id": "b", "text": "For binary classification only", "correct": false },
+                { "id": "c", "text": "In the output layer for multi-class classification", "correct": true },
+                { "id": "d", "text": "To prevent overfitting", "correct": false }
+              ],
+              "difficulty": 0.35,
+              "objectivesAssessed": ["obj-analyze-architectures"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-loss-optimization" },
+          "title": "Loss Functions and Optimization",
+          "type": "topic",
+          "orderIndex": 4,
+          "description": "Learn how we measure network performance with loss functions and optimize using gradient descent.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-activations",
+              "required": true
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT5M",
+            "introductory": "PT30M",
+            "intermediate": "PT1H",
+            "advanced": "PT1H30M",
+            "graduate": "PT2H30M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-loss-intro",
+                "type": "introduction",
+                "content": "How do we know if our network is doing a good job? We need a way to measure its mistakes. That's what a loss function does. And once we can measure errors, we need a method to reduce them. That's optimization. These two concepts form the core of neural network training.",
+                "glossaryRefs": ["term-loss"]
+              },
+              {
+                "id": "seg-mse",
+                "type": "explanation",
+                "content": "For regression problems where we predict continuous values, mean squared error or MSE is common. It's the average of the squared differences between predictions and true values. Squaring means larger errors get penalized more heavily. The formula: sum over all samples of prediction minus target, squared, divided by the number of samples.",
+                "speakingNotes": {
+                  "pace": "slow"
+                }
+              },
+              {
+                "id": "seg-cross-entropy",
+                "type": "explanation",
+                "content": "For classification, we use cross-entropy loss. It measures how well the predicted probability distribution matches the true distribution. If the true class has probability 1 in our prediction, loss is zero. If the true class has probability near zero, loss becomes very large. This aligns incentives: the network is strongly encouraged to predict high probability for the correct class.",
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true
+                }
+              },
+              {
+                "id": "seg-gradient-descent",
+                "type": "lecture",
+                "content": "Gradient descent is how we minimize the loss. Imagine the loss as a landscape of hills and valleys over the space of all possible weights. We want to find a valley, a set of weights with low loss. The gradient points uphill. So we step in the opposite direction, downhill, by subtracting the gradient times a learning rate from our weights. Repeat until we reach a valley or stop improving.",
+                "glossaryRefs": ["term-gradient", "term-learning-rate"],
+                "speakingNotes": {
+                  "emotionalTone": "encouraging",
+                  "emphasis": ["opposite direction", "learning rate"]
+                },
+                "alternativeExplanations": [
+                  {
+                    "style": "analogy",
+                    "content": "Imagine you're blindfolded on a hilly terrain and want to find the lowest point. You feel the slope under your feet. You take a step in the direction that goes most steeply downward. Repeat. That's gradient descent. The learning rate is your step size: too big and you might overshoot valleys; too small and you'll take forever."
+                  }
+                ]
+              },
+              {
+                "id": "seg-local-minima",
+                "type": "lecture",
+                "content": "A concern with gradient descent is local minima: valleys that aren't the deepest. The algorithm might get stuck there. In high-dimensional spaces, true local minima are actually rare, though saddle points (flat regions) can slow training. Modern techniques like momentum and adaptive learning rates help navigate these challenges.",
+                "speakingNotes": {
+                  "emphasis": ["local minima", "saddle points"]
+                },
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "What might happen if the learning rate is too large?",
+                  "expectedResponsePatterns": ["overshoot", "miss", "diverge", "oscillate", "won't converge"],
+                  "fallbackBehavior": "continue"
+                }
+              },
+              {
+                "id": "seg-sgd",
+                "type": "explanation",
+                "content": "Computing gradients over the entire dataset for each step is expensive. Stochastic gradient descent or SGD uses only one sample at a time. Mini-batch SGD, the most common approach, uses small batches, typically 32 to 256 samples. This balances noise reduction with computational efficiency. The randomness actually helps escape shallow local minima."
+              }
+            ]
+          },
+          "misconceptions": [
+            {
+              "id": "misc-loss-zero",
+              "misconception": "We should train until loss reaches zero",
+              "triggerPhrases": ["zero loss", "perfect loss", "minimize completely"],
+              "correction": "Zero training loss often means overfitting, where the model memorized training data but won't generalize. We use validation sets to check performance on unseen data and stop training when validation loss stops improving.",
+              "severity": "moderate",
+              "remediationPath": {
+                "reviewTopics": ["topic-regularization"]
+              }
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-loss-choice" },
+              "type": "choice",
+              "prompt": "Which loss function is typically used for multi-class classification?",
+              "choices": [
+                { "id": "a", "text": "Mean squared error", "correct": false, "feedback": "MSE is for regression, not classification" },
+                { "id": "b", "text": "Cross-entropy loss", "correct": true },
+                { "id": "c", "text": "Absolute error", "correct": false },
+                { "id": "d", "text": "Hinge loss", "correct": false, "feedback": "Hinge loss is used for SVMs, less common in neural networks" }
+              ],
+              "difficulty": 0.35,
+              "objectivesAssessed": ["obj-evaluate-training"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-backpropagation" },
+          "title": "Backpropagation",
+          "type": "topic",
+          "orderIndex": 5,
+          "description": "Master the backpropagation algorithm, the key technique that enables training multi-layer networks.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-loss-optimization",
+              "required": true,
+              "minimumMastery": 0.7
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT10M",
+            "introductory": "PT40M",
+            "intermediate": "PT75M",
+            "advanced": "PT2H",
+            "graduate": "PT3H",
+            "research": "PT5H"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-backprop-intro",
+                "type": "introduction",
+                "content": "We know we need gradients to update weights. In a multi-layer network, computing these gradients efficiently was a major challenge. Backpropagation, independently discovered several times in the 1970s and 80s, solved this problem. It's arguably the most important algorithm in deep learning.",
+                "glossaryRefs": ["term-backprop"],
+                "speakingNotes": {
+                  "emotionalTone": "serious",
+                  "emphasis": ["most important algorithm"]
+                }
+              },
+              {
+                "id": "seg-chain-rule",
+                "type": "explanation",
+                "content": "Backpropagation is essentially efficient application of the chain rule from calculus. If y depends on u and u depends on x, then the derivative of y with respect to x is the derivative of y with respect to u, times the derivative of u with respect to x. In a network, each layer's output depends on the previous layer's output, creating a chain.",
+                "speakingNotes": {
+                  "pace": "slow"
+                },
+                "stoppingPoint": {
+                  "type": "mandatory",
+                  "promptForContinue": true,
+                  "suggestedPrompt": "Are you comfortable with the chain rule from calculus?"
+                }
+              },
+              {
+                "id": "seg-forward-pass",
+                "type": "lecture",
+                "content": "Training has two phases. First, the forward pass: input flows through the network, layer by layer, until we get an output. We save intermediate values at each layer because we'll need them. Then we compute the loss by comparing the output to the true label."
+              },
+              {
+                "id": "seg-backward-pass",
+                "type": "lecture",
+                "content": "Next comes the backward pass. We start at the loss and work backwards. What's the gradient of the loss with respect to the final layer's output? Using the chain rule, we propagate this gradient back through each layer. At each layer, we compute two things: the gradient with respect to that layer's weights, which tells us how to update them, and the gradient with respect to the layer's input, which we pass to the previous layer. This continues until we reach the input.",
+                "speakingNotes": {
+                  "pace": "slow",
+                  "emphasis": ["backward", "chain rule", "propagate"]
+                }
+              },
+              {
+                "id": "seg-computational-graph",
+                "type": "explanation",
+                "content": "It helps to think of the network as a computational graph. Each operation, like matrix multiply or ReLU, is a node. Edges show how data flows. In the forward pass, we compute node values from inputs to outputs. In the backward pass, we compute gradients from outputs to inputs. Modern frameworks like PyTorch and TensorFlow build these graphs automatically and handle backpropagation for you.",
+                "alternativeExplanations": [
+                  {
+                    "style": "simpler",
+                    "content": "Think of backpropagation as asking, 'who's responsible for the mistake?' The output layer made the final call, so it's partially responsible. But it relied on the hidden layers, which shaped its inputs. Backprop traces responsibility backwards, assigning blame to each weight based on how much it contributed to the error."
+                  }
+                ],
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "In your own words, what does backpropagation compute?",
+                  "expectedResponsePatterns": ["gradient", "derivative", "how to adjust", "weight update", "chain rule"],
+                  "fallbackBehavior": "simplify"
+                }
+              },
+              {
+                "id": "seg-vanishing-gradient",
+                "type": "lecture",
+                "content": "Backpropagation revealed a problem with deep networks: vanishing gradients. When gradients pass through many layers, they can shrink exponentially if each layer multiplies by numbers less than 1. With sigmoid activations, gradients almost always shrink. This meant early layers learned very slowly or not at all. ReLU helped by having gradients of exactly 1 for positive inputs, but vanishing gradients remain a challenge for very deep networks.",
+                "speakingNotes": {
+                  "emotionalTone": "serious",
+                  "emphasis": ["vanishing", "shrink exponentially"]
+                }
+              }
+            ]
+          },
+          "examples": [
+            {
+              "id": "ex-simple-backprop",
+              "type": "worked_problem",
+              "title": "Backpropagation Through One Layer",
+              "content": "Given: y = σ(wx + b), loss L = (y - t)²\n\nForward: Compute y from input x\n\nBackward:\n∂L/∂y = 2(y - t)\n∂y/∂(wx+b) = σ'(wx+b) = y(1-y) for sigmoid\n∂L/∂w = ∂L/∂y · ∂y/∂(wx+b) · x\n∂L/∂b = ∂L/∂y · ∂y/∂(wx+b)",
+              "spokenContent": "Let's trace backprop through one layer with a sigmoid activation. The loss is the squared error between output y and target t. First, we compute the derivative of loss with respect to y: that's 2 times y minus t. Next, the derivative of y with respect to the pre-activation: for sigmoid, that's y times 1 minus y. Now chain them together: the gradient of loss with respect to w is the loss gradient times the activation gradient times x, the input to this weight. Each link in the chain multiplies.",
+              "complexity": "moderate"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-backprop-direction" },
+              "type": "choice",
+              "prompt": "In which direction does backpropagation compute gradients?",
+              "choices": [
+                { "id": "a", "text": "From inputs to outputs", "correct": false, "feedback": "That's the forward pass" },
+                { "id": "b", "text": "From outputs to inputs", "correct": true, "feedback": "Correct! Gradients flow backward from the loss through each layer" },
+                { "id": "c", "text": "Simultaneously in both directions", "correct": false },
+                { "id": "d", "text": "Only through the hidden layers", "correct": false }
+              ],
+              "difficulty": 0.3,
+              "objectivesAssessed": ["obj-apply-backprop"]
+            },
+            {
+              "id": { "value": "q-vanishing" },
+              "type": "choice",
+              "prompt": "What causes vanishing gradients in deep networks?",
+              "choices": [
+                { "id": "a", "text": "Too many training examples", "correct": false },
+                { "id": "b", "text": "Gradients multiplying through many layers of small derivatives", "correct": true },
+                { "id": "c", "text": "Using ReLU activations", "correct": false, "feedback": "ReLU actually helps prevent vanishing gradients" },
+                { "id": "d", "text": "High learning rates", "correct": false }
+              ],
+              "difficulty": 0.5,
+              "objectivesAssessed": ["obj-evaluate-training"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-regularization" },
+          "title": "Regularization",
+          "type": "topic",
+          "orderIndex": 6,
+          "description": "Learn techniques to prevent overfitting, including L2 regularization, dropout, and early stopping.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-backpropagation",
+              "required": true
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT5M",
+            "introductory": "PT25M",
+            "intermediate": "PT45M",
+            "advanced": "PT1H15M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-reg-intro",
+                "type": "introduction",
+                "content": "A neural network with enough parameters can memorize the training data perfectly. But memorization isn't learning. When we test on new data, the memorizing network fails. This is overfitting, and regularization is our defense against it.",
+                "glossaryRefs": ["term-overfitting", "term-regularization"],
+                "speakingNotes": {
+                  "emotionalTone": "serious"
+                }
+              },
+              {
+                "id": "seg-train-val-test",
+                "type": "explanation",
+                "content": "First, we need to detect overfitting. Split your data into three sets: training, validation, and test. Train on the training set. Monitor performance on the validation set. When training loss keeps decreasing but validation loss starts increasing, you're overfitting. The test set is held out until the very end, for a final unbiased evaluation.",
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true
+                }
+              },
+              {
+                "id": "seg-l2",
+                "type": "lecture",
+                "content": "L2 regularization, also called weight decay, adds a penalty to the loss proportional to the squared magnitude of the weights. The modified loss is the original loss plus lambda times the sum of all weights squared. Lambda is a hyperparameter controlling the penalty strength. This encourages smaller weights, smoother functions, and less extreme fits to the training data.",
+                "speakingNotes": {
+                  "emphasis": ["penalty", "smaller weights"]
+                }
+              },
+              {
+                "id": "seg-dropout",
+                "type": "lecture",
+                "content": "Dropout is beautifully simple and surprisingly effective. During training, randomly set some neurons' outputs to zero with probability p, typically 0.5 for hidden layers. This forces the network to not rely too heavily on any one neuron. At test time, use all neurons but scale their outputs by 1 minus p. Dropout creates an implicit ensemble of many thinner networks.",
+                "speakingNotes": {
+                  "emotionalTone": "excited",
+                  "emphasis": ["randomly set to zero", "ensemble"]
+                },
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "Why does randomly dropping neurons during training help prevent overfitting?",
+                  "expectedResponsePatterns": ["can't rely", "no single neuron", "forces redundancy", "ensemble", "robust"],
+                  "fallbackBehavior": "continue"
+                }
+              },
+              {
+                "id": "seg-early-stopping",
+                "type": "lecture",
+                "content": "Early stopping is pragmatic: just stop training when validation loss stops improving. We monitor validation loss each epoch. If it doesn't improve for several epochs, called the patience, we stop and revert to the best-performing weights. No extra computation, no hyperparameters to tune for the method itself, and often very effective."
+              },
+              {
+                "id": "seg-reg-summary",
+                "type": "summary",
+                "content": "Regularization fights overfitting. L2 regularization penalizes large weights. Dropout forces redundancy by randomly silencing neurons. Early stopping halts training before the network memorizes. In practice, you'll often combine these techniques. The goal is to find the sweet spot between underfitting, where the model is too simple, and overfitting, where it's too complex.",
+                "speakingNotes": {
+                  "pace": "slow"
+                }
+              }
+            ]
+          },
+          "misconceptions": [
+            {
+              "id": "misc-more-data-always",
+              "misconception": "More training data always prevents overfitting",
+              "triggerPhrases": ["just get more data", "data solves overfitting"],
+              "correction": "More data helps but isn't always possible or sufficient. With limited data, regularization techniques become crucial. Even with large datasets, very large models can still overfit.",
+              "severity": "minor"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-dropout-inference" },
+              "type": "choice",
+              "prompt": "At test/inference time, what happens with dropout?",
+              "choices": [
+                { "id": "a", "text": "Neurons are still randomly dropped", "correct": false },
+                { "id": "b", "text": "All neurons are used but outputs are scaled down", "correct": true },
+                { "id": "c", "text": "Dropout is completely removed with no adjustment", "correct": false },
+                { "id": "d", "text": "Only the dropped neurons are used", "correct": false }
+              ],
+              "difficulty": 0.45,
+              "objectivesAssessed": ["obj-evaluate-training"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-architectures" },
+          "title": "Modern Architectures Overview",
+          "type": "topic",
+          "orderIndex": 7,
+          "description": "Survey major neural network architectures: CNNs for images, RNNs for sequences, and Transformers for attention-based learning.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-regularization",
+              "required": false
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT10M",
+            "introductory": "PT30M",
+            "intermediate": "PT1H",
+            "advanced": "PT2H",
+            "graduate": "PT3H30M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-arch-intro",
+                "type": "introduction",
+                "content": "So far we've discussed fully connected networks where every neuron connects to every neuron in the adjacent layer. But for many problems, different architectures work better. Let's survey three revolutionary architectures: Convolutional Neural Networks for images, Recurrent Neural Networks for sequences, and Transformers, which have taken over natural language processing and beyond.",
+                "speakingNotes": {
+                  "emotionalTone": "excited"
+                }
+              },
+              {
+                "id": "seg-cnn",
+                "type": "lecture",
+                "content": "Convolutional Neural Networks, or CNNs, are designed for grid-like data such as images. Instead of connecting every pixel to every neuron, CNNs use small filters that slide across the image. Each filter learns to detect a specific pattern, like an edge or a texture. Because the same filter applies everywhere, CNNs have far fewer parameters than fully connected networks and naturally handle translation: a cat in the corner is still detected by the same filter as a cat in the center.",
+                "speakingNotes": {
+                  "emphasis": ["filters", "slide across", "translation"]
+                },
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true
+                }
+              },
+              {
+                "id": "seg-rnn",
+                "type": "lecture",
+                "content": "Recurrent Neural Networks, or RNNs, handle sequences like text, speech, or time series. They process one element at a time, maintaining a hidden state that carries information from previous elements. The same weights apply at each step, giving them a form of memory. LSTMs and GRUs are improved RNN variants that better capture long-range dependencies, though they've been largely superseded by Transformers.",
+                "speakingNotes": {
+                  "emphasis": ["hidden state", "memory"]
+                }
+              },
+              {
+                "id": "seg-transformers",
+                "type": "lecture",
+                "content": "Transformers, introduced in 2017, revolutionized deep learning. Instead of processing sequences step by step, they use attention to relate every position to every other position simultaneously. This parallelizes computation and captures long-range dependencies elegantly. Transformers power GPT, BERT, and virtually all modern language models. They're also conquering vision, audio, and scientific domains.",
+                "speakingNotes": {
+                  "emotionalTone": "excited",
+                  "emphasis": ["attention", "simultaneously", "revolutionized"]
+                },
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "What is the key innovation of Transformers compared to RNNs?",
+                  "expectedResponsePatterns": ["attention", "parallel", "all positions", "simultaneous", "not sequential"],
+                  "fallbackBehavior": "simplify"
+                }
+              },
+              {
+                "id": "seg-arch-summary",
+                "type": "summary",
+                "content": "Different data types call for different architectures. CNNs exploit spatial structure in images with local filters. RNNs process sequences with recurrent connections that maintain state. Transformers use attention to model relationships between all elements, enabling parallelism and better long-range learning. These architectures aren't mutually exclusive; modern models often combine ideas from each."
+              }
+            ]
+          },
+          "examples": [
+            {
+              "id": "ex-vision-hierarchy",
+              "type": "analogy",
+              "title": "CNN Feature Hierarchy",
+              "content": "Early layers detect edges → Middle layers detect shapes and textures → Deep layers detect objects and faces",
+              "spokenContent": "Think of a CNN for image recognition as building up understanding layer by layer. The first layer might just detect edges: vertical lines, horizontal lines, diagonals. The next layers combine edges into simple shapes: curves, corners, textures like fur or metal. Deeper layers combine shapes into parts: eyes, wheels, handles. The deepest layers recognize whole objects: faces, cars, dogs. This hierarchy emerges automatically from training.",
+              "complexity": "simple"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-cnn-property" },
+              "type": "choice",
+              "prompt": "What property makes CNNs well-suited for image data?",
+              "choices": [
+                { "id": "a", "text": "They process pixels sequentially", "correct": false },
+                { "id": "b", "text": "They use local filters that are shared across the image", "correct": true },
+                { "id": "c", "text": "They require fewer training examples", "correct": false },
+                { "id": "d", "text": "They only work with black and white images", "correct": false }
+              ],
+              "difficulty": 0.4,
+              "objectivesAssessed": ["obj-analyze-architectures"]
+            },
+            {
+              "id": { "value": "q-transformer-attention" },
+              "type": "choice",
+              "prompt": "What is the key mechanism that enables Transformers to process sequences in parallel?",
+              "choices": [
+                { "id": "a", "text": "Recurrence", "correct": false },
+                { "id": "b", "text": "Convolution", "correct": false },
+                { "id": "c", "text": "Attention", "correct": true },
+                { "id": "d", "text": "Dropout", "correct": false }
+              ],
+              "difficulty": 0.35,
+              "objectivesAssessed": ["obj-analyze-architectures"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": {
+    "https://voicelearn.io/extensions/technical": {
+      "codeExecutionEnabled": false,
+      "mathematicalNotation": true,
+      "recommendedVisualizationTools": ["3Blue1Brown videos", "TensorFlow Playground", "CNN Explainer"],
+      "suggestedFollowUp": ["pytorch-fundamentals.vlcf", "deep-learning-applications.vlcf"]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 /**
- * VoiceLearn Management Console - Frontend Application
- * A real-time dashboard for monitoring VoiceLearn services
+ * UnaMentis Management Console - Frontend Application
+ * A real-time dashboard for monitoring UnaMentis services
  */
 
 // =============================================================================
@@ -25,6 +25,7 @@ const state = {
     clients: [],
     servers: [],
     models: [],
+    services: [],
 
     stats: {
         uptime: 0,
@@ -143,6 +144,10 @@ function handleWebSocketMessage(message) {
             refreshServers();
             break;
 
+        case 'service_update':
+            handleServiceUpdate(message.data);
+            break;
+
         case 'logs_cleared':
             state.logs = [];
             renderLogs();
@@ -242,6 +247,73 @@ async function refreshModels() {
         renderModels(data);
     } catch (e) {
         console.error('Failed to refresh models:', e);
+    }
+}
+
+async function refreshServices() {
+    try {
+        const data = await fetchAPI('/services');
+        state.services = data.services;
+        updateServicesUI(data);
+        renderServices(data.services);
+    } catch (e) {
+        console.error('Failed to refresh services:', e);
+    }
+}
+
+async function startService(serviceId) {
+    try {
+        const response = await fetchAPI(`/services/${serviceId}/start`, { method: 'POST' });
+        console.log('Service start response:', response);
+        await refreshServices();
+    } catch (e) {
+        console.error('Failed to start service:', e);
+        alert('Failed to start service: ' + e.message);
+    }
+}
+
+async function stopService(serviceId) {
+    try {
+        const response = await fetchAPI(`/services/${serviceId}/stop`, { method: 'POST' });
+        console.log('Service stop response:', response);
+        await refreshServices();
+    } catch (e) {
+        console.error('Failed to stop service:', e);
+        alert('Failed to stop service: ' + e.message);
+    }
+}
+
+async function restartService(serviceId) {
+    try {
+        const response = await fetchAPI(`/services/${serviceId}/restart`, { method: 'POST' });
+        console.log('Service restart response:', response);
+        await refreshServices();
+    } catch (e) {
+        console.error('Failed to restart service:', e);
+        alert('Failed to restart service: ' + e.message);
+    }
+}
+
+async function startAllServices() {
+    try {
+        const response = await fetchAPI('/services/start-all', { method: 'POST' });
+        console.log('Start all response:', response);
+        await refreshServices();
+    } catch (e) {
+        console.error('Failed to start all services:', e);
+        alert('Failed to start all services: ' + e.message);
+    }
+}
+
+async function stopAllServices() {
+    if (!confirm('Are you sure you want to stop all services?')) return;
+    try {
+        const response = await fetchAPI('/services/stop-all', { method: 'POST' });
+        console.log('Stop all response:', response);
+        await refreshServices();
+    } catch (e) {
+        console.error('Failed to stop all services:', e);
+        alert('Failed to stop all services: ' + e.message);
     }
 }
 
@@ -398,6 +470,188 @@ function handleClientUpdate(client) {
     updateClientsUI({ clients: state.clients, online: 0, idle: 0, offline: 0 });
 }
 
+function handleServiceUpdate(service) {
+    const index = state.services.findIndex(s => s.id === service.id);
+    if (index >= 0) {
+        state.services[index] = service;
+    } else {
+        state.services.push(service);
+    }
+    renderServices(state.services);
+    updateServicesStatsUI();
+}
+
+function updateServicesUI(data) {
+    document.getElementById('services-running').textContent = data.running;
+    document.getElementById('services-stopped').textContent = data.stopped;
+    document.getElementById('services-error').textContent = data.error;
+
+    // Update memory stats if elements exist
+    const memUsedEl = document.getElementById('services-memory-used');
+    const memTotalEl = document.getElementById('services-memory-total');
+    const memPercentEl = document.getElementById('services-memory-percent');
+
+    if (memUsedEl && data.total_memory_mb !== undefined) {
+        memUsedEl.textContent = formatBytes(data.total_memory_mb * 1024 * 1024);
+    }
+    if (data.system_memory) {
+        if (memTotalEl) {
+            memTotalEl.textContent = `${data.system_memory.total_gb} GB`;
+        }
+        if (memPercentEl) {
+            memPercentEl.textContent = `${data.system_memory.percent_used}%`;
+        }
+        // Update progress bar if it exists
+        const memBar = document.getElementById('services-memory-bar');
+        if (memBar) {
+            memBar.style.width = `${data.system_memory.percent_used}%`;
+        }
+    }
+}
+
+function updateServicesStatsUI() {
+    const running = state.services.filter(s => s.status === 'running').length;
+    const stopped = state.services.filter(s => s.status === 'stopped').length;
+    const error = state.services.filter(s => s.status === 'error').length;
+    document.getElementById('services-running').textContent = running;
+    document.getElementById('services-stopped').textContent = stopped;
+    document.getElementById('services-error').textContent = error;
+}
+
+function getServiceTypeStyles(type) {
+    const styles = {
+        'vibevoice': { bg: 'bg-accent-info/20', text: 'text-accent-info' },
+        'nextjs': { bg: 'bg-accent-secondary/20', text: 'text-accent-secondary' },
+        'default': { bg: 'bg-dark-600/20', text: 'text-dark-400' }
+    };
+    return styles[type] || styles.default;
+}
+
+function getServiceTypeIcon(type, size = 'w-5 h-5') {
+    const styles = getServiceTypeStyles(type);
+    const icons = {
+        'vibevoice': `<svg class="${size} ${styles.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 0112.728 0"></path></svg>`,
+        'nextjs': `<svg class="${size} ${styles.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>`,
+        'default': `<svg class="${size} ${styles.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"></path></svg>`
+    };
+    return icons[type] || icons.default;
+}
+
+function renderServices(services) {
+    const container = document.getElementById('services-grid');
+    if (!container) return;
+
+    if (services.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center text-dark-500 py-12">
+                <svg class="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <p class="text-lg font-medium">No managed services configured</p>
+            </div>
+        `;
+        return;
+    }
+
+    const html = services.map(service => {
+        const styles = getServiceTypeStyles(service.service_type);
+        const statusColors = {
+            'running': 'bg-accent-success/20 text-accent-success',
+            'stopped': 'bg-dark-600/50 text-dark-400',
+            'starting': 'bg-accent-warning/20 text-accent-warning',
+            'error': 'bg-accent-danger/20 text-accent-danger'
+        };
+        const statusColor = statusColors[service.status] || statusColors.stopped;
+        const isRunning = service.status === 'running';
+        const isStarting = service.status === 'starting';
+
+        return `
+            <div class="card">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-lg ${styles.bg} flex items-center justify-center">
+                                ${getServiceTypeIcon(service.service_type, 'w-6 h-6')}
+                            </div>
+                            <div>
+                                <div class="font-semibold text-dark-100">${escapeHtml(service.name)}</div>
+                                <div class="text-xs text-dark-400">Port ${service.port}</div>
+                            </div>
+                        </div>
+                        <div class="status-badge ${statusColor}">${service.status}</div>
+                    </div>
+
+                    <div class="space-y-2 text-sm mb-4">
+                        ${service.pid ? `
+                        <div class="flex justify-between">
+                            <span class="text-dark-400">PID</span>
+                            <span class="text-dark-200 font-mono">${service.pid}</span>
+                        </div>
+                        ` : ''}
+                        ${service.memory && service.memory.rss_mb > 0 ? `
+                        <div class="flex justify-between">
+                            <span class="text-dark-400">Memory</span>
+                            <span class="text-accent-warning font-semibold">${formatBytes(service.memory.rss_mb * 1024 * 1024)}</span>
+                        </div>
+                        ` : ''}
+                        ${service.started_at ? `
+                        <div class="flex justify-between">
+                            <span class="text-dark-400">Uptime</span>
+                            <span class="text-dark-200">${formatUptime(Date.now()/1000 - service.started_at)}</span>
+                        </div>
+                        ` : ''}
+                        <div class="flex justify-between">
+                            <span class="text-dark-400">Health URL</span>
+                            <a href="${service.health_url}" target="_blank" class="text-accent-primary hover:underline text-xs font-mono truncate max-w-[200px]">${service.health_url}</a>
+                        </div>
+                        ${service.error_message ? `
+                        <div class="mt-2 p-2 rounded bg-accent-danger/10 border border-accent-danger/30">
+                            <div class="text-xs text-accent-danger">${escapeHtml(service.error_message)}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="flex gap-2">
+                        ${isRunning ? `
+                            <button onclick="stopService('${service.id}')" class="flex-1 btn-danger-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                                </svg>
+                                Stop
+                            </button>
+                            <button onclick="restartService('${service.id}')" class="flex-1 btn-secondary-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Restart
+                            </button>
+                        ` : isStarting ? `
+                            <button disabled class="flex-1 btn-secondary-sm opacity-50 cursor-not-allowed">
+                                <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Starting...
+                            </button>
+                        ` : `
+                            <button onclick="startService('${service.id}')" class="flex-1 btn-success-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Start
+                            </button>
+                        `}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+}
+
 function renderClients(clients) {
     const container = document.getElementById('clients-list');
 
@@ -523,8 +777,34 @@ function renderModels(data) {
                     <div class="text-xs text-dark-400">${model.type.toUpperCase()} • ${model.server_name}</div>
                 </div>
             </div>
-            <div class="flex items-center justify-between mt-3">
-                <span class="status-badge status-${model.status === 'available' ? 'online' : 'offline'}">${model.status}</span>
+            <div class="space-y-2 text-sm mb-3">
+                ${model.size_gb > 0 ? `
+                <div class="flex justify-between">
+                    <span class="text-dark-400">Size</span>
+                    <span class="text-dark-200 font-mono">${model.size_gb.toFixed(1)} GB</span>
+                </div>
+                ` : ''}
+                ${model.parameter_size ? `
+                <div class="flex justify-between">
+                    <span class="text-dark-400">Parameters</span>
+                    <span class="text-dark-200">${model.parameter_size}</span>
+                </div>
+                ` : ''}
+                ${model.quantization ? `
+                <div class="flex justify-between">
+                    <span class="text-dark-400">Quantization</span>
+                    <span class="text-dark-200 font-mono text-xs">${model.quantization}</span>
+                </div>
+                ` : ''}
+                ${model.vram_gb > 0 ? `
+                <div class="flex justify-between">
+                    <span class="text-dark-400">VRAM Used</span>
+                    <span class="text-accent-warning font-semibold">${model.vram_gb.toFixed(1)} GB</span>
+                </div>
+                ` : ''}
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="status-badge ${model.status === 'loaded' ? 'bg-accent-success/20 text-accent-success' : model.status === 'available' ? 'bg-dark-600/50 text-dark-300' : 'bg-dark-600/50 text-dark-400'}">${model.status}</span>
             </div>
         </div>
     `).join('');
@@ -899,6 +1179,9 @@ function initTabs() {
                 case 'models':
                     refreshModels();
                     break;
+                case 'services':
+                    refreshServices();
+                    break;
             }
         });
     });
@@ -1051,6 +1334,14 @@ function formatRelativeTime(timestamp) {
     return `${Math.floor(seconds / 86400)}d ago`;
 }
 
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
 function escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');
@@ -1063,7 +1354,7 @@ function getServerTypeStyles(type) {
         'ollama': { bg: 'bg-accent-secondary/20', text: 'text-accent-secondary' },
         'whisper': { bg: 'bg-accent-success/20', text: 'text-accent-success' },
         'piper': { bg: 'bg-accent-info/20', text: 'text-accent-info' },
-        'voicelearnGateway': { bg: 'bg-accent-primary/20', text: 'text-accent-primary' },
+        'unamentisGateway': { bg: 'bg-accent-primary/20', text: 'text-accent-primary' },
         'default': { bg: 'bg-dark-600/20', text: 'text-dark-400' }
     };
     return styles[type] || styles.default;
@@ -1075,7 +1366,7 @@ function getServerTypeIcon(type, size = 'w-5 h-5') {
         'ollama': `<svg class="${size} ${styles.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>`,
         'whisper': `<svg class="${size} ${styles.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>`,
         'piper': `<svg class="${size} ${styles.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 0112.728 0"></path></svg>`,
-        'voicelearnGateway': `<svg class="${size} ${styles.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>`,
+        'unamentisGateway': `<svg class="${size} ${styles.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>`,
         'default': `<svg class="${size} ${styles.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"></path></svg>`
     };
     return icons[type] || icons.default;
@@ -1141,7 +1432,7 @@ function updateClock() {
 // =============================================================================
 
 async function init() {
-    console.log('VoiceLearn Management Console initializing...');
+    console.log('UnaMentis Management Console initializing...');
 
     // Initialize UI
     initTabs();
@@ -1172,7 +1463,7 @@ async function init() {
         refreshStats();
     }, 5000);
 
-    console.log('VoiceLearn Management Console ready');
+    console.log('UnaMentis Management Console ready');
 }
 
 // Start the application

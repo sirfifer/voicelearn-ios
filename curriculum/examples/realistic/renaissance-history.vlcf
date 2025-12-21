@@ -1,0 +1,1067 @@
+{
+  "vlcf": "1.0.0",
+  "id": {
+    "catalog": "UUID",
+    "value": "e5f6a7b8-c9d0-1234-ef56-789012345678"
+  },
+  "title": "The Renaissance: Europe's Rebirth",
+  "description": "Explore the Renaissance, a period of extraordinary cultural, artistic, and scientific achievement that transformed Europe and laid the foundation for the modern world. Perfect for 8th grade students, this curriculum brings history to life through stories, art, and discoveries.",
+  "version": {
+    "number": "1.0.0",
+    "date": "2025-12-20T00:00:00Z",
+    "changelog": "Initial release - comprehensive 8th grade Renaissance history curriculum"
+  },
+  "lifecycle": {
+    "status": "final",
+    "contributors": [
+      {
+        "name": "VoiceLearn Curriculum Team",
+        "role": "author",
+        "organization": "VoiceLearn"
+      },
+      {
+        "name": "History Education Specialists",
+        "role": "educational validator",
+        "organization": "VoiceLearn"
+      }
+    ],
+    "created": "2025-12-20T00:00:00Z"
+  },
+  "metadata": {
+    "language": "en-US",
+    "keywords": ["Renaissance", "history", "art", "science", "Europe", "Italy", "Leonardo da Vinci", "Michelangelo", "Gutenberg", "Shakespeare"],
+    "structure": "hierarchical",
+    "aggregationLevel": 3
+  },
+  "educational": {
+    "interactivityType": "mixed",
+    "interactivityLevel": "high",
+    "learningResourceType": ["tutorial", "conversation", "self assessment"],
+    "intendedEndUserRole": ["learner"],
+    "context": ["school"],
+    "typicalAgeRange": "12-14",
+    "difficulty": "medium",
+    "typicalLearningTime": "PT4H",
+    "educationalAlignment": [
+      {
+        "alignmentType": "teaches",
+        "educationalFramework": "Common Core State Standards",
+        "targetName": "CCSS.ELA-LITERACY.RH.6-8.2",
+        "targetDescription": "Determine the central ideas or information of a primary or secondary source"
+      },
+      {
+        "alignmentType": "teaches",
+        "educationalFramework": "Common Core State Standards",
+        "targetName": "CCSS.ELA-LITERACY.RH.6-8.7",
+        "targetDescription": "Integrate visual information with other information in print and digital texts"
+      },
+      {
+        "alignmentType": "teaches",
+        "educationalFramework": "C3 Framework for Social Studies",
+        "targetName": "D2.His.1.6-8",
+        "targetDescription": "Analyze connections among events and developments in broader historical contexts"
+      },
+      {
+        "alignmentType": "teaches",
+        "educationalFramework": "National Standards for History",
+        "targetName": "Era 5",
+        "targetDescription": "Renaissance and Reformation in Europe"
+      }
+    ],
+    "audienceProfile": {
+      "educationLevel": "middle school",
+      "gradeLevel": "8",
+      "prerequisites": [
+        {
+          "description": "Basic understanding of European geography",
+          "required": false
+        },
+        {
+          "description": "Familiarity with the concept of historical periods",
+          "required": true
+        }
+      ]
+    }
+  },
+  "rights": {
+    "cost": false,
+    "license": {
+      "type": "CC-BY-4.0",
+      "url": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "holder": "VoiceLearn Inc."
+  },
+  "glossary": {
+    "terms": [
+      {
+        "id": "term-renaissance",
+        "term": "Renaissance",
+        "pronunciation": "/ˈrenəˌsäns/",
+        "definition": "A period of cultural, artistic, and intellectual revival in Europe from the 14th to 17th century, marking the transition from medieval to modern times.",
+        "spokenDefinition": "The Renaissance was an amazing time in European history, roughly from the 1300s to the 1600s, when art, science, and learning exploded after the darker medieval period. The word Renaissance literally means 'rebirth' in French, because it felt like civilization was being reborn.",
+        "simpleDefinition": "A time in Europe when art, science, and learning became super important again after the Middle Ages. It means 'rebirth.'",
+        "etymology": "From French 'renaissance' meaning 'rebirth', from Latin 'renasci' meaning 'to be born again'",
+        "relatedTerms": ["humanism", "medieval", "rebirth"]
+      },
+      {
+        "id": "term-humanism",
+        "term": "humanism",
+        "pronunciation": "/ˈhyo͞oməˌnizəm/",
+        "definition": "A Renaissance philosophy that emphasized human potential, achievements, and the study of classical Greek and Roman texts.",
+        "spokenDefinition": "Humanism was a big idea during the Renaissance. Instead of focusing only on religious topics, humanists said, 'Hey, humans are pretty amazing! Let's study what people in ancient Greece and Rome accomplished and see what we can learn.' They believed in human potential and individual achievement.",
+        "simpleDefinition": "A way of thinking that says people are capable of great things and we should study what ancient Greeks and Romans did.",
+        "relatedTerms": ["Renaissance", "classical", "philosophy"]
+      },
+      {
+        "id": "term-patron",
+        "term": "patron",
+        "pronunciation": "/ˈpātrən/",
+        "definition": "A wealthy person who financially supports artists, writers, or other creative people.",
+        "spokenDefinition": "A patron was a rich person who paid artists to create their works. During the Renaissance, wealthy families like the Medici in Florence were famous patrons. Without patrons, many great artists couldn't have afforded to spend their time painting or sculpting.",
+        "simpleDefinition": "A rich person who pays artists to create art.",
+        "relatedTerms": ["Medici", "commission", "sponsorship"]
+      },
+      {
+        "id": "term-perspective",
+        "term": "perspective",
+        "pronunciation": "/pərˈspektiv/",
+        "definition": "An artistic technique that creates the illusion of depth and three-dimensional space on a flat surface.",
+        "spokenDefinition": "Perspective is a technique that makes flat paintings look like they have depth, like you could walk right into them. Renaissance artists figured out the math behind how things look smaller when they're far away, and they used it to create incredibly realistic scenes. Before this, medieval art looked pretty flat.",
+        "simpleDefinition": "A way of drawing that makes flat pictures look 3D, with things getting smaller in the distance.",
+        "relatedTerms": ["depth", "vanishing point", "realism"]
+      },
+      {
+        "id": "term-printing-press",
+        "term": "printing press",
+        "pronunciation": "/ˈprintiNG pres/",
+        "definition": "A mechanical device invented by Johannes Gutenberg around 1440 that could produce multiple copies of text quickly.",
+        "spokenDefinition": "The printing press was a machine that changed the world. Before Gutenberg invented it around 1440, every book had to be copied by hand, which was incredibly slow and expensive. The printing press could make many copies of a book quickly, which meant more people could afford books and learn to read.",
+        "simpleDefinition": "A machine that could make many copies of a book quickly instead of writing each one by hand.",
+        "relatedTerms": ["Gutenberg", "books", "literacy"]
+      },
+      {
+        "id": "term-reformation",
+        "term": "Reformation",
+        "pronunciation": "/ˌrefərˈmāSH(ə)n/",
+        "definition": "A 16th-century religious movement that led to the split of Western Christianity into Catholic and Protestant churches.",
+        "spokenDefinition": "The Reformation was a religious revolution that happened during the Renaissance. People like Martin Luther criticized the Catholic Church and started new Protestant churches. This happened partly because the printing press helped spread new ideas quickly.",
+        "simpleDefinition": "A time when people challenged the Catholic Church and created new Christian churches.",
+        "relatedTerms": ["Protestant", "Catholic", "Martin Luther"]
+      },
+      {
+        "id": "term-classical",
+        "term": "classical",
+        "pronunciation": "/ˈklasək(ə)l/",
+        "definition": "Relating to ancient Greek and Roman civilization, art, and learning.",
+        "spokenDefinition": "When historians say 'classical,' they mean ancient Greece and Rome. During the Renaissance, people became obsessed with studying classical texts, architecture, and art. They thought the ancients had figured out a lot of important things that had been forgotten during the Middle Ages.",
+        "simpleDefinition": "Related to ancient Greece and Rome.",
+        "relatedTerms": ["Greek", "Roman", "ancient"]
+      },
+      {
+        "id": "term-fresco",
+        "term": "fresco",
+        "pronunciation": "/ˈfreskō/",
+        "definition": "A painting technique where pigments are applied to wet plaster on a wall or ceiling.",
+        "spokenDefinition": "A fresco is a type of painting done on wet plaster. The artist has to work fast before the plaster dries! Michelangelo painted the Sistine Chapel ceiling using this technique. It was incredibly difficult because he had to paint while lying on scaffolding, looking up.",
+        "simpleDefinition": "A painting made on wet plaster on a wall or ceiling.",
+        "relatedTerms": ["Michelangelo", "Sistine Chapel", "painting"]
+      },
+      {
+        "id": "term-city-state",
+        "term": "city-state",
+        "pronunciation": "/ˈsidē stāt/",
+        "definition": "An independent city and its surrounding territory that functions as its own nation.",
+        "spokenDefinition": "A city-state is a city that runs itself like its own country. During the Renaissance, Italy wasn't one unified country like it is today. Instead, it was made up of powerful city-states like Florence, Venice, and Milan. These city-states competed with each other, which actually helped art and culture flourish.",
+        "simpleDefinition": "A city that acts like its own country, with its own government.",
+        "relatedTerms": ["Florence", "Venice", "Milan"]
+      },
+      {
+        "id": "term-scientific-method",
+        "term": "scientific method",
+        "pronunciation": "/ˌsīənˈtifik ˈmeTHəd/",
+        "definition": "A systematic approach to learning about the world through observation, hypothesis, experimentation, and analysis.",
+        "spokenDefinition": "The scientific method is a way of figuring out how things work. Instead of just accepting what old books said, Renaissance scientists like Galileo actually tested their ideas with experiments. They observed, made guesses about what might be true, tested those guesses, and then revised their ideas based on the results.",
+        "simpleDefinition": "A step-by-step way of learning about the world through experiments and observations.",
+        "relatedTerms": ["Galileo", "experiment", "hypothesis"]
+      }
+    ]
+  },
+  "content": [
+    {
+      "id": { "value": "course-renaissance" },
+      "title": "The Renaissance: Europe's Rebirth",
+      "type": "curriculum",
+      "description": "Journey through the Renaissance, exploring how art, science, and ideas transformed Europe and shaped the modern world.",
+      "learningObjectives": [
+        {
+          "id": { "value": "obj-define-renaissance" },
+          "statement": "Explain what the Renaissance was and why it's called a 'rebirth'",
+          "bloomsLevel": "understand"
+        },
+        {
+          "id": { "value": "obj-identify-changes" },
+          "statement": "Identify key changes in art, science, and society during the Renaissance",
+          "bloomsLevel": "remember"
+        },
+        {
+          "id": { "value": "obj-analyze-impact" },
+          "statement": "Analyze how Renaissance innovations like the printing press changed society",
+          "bloomsLevel": "analyze"
+        },
+        {
+          "id": { "value": "obj-connect-today" },
+          "statement": "Connect Renaissance ideas and values to the modern world",
+          "bloomsLevel": "apply"
+        }
+      ],
+      "tutoringConfig": {
+        "contentDepth": "introductory",
+        "adaptiveDepth": true,
+        "interactionMode": "socratic",
+        "allowTangents": true,
+        "checkpointFrequency": "high"
+      },
+      "children": [
+        {
+          "id": { "value": "topic-medieval-world" },
+          "title": "Before the Renaissance: The Medieval World",
+          "type": "topic",
+          "orderIndex": 0,
+          "description": "Understand what life was like in medieval Europe to appreciate how much the Renaissance changed things.",
+          "timeEstimates": {
+            "overview": "PT3M",
+            "introductory": "PT15M",
+            "intermediate": "PT25M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-medieval-intro",
+                "type": "introduction",
+                "content": "To understand why the Renaissance was such a big deal, we need to know what came before. Imagine living in medieval Europe, say around 1200. Life was very different from today, and different from the Renaissance that would come later. Let's take a look.",
+                "speakingNotes": {
+                  "emotionalTone": "curious",
+                  "pace": "normal"
+                }
+              },
+              {
+                "id": "seg-feudalism",
+                "type": "explanation",
+                "content": "Medieval society was organized into a system called feudalism. At the top was the king, then nobles and knights, and at the bottom were peasants who worked the land. Most people never traveled more than a few miles from where they were born. There was no real chance to move up in society. If your parents were farmers, you'd be a farmer too.",
+                "speakingNotes": {
+                  "emphasis": ["feudalism", "no real chance"],
+                  "pace": "slow"
+                },
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true,
+                  "suggestedPrompt": "Does this system sound fair to you?"
+                }
+              },
+              {
+                "id": "seg-church-power",
+                "type": "lecture",
+                "content": "The Catholic Church was incredibly powerful. It was the center of education, art, and daily life. Most artwork depicted religious scenes. Questioning the Church's teachings could get you in serious trouble. The focus was on the afterlife, on getting to heaven, rather than on making life better here on Earth.",
+                "speakingNotes": {
+                  "emphasis": ["incredibly powerful", "afterlife"]
+                }
+              },
+              {
+                "id": "seg-limited-learning",
+                "type": "explanation",
+                "content": "Learning was limited. Books were hand-copied by monks and were incredibly expensive. Few people could read. Knowledge from ancient Greece and Rome had been largely forgotten or preserved only in monasteries. People thought the ancient Romans were almost like giants, superior beings whose achievements could never be matched.",
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "Why do you think books were so expensive in medieval times?",
+                  "expectedResponsePatterns": ["copied by hand", "took a long time", "monks", "no printing"],
+                  "fallbackBehavior": "continue"
+                }
+              },
+              {
+                "id": "seg-black-death",
+                "type": "lecture",
+                "content": "Then came the Black Death in the 1340s. This devastating plague killed about one-third of Europe's population. It was terrible, but it also shook up society. With fewer workers, peasants could demand better wages. People started questioning why God would let this happen. This crisis, strangely, helped set the stage for change.",
+                "speakingNotes": {
+                  "emotionalTone": "serious",
+                  "emphasis": ["one-third", "questioning"]
+                }
+              },
+              {
+                "id": "seg-medieval-summary",
+                "type": "summary",
+                "content": "So medieval Europe was a world of rigid social classes, limited education, and a focus on religious salvation. But crises like the Black Death began to shake things up. The stage was set for something new. That something was the Renaissance.",
+                "speakingNotes": {
+                  "pace": "slow",
+                  "emotionalTone": "encouraging"
+                }
+              }
+            ],
+            "voiceProfile": {
+              "tone": "enthusiastic",
+              "pace": "moderate"
+            }
+          },
+          "examples": [
+            {
+              "id": "ex-medieval-book",
+              "type": "real_world",
+              "title": "The Cost of a Medieval Book",
+              "description": "How expensive books were before printing",
+              "content": "A single book might take a monk months to copy by hand. A Bible could cost as much as a house!",
+              "spokenContent": "Here's something wild: a single book in medieval times might take a monk months to copy out by hand. One letter at a time, one page at a time. A complete Bible could cost as much as a house! Only churches and very wealthy nobles could afford books. Imagine if you had to pay the price of a house just to read a book!",
+              "complexity": "simple"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-feudalism" },
+              "type": "choice",
+              "prompt": "In the feudal system, who was at the bottom of the social structure?",
+              "spokenPrompt": "In the feudal system, who was at the bottom of the social structure?",
+              "choices": [
+                { "id": "a", "text": "Knights", "correct": false },
+                { "id": "b", "text": "Nobles", "correct": false },
+                { "id": "c", "text": "Peasants", "correct": true, "feedback": "Correct! Peasants worked the land and had the least power and freedom." },
+                { "id": "d", "text": "The King", "correct": false }
+              ],
+              "difficulty": 0.2,
+              "objectivesAssessed": ["obj-identify-changes"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-italy-beginning" },
+          "title": "Italy: Where It All Began",
+          "type": "topic",
+          "orderIndex": 1,
+          "description": "Discover why the Renaissance started in Italy's wealthy city-states like Florence and Venice.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-medieval-world",
+              "required": true
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT3M",
+            "introductory": "PT20M",
+            "intermediate": "PT35M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-italy-intro",
+                "type": "introduction",
+                "content": "The Renaissance didn't happen everywhere at once. It started in Italy, specifically in wealthy trading cities like Florence, Venice, and Milan. Why Italy? Let's find out!",
+                "speakingNotes": {
+                  "emotionalTone": "curious"
+                }
+              },
+              {
+                "id": "seg-city-states",
+                "type": "explanation",
+                "content": "Unlike most of Europe, Italy wasn't one unified country. It was made up of independent city-states, each with its own government and identity. Florence was a banking center, Venice controlled Mediterranean trade, and Milan was an industrial powerhouse. These cities competed fiercely with each other, not just in business, but also in art and culture. They wanted to show off!",
+                "glossaryRefs": ["term-city-state"],
+                "speakingNotes": {
+                  "emphasis": ["competed fiercely", "show off"],
+                  "pace": "normal"
+                },
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true
+                }
+              },
+              {
+                "id": "seg-trade-wealth",
+                "type": "lecture",
+                "content": "Italian cities sat at the crossroads of trade between Europe and Asia. Merchants grew incredibly wealthy selling spices, silk, and other luxury goods. This wealth meant people had money to spend on beautiful buildings, art, and education. When you don't have to worry about where your next meal is coming from, you can think about finer things.",
+                "speakingNotes": {
+                  "emphasis": ["crossroads of trade", "incredibly wealthy"]
+                }
+              },
+              {
+                "id": "seg-medici",
+                "type": "lecture",
+                "content": "The Medici family of Florence were the ultimate patrons. They were bankers who became fabulously rich and used their money to support artists, architects, and scholars. They supported Leonardo da Vinci, Michelangelo, and many others. Lorenzo de' Medici, called Lorenzo the Magnificent, basically created an environment where art and learning could flourish.",
+                "glossaryRefs": ["term-patron"],
+                "speakingNotes": {
+                  "emotionalTone": "excited",
+                  "emphasis": ["Medici", "Lorenzo the Magnificent"]
+                },
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "Why were patrons like the Medici so important for the Renaissance?",
+                  "expectedResponsePatterns": ["paid", "supported", "money", "artists could work"],
+                  "fallbackBehavior": "simplify"
+                }
+              },
+              {
+                "id": "seg-classical-ruins",
+                "type": "explanation",
+                "content": "Italy had another advantage: Roman ruins were everywhere. Italians could literally walk among ancient Roman buildings, statues, and artifacts. This made it easier to study and be inspired by classical civilization. In Florence, scholars began collecting and translating ancient Greek and Roman texts, rediscovering knowledge that had been lost for centuries.",
+                "glossaryRefs": ["term-classical"]
+              },
+              {
+                "id": "seg-italy-summary",
+                "type": "summary",
+                "content": "So Italy became the birthplace of the Renaissance because it had wealthy trading cities that competed for prestige, powerful patrons who funded the arts, and ancient Roman ruins that inspired a return to classical learning. All these factors combined to create something special.",
+                "speakingNotes": {
+                  "pace": "slow"
+                }
+              }
+            ]
+          },
+          "examples": [
+            {
+              "id": "ex-florence-duomo",
+              "type": "real_world",
+              "title": "Florence's Famous Dome",
+              "description": "The Duomo as a symbol of Renaissance achievement",
+              "content": "The dome of Florence's cathedral was designed by Brunelleschi and remains the largest masonry dome ever built. It showed what humans could achieve.",
+              "spokenContent": "Look at the dome of Florence's cathedral, called the Duomo. When Filippo Brunelleschi designed it in the early 1400s, people thought it was impossible to build. The space was too wide for a traditional dome. But Brunelleschi invented new techniques, inspired by studying Roman ruins, and created the largest masonry dome ever built. To this day, no larger one has been constructed! It became a symbol of human achievement, the Renaissance spirit in stone.",
+              "complexity": "simple"
+            }
+          ],
+          "misconceptions": [
+            {
+              "id": "misc-italy-country",
+              "misconception": "Italy was a unified country during the Renaissance",
+              "triggerPhrases": ["country of Italy", "Italian nation", "Italy's government"],
+              "correction": "Italy wasn't unified until 1861! During the Renaissance, it was made up of independent city-states like Florence, Venice, Milan, and Rome. They competed with each other, which actually helped fuel cultural achievements.",
+              "spokenCorrection": "Actually, Italy wasn't one country back then. It didn't become unified until 1861, almost 400 years after the Renaissance began! During the Renaissance, Italy was a patchwork of independent city-states, each with its own government. Florence, Venice, Milan, Rome, and others all competed with each other. This competition was actually good for art and culture because each city wanted to outdo the others!",
+              "severity": "moderate"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-medici" },
+              "type": "choice",
+              "prompt": "What role did the Medici family play in the Renaissance?",
+              "choices": [
+                { "id": "a", "text": "They were famous painters", "correct": false },
+                { "id": "b", "text": "They were wealthy patrons who supported artists", "correct": true },
+                { "id": "c", "text": "They were kings of Italy", "correct": false },
+                { "id": "d", "text": "They invented the printing press", "correct": false }
+              ],
+              "difficulty": 0.3,
+              "objectivesAssessed": ["obj-identify-changes"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-renaissance-art" },
+          "title": "Renaissance Art: A New Way of Seeing",
+          "type": "topic",
+          "orderIndex": 2,
+          "description": "Explore the revolutionary changes in art, from perspective to humanism, through the works of da Vinci, Michelangelo, and Raphael.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-italy-beginning",
+              "required": true
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT5M",
+            "introductory": "PT25M",
+            "intermediate": "PT40M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-art-intro",
+                "type": "introduction",
+                "content": "Renaissance art looks so different from medieval art that you can spot the difference immediately. Medieval paintings look flat, with stiff figures and gold backgrounds. Renaissance paintings look like windows into real worlds, with depth and human emotion. How did this transformation happen?",
+                "speakingNotes": {
+                  "emotionalTone": "curious"
+                }
+              },
+              {
+                "id": "seg-perspective",
+                "type": "explanation",
+                "content": "The biggest breakthrough was linear perspective, developed by Filippo Brunelleschi. He figured out the mathematical rules for how things look smaller as they get farther away. When artists used perspective, their paintings suddenly had depth. You could see roads stretching into the distance, rooms you felt you could walk into. It was like magic!",
+                "glossaryRefs": ["term-perspective"],
+                "speakingNotes": {
+                  "emphasis": ["mathematical rules", "depth", "magic"],
+                  "pace": "slow"
+                },
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true,
+                  "suggestedPrompt": "Have you ever noticed perspective in paintings or photographs?"
+                }
+              },
+              {
+                "id": "seg-humanism-art",
+                "type": "lecture",
+                "content": "Renaissance art embraced humanism. Instead of only painting religious figures as stiff, symbolic icons, artists showed humans as real, emotional beings. Bodies became anatomically correct. Artists like Leonardo da Vinci actually dissected human bodies to understand how muscles and bones worked. Faces showed genuine emotion. People in Renaissance paintings look like people!",
+                "glossaryRefs": ["term-humanism"],
+                "speakingNotes": {
+                  "emphasis": ["real, emotional beings", "look like people"]
+                }
+              },
+              {
+                "id": "seg-leonardo",
+                "type": "lecture",
+                "content": "Leonardo da Vinci might be the most famous Renaissance artist. His painting of the Mona Lisa is probably the most famous painting in the world. What makes it special? Her mysterious smile seems to change depending on where you look. Leonardo invented a technique called sfumato, a smoky blending of colors that creates soft edges and lifelike skin. He was also an inventor, scientist, and engineer, the ultimate Renaissance man.",
+                "speakingNotes": {
+                  "emotionalTone": "excited",
+                  "emphasis": ["most famous painting", "Renaissance man"]
+                },
+                "checkpoint": {
+                  "type": "simple_confirmation",
+                  "prompt": "Have you ever seen an image of the Mona Lisa?",
+                  "fallbackBehavior": "continue"
+                }
+              },
+              {
+                "id": "seg-michelangelo",
+                "type": "lecture",
+                "content": "Michelangelo was another genius, famous for his sculptures and paintings. His statue of David, carved from a single block of marble, shows the human body in perfect form. But his most famous work is the ceiling of the Sistine Chapel in Rome. Imagine painting while lying on your back on scaffolding, looking up, for four years. The result shows scenes from the Bible with incredible power and emotion.",
+                "glossaryRefs": ["term-fresco"],
+                "speakingNotes": {
+                  "pace": "slow",
+                  "emphasis": ["single block of marble", "four years"]
+                }
+              },
+              {
+                "id": "seg-art-summary",
+                "type": "summary",
+                "content": "Renaissance art revolutionized how we see the world. Perspective created depth. Humanism brought emotion and realism. Masters like Leonardo and Michelangelo pushed human creativity to new heights. Their work still inspires us today, more than 500 years later.",
+                "speakingNotes": {
+                  "emotionalTone": "encouraging"
+                }
+              }
+            ]
+          },
+          "examples": [
+            {
+              "id": "ex-last-supper",
+              "type": "real_world",
+              "title": "Leonardo's Last Supper",
+              "description": "How perspective creates depth in a painting",
+              "content": "In 'The Last Supper,' all perspective lines lead to Jesus's head at the center, making him the focus of the entire scene.",
+              "spokenContent": "Look at Leonardo's 'The Last Supper.' Notice how the walls of the room seem to extend into the painting? All the perspective lines, if you trace them, point to a single spot: Jesus's head at the center of the table. This makes Jesus the obvious focus of the painting. It's not just a picture; it's carefully designed to guide your eye exactly where Leonardo wanted it to go.",
+              "complexity": "simple"
+            },
+            {
+              "id": "ex-david-details",
+              "type": "real_world",
+              "title": "Michelangelo's David",
+              "description": "The incredible detail in Renaissance sculpture",
+              "content": "David is 17 feet tall and shows veins, muscles, and even a tense expression as he faces Goliath.",
+              "spokenContent": "Michelangelo's statue of David stands 17 feet tall, that's about as tall as a two-story building! But what's really amazing is the detail. You can see the veins in his hands, the tension in his muscles, even the worried expression on his face as he prepares to face the giant Goliath. Remember, this was all carved from a single block of marble. One wrong hit of the chisel and the whole thing could have been ruined.",
+              "complexity": "simple"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-perspective" },
+              "type": "choice",
+              "prompt": "What artistic technique makes Renaissance paintings look like they have depth?",
+              "choices": [
+                { "id": "a", "text": "Gold backgrounds", "correct": false, "feedback": "Gold backgrounds were common in medieval art, which looked flat" },
+                { "id": "b", "text": "Linear perspective", "correct": true, "feedback": "Yes! Perspective uses mathematical rules to show depth, with things getting smaller in the distance" },
+                { "id": "c", "text": "Bright colors", "correct": false },
+                { "id": "d", "text": "Large canvases", "correct": false }
+              ],
+              "difficulty": 0.3,
+              "objectivesAssessed": ["obj-identify-changes"]
+            },
+            {
+              "id": { "value": "q-mona-lisa" },
+              "type": "choice",
+              "prompt": "Who painted the Mona Lisa?",
+              "choices": [
+                { "id": "a", "text": "Michelangelo", "correct": false },
+                { "id": "b", "text": "Raphael", "correct": false },
+                { "id": "c", "text": "Leonardo da Vinci", "correct": true },
+                { "id": "d", "text": "Botticelli", "correct": false }
+              ],
+              "difficulty": 0.2,
+              "objectivesAssessed": ["obj-identify-changes"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-science-discovery" },
+          "title": "Science and Discovery",
+          "type": "topic",
+          "orderIndex": 3,
+          "description": "Learn how Renaissance thinkers like Copernicus and Galileo challenged old beliefs and laid the foundation for modern science.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-renaissance-art",
+              "required": false
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT3M",
+            "introductory": "PT20M",
+            "intermediate": "PT35M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-science-intro",
+                "type": "introduction",
+                "content": "The Renaissance didn't just change art. It also transformed how people thought about the natural world. Instead of just accepting what ancient authorities or the Church said, people started asking, 'But is it actually true?' This questioning spirit led to the birth of modern science.",
+                "speakingNotes": {
+                  "emotionalTone": "curious"
+                }
+              },
+              {
+                "id": "seg-old-beliefs",
+                "type": "explanation",
+                "content": "For over a thousand years, Europeans believed that Earth was at the center of the universe, with the sun, moon, and stars revolving around it. This view came from the ancient Greek philosopher Ptolemy and was supported by the Church. After all, it made sense that God would put humans at the center of creation, right?",
+                "speakingNotes": {
+                  "pace": "normal"
+                },
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true
+                }
+              },
+              {
+                "id": "seg-copernicus",
+                "type": "lecture",
+                "content": "Then came Nicolaus Copernicus, a Polish astronomer. In 1543, he proposed a revolutionary idea: the sun is at the center, and Earth and other planets revolve around it. This heliocentric model, 'helio' meaning sun, was shocking. It suggested that Earth wasn't special, that we weren't at the center of everything. Copernicus was so worried about the reaction that his book wasn't published until he was dying.",
+                "speakingNotes": {
+                  "emotionalTone": "serious",
+                  "emphasis": ["revolutionary idea", "sun is at the center"]
+                }
+              },
+              {
+                "id": "seg-galileo",
+                "type": "lecture",
+                "content": "Galileo Galilei built on Copernicus's work about 70 years later. He built telescopes and pointed them at the sky. He saw moons orbiting Jupiter, proving that not everything revolves around Earth. He saw mountains on our moon, showing it wasn't a perfect sphere. The Church eventually put Galileo on trial and forced him to recant his views. But he reportedly muttered, 'And yet it moves,' meaning Earth still orbits the sun regardless of what the Church says.",
+                "glossaryRefs": ["term-scientific-method"],
+                "speakingNotes": {
+                  "emotionalTone": "excited",
+                  "emphasis": ["moons orbiting Jupiter", "And yet it moves"]
+                },
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "Why was the idea that Earth moves around the sun so controversial?",
+                  "expectedResponsePatterns": ["Church", "center", "humans special", "against religion", "Ptolemy"],
+                  "fallbackBehavior": "continue"
+                }
+              },
+              {
+                "id": "seg-scientific-method",
+                "type": "explanation",
+                "content": "What made Renaissance science different was the method. Instead of just reading old books, scientists observed the world, made hypotheses, and tested them with experiments. If the experiment disagreed with the hypothesis, they revised their thinking. This scientific method is still how science works today. It's about evidence, not just authority.",
+                "glossaryRefs": ["term-scientific-method"],
+                "speakingNotes": {
+                  "emphasis": ["observed", "tested", "evidence"]
+                }
+              },
+              {
+                "id": "seg-science-summary",
+                "type": "summary",
+                "content": "Renaissance science challenged centuries of accepted belief. Copernicus and Galileo showed that Earth isn't the center of the universe. More importantly, they showed that careful observation and experimentation could reveal truth, even if it contradicted tradition. This scientific mindset is one of the Renaissance's greatest gifts to us.",
+                "speakingNotes": {
+                  "emotionalTone": "encouraging"
+                }
+              }
+            ]
+          },
+          "misconceptions": [
+            {
+              "id": "misc-church-anti-science",
+              "misconception": "The Church was always against science",
+              "triggerPhrases": ["Church hated science", "religion against knowledge", "Church opposed learning"],
+              "correction": "The relationship was more complex. The Church actually preserved much ancient knowledge through the Middle Ages and supported many scholars. The conflict arose mainly when new ideas directly challenged Church teachings about Earth's place in the universe.",
+              "spokenCorrection": "It's actually more complicated than that! The Church preserved a lot of ancient knowledge through the Middle Ages, and many scientists, including Copernicus, were actually religious. The conflict came specifically when new discoveries seemed to contradict what the Church taught about Earth being at the center of God's creation. In many other areas, the Church supported learning and education.",
+              "severity": "moderate"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-heliocentric" },
+              "type": "choice",
+              "prompt": "What does 'heliocentric' mean?",
+              "choices": [
+                { "id": "a", "text": "Earth-centered", "correct": false },
+                { "id": "b", "text": "Sun-centered", "correct": true, "feedback": "Correct! 'Helio' comes from the Greek word for sun." },
+                { "id": "c", "text": "Moon-centered", "correct": false },
+                { "id": "d", "text": "Star-centered", "correct": false }
+              ],
+              "difficulty": 0.25,
+              "objectivesAssessed": ["obj-identify-changes"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-printing-press" },
+          "title": "The Printing Press: Ideas Go Viral",
+          "type": "topic",
+          "orderIndex": 4,
+          "description": "Discover how Gutenberg's invention of the printing press revolutionized the spread of knowledge and changed the world forever.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-italy-beginning",
+              "required": false
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT3M",
+            "introductory": "PT20M",
+            "intermediate": "PT30M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-press-intro",
+                "type": "introduction",
+                "content": "If I had to pick the single most important invention of the Renaissance, it would be the printing press. Before Johannes Gutenberg, every book had to be copied by hand. After Gutenberg, ideas could spread like never before. Let's see how one invention changed everything.",
+                "speakingNotes": {
+                  "emotionalTone": "excited"
+                }
+              },
+              {
+                "id": "seg-before-printing",
+                "type": "explanation",
+                "content": "Remember how we talked about books being copied by hand in medieval times? A scribe might copy one book in a year. That made books incredibly expensive, rare treasures that only the wealthy could afford. Most people never owned a book, never learned to read, and never had access to new ideas.",
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true
+                }
+              },
+              {
+                "id": "seg-gutenberg",
+                "type": "lecture",
+                "content": "Around 1440, in the German city of Mainz, Johannes Gutenberg invented movable type printing. He created individual metal letters that could be arranged to form any text, inked, and pressed onto paper. After printing, the letters could be rearranged for a new page. His first major work was the Gutenberg Bible around 1455. It was beautiful and, compared to hand-copying, fast!",
+                "glossaryRefs": ["term-printing-press"],
+                "speakingNotes": {
+                  "pace": "slow",
+                  "emphasis": ["movable type", "rearranged"]
+                }
+              },
+              {
+                "id": "seg-explosion",
+                "type": "lecture",
+                "content": "The results were explosive. By 1500, there were printing presses in 270 cities across Europe. Millions of books had been printed. The price of books dropped dramatically. Suddenly, middle-class people could afford books! Ideas that once took decades to spread could now reach thousands of readers in months. The printing press was like the internet of its time.",
+                "speakingNotes": {
+                  "emotionalTone": "excited",
+                  "emphasis": ["270 cities", "millions of books", "internet of its time"]
+                },
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "Why do you think cheaper books led to more people learning to read?",
+                  "expectedResponsePatterns": ["afford", "more books", "available", "worth learning"],
+                  "fallbackBehavior": "continue"
+                }
+              },
+              {
+                "id": "seg-literacy-reformation",
+                "type": "explanation",
+                "content": "The printing press had huge consequences. Literacy rates climbed as more people had reasons to learn to read. The Protestant Reformation, when Martin Luther challenged the Catholic Church, spread rapidly because his writings could be printed and distributed widely. Scientific discoveries spread faster too. The printing press didn't just spread ideas; it accelerated history itself.",
+                "glossaryRefs": ["term-reformation"],
+                "speakingNotes": {
+                  "emphasis": ["accelerated history"]
+                }
+              },
+              {
+                "id": "seg-press-summary",
+                "type": "summary",
+                "content": "Gutenberg's printing press transformed society. It made books affordable, spread literacy, enabled the Reformation, and accelerated scientific progress. Before printing, knowledge was limited to a privileged few. After printing, ideas could reach anyone who could read. It's hard to overstate how revolutionary this was.",
+                "speakingNotes": {
+                  "emotionalTone": "encouraging",
+                  "pace": "slow"
+                }
+              }
+            ]
+          },
+          "examples": [
+            {
+              "id": "ex-luther-pamphlets",
+              "type": "historical",
+              "title": "Martin Luther's 95 Theses",
+              "description": "How the printing press spread the Reformation",
+              "content": "When Martin Luther posted his criticisms of the Church in 1517, printers quickly copied and distributed them. Within weeks, his ideas reached all of Germany.",
+              "spokenContent": "In 1517, Martin Luther nailed 95 criticisms of the Catholic Church to a church door in Wittenberg, Germany. In the old days, maybe a few hundred people would have heard about it. But printers grabbed Luther's ideas and started printing pamphlets. Within just two weeks, his 95 Theses had spread throughout Germany. Within two months, they'd reached all of Europe. The printing press turned what could have been a local complaint into a continental revolution.",
+              "complexity": "simple"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-gutenberg-invention" },
+              "type": "text_entry",
+              "prompt": "What technology did Johannes Gutenberg invent around 1440?",
+              "spokenPrompt": "What technology did Johannes Gutenberg invent around 1440?",
+              "correctResponse": ["printing press", "the printing press", "movable type", "movable type printing"],
+              "difficulty": 0.2,
+              "objectivesAssessed": ["obj-identify-changes"]
+            },
+            {
+              "id": { "value": "q-press-impact" },
+              "type": "multiple_choice",
+              "prompt": "What were the effects of the printing press? Select all that apply.",
+              "choices": [
+                { "id": "a", "text": "Books became cheaper", "correct": true },
+                { "id": "b", "text": "More people learned to read", "correct": true },
+                { "id": "c", "text": "Ideas spread faster", "correct": true },
+                { "id": "d", "text": "Only nobles could own books", "correct": false, "feedback": "Actually, the opposite happened! Middle-class people could now afford books." }
+              ],
+              "difficulty": 0.35,
+              "objectivesAssessed": ["obj-analyze-impact"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-northern-renaissance" },
+          "title": "Beyond Italy: The Northern Renaissance",
+          "type": "topic",
+          "orderIndex": 5,
+          "description": "See how Renaissance ideas spread across Europe, transforming art and culture in places like Germany, the Netherlands, and England.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-printing-press",
+              "required": false
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT3M",
+            "introductory": "PT20M",
+            "intermediate": "PT35M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-north-intro",
+                "type": "introduction",
+                "content": "The Renaissance began in Italy, but it didn't stay there. By the 1500s, Renaissance ideas had spread across the Alps to northern Europe. But the Northern Renaissance wasn't just a copy of the Italian version. It developed its own unique character.",
+                "speakingNotes": {
+                  "emotionalTone": "curious"
+                }
+              },
+              {
+                "id": "seg-spread",
+                "type": "explanation",
+                "content": "How did Renaissance ideas travel north? Trade routes carried not just goods but also ideas. Scholars traveled to Italy and brought back what they learned. And the printing press spread Italian books across Europe. By the early 1500s, countries like Germany, the Netherlands, France, and England were developing their own Renaissance movements.",
+                "speakingNotes": {
+                  "pace": "normal"
+                },
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true
+                }
+              },
+              {
+                "id": "seg-dutch-art",
+                "type": "lecture",
+                "content": "Northern artists like Jan van Eyck in the Netherlands pioneered oil painting, which allowed for incredibly detailed and realistic images. They painted everyday scenes and regular people, not just religious subjects or nobles. Look at a Dutch painting from this era and you'll see wrinkles, textures, reflections, everything captured with amazing precision.",
+                "speakingNotes": {
+                  "emphasis": ["oil painting", "everyday scenes", "amazing precision"]
+                }
+              },
+              {
+                "id": "seg-erasmus",
+                "type": "lecture",
+                "content": "Erasmus of Rotterdam was the greatest scholar of the Northern Renaissance. He studied ancient Greek texts and published a new version of the New Testament in its original Greek. He criticized corruption in the Church but stayed within Catholicism. His writings influenced both Catholics and Protestants, and he became the first international celebrity of the print age.",
+                "speakingNotes": {
+                  "emphasis": ["Erasmus", "international celebrity"]
+                }
+              },
+              {
+                "id": "seg-shakespeare",
+                "type": "lecture",
+                "content": "In England, the Renaissance blossomed in literature, especially theater. William Shakespeare wrote plays that are still performed today, over 400 years later. Hamlet, Romeo and Juliet, Macbeth... Shakespeare explored human nature with a depth and complexity that was new. He invented words we still use, like 'lonely,' 'generous,' and 'hurry.'",
+                "speakingNotes": {
+                  "emotionalTone": "excited",
+                  "emphasis": ["still performed today", "invented words"]
+                },
+                "checkpoint": {
+                  "type": "simple_confirmation",
+                  "prompt": "Have you heard of any Shakespeare plays?",
+                  "fallbackBehavior": "continue"
+                }
+              },
+              {
+                "id": "seg-north-summary",
+                "type": "summary",
+                "content": "The Northern Renaissance adapted Italian ideas to local cultures. Dutch painters perfected oil painting and depicted everyday life. Erasmus became Europe's leading intellectual. Shakespeare transformed English literature. Each region added its own flavor while sharing the core Renaissance values of human potential, classical learning, and artistic excellence.",
+                "speakingNotes": {
+                  "pace": "slow"
+                }
+              }
+            ]
+          },
+          "examples": [
+            {
+              "id": "ex-shakespeare-words",
+              "type": "real_world",
+              "title": "Words Shakespeare Invented",
+              "description": "Shakespeare's lasting impact on the English language",
+              "content": "Shakespeare invented over 1,700 words including: lonely, generous, hurry, obscene, gossip, bedroom, and many more.",
+              "spokenContent": "Here's something amazing: Shakespeare invented over 1,700 words that we still use today! Before Shakespeare, there was no word 'lonely.' He made it up. Same with 'generous,' 'hurry,' 'obscene,' and 'gossip.' He even invented 'bedroom'! When he couldn't find the right word, he just created one. His creativity with language is one reason his work has lasted so long.",
+              "complexity": "simple"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-shakespeare" },
+              "type": "choice",
+              "prompt": "In which country did William Shakespeare write his plays?",
+              "choices": [
+                { "id": "a", "text": "Italy", "correct": false },
+                { "id": "b", "text": "France", "correct": false },
+                { "id": "c", "text": "England", "correct": true },
+                { "id": "d", "text": "Germany", "correct": false }
+              ],
+              "difficulty": 0.2,
+              "objectivesAssessed": ["obj-identify-changes"]
+            }
+          ]
+        },
+        {
+          "id": { "value": "topic-legacy-today" },
+          "title": "The Renaissance Legacy: Shaping Our World",
+          "type": "topic",
+          "orderIndex": 6,
+          "description": "Connect Renaissance innovations and values to the modern world and understand why this period still matters today.",
+          "prerequisites": [
+            {
+              "nodeId": "topic-northern-renaissance",
+              "required": false
+            }
+          ],
+          "timeEstimates": {
+            "overview": "PT3M",
+            "introductory": "PT15M",
+            "intermediate": "PT25M"
+          },
+          "transcript": {
+            "segments": [
+              {
+                "id": "seg-legacy-intro",
+                "type": "introduction",
+                "content": "The Renaissance ended centuries ago, but its effects are all around us. Many ideas we take for granted today, from scientific thinking to individual rights to the value of education, have roots in this period. Let's explore how the Renaissance still shapes our world.",
+                "speakingNotes": {
+                  "emotionalTone": "curious"
+                }
+              },
+              {
+                "id": "seg-scientific-thinking",
+                "type": "explanation",
+                "content": "The scientific method developed during the Renaissance is still how science works. When scientists today test a new medicine or explore space, they're using the same approach Galileo pioneered: observe, hypothesize, experiment, revise. The idea that we can understand the world through careful observation rather than just accepting authority comes directly from the Renaissance.",
+                "stoppingPoint": {
+                  "type": "natural",
+                  "promptForContinue": true
+                }
+              },
+              {
+                "id": "seg-education",
+                "type": "lecture",
+                "content": "Renaissance humanists believed in the power of education to improve people. They created schools that taught classical languages, history, art, and science. Our modern idea that everyone should have access to education, that learning makes better citizens, comes from this period. The liberal arts curriculum still used in many colleges today is a Renaissance invention.",
+                "speakingNotes": {
+                  "emphasis": ["power of education", "Renaissance invention"]
+                }
+              },
+              {
+                "id": "seg-individual-worth",
+                "type": "explanation",
+                "content": "Before the Renaissance, your identity was defined by your social class and your role in the community. Renaissance humanism said that individuals matter, that each person has potential worth developing. This idea evolved into concepts of individual rights and freedoms that shape modern democracies. The Declaration of Independence's 'all men are created equal' has Renaissance roots.",
+                "speakingNotes": {
+                  "emotionalTone": "serious",
+                  "emphasis": ["individuals matter", "Renaissance roots"]
+                },
+                "checkpoint": {
+                  "type": "comprehension_check",
+                  "prompt": "How does the Renaissance idea of individual worth connect to modern democracy?",
+                  "expectedResponsePatterns": ["rights", "equality", "potential", "each person", "freedom"],
+                  "fallbackBehavior": "simplify"
+                }
+              },
+              {
+                "id": "seg-art-continues",
+                "type": "lecture",
+                "content": "Renaissance art principles like perspective and realistic human forms are still taught in art schools. The masterpieces from this era remain among the world's most treasured artworks. Millions visit the Louvre to see the Mona Lisa or the Vatican to see the Sistine Chapel. These works continue to inspire artists and amaze viewers five centuries later.",
+                "speakingNotes": {
+                  "emotionalTone": "excited"
+                }
+              },
+              {
+                "id": "seg-information-age",
+                "type": "explanation",
+                "content": "Finally, consider the printing press. It was the 'internet' of its time, spreading information widely and democratizing knowledge. The digital revolution we're living through now is in many ways a continuation of what Gutenberg started. The Renaissance taught us that knowledge should be shared, that ideas can change the world.",
+                "speakingNotes": {
+                  "emphasis": ["democratizing knowledge", "ideas can change the world"]
+                }
+              },
+              {
+                "id": "seg-legacy-summary",
+                "type": "summary",
+                "content": "The Renaissance wasn't just a historical period. It was a transformation in how humans think about themselves and their potential. Scientific thinking, universal education, individual rights, artistic excellence, the spread of knowledge, these Renaissance values are woven into modern life. Understanding the Renaissance helps us understand who we are today.",
+                "speakingNotes": {
+                  "emotionalTone": "encouraging",
+                  "pace": "slow"
+                }
+              }
+            ]
+          },
+          "examples": [
+            {
+              "id": "ex-museum-visitors",
+              "type": "real_world",
+              "title": "Renaissance Art Today",
+              "description": "The continuing popularity of Renaissance masterpieces",
+              "content": "The Louvre in Paris has about 10 million visitors per year, most coming to see the Mona Lisa. The Sistine Chapel receives about 6 million visitors annually.",
+              "spokenContent": "Here's proof that Renaissance art still matters: the Louvre museum in Paris gets about 10 million visitors every year, and most of them come specifically to see the Mona Lisa. That's one painting attracting more visitors than most cities! The Sistine Chapel in Vatican City receives about 6 million visitors annually, all craning their necks to see Michelangelo's ceiling. Renaissance artists created something timeless.",
+              "complexity": "simple"
+            }
+          ],
+          "assessments": [
+            {
+              "id": { "value": "q-legacy" },
+              "type": "multiple_choice",
+              "prompt": "Which of these modern concepts have roots in the Renaissance? Select all that apply.",
+              "choices": [
+                { "id": "a", "text": "The scientific method", "correct": true },
+                { "id": "b", "text": "Universal education", "correct": true },
+                { "id": "c", "text": "Individual rights", "correct": true },
+                { "id": "d", "text": "The feudal system", "correct": false, "feedback": "The feudal system came before the Renaissance and declined during it" }
+              ],
+              "difficulty": 0.4,
+              "objectivesAssessed": ["obj-connect-today"]
+            },
+            {
+              "id": { "value": "q-printing-internet" },
+              "type": "choice",
+              "prompt": "Why is the printing press sometimes compared to the internet?",
+              "choices": [
+                { "id": "a", "text": "Both use electricity", "correct": false },
+                { "id": "b", "text": "Both spread information widely and made knowledge more accessible", "correct": true },
+                { "id": "c", "text": "Both were invented in Italy", "correct": false },
+                { "id": "d", "text": "Both are no longer used today", "correct": false }
+              ],
+              "difficulty": 0.35,
+              "objectivesAssessed": ["obj-analyze-impact"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": {
+    "https://voicelearn.io/extensions/elementary": {
+      "celebrationPhrases": [
+        "Excellent work! You're becoming a Renaissance scholar!",
+        "Great job! Leonardo would be impressed!",
+        "Fantastic! You're really getting this!",
+        "Amazing! You're thinking like a Renaissance humanist!"
+      ],
+      "encouragementPhrases": [
+        "That's okay, let's think about it another way.",
+        "Good try! The Renaissance is full of surprising facts.",
+        "No worries! Even Renaissance geniuses made mistakes.",
+        "Let's explore that idea a bit more."
+      ],
+      "visualResourceSuggestions": [
+        "Show image of Mona Lisa when discussing Leonardo",
+        "Show Sistine Chapel ceiling when discussing Michelangelo",
+        "Show side-by-side medieval vs Renaissance art for contrast",
+        "Show map of Renaissance Italy and city-states"
+      ]
+    }
+  }
+}

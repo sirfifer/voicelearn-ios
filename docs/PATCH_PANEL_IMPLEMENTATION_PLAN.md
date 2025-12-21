@@ -7,7 +7,7 @@ This document outlines the step-by-step implementation of the LLM Patch Panel ro
 ## Directory Structure
 
 ```
-VoiceLearn/
+UnaMentis/
 ├── Core/
 │   └── Routing/
 │       ├── Models/
@@ -18,7 +18,7 @@ VoiceLearn/
 │       ├── PatchPanelService.swift        # Main routing actor
 │       └── DeviceCapabilityManager.swift  # Device tier detection (future)
 │
-VoiceLearnTests/
+UnaMentisTests/
 ├── Unit/
 │   └── Routing/
 │       ├── LLMEndpointTests.swift

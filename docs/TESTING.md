@@ -1,4 +1,4 @@
-# VoiceLearn - Testing Guide
+# UnaMentis - Testing Guide
 
 ## Testing Philosophy
 
@@ -23,7 +23,7 @@ Only use simple test doubles when necessary:
 ### Directory Layout
 
 ```
-VoiceLearnTests/
+UnaMentisTests/
 ├── Unit/                    # Fast, isolated tests (103+ tests)
 │   ├── AudioEngineTests.swift       # Audio capture, VAD, playback
 │   ├── SessionManagerTests.swift    # Session lifecycle, state machine
@@ -79,7 +79,7 @@ VoiceLearnTests/
 ./scripts/test-all.sh
 
 # Or
-xcodebuild test -scheme VoiceLearn
+xcodebuild test -scheme UnaMentis
 ```
 
 ### E2E Tests
@@ -94,13 +94,13 @@ xcodebuild test -scheme VoiceLearn
 ```bash
 # Single test class
 xcodebuild test \
-  -scheme VoiceLearn \
-  -only-testing:VoiceLearnTests/Unit/AudioEngineTests
+  -scheme UnaMentis \
+  -only-testing:UnaMentisTests/Unit/AudioEngineTests
 
 # Single test method
 xcodebuild test \
-  -scheme VoiceLearn \
-  -only-testing:VoiceLearnTests/Unit/AudioEngineTests/testVADDetection
+  -scheme UnaMentis \
+  -only-testing:UnaMentisTests/Unit/AudioEngineTests/testVADDetection
 ```
 
 ## Writing Tests
@@ -109,7 +109,7 @@ xcodebuild test \
 
 ```swift
 import XCTest
-@testable import VoiceLearn
+@testable import UnaMentis
 
 final class AudioEngineTests: XCTestCase {
     var audioEngine: AudioEngine!
@@ -358,7 +358,7 @@ func testVAD() async throws {
 
 Set breakpoint in test, run with:
 ```bash
-xcodebuild test -scheme VoiceLearn \
+xcodebuild test -scheme UnaMentis \
   -only-testing:MyTest/testMethod
 ```
 
@@ -376,7 +376,7 @@ cat ~/Library/Developer/Xcode/DerivedData/.../Logs/Test/*.xcresult
 ```bash
 # Run with coverage
 xcodebuild test \
-  -scheme VoiceLearn \
+  -scheme UnaMentis \
   -enableCodeCoverage YES
 
 # View report
@@ -421,14 +421,14 @@ The integration test suite (`VoiceSessionIntegrationTests.swift`) tests multiple
 
 ```bash
 # Run all integration tests
-xcodebuild test -project VoiceLearn.xcodeproj -scheme VoiceLearn \
+xcodebuild test -project UnaMentis.xcodeproj -scheme UnaMentis \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:VoiceLearnTests/Integration
+  -only-testing:UnaMentisTests/Integration
 
 # Run specific integration test class
-xcodebuild test -project VoiceLearn.xcodeproj -scheme VoiceLearn \
+xcodebuild test -project UnaMentis.xcodeproj -scheme UnaMentis \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:VoiceLearnTests/VoiceSessionIntegrationTests
+  -only-testing:UnaMentisTests/VoiceSessionIntegrationTests
 ```
 
 ## Troubleshooting

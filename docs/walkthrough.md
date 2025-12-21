@@ -6,7 +6,7 @@ This document summarizes the verification of the Curriculum Management System im
 
 The following components were verified to exist and match the TDD specifications:
 
-*   **Core Data Model:** Verified `Curriculum`, `Topic`, `Document`, `TopicProgress` entities relations and attributes in `VoiceLearn.xcdatamodeld`.
+*   **Core Data Model:** Verified `Curriculum`, `Topic`, `Document`, `TopicProgress` entities relations and attributes in `UnaMentis.xcdatamodeld`.
 *   **CurriculumEngine:** Validated actor-based implementation for state management, context generation, and navigation.
 *   **DocumentProcessor:** Validated document ingestion, chunking, and embedding generation logic.
 *   **ProgressTracker:** Validated progress tracking with Core Data persistence.
@@ -32,7 +32,7 @@ We established a comprehensive test suite for the curriculum system.
 ### Test Results
 Run Command:
 ```bash
-xcodebuild test -scheme VoiceLearn -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:VoiceLearnTests/CurriculumEngineTests -only-testing:VoiceLearnTests/DocumentProcessorTests -only-testing:VoiceLearnTests/ProgressTrackerTests
+xcodebuild test -scheme UnaMentis -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:UnaMentisTests/CurriculumEngineTests -only-testing:UnaMentisTests/DocumentProcessorTests -only-testing:UnaMentisTests/ProgressTrackerTests
 ```
 
 **Result:** **PASSED** (All Suites)

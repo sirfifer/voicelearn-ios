@@ -1,6 +1,6 @@
 # Proxmox CPU-Only Server Deployment
 
-This guide covers deploying VoiceLearn's AI services on a high-spec server without GPU acceleration.
+This guide covers deploying UnaMentis's AI services on a high-spec server without GPU acceleration.
 
 ## Hardware Assumptions
 
@@ -868,4 +868,4 @@ Less secure, but simplest for testing:
 4. Install Piper with amy-medium voice
 5. Configure unified API gateway
 6. Set up Tailscale for external access
-7. Update VoiceLearn app configuration
+7. Update UnaMentis app configuration

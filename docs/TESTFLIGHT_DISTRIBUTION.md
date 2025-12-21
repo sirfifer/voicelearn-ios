@@ -1,6 +1,6 @@
-# VoiceLearn - TestFlight Distribution Guide
+# UnaMentis - TestFlight Distribution Guide
 
-This document provides step-by-step instructions for distributing VoiceLearn to beta testers via Apple's TestFlight platform.
+This document provides step-by-step instructions for distributing UnaMentis to beta testers via Apple's TestFlight platform.
 
 ---
 
@@ -34,8 +34,8 @@ Before starting, gather the following:
 
 | Item | Current Value | Notes |
 |------|---------------|-------|
-| Bundle Identifier | `com.voicelearn.app` | Already configured in project |
-| App Name | VoiceLearn | Must be unique on App Store |
+| Bundle Identifier | `com.unamentis.app` | Already configured in project |
+| App Name | UnaMentis | Must be unique on App Store |
 | SKU | `voicelearn-ios-001` | Your internal reference (any string) |
 | Primary Language | English (U.S.) | Or your preferred language |
 | App Category | Education | Primary category |
@@ -61,16 +61,16 @@ You'll need to prepare these before uploading:
 
 ### 1. Verify Bundle Identifier
 
-Your bundle identifier is already set to `com.voicelearn.app`. Ensure this matches what you register in App Store Connect.
+Your bundle identifier is already set to `com.unamentis.app`. Ensure this matches what you register in App Store Connect.
 
-**Location:** VoiceLearn.xcodeproj → VoiceLearn target → Signing & Capabilities
+**Location:** UnaMentis.xcodeproj → UnaMentis target → Signing & Capabilities
 
 ### 2. Set Development Team
 
 Currently your project shows `DEVELOPMENT_TEAM = "";` which needs to be configured.
 
-1. Open `VoiceLearn.xcodeproj` in Xcode
-2. Select the **VoiceLearn** target
+1. Open `UnaMentis.xcodeproj` in Xcode
+2. Select the **UnaMentis** target
 3. Go to **Signing & Capabilities** tab
 4. Under **Signing**, select your Team from the dropdown
 5. Ensure "Automatically manage signing" is checked (recommended for simplicity)
@@ -86,7 +86,7 @@ Currently your project shows `DEVELOPMENT_TEAM = "";` which needs to be configur
 - Build number (1, 2, 3...): Increment for EVERY TestFlight upload
 
 To update in Xcode:
-1. Select the VoiceLearn target
+1. Select the UnaMentis target
 2. Go to **General** tab
 3. Update **Version** and **Build** fields
 
@@ -98,7 +98,7 @@ Your app uses these capabilities (already configured):
 
 Ensure these are properly registered in your Developer Account:
 1. Go to https://developer.apple.com/account/resources/identifiers
-2. Find or create your App ID for `com.voicelearn.app`
+2. Find or create your App ID for `com.unamentis.app`
 3. Enable required capabilities
 
 ### 5. Create Distribution Certificate (if needed)
@@ -126,9 +126,9 @@ Go to: https://appstoreconnect.apple.com
 | Field | Value |
 |-------|-------|
 | Platforms | iOS |
-| Name | VoiceLearn |
+| Name | UnaMentis |
 | Primary Language | English (U.S.) |
-| Bundle ID | com.voicelearn.app (select from dropdown after registering) |
+| Bundle ID | com.unamentis.app (select from dropdown after registering) |
 | SKU | voicelearn-ios-001 |
 | User Access | Full Access (or Limited if you want to restrict) |
 
@@ -142,8 +142,8 @@ If your bundle ID doesn't appear in the dropdown:
 2. Click **+** to register a new identifier
 3. Select **App IDs** → **App**
 4. Enter:
-   - Description: VoiceLearn
-   - Bundle ID: Explicit → `com.voicelearn.app`
+   - Description: UnaMentis
+   - Bundle ID: Explicit → `com.unamentis.app`
 5. Enable capabilities:
    - [x] Background Modes
    - [x] (Any others your app needs)
@@ -155,7 +155,7 @@ If your bundle ID doesn't appear in the dropdown:
 After creating the app, complete these sections:
 
 #### App Information Tab
-- **Name:** VoiceLearn
+- **Name:** UnaMentis
 - **Subtitle:** (optional, up to 30 chars) e.g., "AI Voice Tutoring"
 - **Category:** Education
 - **Secondary Category:** Lifestyle (optional)
@@ -178,7 +178,7 @@ After creating the app, complete these sections:
 
 ### 1. Select Destination
 
-1. In Xcode, select the scheme **VoiceLearn**
+1. In Xcode, select the scheme **UnaMentis**
 2. For destination, select **Any iOS Device (arm64)** (NOT a simulator)
 
 ### 2. Clean Build Folder
@@ -220,13 +220,13 @@ In the Organizer (Window → Organizer):
 ```bash
 # Export archive to IPA
 xcodebuild -exportArchive \
-  -archivePath ~/Library/Developer/Xcode/Archives/[DATE]/VoiceLearn.xcarchive \
+  -archivePath ~/Library/Developer/Xcode/Archives/[DATE]/UnaMentis.xcarchive \
   -exportOptionsPlist ExportOptions.plist \
   -exportPath ./build
 
 # Upload using altool
 xcrun altool --upload-app \
-  -f ./build/VoiceLearn.ipa \
+  -f ./build/UnaMentis.ipa \
   -t ios \
   -u YOUR_APPLE_ID \
   -p YOUR_APP_SPECIFIC_PASSWORD
@@ -255,7 +255,7 @@ Create `ExportOptions.plist`:
 ### 1. Wait for Processing
 
 After uploading:
-1. Go to App Store Connect → My Apps → VoiceLearn
+1. Go to App Store Connect → My Apps → UnaMentis
 2. Click **TestFlight** tab
 3. Your build will show as "Processing" (typically 15-30 minutes)
 4. Once processed, it will show a yellow "Missing Compliance" warning
@@ -266,7 +266,7 @@ For each new build:
 1. Click on the build version
 2. Under "Missing Compliance", click **Manage**
 3. Answer the encryption questionnaire:
-   - VoiceLearn likely uses HTTPS only (standard encryption)
+   - UnaMentis likely uses HTTPS only (standard encryption)
    - If only using HTTPS/TLS: Select "No" for custom encryption
 4. Click **Start Internal Testing** (or **Save** for external)
 
@@ -365,7 +365,7 @@ For each new upload:
 2. Increment build number (1 → 2 → 3...)
 
 **Quick update in Xcode:**
-1. Select VoiceLearn target
+1. Select UnaMentis target
 2. General tab → Build field
 3. Increment the number
 
@@ -451,7 +451,7 @@ To automatically distribute new builds to existing testers:
 ### First-Time Setup
 - [ ] Apple Developer Program membership active ($99/year)
 - [ ] App Store Connect agreements accepted
-- [ ] Bundle ID registered (`com.voicelearn.app`)
+- [ ] Bundle ID registered (`com.unamentis.app`)
 - [ ] App created in App Store Connect
 - [ ] Development Team set in Xcode project
 - [ ] Distribution certificate created
@@ -476,7 +476,7 @@ To automatically distribute new builds to existing testers:
 
 ---
 
-## VoiceLearn-Specific Notes
+## UnaMentis-Specific Notes
 
 ### Special Considerations
 
@@ -502,7 +502,7 @@ To automatically distribute new builds to existing testers:
 Example "What to Test" content for builds:
 
 ```
-VoiceLearn Beta - What to Test
+UnaMentis Beta - What to Test
 
 1. Voice Session Flow
    - Start a learning session

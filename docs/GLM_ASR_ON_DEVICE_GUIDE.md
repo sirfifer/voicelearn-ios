@@ -1,6 +1,6 @@
 # GLM-ASR On-Device Implementation Guide
 
-**Purpose:** Complete guide for implementing and using the on-device GLM-ASR-Nano speech recognition service in VoiceLearn iOS.
+**Purpose:** Complete guide for implementing and using the on-device GLM-ASR-Nano speech recognition service in UnaMentis iOS.
 
 **Last Updated:** December 2025
 
@@ -23,7 +23,7 @@
 
 ### 1.1 What is On-Device GLM-ASR?
 
-VoiceLearn supports running GLM-ASR-Nano directly on the device using CoreML for the neural network components and llama.cpp for the text decoder. This provides:
+UnaMentis supports running GLM-ASR-Nano directly on the device using CoreML for the neural network components and llama.cpp for the text decoder. This provides:
 
 - **Zero latency** - No network round-trip
 - **Complete privacy** - Audio never leaves the device
@@ -101,7 +101,7 @@ The `GLMASROnDeviceSTTService` is automatically selected when:
 
 | Class | File | Purpose |
 |-------|------|---------|
-| `GLMASROnDeviceSTTService` | [GLMASROnDeviceSTTService.swift](../VoiceLearn/Services/STT/GLMASROnDeviceSTTService.swift) | Main STT service implementation |
+| `GLMASROnDeviceSTTService` | [GLMASROnDeviceSTTService.swift](../UnaMentis/Services/STT/GLMASROnDeviceSTTService.swift) | Main STT service implementation |
 | `GLMWhisperEncoder` | (internal) | CoreML Whisper encoder wrapper |
 | `GLMAudioAdapter` | (internal) | CoreML adapter wrapper |
 | `GLMEmbedHead` | (internal) | CoreML embed head wrapper |
@@ -267,13 +267,13 @@ return true
 
 ### 5.1 Adding Models to Xcode Project
 
-1. **Open Xcode** and your VoiceLearn project
-2. **Right-click** on the VoiceLearn folder in the navigator
-3. **Select "Add Files to VoiceLearn..."**
+1. **Open Xcode** and your UnaMentis project
+2. **Right-click** on the UnaMentis folder in the navigator
+3. **Select "Add Files to UnaMentis..."**
 4. **Navigate** to `models/glm-asr-nano/`
 5. **Select all model files** (.mlpackage folders and .gguf file)
 6. **Check** "Copy items if needed"
-7. **Check** "Add to targets: VoiceLearn"
+7. **Check** "Add to targets: UnaMentis"
 8. **Click Add**
 
 ### 5.2 Build Settings
@@ -299,7 +299,7 @@ dependencies: [
 ],
 targets: [
     .target(
-        name: "VoiceLearn",
+        name: "UnaMentis",
         dependencies: [
             .product(name: "llama", package: "llama.cpp"),
         ],
@@ -413,9 +413,9 @@ Run the GLM-ASR unit tests:
 
 ```bash
 xcodebuild test \
-  -scheme VoiceLearn \
+  -scheme UnaMentis \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:VoiceLearnTests/Unit/Services/GLMASROnDeviceSTTServiceTests
+  -only-testing:UnaMentisTests/Unit/Services/GLMASROnDeviceSTTServiceTests
 ```
 
 ### 7.4 Performance Benchmarks

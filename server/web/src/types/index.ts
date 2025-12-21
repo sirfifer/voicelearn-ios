@@ -1,4 +1,4 @@
-// VoiceLearn Management Console Types
+// UnaMentis Management Console Types
 
 export interface LogEntry {
   id: string;
@@ -62,7 +62,7 @@ export interface RemoteClient {
 export interface ServerStatus {
   id: string;
   name: string;
-  type: 'ollama' | 'whisper' | 'piper' | 'voicelearnGateway' | 'custom';
+  type: 'ollama' | 'whisper' | 'piper' | 'unamentisGateway' | 'custom';
   url: string;
   port: number;
   status: 'unknown' | 'healthy' | 'degraded' | 'unhealthy';

@@ -1,4 +1,4 @@
-# VoiceLearn AI Task Analysis & Model Routing Strategy
+# UnaMentis AI Task Analysis & Model Routing Strategy
 
 **Purpose:** Break down every AI/LLM task to understand capability requirements and optimal deployment strategies.
 
@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-This document analyzes every AI-dependent task in VoiceLearn to determine:
+This document analyzes every AI-dependent task in UnaMentis to determine:
 1. Whether AI is actually needed (vs simple deterministic code)
 2. If AI is needed, what capability level is required
 3. Optimal deployment: On-Device | Self-Hosted Server | Cloud API

@@ -1,6 +1,6 @@
-# VoiceLearn Device Setup Guide
+# UnaMentis Device Setup Guide
 
-**Complete guide for running VoiceLearn on your iPhone with local on-device speech recognition.**
+**Complete guide for running UnaMentis on your iPhone with local on-device speech recognition.**
 
 ---
 
@@ -66,7 +66,7 @@ xcrun xctrace list devices
 
 # Build for your device (replace with your device name)
 xcodebuild build \
-    -scheme VoiceLearn \
+    -scheme UnaMentis \
     -destination 'platform=iOS,name=Your iPhone Name' \
     -configuration Release
 ```
@@ -75,7 +75,7 @@ xcodebuild build \
 
 For device deployment, you need code signing:
 
-1. **In Xcode**: Select VoiceLearn target → Signing & Capabilities
+1. **In Xcode**: Select UnaMentis target → Signing & Capabilities
 2. **Team**: Select your Apple ID / Developer Team
 3. **Bundle Identifier**: Change to unique ID (e.g., `com.yourname.voicelearn`)
 4. **Automatically manage signing**: Enable
@@ -134,17 +134,17 @@ mkdir -p /Users/ramerman/dev/voicelearn-ios/models/glm-asr-nano
 
 ### Step 2: Add Models to Xcode Project
 
-1. **In Xcode**: Right-click on VoiceLearn folder
-2. **Add Files to VoiceLearn...**
+1. **In Xcode**: Right-click on UnaMentis folder
+2. **Add Files to UnaMentis...**
 3. **Select** all model files from `models/glm-asr-nano/`
 4. **Options**:
    - ✅ Copy items if needed
-   - ✅ Add to targets: VoiceLearn
+   - ✅ Add to targets: UnaMentis
 5. **Click Add**
 
 ### Step 3: Configure Build Phase
 
-1. Select VoiceLearn target
+1. Select UnaMentis target
 2. Go to **Build Phases**
 3. Expand **Copy Bundle Resources**
 4. Verify all .mlpackage and .gguf files are listed
@@ -245,7 +245,7 @@ Check **Analytics** tab for:
 - Check Console.app for crash logs
 
 **Microphone not working**
-- Settings → VoiceLearn → Microphone → Enable
+- Settings → UnaMentis → Microphone → Enable
 - Restart the app
 
 **Models not loading**
@@ -281,8 +281,8 @@ Check **Analytics** tab for:
 | Project | `/Users/ramerman/dev/voicelearn-ios/` |
 | Package.swift | `/Users/ramerman/dev/voicelearn-ios/Package.swift` |
 | Models directory | `/Users/ramerman/dev/voicelearn-ios/models/glm-asr-nano/` |
-| Core Data model | `VoiceLearn/VoiceLearn.xcdatamodeld` |
-| On-device service | `VoiceLearn/Services/STT/GLMASROnDeviceSTTService.swift` |
+| Core Data model | `UnaMentis/UnaMentis.xcdatamodeld` |
+| On-device service | `UnaMentis/Services/STT/GLMASROnDeviceSTTService.swift` |
 
 ### Build Commands
 
@@ -291,7 +291,7 @@ Check **Analytics** tab for:
 swift build
 
 # Xcode build for device
-xcodebuild -scheme VoiceLearn -destination 'platform=iOS,name=YOUR_IPHONE'
+xcodebuild -scheme UnaMentis -destination 'platform=iOS,name=YOUR_IPHONE'
 
 # List simulators
 xcrun simctl list devices

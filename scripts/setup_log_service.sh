@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# VoiceLearn Log Server Service Setup
+# UnaMentis Log Server Service Setup
 #
 # This script installs/uninstalls the log server as a macOS launchd service
 # that runs automatically in the background.
@@ -17,8 +17,8 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SERVICE_NAME="com.voicelearn.logserver"
-PLIST_SOURCE="$SCRIPT_DIR/com.voicelearn.logserver.plist"
+SERVICE_NAME="com.unamentis.logserver"
+PLIST_SOURCE="$SCRIPT_DIR/com.unamentis.logserver.plist"
 PLIST_DEST="$HOME/Library/LaunchAgents/$SERVICE_NAME.plist"
 LOG_SERVER="$SCRIPT_DIR/log_server.py"
 
@@ -51,7 +51,7 @@ get_local_ip() {
 }
 
 install_service() {
-    print_status "Installing VoiceLearn Log Server service..."
+    print_status "Installing UnaMentis Log Server service..."
 
     # Create LaunchAgents directory if it doesn't exist
     mkdir -p "$HOME/Library/LaunchAgents"
@@ -96,7 +96,7 @@ install_service() {
 }
 
 uninstall_service() {
-    print_status "Uninstalling VoiceLearn Log Server service..."
+    print_status "Uninstalling UnaMentis Log Server service..."
 
     if [ -f "$PLIST_DEST" ]; then
         # Unload the service
@@ -112,7 +112,7 @@ uninstall_service() {
 }
 
 check_status() {
-    echo -e "${BLUE}VoiceLearn Log Server Status${NC}"
+    echo -e "${BLUE}UnaMentis Log Server Status${NC}"
     echo "=============================="
 
     if launchctl list | grep -q "$SERVICE_NAME"; then
@@ -146,7 +146,7 @@ check_status() {
 }
 
 restart_service() {
-    print_status "Restarting VoiceLearn Log Server service..."
+    print_status "Restarting UnaMentis Log Server service..."
 
     if [ -f "$PLIST_DEST" ]; then
         launchctl unload "$PLIST_DEST" 2>/dev/null || true
@@ -161,20 +161,20 @@ restart_service() {
 }
 
 show_logs() {
-    echo -e "${BLUE}VoiceLearn Log Server Logs${NC}"
+    echo -e "${BLUE}UnaMentis Log Server Logs${NC}"
     echo "============================"
 
-    if [ -f /tmp/voicelearn-logserver.log ]; then
+    if [ -f /tmp/unamentis-logserver.log ]; then
         echo -e "\n${GREEN}=== stdout ===${NC}"
-        tail -50 /tmp/voicelearn-logserver.log
+        tail -50 /tmp/unamentis-logserver.log
     fi
 
-    if [ -f /tmp/voicelearn-logserver.err ]; then
+    if [ -f /tmp/unamentis-logserver.err ]; then
         echo -e "\n${RED}=== stderr ===${NC}"
-        tail -50 /tmp/voicelearn-logserver.err
+        tail -50 /tmp/unamentis-logserver.err
     fi
 
-    if [ ! -f /tmp/voicelearn-logserver.log ] && [ ! -f /tmp/voicelearn-logserver.err ]; then
+    if [ ! -f /tmp/unamentis-logserver.log ] && [ ! -f /tmp/unamentis-logserver.err ]; then
         print_warning "No log files found. Service may not have run yet."
     fi
 }
@@ -197,7 +197,7 @@ case "${1:-}" in
         show_logs
         ;;
     *)
-        echo "VoiceLearn Log Server Service Manager"
+        echo "UnaMentis Log Server Service Manager"
         echo ""
         echo "Usage: $0 {install|uninstall|status|restart|logs}"
         echo ""

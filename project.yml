@@ -1,6 +1,6 @@
-name: VoiceLearn
+name: UnaMentis
 options:
-  bundleIdPrefix: com.voicelearn
+  bundleIdPrefix: com.unamentis
   deploymentTarget:
     iOS: "18.0"
   xcodeVersion: "15.2"
@@ -37,12 +37,12 @@ packages:
   # See docs/plan for xcframework setup instructions
 
 targets:
-  VoiceLearn:
+  UnaMentis:
     type: application
     platform: iOS
     deploymentTarget: "18.0"
     sources:
-      - path: VoiceLearn
+      - path: UnaMentis
         excludes:
           - "**/.DS_Store"
           # ManagedObjects included now - using manual classes with no auto-generation
@@ -59,69 +59,69 @@ targets:
       # LlamaCpp dependency removed - using server-hosted LLM via SelfHostedLLMService
     settings:
       base:
-        INFOPLIST_FILE: VoiceLearn/Info.plist
-        PRODUCT_BUNDLE_IDENTIFIER: com.voicelearn.app
+        INFOPLIST_FILE: UnaMentis/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.unamentis.app
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_EMIT_LOC_STRINGS: YES
         GENERATE_INFOPLIST_FILE: NO
     info:
-      path: VoiceLearn/Info.plist
+      path: UnaMentis/Info.plist
       properties:
-        CFBundleName: VoiceLearn
-        CFBundleDisplayName: VoiceLearn
+        CFBundleName: UnaMentis
+        CFBundleDisplayName: UnaMentis
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
         CFBundleVersion: "1"
         CFBundleShortVersionString: "1.0"
         CFBundlePackageType: APPL
-        CFBundleExecutable: VoiceLearn
+        CFBundleExecutable: UnaMentis
         UILaunchStoryboardName: LaunchScreen
         UIRequiredDeviceCapabilities:
           - arm64
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
-        NSMicrophoneUsageDescription: "VoiceLearn needs microphone access for voice-based educational conversations."
-        NSSpeechRecognitionUsageDescription: "VoiceLearn uses speech recognition for voice commands."
+        NSMicrophoneUsageDescription: "UnaMentis needs microphone access for voice-based educational conversations."
+        NSSpeechRecognitionUsageDescription: "UnaMentis uses speech recognition for voice commands."
         UIBackgroundModes:
           - audio
         BGTaskSchedulerPermittedIdentifiers:
-          - com.voicelearn.session-sync
+          - com.unamentis.session-sync
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
     entitlements:
-      path: VoiceLearn/VoiceLearn.entitlements
+      path: UnaMentis/UnaMentis.entitlements
       properties:
         com.apple.security.app-sandbox: true
         com.apple.security.device.audio-input: true
         com.apple.security.network.client: true
 
-  VoiceLearnTests:
+  UnaMentisTests:
     type: bundle.unit-test
     platform: iOS
     deploymentTarget: "18.0"
     sources:
-      - path: VoiceLearnTests
+      - path: UnaMentisTests
         excludes:
           - "**/.DS_Store"
           - E2E  # E2E tests separate
     dependencies:
-      - target: VoiceLearn
+      - target: UnaMentis
     settings:
       base:
-        INFOPLIST_FILE: VoiceLearnTests/Info.plist
-        PRODUCT_BUNDLE_IDENTIFIER: com.voicelearn.tests
+        INFOPLIST_FILE: UnaMentisTests/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.unamentis.tests
         GENERATE_INFOPLIST_FILE: YES
 
 schemes:
-  VoiceLearn:
+  UnaMentis:
     build:
       targets:
-        VoiceLearn: all
+        UnaMentis: all
     run:
       config: Debug
     test:
       config: Debug
       targets:
-        - name: VoiceLearnTests
+        - name: UnaMentisTests
           parallelizable: true
           randomExecutionOrder: true
     profile:

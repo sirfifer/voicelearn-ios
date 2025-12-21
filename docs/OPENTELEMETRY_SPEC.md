@@ -1,8 +1,8 @@
-# VoiceLearn OpenTelemetry Architecture Specification
+# UnaMentis OpenTelemetry Architecture Specification
 
 ## Overview
 
-This document specifies the OpenTelemetry (OTel) infrastructure for VoiceLearn, providing rich performance metrics, distributed tracing, and analytics capabilities. The architecture is designed to:
+This document specifies the OpenTelemetry (OTel) infrastructure for UnaMentis, providing rich performance metrics, distributed tracing, and analytics capabilities. The architecture is designed to:
 
 1. **Unify observability** - Same metrics visible in-app and in dashboards
 2. **Enable AI agent access** - HTTP API endpoints for programmatic analysis
@@ -40,7 +40,7 @@ Both options support the same OpenTelemetry protocols from the iOS app.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           VoiceLearn iOS App                                 │
+│                           UnaMentis iOS App                                 │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
 │  │ TelemetryEngine │  │ OTelExporter    │  │ RemoteLogHandler            │  │
 │  │ (existing)      │──│ (new)           │  │ (existing - port 8765)      │  │
@@ -428,8 +428,8 @@ GROUP BY session_id
 
 | File | Purpose |
 |------|---------|
-| `VoiceLearn/Core/Telemetry/OTelExporter.swift` | OpenTelemetry export wrapper |
-| `VoiceLearn/Core/Telemetry/SpanManager.swift` | Trace span lifecycle management |
+| `UnaMentis/Core/Telemetry/OTelExporter.swift` | OpenTelemetry export wrapper |
+| `UnaMentis/Core/Telemetry/SpanManager.swift` | Trace span lifecycle management |
 | `scripts/setup_telemetry_service.sh` | Service management script |
 | `telemetry/docker-compose.yml` | SigNoz configuration |
 | `telemetry/dashboards/` | Pre-built dashboard JSON |

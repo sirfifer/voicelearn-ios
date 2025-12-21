@@ -1,4 +1,4 @@
-# VoiceLearn - Detailed Setup Guide
+# UnaMentis - Detailed Setup Guide
 
 ## System Requirements
 
@@ -46,7 +46,7 @@ Installed automatically by `setup-local-env.sh`:
 After running the installer, you'll have:
 
 ```
-VoiceLearn-iOS/
+UnaMentis-iOS/
 ├── .git/                      # Git repository
 ├── .github/
 │   └── workflows/
@@ -54,7 +54,7 @@ VoiceLearn-iOS/
 ├── .vscode/
 │   ├── settings.json         # VS Code settings
 │   └── tasks.json            # Build tasks
-├── VoiceLearn/               # Main app (after Xcode setup)
+├── UnaMentis/               # Main app (after Xcode setup)
 │   ├── Core/
 │   │   ├── Audio/
 │   │   ├── Session/
@@ -67,7 +67,7 @@ VoiceLearn-iOS/
 │   │   ├── VAD/
 │   │   └── Protocols/
 │   └── UI/
-├── VoiceLearnTests/          # Tests
+├── UnaMentisTests/          # Tests
 │   ├── Unit/
 │   ├── Integration/
 │   ├── E2E/
@@ -100,7 +100,7 @@ This must be done manually because Xcode project files are binary:
 2. **File → New → Project**
 3. **iOS → App**
 4. **Configure**:
-   - Product Name: `VoiceLearn`
+   - Product Name: `UnaMentis`
    - Team: Your team
    - Organization ID: `com.yourname`
    - Interface: **SwiftUI**
@@ -168,11 +168,11 @@ For on-device speech recognition without API costs:
    ```
 
 4. **Add to Xcode** (for device builds):
-   - Right-click VoiceLearn folder
-   - Add Files to VoiceLearn
+   - Right-click UnaMentis folder
+   - Add Files to UnaMentis
    - Select model files
    - Check "Copy items if needed"
-   - Check "Add to targets: VoiceLearn"
+   - Check "Add to targets: UnaMentis"
 
 See [GLM_ASR_ON_DEVICE_GUIDE.md](GLM_ASR_ON_DEVICE_GUIDE.md) for complete setup.
 
@@ -216,7 +216,7 @@ Already configured in `.vscode/`:
 
 ```bash
 # From command line
-xcodebuild -scheme VoiceLearn build
+xcodebuild -scheme UnaMentis build
 
 # Or in Xcode
 ⌘ + B
@@ -343,7 +343,7 @@ GitHub Actions is configured in `.github/workflows/ios.yml`.
 
 ## AI Simulator Testing Setup
 
-VoiceLearn supports AI-driven iOS Simulator testing via MCP (Model Context Protocol).
+UnaMentis supports AI-driven iOS Simulator testing via MCP (Model Context Protocol).
 
 ### Install ios-simulator-mcp
 
@@ -368,7 +368,7 @@ After restarting Claude Code, simulator tools become available. See [AI_SIMULATO
 
 ## Curriculum Format Setup
 
-VoiceLearn uses the **VoiceLearn Curriculum Format (VLCF)** for educational content. The specification and tooling are in the `curriculum/` directory.
+UnaMentis uses the **UnaMentis Curriculum Format (VLCF)** for educational content. The specification and tooling are in the `curriculum/` directory.
 
 ### Curriculum Structure
 

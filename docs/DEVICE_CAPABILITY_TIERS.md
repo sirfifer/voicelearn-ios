@@ -1,4 +1,4 @@
-# VoiceLearn Device Capability Tiers
+# UnaMentis Device Capability Tiers
 
 **Purpose:** Define device tiers for optimal on-device AI experience with graceful fallback.
 
@@ -422,7 +422,7 @@ or
 
 **Unsupported devices (at app launch):**
 ```
-"VoiceLearn requires iPhone 13 Pro or newer for the best experience.
+"UnaMentis requires iPhone 13 Pro or newer for the best experience.
 Your device may experience reduced functionality."
 
 [Allow them to continue but set expectations]

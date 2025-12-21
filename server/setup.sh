@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# VoiceLearn Server Setup Script
+# UnaMentis Server Setup Script
 #
 # Single-command deployment for self-hosted AI services on macOS.
 # Installs and configures: Ollama (LLM), whisper.cpp (STT), Piper (TTS)
@@ -10,7 +10,7 @@
 #   --whisper SIZE   Whisper model size: tiny|base|small|medium|large (default: small)
 #   --port PORT      Base port for services (default: 11400)
 #   --no-autostart   Don't configure services to start automatically
-#   --uninstall      Remove VoiceLearn server components
+#   --uninstall      Remove UnaMentis server components
 #
 # Services will be available at:
 #   LLM:  http://localhost:11434 (Ollama)
@@ -35,11 +35,11 @@ AUTOSTART=true
 UNINSTALL=false
 
 # Directories
-VOICELEARN_DIR="$HOME/.voicelearn-server"
-BIN_DIR="$VOICELEARN_DIR/bin"
-MODELS_DIR="$VOICELEARN_DIR/models"
-LOGS_DIR="$VOICELEARN_DIR/logs"
-CONFIG_DIR="$VOICELEARN_DIR/config"
+UNAMENTIS_DIR="$HOME/.unamentis-server"
+BIN_DIR="$UNAMENTIS_DIR/bin"
+MODELS_DIR="$UNAMENTIS_DIR/models"
+LOGS_DIR="$UNAMENTIS_DIR/logs"
+CONFIG_DIR="$UNAMENTIS_DIR/config"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -80,7 +80,7 @@ OLLAMA_PORT=11434  # Standard Ollama port
 print_banner() {
     echo -e "${BLUE}"
     echo "╔═══════════════════════════════════════════════════════════╗"
-    echo "║          VoiceLearn Server Setup for macOS                ║"
+    echo "║          UnaMentis Server Setup for macOS                ║"
     echo "║                                                           ║"
     echo "║  LLM: Ollama    STT: whisper.cpp    TTS: Piper            ║"
     echo "╚═══════════════════════════════════════════════════════════╝"
@@ -148,7 +148,7 @@ install_ollama() {
 install_whisper() {
     echo -e "${BLUE}Setting up whisper.cpp...${NC}"
 
-    WHISPER_DIR="$VOICELEARN_DIR/whisper.cpp"
+    WHISPER_DIR="$UNAMENTIS_DIR/whisper.cpp"
 
     if [[ ! -d "$WHISPER_DIR" ]]; then
         echo "Cloning whisper.cpp..."
@@ -177,7 +177,7 @@ install_whisper() {
 install_piper() {
     echo -e "${BLUE}Setting up Piper TTS...${NC}"
 
-    PIPER_DIR="$VOICELEARN_DIR/piper"
+    PIPER_DIR="$UNAMENTIS_DIR/piper"
 
     # Download Piper binary
     if [[ ! -f "$BIN_DIR/piper" ]]; then
@@ -406,10 +406,10 @@ PIPER_SERVER
 create_unified_server() {
     echo -e "${BLUE}Creating unified API gateway...${NC}"
 
-    cat > "$BIN_DIR/voicelearn-gateway.py" << 'GATEWAY_SERVER'
+    cat > "$BIN_DIR/unamentis-gateway.py" << 'GATEWAY_SERVER'
 #!/usr/bin/env python3
 """
-VoiceLearn API Gateway
+UnaMentis API Gateway
 Unified endpoint that routes to all services and provides discovery.
 """
 import os
@@ -446,7 +446,7 @@ class GatewayHandler(BaseHTTPRequestHandler):
     def handle_discovery(self):
         """Return server configuration for auto-discovery"""
         config = {
-            'voicelearn_server': True,
+            'unamentis_server': True,
             'version': '1.0.0',
             'services': {
                 'llm': {
@@ -561,27 +561,27 @@ class GatewayHandler(BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     server = HTTPServer(('0.0.0.0', GATEWAY_PORT), GatewayHandler)
-    print(f'VoiceLearn Gateway listening on port {GATEWAY_PORT}')
+    print(f'UnaMentis Gateway listening on port {GATEWAY_PORT}')
     print(f'Discovery endpoint: http://localhost:{GATEWAY_PORT}/')
     print(f'Health endpoint: http://localhost:{GATEWAY_PORT}/health')
     server.serve_forever()
 GATEWAY_SERVER
 
-    chmod +x "$BIN_DIR/voicelearn-gateway.py"
+    chmod +x "$BIN_DIR/unamentis-gateway.py"
 }
 
 create_control_script() {
     echo -e "${BLUE}Creating control script...${NC}"
 
-    cat > "$BIN_DIR/voicelearn-server" << CONTROL
+    cat > "$BIN_DIR/unamentis-server" << CONTROL
 #!/bin/bash
 #
-# VoiceLearn Server Control Script
+# UnaMentis Server Control Script
 #
-# Usage: voicelearn-server [start|stop|status|restart]
+# Usage: unamentis-server [start|stop|status|restart]
 #
 
-VOICELEARN_DIR="$VOICELEARN_DIR"
+UNAMENTIS_DIR="$UNAMENTIS_DIR"
 BIN_DIR="$BIN_DIR"
 MODELS_DIR="$MODELS_DIR"
 LOGS_DIR="$LOGS_DIR"
@@ -594,7 +594,7 @@ WHISPER_MODEL="ggml-$WHISPER_SIZE.bin"
 PIPER_MODEL="en_US-amy-medium.onnx"
 
 start_services() {
-    echo "Starting VoiceLearn services..."
+    echo "Starting UnaMentis services..."
 
     # Start Ollama if not running
     if ! pgrep -x "ollama" > /dev/null; then
@@ -622,14 +622,14 @@ start_services() {
     fi
 
     # Start Gateway
-    if ! pgrep -f "voicelearn-gateway" > /dev/null; then
+    if ! pgrep -f "unamentis-gateway" > /dev/null; then
         echo "Starting API gateway on port \$GATEWAY_PORT..."
         OLLAMA_URL="http://localhost:11434" \\
         STT_URL="http://localhost:\$STT_PORT" \\
         TTS_URL="http://localhost:\$TTS_PORT" \\
         GATEWAY_PORT=\$GATEWAY_PORT \\
         LLM_MODEL="\$LLM_MODEL" \\
-        nohup python3 "\$BIN_DIR/voicelearn-gateway.py" > "\$LOGS_DIR/gateway.log" 2>&1 &
+        nohup python3 "\$BIN_DIR/unamentis-gateway.py" > "\$LOGS_DIR/gateway.log" 2>&1 &
     fi
 
     sleep 2
@@ -639,9 +639,9 @@ start_services() {
 }
 
 stop_services() {
-    echo "Stopping VoiceLearn services..."
+    echo "Stopping UnaMentis services..."
 
-    pkill -f "voicelearn-gateway" 2>/dev/null
+    pkill -f "unamentis-gateway" 2>/dev/null
     pkill -f "piper-http-server" 2>/dev/null
     pkill -f "whisper-http-server" 2>/dev/null
 
@@ -651,7 +651,7 @@ stop_services() {
 show_status() {
     echo ""
     echo "╔═══════════════════════════════════════════════════════════╗"
-    echo "║              VoiceLearn Server Status                     ║"
+    echo "║              UnaMentis Server Status                     ║"
     echo "╚═══════════════════════════════════════════════════════════╝"
     echo ""
 
@@ -709,13 +709,13 @@ case "\${1:-status}" in
         show_status
         ;;
     *)
-        echo "Usage: voicelearn-server [start|stop|status|restart]"
+        echo "Usage: unamentis-server [start|stop|status|restart]"
         exit 1
         ;;
 esac
 CONTROL
 
-    chmod +x "$BIN_DIR/voicelearn-server"
+    chmod +x "$BIN_DIR/unamentis-server"
 }
 
 create_launchd_plist() {
@@ -725,7 +725,7 @@ create_launchd_plist() {
 
     echo -e "${BLUE}Configuring auto-start...${NC}"
 
-    PLIST_PATH="$HOME/Library/LaunchAgents/com.voicelearn.server.plist"
+    PLIST_PATH="$HOME/Library/LaunchAgents/com.unamentis.server.plist"
 
     cat > "$PLIST_PATH" << PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -733,10 +733,10 @@ create_launchd_plist() {
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.voicelearn.server</string>
+    <string>com.unamentis.server</string>
     <key>ProgramArguments</key>
     <array>
-        <string>$BIN_DIR/voicelearn-server</string>
+        <string>$BIN_DIR/unamentis-server</string>
         <string>start</string>
     </array>
     <key>RunAtLoad</key>
@@ -787,7 +787,7 @@ write_config() {
         }
     },
     "directories": {
-        "base": "$VOICELEARN_DIR",
+        "base": "$UNAMENTIS_DIR",
         "bin": "$BIN_DIR",
         "models": "$MODELS_DIR",
         "logs": "$LOGS_DIR"
@@ -805,9 +805,9 @@ add_to_path() {
 
     PATH_LINE="export PATH=\"\$PATH:$BIN_DIR\""
 
-    if ! grep -q "voicelearn-server" "$SHELL_RC" 2>/dev/null; then
+    if ! grep -q "unamentis-server" "$SHELL_RC" 2>/dev/null; then
         echo "" >> "$SHELL_RC"
-        echo "# VoiceLearn Server" >> "$SHELL_RC"
+        echo "# UnaMentis Server" >> "$SHELL_RC"
         echo "$PATH_LINE" >> "$SHELL_RC"
     fi
 
@@ -815,19 +815,19 @@ add_to_path() {
 }
 
 uninstall() {
-    echo -e "${YELLOW}Uninstalling VoiceLearn Server...${NC}"
+    echo -e "${YELLOW}Uninstalling UnaMentis Server...${NC}"
 
     # Stop services
-    "$BIN_DIR/voicelearn-server" stop 2>/dev/null || true
+    "$BIN_DIR/unamentis-server" stop 2>/dev/null || true
 
     # Remove launchd plist
-    launchctl unload "$HOME/Library/LaunchAgents/com.voicelearn.server.plist" 2>/dev/null || true
-    rm -f "$HOME/Library/LaunchAgents/com.voicelearn.server.plist"
+    launchctl unload "$HOME/Library/LaunchAgents/com.unamentis.server.plist" 2>/dev/null || true
+    rm -f "$HOME/Library/LaunchAgents/com.unamentis.server.plist"
 
     # Remove directory
-    rm -rf "$VOICELEARN_DIR"
+    rm -rf "$UNAMENTIS_DIR"
 
-    echo -e "${GREEN}VoiceLearn Server uninstalled.${NC}"
+    echo -e "${GREEN}UnaMentis Server uninstalled.${NC}"
     echo "Note: Ollama was not removed. Run 'brew uninstall ollama' to remove it."
     exit 0
 }
@@ -835,7 +835,7 @@ uninstall() {
 print_summary() {
     echo ""
     echo -e "${GREEN}╔═══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║          VoiceLearn Server Setup Complete!                ║${NC}"
+    echo -e "${GREEN}║          UnaMentis Server Setup Complete!                ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo "Services configured:"
@@ -850,14 +850,14 @@ print_summary() {
     echo "  • TTS:       http://localhost:$TTS_PORT/v1/audio/speech"
     echo ""
     echo "Commands:"
-    echo "  • Start:   voicelearn-server start"
-    echo "  • Stop:    voicelearn-server stop"
-    echo "  • Status:  voicelearn-server status"
+    echo "  • Start:   unamentis-server start"
+    echo "  • Stop:    unamentis-server stop"
+    echo "  • Status:  unamentis-server status"
     echo ""
     echo "Starting services now..."
     echo ""
 
-    "$BIN_DIR/voicelearn-server" start
+    "$BIN_DIR/unamentis-server" start
 }
 
 # Main execution

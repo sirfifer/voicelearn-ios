@@ -1,10 +1,10 @@
-# VoiceLearn iOS
+# UnaMentis iOS
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Real-time bidirectional voice AI platform for extended educational conversations**
 
-## Why VoiceLearn?
+## Why UnaMentis?
 
 One of my earliest experiences re-engaging with AI earlier this year was with ChatGPT's Advanced Voice Mode. Very quickly, I fell in love with the capability of having seamless, hands-free conversations with AI. Initially these were about bouncing off ideas and exploring things, but it evolved into the ultimate way of learning. I could give advanced topics to the AI and it would deliver detailed lectures on demand.
 
@@ -14,7 +14,7 @@ I realized I can't rely on off-the-shelf tools to meet this need. There's a lot 
 
 ## Overview
 
-VoiceLearn is an iOS application that enables 60-90+ minute voice-based learning sessions with AI tutoring. Built for iPhone 16/17 Pro Max with emphasis on:
+UnaMentis is an iOS application that enables 60-90+ minute voice-based learning sessions with AI tutoring. Built for iPhone 16/17 Pro Max with emphasis on:
 
 - Sub-500ms end-to-end latency
 - Natural interruption handling (no push-to-talk)
@@ -24,7 +24,7 @@ VoiceLearn is an iOS application that enables 60-90+ minute voice-based learning
 
 ## Provider Flexibility
 
-VoiceLearn is designed to be provider-agnostic. The system supports pluggable providers for every component of the voice AI pipeline:
+UnaMentis is designed to be provider-agnostic. The system supports pluggable providers for every component of the voice AI pipeline:
 
 - **STT (Speech-to-Text)**: AssemblyAI, Deepgram, or any compatible provider
 - **TTS (Text-to-Speech)**: ElevenLabs, Deepgram Aura, or alternatives
@@ -117,7 +117,7 @@ See [docs/TASK_STATUS.md](docs/TASK_STATUS.md) for detailed task tracking.
 ## Architecture
 
 ```
-VoiceLearn/
+UnaMentis/
 ├── Core/           # Core business logic
 │   ├── Audio/      # Audio engine, VAD
 │   ├── Session/    # Session management
@@ -142,7 +142,7 @@ VoiceLearn/
 
 ## Curriculum System (VLCF)
 
-VoiceLearn includes a comprehensive curriculum format specification: the **VoiceLearn Curriculum Format (VLCF)**. This is a JSON-based standard designed specifically for conversational AI tutoring.
+UnaMentis includes a comprehensive curriculum format specification: the **UnaMentis Curriculum Format (VLCF)**. This is a JSON-based standard designed specifically for conversational AI tutoring.
 
 ### Key Features
 
@@ -182,7 +182,7 @@ VLCF may be spun off as a standalone project to enable adoption by other tutorin
 
 ### Open Source Core
 
-The fundamental core of VoiceLearn will always remain open source. This ensures the greatest possible audience can collaborate on and utilize this work. The open source commitment includes:
+The fundamental core of UnaMentis will always remain open source. This ensures the greatest possible audience can collaborate on and utilize this work. The open source commitment includes:
 
 - Core voice pipeline and session management
 - Curriculum system and progress tracking

@@ -42,19 +42,19 @@
 
 | File | Purpose | Lines |
 |------|---------|-------|
-| `VoiceLearn/Services/STT/GLMASRSTTService.swift` | Server-based STT service | ~400 |
-| `VoiceLearn/Services/STT/GLMASRHealthMonitor.swift` | Server health monitoring | ~150 |
-| `VoiceLearn/Services/STT/STTProviderRouter.swift` | Provider routing with failover | ~200 |
-| `VoiceLearnTests/Unit/Services/GLMASRSTTServiceTests.swift` | Unit tests for service | ~250 |
-| `VoiceLearnTests/Unit/Services/GLMASRHealthMonitorTests.swift` | Unit tests for health monitor | ~200 |
-| `VoiceLearnTests/Unit/Services/STTProviderRouterTests.swift` | Unit tests for router | ~300 |
-| `VoiceLearnTests/Integration/GLMASRIntegrationTests.swift` | Integration tests | ~250 |
+| `UnaMentis/Services/STT/GLMASRSTTService.swift` | Server-based STT service | ~400 |
+| `UnaMentis/Services/STT/GLMASRHealthMonitor.swift` | Server health monitoring | ~150 |
+| `UnaMentis/Services/STT/STTProviderRouter.swift` | Provider routing with failover | ~200 |
+| `UnaMentisTests/Unit/Services/GLMASRSTTServiceTests.swift` | Unit tests for service | ~250 |
+| `UnaMentisTests/Unit/Services/GLMASRHealthMonitorTests.swift` | Unit tests for health monitor | ~200 |
+| `UnaMentisTests/Unit/Services/STTProviderRouterTests.swift` | Unit tests for router | ~300 |
+| `UnaMentisTests/Integration/GLMASRIntegrationTests.swift` | Integration tests | ~250 |
 
 ### New Files - On-Device Implementation
 
 | File | Purpose | Lines |
 |------|---------|-------|
-| `VoiceLearn/Services/STT/GLMASROnDeviceSTTService.swift` | On-device STT with CoreML + llama.cpp | ~600 |
+| `UnaMentis/Services/STT/GLMASROnDeviceSTTService.swift` | On-device STT with CoreML + llama.cpp | ~600 |
 
 ### New Documentation
 
@@ -66,10 +66,10 @@
 
 | File | Changes |
 |------|---------|
-| `VoiceLearn/Services/Protocols/STTService.swift` | Added `glmASRNano` to `STTProvider` enum, cost info |
+| `UnaMentis/Services/Protocols/STTService.swift` | Added `glmASRNano` to `STTProvider` enum, cost info |
 | `Package.swift` | Added llama.cpp dependency, C++ interop settings |
-| `VoiceLearn/Core/Persistence/ManagedObjects/*.swift` | Manual NSManagedObject subclasses for SPM |
-| `VoiceLearn/VoiceLearn.xcdatamodeld` | Changed codegen to manual/none |
+| `UnaMentis/Core/Persistence/ManagedObjects/*.swift` | Manual NSManagedObject subclasses for SPM |
+| `UnaMentis/UnaMentis.xcdatamodeld` | Changed codegen to manual/none |
 
 ---
 
@@ -199,7 +199,7 @@ for await result in results {
 ### Phase 1: Tests (TDD Approach)
 
 #### 1.1 GLMASRSTTService Unit Tests
-**File:** `VoiceLearnTests/Unit/Services/GLMASRSTTServiceTests.swift`
+**File:** `UnaMentisTests/Unit/Services/GLMASRSTTServiceTests.swift`
 
 - [x] Test audio format validation (16kHz mono required)
 - [x] Test audio buffer conversion (Float32 → Int16 PCM)
@@ -212,7 +212,7 @@ for await result in results {
 - [x] Test metrics tracking
 
 #### 1.2 GLMASRHealthMonitor Unit Tests
-**File:** `VoiceLearnTests/Unit/Services/GLMASRHealthMonitorTests.swift`
+**File:** `UnaMentisTests/Unit/Services/GLMASRHealthMonitorTests.swift`
 
 - [x] Test health check success path
 - [x] Test health check failure path
@@ -223,7 +223,7 @@ for await result in results {
 - [x] Test monitoring start/stop
 
 #### 1.3 STTProviderRouter Unit Tests
-**File:** `VoiceLearnTests/Unit/Services/STTProviderRouterTests.swift`
+**File:** `UnaMentisTests/Unit/Services/STTProviderRouterTests.swift`
 
 - [x] Test routes to GLM-ASR when healthy
 - [x] Test fails over to Deepgram when unhealthy
@@ -232,7 +232,7 @@ for await result in results {
 - [x] Test cost passthrough
 
 #### 1.4 Integration Tests
-**File:** `VoiceLearnTests/Integration/GLMASRIntegrationTests.swift`
+**File:** `UnaMentisTests/Integration/GLMASRIntegrationTests.swift`
 
 - [x] Test connection to server
 - [x] Test end-to-end transcription (requires server)
@@ -243,7 +243,7 @@ for await result in results {
 ### Phase 2: Implementation
 
 #### 2.1 GLMASRSTTService
-**File:** `VoiceLearn/Services/STT/GLMASRSTTService.swift`
+**File:** `UnaMentis/Services/STT/GLMASRSTTService.swift`
 
 - [x] Configuration struct with all parameters
 - [x] WebSocket connection management
@@ -256,7 +256,7 @@ for await result in results {
 - [x] Message parser utility
 
 #### 2.2 GLMASRHealthMonitor
-**File:** `VoiceLearn/Services/STT/GLMASRHealthMonitor.swift`
+**File:** `UnaMentis/Services/STT/GLMASRHealthMonitor.swift`
 
 - [x] Configuration struct
 - [x] Health check HTTP request
@@ -265,7 +265,7 @@ for await result in results {
 - [x] Status stream via AsyncStream
 
 #### 2.3 STTProviderRouter
-**File:** `VoiceLearn/Services/STT/STTProviderRouter.swift`
+**File:** `UnaMentis/Services/STT/STTProviderRouter.swift`
 
 - [x] Provider selection logic
 - [x] Health monitoring integration
@@ -273,7 +273,7 @@ for await result in results {
 - [x] STTService protocol conformance
 
 #### 2.4 STTProvider Enum Update
-**File:** `VoiceLearn/Services/Protocols/STTService.swift`
+**File:** `UnaMentis/Services/Protocols/STTService.swift`
 
 - [x] Add `.glmASRNano` case
 - [x] Add display name and identifier

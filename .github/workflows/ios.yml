@@ -75,7 +75,7 @@ jobs:
       run: |
         set -o pipefail
         xcodebuild build \
-          -scheme VoiceLearn \
+          -scheme UnaMentis \
           -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
           -skipPackagePluginValidation \
           CODE_SIGNING_ALLOWED=NO \
@@ -85,9 +85,9 @@ jobs:
       run: |
         set -o pipefail
         xcodebuild test \
-          -scheme VoiceLearn \
+          -scheme UnaMentis \
           -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
-          -only-testing:VoiceLearnTests/Unit \
+          -only-testing:UnaMentisTests/Unit \
           -enableCodeCoverage YES \
           -resultBundlePath UnitTestResults.xcresult \
           CODE_SIGNING_ALLOWED=NO \
@@ -156,7 +156,7 @@ jobs:
       run: |
         set -o pipefail
         xcodebuild build \
-          -scheme VoiceLearn \
+          -scheme UnaMentis \
           -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
           -skipPackagePluginValidation \
           CODE_SIGNING_ALLOWED=NO \
@@ -166,9 +166,9 @@ jobs:
       run: |
         set -o pipefail
         xcodebuild test \
-          -scheme VoiceLearn \
+          -scheme UnaMentis \
           -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
-          -only-testing:VoiceLearnTests/Integration \
+          -only-testing:UnaMentisTests/Integration \
           -resultBundlePath IntegrationTestResults.xcresult \
           CODE_SIGNING_ALLOWED=NO \
           | xcbeautify --renderer github-actions

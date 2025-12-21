@@ -1,8 +1,8 @@
-# VoiceLearn iOS - Project Overview
+# UnaMentis iOS - Project Overview
 
 ## Purpose
 
-VoiceLearn is an AI-powered voice tutoring app for iOS that enables extended (60-90+ minute) educational conversations. Built to address limitations in existing voice AI (like ChatGPT's Advanced Voice Mode), it provides low-latency, natural voice interaction with curriculum-driven learning.
+UnaMentis is an AI-powered voice tutoring app for iOS that enables extended (60-90+ minute) educational conversations. Built to address limitations in existing voice AI (like ChatGPT's Advanced Voice Mode), it provides low-latency, natural voice interaction with curriculum-driven learning.
 
 **Target:** iPhone 15 Pro+ / 16/17 Pro Max
 **Goal:** Sub-500ms end-to-end latency with natural interruption handling
@@ -45,7 +45,7 @@ Microphone → AudioEngine → VAD → STT (streaming)
 
 ## Self-Hosted Server Support
 
-VoiceLearn can connect to local/LAN servers for zero-cost inference:
+UnaMentis can connect to local/LAN servers for zero-cost inference:
 
 | Server Type | Port | Purpose |
 |-------------|------|---------|
@@ -64,7 +64,7 @@ VoiceLearn can connect to local/LAN servers for zero-cost inference:
 
 ## Curriculum System (VLCF)
 
-**VoiceLearn Curriculum Format** - A JSON-based specification designed for conversational AI tutoring:
+**UnaMentis Curriculum Format** - A JSON-based specification designed for conversational AI tutoring:
 
 ### Structure
 ```
@@ -135,10 +135,10 @@ Maps to IEEE LOM, LRMI, SCORM, xAPI, QTI, and 5+ other educational standards.
 
 | Path | Purpose |
 |------|---------|
-| `VoiceLearn/Core/Session/SessionManager.swift` | Orchestrates voice sessions |
-| `VoiceLearn/Core/Curriculum/CurriculumEngine.swift` | Curriculum context generation |
-| `VoiceLearn/Core/Routing/PatchPanelService.swift` | LLM endpoint routing |
-| `VoiceLearn/Services/LLM/SelfHostedLLMService.swift` | Ollama/llama.cpp integration |
+| `UnaMentis/Core/Session/SessionManager.swift` | Orchestrates voice sessions |
+| `UnaMentis/Core/Curriculum/CurriculumEngine.swift` | Curriculum context generation |
+| `UnaMentis/Core/Routing/PatchPanelService.swift` | LLM endpoint routing |
+| `UnaMentis/Services/LLM/SelfHostedLLMService.swift` | Ollama/llama.cpp integration |
 | `curriculum/spec/vlcf-schema.json` | VLCF JSON Schema (1,847 lines) |
 
 ---

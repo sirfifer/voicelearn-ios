@@ -1,0 +1,1096 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01ABAF0927B8FB3C82CB7555 /* CurriculumEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C44C207CAFA73C1D526B473B /* CurriculumEngine.swift */; };
+		02D04453683695A6354A69CF /* LMAPIProviderInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA2D0F2C7B340A0F71796A7 /* LMAPIProviderInfo.swift */; };
+		05D30C780E95912853747429 /* APIKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A41B20443F5CDE827A977D /* APIKeyManager.swift */; };
+		06EEB298FD4923FB191A97AE /* TelemetryEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83ACA2137AC7B35D6BDAB74 /* TelemetryEngineTests.swift */; };
+		0CD94962B9FD36324214C8EF /* SampleCurriculumSeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDB5A62C7C40A99571DBF01 /* SampleCurriculumSeeder.swift */; };
+		0ED06879B9789F125D3AEA22 /* DebugConversationTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8871565D2C900334E4BB57B /* DebugConversationTestView.swift */; };
+		0F3F93E307337ECC5F6856EF /* AnthropicLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34AE5335D8D46F4E68958AE5 /* AnthropicLLMService.swift */; };
+		132E4E09251795EB48A00F47 /* DeepgramSTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DA39F6C49CAE826C4D39CA7 /* DeepgramSTTService.swift */; };
+		2040E1BCBAC62EB1FA16B3D8 /* OpenAIEmbeddingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7255225D19D4EFBCDC467F4B /* OpenAIEmbeddingServiceTests.swift */; };
+		2353C0717E17DDE868F4FFDC /* STTProviderRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D215C843AA2A1228353BAB /* STTProviderRouterTests.swift */; };
+		2677ACF9A194F6325F5EB743 /* GLMASRHealthMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D34530F07B6AA9C486B3014 /* GLMASRHealthMonitor.swift */; };
+		27CDEC09CE80D2E32B4366D6 /* DebugConversationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28C6E637C06E56B4C0174B /* DebugConversationViewModel.swift */; };
+		291BD2E24D18E30DC6DAEE24 /* CurriculumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA6A16CA0F313B0BA5AF32CB /* CurriculumView.swift */; };
+		30FAEB94763428F187B69D1E /* SelfHostedTTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3BE5EA29C7D8C9D7CC12E45 /* SelfHostedTTSService.swift */; };
+		314C1C9B84E3FDC93EE9993D /* TranscriptEntry+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692AD0E924FA90F347A7DD25 /* TranscriptEntry+CoreDataClass.swift */; };
+		3252626A4F9A72151311B11E /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 8C4E61A36776FE76358D2014 /* Logging */; };
+		325D06F3213C406477E53AF0 /* TTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7740943D1A030000E4F25555 /* TTSService.swift */; };
+		35617D3756CFFDB65A2914BD /* MockServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F70E39B59EF792368F5F1E4 /* MockServices.swift */; };
+		3A6E9B0DBB0AF4F839C09FA7 /* STTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32CEE1862B662019B07B4EAB /* STTService.swift */; };
+		3C815907AB7777C3AEB9CBCB /* MockLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95969F48DA15F89D70603334 /* MockLLMService.swift */; };
+		3EE6A10EB470F1654EA8EE1C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 01C496581684518021B58948 /* LaunchScreen.storyboard */; };
+		40617E027E2B006827B08E81 /* DeepgramTTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B615593CB5F40AE18991D0 /* DeepgramTTSService.swift */; };
+		445DE38CFA5CBA6AEDF7CC2C /* CurriculumModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6762AB91B87A534E283F0CD0 /* CurriculumModels.swift */; };
+		469094F4D5F4797BA502E893 /* Topic+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41404B99C2D28DB798E458D0 /* Topic+CoreDataClass.swift */; };
+		481004116FC3EAEAAF7728FE /* SelfHostedLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD1692A56AC29CE6BF963BC /* SelfHostedLLMService.swift */; };
+		4B78B623D73A6D9177CCECD5 /* PatchPanelService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FA83EC668270AD7666A687 /* PatchPanelService.swift */; };
+		4CF3AB55E7076695265DFD08 /* Document+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51EB452B1B3D3922B7EA16F /* Document+CoreDataClass.swift */; };
+		4D06057B4FF7CCBBB171EF7F /* AppleTTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1852307C37692E182EB4F8 /* AppleTTSService.swift */; };
+		4D5B79F40271572EDF52AF45 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E0EE9901AA3AE346A2AF37 /* HistoryView.swift */; };
+		59786F06803B933F6C2A0AB3 /* OpenAILLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD2D075A47AA1E67A90A689 /* OpenAILLMService.swift */; };
+		5C0A3CDC3254ADEAEDD5F061 /* SessionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FDAE9921DF5C4D8646FB7C /* SessionManagerTests.swift */; };
+		5FB02016D05BE3A79498AF76 /* Curriculum+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = F969DA1B3AC136EEE9F4063F /* Curriculum+CoreDataClass.swift */; };
+		606486FC4527634F60886677 /* LLMEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6819C6680DDB8F7A6C3DD0C4 /* LLMEndpoint.swift */; };
+		61C9A310A7F76F3938D334E7 /* DocumentProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7939543C761675CCC470CB6 /* DocumentProcessor.swift */; };
+		61E7CE41E111FA95E68BF60A /* RemoteLogHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0122D12D71D21E39864BD351 /* RemoteLogHandler.swift */; };
+		6204F933534BE8F950C6B32B /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEE64B3B724CA82C6DF107E /* AnalyticsView.swift */; };
+		63DA72E27AD8F3C5AF92BEDF /* APIProviderDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DA9B38260E744403DA38A8 /* APIProviderDetailView.swift */; };
+		6538195C252D1D331A78ED75 /* APIKeyManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0ABC1A1F855955D78CF05F9 /* APIKeyManagerTests.swift */; };
+		6620DE1B619B9F29F9CFEE0B /* GLMASROnDeviceSTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BFE7033B917361351B24627 /* GLMASROnDeviceSTTService.swift */; };
+		679F74CD16927AC8AEB8D1A4 /* AppleSpeechSTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C670B8ABA9BB2D3CB56B2DCA /* AppleSpeechSTTService.swift */; };
+		6D6A809176045CAED36B1183 /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E5DFDB8CAB387BD3FABE2DB /* SessionView.swift */; };
+		6F50A372D09225D61514CFC0 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D06794D6625933C55B64860C /* SessionManager.swift */; };
+		714C752BBDA10867789EA0AA /* ElevenLabsTTSServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F9F99A63180C417C5EF1CB5 /* ElevenLabsTTSServiceTests.swift */; };
+		73513C6C6309F5A31EB6D5A4 /* CurriculumEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD17BD85661AA22279D27BA4 /* CurriculumEngineTests.swift */; };
+		80116AD1D76A21BADBA26485 /* ElevenLabsTTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CFA41056359E384BDAB5DE /* ElevenLabsTTSService.swift */; };
+		93097C63E8BF951A485F601B /* OpenAIEmbeddingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37875DC192C64C92DDA3CB7 /* OpenAIEmbeddingService.swift */; };
+		943088FD68891AF893C994A8 /* UnaMentis.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C9E6C480A39CD30072D919FF /* UnaMentis.xcdatamodeld */; };
+		977ACF04A479545A8E042174 /* AudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3512907BB86A67A781C6BA88 /* AudioEngine.swift */; };
+		979AE8F5878DBD378FADD22F /* GLMASRSTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913726F1DED7248C8A332F99 /* GLMASRSTTService.swift */; };
+		A0B7F1F73D8A304D20840717 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70220748F3897D2FF6F683DC /* LLMService.swift */; };
+		A3D8AE762F11E3A2C5525541 /* ProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B842F50989F4AED5568E96 /* ProgressTracker.swift */; };
+		A521E8140AFE34E08210E8F5 /* ServerConfigManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E71AFF688A32DC11019438 /* ServerConfigManager.swift */; };
+		A69123C97315631BAE95CE15 /* AudioEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28BF0821DBE85148E339B50 /* AudioEngineTests.swift */; };
+		A7646430427520CB7751070E /* AnalyticsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEAAC040F0D5B735565FA7B1 /* AnalyticsViewModelTests.swift */; };
+		AB81D07EC5EFB5AE242DD039 /* STTProviderRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC492A82755816514BEE3A8 /* STTProviderRouter.swift */; };
+		AD2CE07D742EAF10859E996B /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F01835E4A6FD36F8723764 /* PersistenceController.swift */; };
+		AFF84A9517C894E0C8AD9193 /* LiveKit in Frameworks */ = {isa = PBXBuildFile; productRef = 0387614469D6DF78A0062D42 /* LiveKit */; };
+		B06E80BFD972E04BBA559DA2 /* AssemblyAISTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87913509FC05E96BC80DEBA1 /* AssemblyAISTTService.swift */; };
+		B193857C269BA7BCA353A047 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = B3195CBE8007BE6BE8922D3B /* Collections */; };
+		B224F96BAECF61527E6D45A6 /* ProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7ECAB95118EC51A54847D3 /* ProviderTests.swift */; };
+		B3C0F0B5E1EAE2ECEF9C0C51 /* SileroVADService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C24598EE63264CB30C0A780D /* SileroVADService.swift */; };
+		BB3BA8D9AF549F365E6162EB /* UnaMentisApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67D31AC52E12378D29C55C7 /* UnaMentisApp.swift */; };
+		C049BE254E80812F8CA12C9B /* LLMTaskTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A762A01A1D23D9C411A9E650 /* LLMTaskTypeTests.swift */; };
+		C15F64F52394545F396CE36C /* RoutingTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4643E4938C4528D6F4597E09 /* RoutingTableTests.swift */; };
+		C2E5F80652C1FF9482E7DDF3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED21B50524DB5FEFE3F9E99 /* SettingsView.swift */; };
+		C5E305ECAC6D723230AABEDC /* VoiceSessionIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7213E60620156AEDEFCE8C /* VoiceSessionIntegrationTests.swift */; };
+		C7BCA873884A524EBF691E47 /* RoutingCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2D4F5137436528F550AF0A1 /* RoutingCondition.swift */; };
+		C9BF237248B853C860914DEB /* RoutingConditionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9572C2C5B797C1028D1B31D5 /* RoutingConditionTests.swift */; };
+		CA17BDFD573A1985E44D00FC /* GLMASRHealthMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EC341018F542DC1654FAB6 /* GLMASRHealthMonitorTests.swift */; };
+		CB18257709110103478B0B4E /* ProgressTrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325F5B3EC3796EEB1E776B04 /* ProgressTrackerTests.swift */; };
+		D113C47FB6EDCDD294642312 /* UnaMentisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 924BA54B04DE8021783F4D74 /* UnaMentisTests.swift */; };
+		D2F16797C496FC64EA2C63F2 /* AudioEngineConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A008CBD6F2FA374F46DDB324 /* AudioEngineConfig.swift */; };
+		D6A00A90CF06357BD9FFFE37 /* AnthropicLLMServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07CF7D30DE2EBE3285D2B6D6 /* AnthropicLLMServiceTests.swift */; };
+		D9D1BDD567A4B8954699628C /* GLMASRSTTServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC5B6F46CBFD1ED68AC1189 /* GLMASRSTTServiceTests.swift */; };
+		E6DE4C0C579FC9C4ACE011C1 /* DeviceMetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEEEBAF2C25A9FB086E1802 /* DeviceMetricsView.swift */; };
+		EF194A5616B8803FDD9833B6 /* LLMEndpointTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2C7E038874D8E92140467D /* LLMEndpointTests.swift */; };
+		EF909E8968CB77CD30D50BD8 /* DeepgramSTTServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B97EDBDFA6980D8ECCAAD88 /* DeepgramSTTServiceTests.swift */; };
+		F05D491B65D6FD0B7BEC5AAF /* TelemetryEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EF93D323C6D6A20DD33F8C2 /* TelemetryEngine.swift */; };
+		F0947A3EA9ABA75040984D1B /* TopicProgress+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3717DC2C51F0E7E22A745A9A /* TopicProgress+CoreDataClass.swift */; };
+		F0E610D07B9E5C9806A81F4C /* PatchPanelServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0587423D8A881D64F373B4D /* PatchPanelServiceTests.swift */; };
+		F1199438BB2D1CB92D87C018 /* RoutingTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F472668A3EBC3F06DC36687 /* RoutingTable.swift */; };
+		F1D139E573DF042F4B238CBB /* DocumentProcessorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A08D5EB9552119D29780C63 /* DocumentProcessorTests.swift */; };
+		F29780771802440377BE41CA /* Session+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475C6A5EE486AB249C2556F5 /* Session+CoreDataClass.swift */; };
+		F5B96F9B50C19678571221DA /* ServerSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60AD25072A06649A8319CA61 /* ServerSettingsView.swift */; };
+		F6515847BF5C9C7953D34854 /* LLMTaskType.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD07E27AF281275DC11BE0 /* LLMTaskType.swift */; };
+		FAD3F8A6F3DD20E8B474CF37 /* GLMASRIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED7DFE0AA0EFDFDA0E2997B /* GLMASRIntegrationTests.swift */; };
+		FB4536FB09E712F73760A143 /* llama-3.2-3b-instruct-q4_k_m.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADF33B783CB8AAF071997F6 /* llama-3.2-3b-instruct-q4_k_m.gguf */; };
+		FFF26AE98F6DDE371CA0B169 /* VADService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F889719749AE4061E8AD19F /* VADService.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FEB18B54DAB43763AC65CD81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E77CFDB101A730676D2DF37 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 250B3CE20887198C8B0639A2;
+			remoteInfo = UnaMentis;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0122D12D71D21E39864BD351 /* RemoteLogHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteLogHandler.swift; sourceTree = "<group>"; };
+		01C496581684518021B58948 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		06BE3D2A121D2753F7AD378F /* UnaMentis.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = UnaMentis.xcdatamodel; sourceTree = "<group>"; };
+		07CF7D30DE2EBE3285D2B6D6 /* AnthropicLLMServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicLLMServiceTests.swift; sourceTree = "<group>"; };
+		0ED7DFE0AA0EFDFDA0E2997B /* GLMASRIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLMASRIntegrationTests.swift; sourceTree = "<group>"; };
+		0EF93D323C6D6A20DD33F8C2 /* TelemetryEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryEngine.swift; sourceTree = "<group>"; };
+		18A41B20443F5CDE827A977D /* APIKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyManager.swift; sourceTree = "<group>"; };
+		1EEE64B3B724CA82C6DF107E /* AnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsView.swift; sourceTree = "<group>"; };
+		1FC492A82755816514BEE3A8 /* STTProviderRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTProviderRouter.swift; sourceTree = "<group>"; };
+		25FA83EC668270AD7666A687 /* PatchPanelService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchPanelService.swift; sourceTree = "<group>"; };
+		2B7ECAB95118EC51A54847D3 /* ProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderTests.swift; sourceTree = "<group>"; };
+		2BFE7033B917361351B24627 /* GLMASROnDeviceSTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLMASROnDeviceSTTService.swift; sourceTree = "<group>"; };
+		2EC5B6F46CBFD1ED68AC1189 /* GLMASRSTTServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLMASRSTTServiceTests.swift; sourceTree = "<group>"; };
+		2F70E39B59EF792368F5F1E4 /* MockServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockServices.swift; sourceTree = "<group>"; };
+		325F5B3EC3796EEB1E776B04 /* ProgressTrackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTrackerTests.swift; sourceTree = "<group>"; };
+		32CEE1862B662019B07B4EAB /* STTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTService.swift; sourceTree = "<group>"; };
+		34AE5335D8D46F4E68958AE5 /* AnthropicLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicLLMService.swift; sourceTree = "<group>"; };
+		3512907BB86A67A781C6BA88 /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
+		3717DC2C51F0E7E22A745A9A /* TopicProgress+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TopicProgress+CoreDataClass.swift"; sourceTree = "<group>"; };
+		38431DCF251D88AA3B7D5A84 /* UnaMentisTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = UnaMentisTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B97EDBDFA6980D8ECCAAD88 /* DeepgramSTTServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepgramSTTServiceTests.swift; sourceTree = "<group>"; };
+		3CD1692A56AC29CE6BF963BC /* SelfHostedLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfHostedLLMService.swift; sourceTree = "<group>"; };
+		41404B99C2D28DB798E458D0 /* Topic+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Topic+CoreDataClass.swift"; sourceTree = "<group>"; };
+		41DA9B38260E744403DA38A8 /* APIProviderDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIProviderDetailView.swift; sourceTree = "<group>"; };
+		4643E4938C4528D6F4597E09 /* RoutingTableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutingTableTests.swift; sourceTree = "<group>"; };
+		475C6A5EE486AB249C2556F5 /* Session+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Session+CoreDataClass.swift"; sourceTree = "<group>"; };
+		4A08D5EB9552119D29780C63 /* DocumentProcessorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentProcessorTests.swift; sourceTree = "<group>"; };
+		4CD2D075A47AA1E67A90A689 /* OpenAILLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAILLMService.swift; sourceTree = "<group>"; };
+		4D34530F07B6AA9C486B3014 /* GLMASRHealthMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLMASRHealthMonitor.swift; sourceTree = "<group>"; };
+		4E5DFDB8CAB387BD3FABE2DB /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
+		5F889719749AE4061E8AD19F /* VADService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VADService.swift; sourceTree = "<group>"; };
+		60AD25072A06649A8319CA61 /* ServerSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSettingsView.swift; sourceTree = "<group>"; };
+		6762AB91B87A534E283F0CD0 /* CurriculumModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurriculumModels.swift; sourceTree = "<group>"; };
+		6819C6680DDB8F7A6C3DD0C4 /* LLMEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMEndpoint.swift; sourceTree = "<group>"; };
+		692AD0E924FA90F347A7DD25 /* TranscriptEntry+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TranscriptEntry+CoreDataClass.swift"; sourceTree = "<group>"; };
+		6F472668A3EBC3F06DC36687 /* RoutingTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutingTable.swift; sourceTree = "<group>"; };
+		6F9F99A63180C417C5EF1CB5 /* ElevenLabsTTSServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevenLabsTTSServiceTests.swift; sourceTree = "<group>"; };
+		70220748F3897D2FF6F683DC /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
+		7255225D19D4EFBCDC467F4B /* OpenAIEmbeddingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIEmbeddingServiceTests.swift; sourceTree = "<group>"; };
+		7740943D1A030000E4F25555 /* TTSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTSService.swift; sourceTree = "<group>"; };
+		77FDAE9921DF5C4D8646FB7C /* SessionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManagerTests.swift; sourceTree = "<group>"; };
+		7DEEEBAF2C25A9FB086E1802 /* DeviceMetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceMetricsView.swift; sourceTree = "<group>"; };
+		7E28C6E637C06E56B4C0174B /* DebugConversationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugConversationViewModel.swift; sourceTree = "<group>"; };
+		87913509FC05E96BC80DEBA1 /* AssemblyAISTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssemblyAISTTService.swift; sourceTree = "<group>"; };
+		8DA39F6C49CAE826C4D39CA7 /* DeepgramSTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepgramSTTService.swift; sourceTree = "<group>"; };
+		913726F1DED7248C8A332F99 /* GLMASRSTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLMASRSTTService.swift; sourceTree = "<group>"; };
+		924BA54B04DE8021783F4D74 /* UnaMentisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnaMentisTests.swift; sourceTree = "<group>"; };
+		9572C2C5B797C1028D1B31D5 /* RoutingConditionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutingConditionTests.swift; sourceTree = "<group>"; };
+		95969F48DA15F89D70603334 /* MockLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockLLMService.swift; sourceTree = "<group>"; };
+		99F01835E4A6FD36F8723764 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
+		9ADF33B783CB8AAF071997F6 /* llama-3.2-3b-instruct-q4_k_m.gguf */ = {isa = PBXFileReference; path = "llama-3.2-3b-instruct-q4_k_m.gguf"; sourceTree = "<group>"; };
+		9ED21B50524DB5FEFE3F9E99 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A008CBD6F2FA374F46DDB324 /* AudioEngineConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngineConfig.swift; sourceTree = "<group>"; };
+		A0587423D8A881D64F373B4D /* PatchPanelServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchPanelServiceTests.swift; sourceTree = "<group>"; };
+		A3BE5EA29C7D8C9D7CC12E45 /* SelfHostedTTSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfHostedTTSService.swift; sourceTree = "<group>"; };
+		A762A01A1D23D9C411A9E650 /* LLMTaskTypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMTaskTypeTests.swift; sourceTree = "<group>"; };
+		ABA2D0F2C7B340A0F71796A7 /* LMAPIProviderInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMAPIProviderInfo.swift; sourceTree = "<group>"; };
+		B0F749D0A7C343F32481093F /* UnaMentis.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = UnaMentis.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B28BF0821DBE85148E339B50 /* AudioEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngineTests.swift; sourceTree = "<group>"; };
+		B83ACA2137AC7B35D6BDAB74 /* TelemetryEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryEngineTests.swift; sourceTree = "<group>"; };
+		BD201D1F3BB062E53F4A882A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		BE991D421C61AF5F3786AE70 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		C1E0EE9901AA3AE346A2AF37 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		C24598EE63264CB30C0A780D /* SileroVADService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SileroVADService.swift; sourceTree = "<group>"; };
+		C37875DC192C64C92DDA3CB7 /* OpenAIEmbeddingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIEmbeddingService.swift; sourceTree = "<group>"; };
+		C44C207CAFA73C1D526B473B /* CurriculumEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurriculumEngine.swift; sourceTree = "<group>"; };
+		C670B8ABA9BB2D3CB56B2DCA /* AppleSpeechSTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSpeechSTTService.swift; sourceTree = "<group>"; };
+		C7939543C761675CCC470CB6 /* DocumentProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentProcessor.swift; sourceTree = "<group>"; };
+		C8CD06EDCAA31E7B098CFE99 /* UnaMentis.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = UnaMentis.entitlements; sourceTree = "<group>"; };
+		C9AD07E27AF281275DC11BE0 /* LLMTaskType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMTaskType.swift; sourceTree = "<group>"; };
+		CA6A16CA0F313B0BA5AF32CB /* CurriculumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurriculumView.swift; sourceTree = "<group>"; };
+		D06794D6625933C55B64860C /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
+		D51EB452B1B3D3922B7EA16F /* Document+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Document+CoreDataClass.swift"; sourceTree = "<group>"; };
+		D6B615593CB5F40AE18991D0 /* DeepgramTTSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepgramTTSService.swift; sourceTree = "<group>"; };
+		D7E71AFF688A32DC11019438 /* ServerConfigManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConfigManager.swift; sourceTree = "<group>"; };
+		D9EC341018F542DC1654FAB6 /* GLMASRHealthMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLMASRHealthMonitorTests.swift; sourceTree = "<group>"; };
+		DA1852307C37692E182EB4F8 /* AppleTTSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleTTSService.swift; sourceTree = "<group>"; };
+		DD2C7E038874D8E92140467D /* LLMEndpointTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMEndpointTests.swift; sourceTree = "<group>"; };
+		E0ABC1A1F855955D78CF05F9 /* APIKeyManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyManagerTests.swift; sourceTree = "<group>"; };
+		E0B842F50989F4AED5568E96 /* ProgressTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTracker.swift; sourceTree = "<group>"; };
+		E8D215C843AA2A1228353BAB /* STTProviderRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTProviderRouterTests.swift; sourceTree = "<group>"; };
+		EDDB5A62C7C40A99571DBF01 /* SampleCurriculumSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCurriculumSeeder.swift; sourceTree = "<group>"; };
+		EF7213E60620156AEDEFCE8C /* VoiceSessionIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSessionIntegrationTests.swift; sourceTree = "<group>"; };
+		F2D4F5137436528F550AF0A1 /* RoutingCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutingCondition.swift; sourceTree = "<group>"; };
+		F67D31AC52E12378D29C55C7 /* UnaMentisApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnaMentisApp.swift; sourceTree = "<group>"; };
+		F7CFA41056359E384BDAB5DE /* ElevenLabsTTSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevenLabsTTSService.swift; sourceTree = "<group>"; };
+		F8871565D2C900334E4BB57B /* DebugConversationTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugConversationTestView.swift; sourceTree = "<group>"; };
+		F969DA1B3AC136EEE9F4063F /* Curriculum+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Curriculum+CoreDataClass.swift"; sourceTree = "<group>"; };
+		FD17BD85661AA22279D27BA4 /* CurriculumEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurriculumEngineTests.swift; sourceTree = "<group>"; };
+		FEAAC040F0D5B735565FA7B1 /* AnalyticsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsViewModelTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2DD653406B81371662B83699 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AFF84A9517C894E0C8AD9193 /* LiveKit in Frameworks */,
+				3252626A4F9A72151311B11E /* Logging in Frameworks */,
+				B193857C269BA7BCA353A047 /* Collections in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		055E45F23C261742139BA3CD /* models */ = {
+			isa = PBXGroup;
+			children = (
+				9ADF33B783CB8AAF071997F6 /* llama-3.2-3b-instruct-q4_k_m.gguf */,
+			);
+			path = models;
+			sourceTree = "<group>";
+		};
+		149563E43490CEEA514703DE /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				18A41B20443F5CDE827A977D /* APIKeyManager.swift */,
+				ABA2D0F2C7B340A0F71796A7 /* LMAPIProviderInfo.swift */,
+				D7E71AFF688A32DC11019438 /* ServerConfigManager.swift */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		1994DCDB33AB66276AA0C2CC /* Curriculum */ = {
+			isa = PBXGroup;
+			children = (
+				CA6A16CA0F313B0BA5AF32CB /* CurriculumView.swift */,
+			);
+			path = Curriculum;
+			sourceTree = "<group>";
+		};
+		24102150C360C5FCA2A38EDF /* UnaMentisTests */ = {
+			isa = PBXGroup;
+			children = (
+				2418D5A94254BC5E7B24848A /* E2E */,
+				2E61AD8FC490064DF1F687F0 /* Helpers */,
+				D747429CF1D6CA3BBE6F9EEA /* Integration */,
+				4ABB271179FA2F8DDB321629 /* Unit */,
+				BE991D421C61AF5F3786AE70 /* Info.plist */,
+			);
+			path = UnaMentisTests;
+			sourceTree = "<group>";
+		};
+		2418D5A94254BC5E7B24848A /* E2E */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = E2E;
+			sourceTree = "<group>";
+		};
+		26D4F0CD25DC0E9630C0BD28 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				832A891AAB702CD24CDFD5C8 /* Embeddings */,
+				51D78AD30F99C5BB666415CA /* LLM */,
+				B044861EF647C303CED63B80 /* Protocols */,
+				9DA5AF55A924936739D95A68 /* STT */,
+				DDFB90884AD566D75AFDA12C /* TTS */,
+				721D2CC0C0BCEE30D0257E5E /* VAD */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		2D7060D0A2F6EA570E40F7FD /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				4F115E0BA4EE0EE454ABDE15 /* Audio */,
+				149563E43490CEEA514703DE /* Config */,
+				511AA855EB65917327CDEBD5 /* Curriculum */,
+				45089E1511914D07CD9E7EE8 /* Logging */,
+				4B7167BB7A6155B251FC3670 /* Persistence */,
+				3E79CF804E394D15FE010518 /* Routing */,
+				B5F5D370CCDDA924BA68D653 /* Session */,
+				42784130A224581A8657A28D /* Telemetry */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		2E61AD8FC490064DF1F687F0 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				2F70E39B59EF792368F5F1E4 /* MockServices.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		2F21BC9D84B04CF1FD2138C7 = {
+			isa = PBXGroup;
+			children = (
+				055E45F23C261742139BA3CD /* models */,
+				53DCB5E6E5D2E1E5D5A8E41B /* UnaMentis */,
+				24102150C360C5FCA2A38EDF /* UnaMentisTests */,
+				35AACC824FB8E153AAFCA13B /* Products */,
+			);
+			indentWidth = 4;
+			sourceTree = "<group>";
+			usesTabs = 0;
+		};
+		35AACC824FB8E153AAFCA13B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B0F749D0A7C343F32481093F /* UnaMentis.app */,
+				38431DCF251D88AA3B7D5A84 /* UnaMentisTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		39FC8779AE057ACCA9B0773D /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				D9EC341018F542DC1654FAB6 /* GLMASRHealthMonitorTests.swift */,
+				2EC5B6F46CBFD1ED68AC1189 /* GLMASRSTTServiceTests.swift */,
+				E8D215C843AA2A1228353BAB /* STTProviderRouterTests.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		3E79CF804E394D15FE010518 /* Routing */ = {
+			isa = PBXGroup;
+			children = (
+				3FE0C8FFC153476BA1D54DE2 /* Models */,
+				25FA83EC668270AD7666A687 /* PatchPanelService.swift */,
+			);
+			path = Routing;
+			sourceTree = "<group>";
+		};
+		3FE0C8FFC153476BA1D54DE2 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				6819C6680DDB8F7A6C3DD0C4 /* LLMEndpoint.swift */,
+				C9AD07E27AF281275DC11BE0 /* LLMTaskType.swift */,
+				F2D4F5137436528F550AF0A1 /* RoutingCondition.swift */,
+				6F472668A3EBC3F06DC36687 /* RoutingTable.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		42784130A224581A8657A28D /* Telemetry */ = {
+			isa = PBXGroup;
+			children = (
+				0EF93D323C6D6A20DD33F8C2 /* TelemetryEngine.swift */,
+			);
+			path = Telemetry;
+			sourceTree = "<group>";
+		};
+		45089E1511914D07CD9E7EE8 /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				0122D12D71D21E39864BD351 /* RemoteLogHandler.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
+		4ABB271179FA2F8DDB321629 /* Unit */ = {
+			isa = PBXGroup;
+			children = (
+				F9618B2299E85D5C1DEE2259 /* Routing */,
+				39FC8779AE057ACCA9B0773D /* Services */,
+				FEAAC040F0D5B735565FA7B1 /* AnalyticsViewModelTests.swift */,
+				07CF7D30DE2EBE3285D2B6D6 /* AnthropicLLMServiceTests.swift */,
+				E0ABC1A1F855955D78CF05F9 /* APIKeyManagerTests.swift */,
+				B28BF0821DBE85148E339B50 /* AudioEngineTests.swift */,
+				FD17BD85661AA22279D27BA4 /* CurriculumEngineTests.swift */,
+				3B97EDBDFA6980D8ECCAAD88 /* DeepgramSTTServiceTests.swift */,
+				4A08D5EB9552119D29780C63 /* DocumentProcessorTests.swift */,
+				6F9F99A63180C417C5EF1CB5 /* ElevenLabsTTSServiceTests.swift */,
+				7255225D19D4EFBCDC467F4B /* OpenAIEmbeddingServiceTests.swift */,
+				325F5B3EC3796EEB1E776B04 /* ProgressTrackerTests.swift */,
+				2B7ECAB95118EC51A54847D3 /* ProviderTests.swift */,
+				77FDAE9921DF5C4D8646FB7C /* SessionManagerTests.swift */,
+				B83ACA2137AC7B35D6BDAB74 /* TelemetryEngineTests.swift */,
+				924BA54B04DE8021783F4D74 /* UnaMentisTests.swift */,
+			);
+			path = Unit;
+			sourceTree = "<group>";
+		};
+		4B7167BB7A6155B251FC3670 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				A24D4E4A7E199372711771DA /* ManagedObjects */,
+				99F01835E4A6FD36F8723764 /* PersistenceController.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		4F115E0BA4EE0EE454ABDE15 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				3512907BB86A67A781C6BA88 /* AudioEngine.swift */,
+				A008CBD6F2FA374F46DDB324 /* AudioEngineConfig.swift */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		511AA855EB65917327CDEBD5 /* Curriculum */ = {
+			isa = PBXGroup;
+			children = (
+				C44C207CAFA73C1D526B473B /* CurriculumEngine.swift */,
+				6762AB91B87A534E283F0CD0 /* CurriculumModels.swift */,
+				C7939543C761675CCC470CB6 /* DocumentProcessor.swift */,
+				E0B842F50989F4AED5568E96 /* ProgressTracker.swift */,
+				EDDB5A62C7C40A99571DBF01 /* SampleCurriculumSeeder.swift */,
+			);
+			path = Curriculum;
+			sourceTree = "<group>";
+		};
+		51D78AD30F99C5BB666415CA /* LLM */ = {
+			isa = PBXGroup;
+			children = (
+				34AE5335D8D46F4E68958AE5 /* AnthropicLLMService.swift */,
+				95969F48DA15F89D70603334 /* MockLLMService.swift */,
+				4CD2D075A47AA1E67A90A689 /* OpenAILLMService.swift */,
+				3CD1692A56AC29CE6BF963BC /* SelfHostedLLMService.swift */,
+			);
+			path = LLM;
+			sourceTree = "<group>";
+		};
+		53DCB5E6E5D2E1E5D5A8E41B /* UnaMentis */ = {
+			isa = PBXGroup;
+			children = (
+				2D7060D0A2F6EA570E40F7FD /* Core */,
+				26D4F0CD25DC0E9630C0BD28 /* Services */,
+				8EDD61B49141BCBC685152F8 /* UI */,
+				BD201D1F3BB062E53F4A882A /* Info.plist */,
+				01C496581684518021B58948 /* LaunchScreen.storyboard */,
+				C8CD06EDCAA31E7B098CFE99 /* UnaMentis.entitlements */,
+				C9E6C480A39CD30072D919FF /* UnaMentis.xcdatamodeld */,
+				F67D31AC52E12378D29C55C7 /* UnaMentisApp.swift */,
+			);
+			path = UnaMentis;
+			sourceTree = "<group>";
+		};
+		721D2CC0C0BCEE30D0257E5E /* VAD */ = {
+			isa = PBXGroup;
+			children = (
+				C24598EE63264CB30C0A780D /* SileroVADService.swift */,
+			);
+			path = VAD;
+			sourceTree = "<group>";
+		};
+		7FB72C483C26A29C16B1E39B /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				1EEE64B3B724CA82C6DF107E /* AnalyticsView.swift */,
+			);
+			path = Analytics;
+			sourceTree = "<group>";
+		};
+		832A891AAB702CD24CDFD5C8 /* Embeddings */ = {
+			isa = PBXGroup;
+			children = (
+				C37875DC192C64C92DDA3CB7 /* OpenAIEmbeddingService.swift */,
+			);
+			path = Embeddings;
+			sourceTree = "<group>";
+		};
+		8EDD61B49141BCBC685152F8 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				7FB72C483C26A29C16B1E39B /* Analytics */,
+				1994DCDB33AB66276AA0C2CC /* Curriculum */,
+				9DE06623115240D5262172CF /* Debug */,
+				BDF33F8D00BA2DBF8C264C9B /* History */,
+				CDC3AA54F11E05FBF0B40BB1 /* Session */,
+				A807F0BA416DA5E8D04A7D95 /* Settings */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		9DA5AF55A924936739D95A68 /* STT */ = {
+			isa = PBXGroup;
+			children = (
+				C670B8ABA9BB2D3CB56B2DCA /* AppleSpeechSTTService.swift */,
+				87913509FC05E96BC80DEBA1 /* AssemblyAISTTService.swift */,
+				8DA39F6C49CAE826C4D39CA7 /* DeepgramSTTService.swift */,
+				4D34530F07B6AA9C486B3014 /* GLMASRHealthMonitor.swift */,
+				2BFE7033B917361351B24627 /* GLMASROnDeviceSTTService.swift */,
+				913726F1DED7248C8A332F99 /* GLMASRSTTService.swift */,
+				1FC492A82755816514BEE3A8 /* STTProviderRouter.swift */,
+			);
+			path = STT;
+			sourceTree = "<group>";
+		};
+		9DE06623115240D5262172CF /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				F8871565D2C900334E4BB57B /* DebugConversationTestView.swift */,
+				7E28C6E637C06E56B4C0174B /* DebugConversationViewModel.swift */,
+				7DEEEBAF2C25A9FB086E1802 /* DeviceMetricsView.swift */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
+		A24D4E4A7E199372711771DA /* ManagedObjects */ = {
+			isa = PBXGroup;
+			children = (
+				F969DA1B3AC136EEE9F4063F /* Curriculum+CoreDataClass.swift */,
+				D51EB452B1B3D3922B7EA16F /* Document+CoreDataClass.swift */,
+				475C6A5EE486AB249C2556F5 /* Session+CoreDataClass.swift */,
+				41404B99C2D28DB798E458D0 /* Topic+CoreDataClass.swift */,
+				3717DC2C51F0E7E22A745A9A /* TopicProgress+CoreDataClass.swift */,
+				692AD0E924FA90F347A7DD25 /* TranscriptEntry+CoreDataClass.swift */,
+			);
+			path = ManagedObjects;
+			sourceTree = "<group>";
+		};
+		A807F0BA416DA5E8D04A7D95 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				41DA9B38260E744403DA38A8 /* APIProviderDetailView.swift */,
+				60AD25072A06649A8319CA61 /* ServerSettingsView.swift */,
+				9ED21B50524DB5FEFE3F9E99 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		B044861EF647C303CED63B80 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				70220748F3897D2FF6F683DC /* LLMService.swift */,
+				32CEE1862B662019B07B4EAB /* STTService.swift */,
+				7740943D1A030000E4F25555 /* TTSService.swift */,
+				5F889719749AE4061E8AD19F /* VADService.swift */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		B5F5D370CCDDA924BA68D653 /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				D06794D6625933C55B64860C /* SessionManager.swift */,
+			);
+			path = Session;
+			sourceTree = "<group>";
+		};
+		BDF33F8D00BA2DBF8C264C9B /* History */ = {
+			isa = PBXGroup;
+			children = (
+				C1E0EE9901AA3AE346A2AF37 /* HistoryView.swift */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+		CDC3AA54F11E05FBF0B40BB1 /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				4E5DFDB8CAB387BD3FABE2DB /* SessionView.swift */,
+			);
+			path = Session;
+			sourceTree = "<group>";
+		};
+		D747429CF1D6CA3BBE6F9EEA /* Integration */ = {
+			isa = PBXGroup;
+			children = (
+				0ED7DFE0AA0EFDFDA0E2997B /* GLMASRIntegrationTests.swift */,
+				EF7213E60620156AEDEFCE8C /* VoiceSessionIntegrationTests.swift */,
+			);
+			path = Integration;
+			sourceTree = "<group>";
+		};
+		DDFB90884AD566D75AFDA12C /* TTS */ = {
+			isa = PBXGroup;
+			children = (
+				DA1852307C37692E182EB4F8 /* AppleTTSService.swift */,
+				D6B615593CB5F40AE18991D0 /* DeepgramTTSService.swift */,
+				F7CFA41056359E384BDAB5DE /* ElevenLabsTTSService.swift */,
+				A3BE5EA29C7D8C9D7CC12E45 /* SelfHostedTTSService.swift */,
+			);
+			path = TTS;
+			sourceTree = "<group>";
+		};
+		F9618B2299E85D5C1DEE2259 /* Routing */ = {
+			isa = PBXGroup;
+			children = (
+				DD2C7E038874D8E92140467D /* LLMEndpointTests.swift */,
+				A762A01A1D23D9C411A9E650 /* LLMTaskTypeTests.swift */,
+				A0587423D8A881D64F373B4D /* PatchPanelServiceTests.swift */,
+				9572C2C5B797C1028D1B31D5 /* RoutingConditionTests.swift */,
+				4643E4938C4528D6F4597E09 /* RoutingTableTests.swift */,
+			);
+			path = Routing;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		250B3CE20887198C8B0639A2 /* UnaMentis */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1C8E895C17DE3A2EB97CF2FB /* Build configuration list for PBXNativeTarget "UnaMentis" */;
+			buildPhases = (
+				02A6E2EEAB03B7855D7060CC /* Sources */,
+				6405562A7CF7D963D59ABF6A /* Resources */,
+				2DD653406B81371662B83699 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = UnaMentis;
+			packageProductDependencies = (
+				0387614469D6DF78A0062D42 /* LiveKit */,
+				8C4E61A36776FE76358D2014 /* Logging */,
+				B3195CBE8007BE6BE8922D3B /* Collections */,
+			);
+			productName = UnaMentis;
+			productReference = B0F749D0A7C343F32481093F /* UnaMentis.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C998553426CFA644B116D266 /* UnaMentisTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0894F454C966647EA2570F97 /* Build configuration list for PBXNativeTarget "UnaMentisTests" */;
+			buildPhases = (
+				C82ECDCF3B280FEC7C67152E /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				16257DF4C58BFE4D51DFDBDA /* PBXTargetDependency */,
+			);
+			name = UnaMentisTests;
+			packageProductDependencies = (
+			);
+			productName = UnaMentisTests;
+			productReference = 38431DCF251D88AA3B7D5A84 /* UnaMentisTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9E77CFDB101A730676D2DF37 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					250B3CE20887198C8B0639A2 = {
+						DevelopmentTeam = "";
+					};
+					C998553426CFA644B116D266 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = C33DE349A0FCB9E0E24EE0E1 /* Build configuration list for PBXProject "UnaMentis" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 2F21BC9D84B04CF1FD2138C7;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F95114E519E2606814784A9F /* XCRemoteSwiftPackageReference "swift-collections" */,
+				725D430F7D40FF1825D85A13 /* XCRemoteSwiftPackageReference "client-sdk-swift" */,
+				3157FAD29363A7813CCFD6FA /* XCRemoteSwiftPackageReference "swift-log" */,
+			);
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				250B3CE20887198C8B0639A2 /* UnaMentis */,
+				C998553426CFA644B116D266 /* UnaMentisTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6405562A7CF7D963D59ABF6A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EE6A10EB470F1654EA8EE1C /* LaunchScreen.storyboard in Resources */,
+				FB4536FB09E712F73760A143 /* llama-3.2-3b-instruct-q4_k_m.gguf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		02A6E2EEAB03B7855D7060CC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05D30C780E95912853747429 /* APIKeyManager.swift in Sources */,
+				63DA72E27AD8F3C5AF92BEDF /* APIProviderDetailView.swift in Sources */,
+				6204F933534BE8F950C6B32B /* AnalyticsView.swift in Sources */,
+				0F3F93E307337ECC5F6856EF /* AnthropicLLMService.swift in Sources */,
+				679F74CD16927AC8AEB8D1A4 /* AppleSpeechSTTService.swift in Sources */,
+				4D06057B4FF7CCBBB171EF7F /* AppleTTSService.swift in Sources */,
+				B06E80BFD972E04BBA559DA2 /* AssemblyAISTTService.swift in Sources */,
+				977ACF04A479545A8E042174 /* AudioEngine.swift in Sources */,
+				D2F16797C496FC64EA2C63F2 /* AudioEngineConfig.swift in Sources */,
+				5FB02016D05BE3A79498AF76 /* Curriculum+CoreDataClass.swift in Sources */,
+				01ABAF0927B8FB3C82CB7555 /* CurriculumEngine.swift in Sources */,
+				445DE38CFA5CBA6AEDF7CC2C /* CurriculumModels.swift in Sources */,
+				291BD2E24D18E30DC6DAEE24 /* CurriculumView.swift in Sources */,
+				0ED06879B9789F125D3AEA22 /* DebugConversationTestView.swift in Sources */,
+				27CDEC09CE80D2E32B4366D6 /* DebugConversationViewModel.swift in Sources */,
+				132E4E09251795EB48A00F47 /* DeepgramSTTService.swift in Sources */,
+				40617E027E2B006827B08E81 /* DeepgramTTSService.swift in Sources */,
+				E6DE4C0C579FC9C4ACE011C1 /* DeviceMetricsView.swift in Sources */,
+				4CF3AB55E7076695265DFD08 /* Document+CoreDataClass.swift in Sources */,
+				61C9A310A7F76F3938D334E7 /* DocumentProcessor.swift in Sources */,
+				80116AD1D76A21BADBA26485 /* ElevenLabsTTSService.swift in Sources */,
+				2677ACF9A194F6325F5EB743 /* GLMASRHealthMonitor.swift in Sources */,
+				6620DE1B619B9F29F9CFEE0B /* GLMASROnDeviceSTTService.swift in Sources */,
+				979AE8F5878DBD378FADD22F /* GLMASRSTTService.swift in Sources */,
+				4D5B79F40271572EDF52AF45 /* HistoryView.swift in Sources */,
+				606486FC4527634F60886677 /* LLMEndpoint.swift in Sources */,
+				A0B7F1F73D8A304D20840717 /* LLMService.swift in Sources */,
+				F6515847BF5C9C7953D34854 /* LLMTaskType.swift in Sources */,
+				02D04453683695A6354A69CF /* LMAPIProviderInfo.swift in Sources */,
+				3C815907AB7777C3AEB9CBCB /* MockLLMService.swift in Sources */,
+				93097C63E8BF951A485F601B /* OpenAIEmbeddingService.swift in Sources */,
+				59786F06803B933F6C2A0AB3 /* OpenAILLMService.swift in Sources */,
+				4B78B623D73A6D9177CCECD5 /* PatchPanelService.swift in Sources */,
+				AD2CE07D742EAF10859E996B /* PersistenceController.swift in Sources */,
+				A3D8AE762F11E3A2C5525541 /* ProgressTracker.swift in Sources */,
+				61E7CE41E111FA95E68BF60A /* RemoteLogHandler.swift in Sources */,
+				C7BCA873884A524EBF691E47 /* RoutingCondition.swift in Sources */,
+				F1199438BB2D1CB92D87C018 /* RoutingTable.swift in Sources */,
+				AB81D07EC5EFB5AE242DD039 /* STTProviderRouter.swift in Sources */,
+				3A6E9B0DBB0AF4F839C09FA7 /* STTService.swift in Sources */,
+				0CD94962B9FD36324214C8EF /* SampleCurriculumSeeder.swift in Sources */,
+				481004116FC3EAEAAF7728FE /* SelfHostedLLMService.swift in Sources */,
+				30FAEB94763428F187B69D1E /* SelfHostedTTSService.swift in Sources */,
+				A521E8140AFE34E08210E8F5 /* ServerConfigManager.swift in Sources */,
+				F5B96F9B50C19678571221DA /* ServerSettingsView.swift in Sources */,
+				F29780771802440377BE41CA /* Session+CoreDataClass.swift in Sources */,
+				6F50A372D09225D61514CFC0 /* SessionManager.swift in Sources */,
+				6D6A809176045CAED36B1183 /* SessionView.swift in Sources */,
+				C2E5F80652C1FF9482E7DDF3 /* SettingsView.swift in Sources */,
+				B3C0F0B5E1EAE2ECEF9C0C51 /* SileroVADService.swift in Sources */,
+				325D06F3213C406477E53AF0 /* TTSService.swift in Sources */,
+				F05D491B65D6FD0B7BEC5AAF /* TelemetryEngine.swift in Sources */,
+				469094F4D5F4797BA502E893 /* Topic+CoreDataClass.swift in Sources */,
+				F0947A3EA9ABA75040984D1B /* TopicProgress+CoreDataClass.swift in Sources */,
+				314C1C9B84E3FDC93EE9993D /* TranscriptEntry+CoreDataClass.swift in Sources */,
+				943088FD68891AF893C994A8 /* UnaMentis.xcdatamodeld in Sources */,
+				BB3BA8D9AF549F365E6162EB /* UnaMentisApp.swift in Sources */,
+				FFF26AE98F6DDE371CA0B169 /* VADService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C82ECDCF3B280FEC7C67152E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6538195C252D1D331A78ED75 /* APIKeyManagerTests.swift in Sources */,
+				A7646430427520CB7751070E /* AnalyticsViewModelTests.swift in Sources */,
+				D6A00A90CF06357BD9FFFE37 /* AnthropicLLMServiceTests.swift in Sources */,
+				A69123C97315631BAE95CE15 /* AudioEngineTests.swift in Sources */,
+				73513C6C6309F5A31EB6D5A4 /* CurriculumEngineTests.swift in Sources */,
+				EF909E8968CB77CD30D50BD8 /* DeepgramSTTServiceTests.swift in Sources */,
+				F1D139E573DF042F4B238CBB /* DocumentProcessorTests.swift in Sources */,
+				714C752BBDA10867789EA0AA /* ElevenLabsTTSServiceTests.swift in Sources */,
+				CA17BDFD573A1985E44D00FC /* GLMASRHealthMonitorTests.swift in Sources */,
+				FAD3F8A6F3DD20E8B474CF37 /* GLMASRIntegrationTests.swift in Sources */,
+				D9D1BDD567A4B8954699628C /* GLMASRSTTServiceTests.swift in Sources */,
+				EF194A5616B8803FDD9833B6 /* LLMEndpointTests.swift in Sources */,
+				C049BE254E80812F8CA12C9B /* LLMTaskTypeTests.swift in Sources */,
+				35617D3756CFFDB65A2914BD /* MockServices.swift in Sources */,
+				2040E1BCBAC62EB1FA16B3D8 /* OpenAIEmbeddingServiceTests.swift in Sources */,
+				F0E610D07B9E5C9806A81F4C /* PatchPanelServiceTests.swift in Sources */,
+				CB18257709110103478B0B4E /* ProgressTrackerTests.swift in Sources */,
+				B224F96BAECF61527E6D45A6 /* ProviderTests.swift in Sources */,
+				C9BF237248B853C860914DEB /* RoutingConditionTests.swift in Sources */,
+				C15F64F52394545F396CE36C /* RoutingTableTests.swift in Sources */,
+				2353C0717E17DDE868F4FFDC /* STTProviderRouterTests.swift in Sources */,
+				5C0A3CDC3254ADEAEDD5F061 /* SessionManagerTests.swift in Sources */,
+				06EEB298FD4923FB191A97AE /* TelemetryEngineTests.swift in Sources */,
+				D113C47FB6EDCDD294642312 /* UnaMentisTests.swift in Sources */,
+				C5E305ECAC6D723230AABEDC /* VoiceSessionIntegrationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		16257DF4C58BFE4D51DFDBDA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 250B3CE20887198C8B0639A2 /* UnaMentis */;
+			targetProxy = FEB18B54DAB43763AC65CD81 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		09394634E8BD263463B75616 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UnaMentisTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.unamentis.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UnaMentis.app/UnaMentis";
+			};
+			name = Release;
+		};
+		0C840FA8229FEE22FA50A6C5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = UnaMentis/UnaMentis.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = UnaMentis/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.unamentis.app;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		68BF94510FD8F31D6ABDD129 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		80F7C2E010212C7AA72692B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		9450BC876D0208A68B842840 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = UnaMentis/UnaMentis.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = UnaMentis/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.unamentis.app;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F058DE2832F628C480871847 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UnaMentisTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.unamentis.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UnaMentis.app/UnaMentis";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0894F454C966647EA2570F97 /* Build configuration list for PBXNativeTarget "UnaMentisTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F058DE2832F628C480871847 /* Debug */,
+				09394634E8BD263463B75616 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1C8E895C17DE3A2EB97CF2FB /* Build configuration list for PBXNativeTarget "UnaMentis" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9450BC876D0208A68B842840 /* Debug */,
+				0C840FA8229FEE22FA50A6C5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C33DE349A0FCB9E0E24EE0E1 /* Build configuration list for PBXProject "UnaMentis" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				68BF94510FD8F31D6ABDD129 /* Debug */,
+				80F7C2E010212C7AA72692B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3157FAD29363A7813CCFD6FA /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.0;
+			};
+		};
+		725D430F7D40FF1825D85A13 /* XCRemoteSwiftPackageReference "client-sdk-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/livekit/client-sdk-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		F95114E519E2606814784A9F /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-collections.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0387614469D6DF78A0062D42 /* LiveKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 725D430F7D40FF1825D85A13 /* XCRemoteSwiftPackageReference "client-sdk-swift" */;
+			productName = LiveKit;
+		};
+		8C4E61A36776FE76358D2014 /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3157FAD29363A7813CCFD6FA /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
+		};
+		B3195CBE8007BE6BE8922D3B /* Collections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F95114E519E2606814784A9F /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = Collections;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		C9E6C480A39CD30072D919FF /* UnaMentis.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				06BE3D2A121D2753F7AD378F /* UnaMentis.xcdatamodel */,
+			);
+			currentVersion = 06BE3D2A121D2753F7AD378F /* UnaMentis.xcdatamodel */;
+			path = UnaMentis.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 9E77CFDB101A730676D2DF37 /* Project object */;
+}

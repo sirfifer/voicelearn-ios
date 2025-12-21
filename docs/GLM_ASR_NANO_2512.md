@@ -1,6 +1,6 @@
 # GLM-ASR-Nano-2512: Model Overview & Integration Guide
 
-**Purpose:** Technical evaluation and integration roadmap for Z.AI's GLM-ASR-Nano-2512 speech recognition model in VoiceLearn iOS.
+**Purpose:** Technical evaluation and integration roadmap for Z.AI's GLM-ASR-Nano-2512 speech recognition model in UnaMentis iOS.
 
 **Version:** 1.0
 **Date:** December 2025
@@ -29,7 +29,7 @@
 
 GLM-ASR-Nano-2512 is an open-source automatic speech recognition (ASR) model released by Z.AI (Zhipu AI) in December 2025. With 1.5 billion parameters, it achieves state-of-the-art performance while remaining compact enough for edge deployment scenarios.
 
-### 1.2 Why Consider for VoiceLearn?
+### 1.2 Why Consider for UnaMentis?
 
 | Factor | Current (Deepgram/AssemblyAI) | GLM-ASR-Nano |
 |--------|-------------------------------|--------------|
@@ -42,7 +42,7 @@ GLM-ASR-Nano-2512 is an open-source automatic speech recognition (ASR) model rel
 
 ### 1.3 Strategic Fit
 
-GLM-ASR-Nano aligns with VoiceLearn's core principles:
+GLM-ASR-Nano aligns with UnaMentis's core principles:
 
 - **Provider-Agnostic Architecture:** Fits existing `STTServiceProtocol` abstraction
 - **Cost Optimization:** Eliminates per-hour STT costs at scale
@@ -159,7 +159,7 @@ Unlike mainstream ASR models that treat dialects as afterthoughts, GLM-ASR-Nano 
 Specifically trained on low-volume "whisper-style" speech:
 
 ```swift
-// VoiceLearn use case: Late-night study sessions
+// UnaMentis use case: Late-night study sessions
 // User speaking quietly to avoid disturbing others
 // GLM-ASR-Nano captures faint audio that other models miss
 ```
@@ -327,11 +327,11 @@ func selectSTTService() -> STTServiceProtocol {
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│           12GB RAM Budget for VoiceLearn + GLM-ASR-Nano            │
+│           12GB RAM Budget for UnaMentis + GLM-ASR-Nano            │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  iOS System Reserved          │████████░░░░░░░░░░░░│  ~3.0 GB      │
-│  VoiceLearn App               │██░░░░░░░░░░░░░░░░░░│  ~0.5 GB      │
+│  UnaMentis App               │██░░░░░░░░░░░░░░░░░░│  ~0.5 GB      │
 │  AudioEngine Buffers          │█░░░░░░░░░░░░░░░░░░░│  ~0.2 GB      │
 │  Silero VAD (CoreML)          │░░░░░░░░░░░░░░░░░░░░│  ~0.05 GB     │
 │  GLM-ASR-Nano (INT4)          │███████░░░░░░░░░░░░░│  ~1.5 GB      │
@@ -348,7 +348,7 @@ func selectSTTService() -> STTServiceProtocol {
 ### 6.4 Device Tier Update Required
 
 ```swift
-// VoiceLearnApp.swift - Add iPhone 17 support
+// UnaMentisApp.swift - Add iPhone 17 support
 
 enum DeviceCapabilityTier: String, Codable, Sendable {
     case ultra        // NEW: iPhone 17 Pro/Pro Max (12GB RAM)
@@ -475,7 +475,7 @@ $149/month (server) ÷ $0.26/hour (Deepgram) = 573 hours/month
 Below 573 hours/month: Deepgram API is cheaper
 Above 573 hours/month: Self-hosted GLM-ASR is cheaper
 
-For VoiceLearn's target of extended 60-90 minute sessions,
+For UnaMentis's target of extended 60-90 minute sessions,
 self-hosting becomes cost-effective at ~10 active daily users.
 ```
 
@@ -514,7 +514,7 @@ self-hosting becomes cost-effective at ~10 active daily users.
 
 ### 9.2 Integration with Existing Architecture
 
-GLM-ASR-Nano fits cleanly into VoiceLearn's existing provider abstraction:
+GLM-ASR-Nano fits cleanly into UnaMentis's existing provider abstraction:
 
 ```swift
 // New provider implementing existing protocol
@@ -571,7 +571,7 @@ let glmASREndpoint = STTEndpoint(
 
 ### 10.2 Related Documentation
 
-- `VoiceLearn_TDD.md` - Main technical design document
+- `UnaMentis_TDD.md` - Main technical design document
 - `DEVICE_CAPABILITY_TIERS.md` - Device tier definitions
 - `PATCH_PANEL_ARCHITECTURE.md` - LLM/STT routing system
 - `GLM_ASR_SERVER_TRD.md` - Server implementation TRD

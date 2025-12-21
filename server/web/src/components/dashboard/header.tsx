@@ -37,7 +37,7 @@ export function Header({ stats, connected = false }: HeaderProps) {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
-                  VoiceLearn
+                  UnaMentis
                 </h1>
                 <p className="text-xs text-slate-400">Management Console</p>
               </div>

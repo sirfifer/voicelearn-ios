@@ -1,12 +1,12 @@
-# VoiceLearn - Quick Start Guide
+# UnaMentis - Quick Start Guide
 
-**Get up and running with VoiceLearn iOS**
+**Get up and running with UnaMentis iOS**
 
 ---
 
 ## Project Status
 
-VoiceLearn is a fully-implemented voice-based AI tutoring app with:
+UnaMentis is a fully-implemented voice-based AI tutoring app with:
 
 - **Voice conversation pipeline** - Audio capture, VAD, STT, LLM, TTS
 - **Curriculum system** - Topics, documents, progress tracking
@@ -118,7 +118,7 @@ See [GLM_ASR_ON_DEVICE_GUIDE.md](GLM_ASR_ON_DEVICE_GUIDE.md) for details.
 ```bash
 # Build for simulator
 xcodebuild build \
-    -scheme VoiceLearn \
+    -scheme UnaMentis \
     -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 
 # Or in Xcode: Select iPhone 17 Pro simulator, press Cmd+R
@@ -129,7 +129,7 @@ xcodebuild build \
 ## Project Structure
 
 ```
-VoiceLearn/
+UnaMentis/
 ├── Core/                    # Core business logic
 │   ├── Audio/               # AudioEngine, VAD integration
 │   ├── Session/             # SessionManager, state machine
@@ -151,7 +151,7 @@ VoiceLearn/
 │   ├── History/             # Session history
 │   ├── Analytics/           # Metrics dashboard
 │   └── Settings/            # Configuration & debug tools
-└── VoiceLearn.xcdatamodeld  # Core Data model
+└── UnaMentis.xcdatamodeld  # Core Data model
 ```
 
 ---
@@ -161,10 +161,10 @@ VoiceLearn/
 | File | Purpose |
 |------|---------|
 | `Package.swift` | SPM package definition |
-| `VoiceLearn/Core/Session/SessionManager.swift` | Main conversation orchestrator |
-| `VoiceLearn/Core/Audio/AudioEngine.swift` | Audio capture & playback |
-| `VoiceLearn/Services/STT/GLMASROnDeviceSTTService.swift` | On-device STT |
-| `docs/VoiceLearn_TDD.md` | Technical design document |
+| `UnaMentis/Core/Session/SessionManager.swift` | Main conversation orchestrator |
+| `UnaMentis/Core/Audio/AudioEngine.swift` | Audio capture & playback |
+| `UnaMentis/Services/STT/GLMASROnDeviceSTTService.swift` | On-device STT |
+| `docs/UnaMentis_TDD.md` | Technical design document |
 
 ---
 
@@ -172,7 +172,7 @@ VoiceLearn/
 
 ### Make Code Changes
 
-1. Edit files in VoiceLearn/
+1. Edit files in UnaMentis/
 2. Build: `swift build` or Cmd+B in Xcode
 3. Test: `swift test` or Cmd+U in Xcode
 4. Commit when tests pass
@@ -204,7 +204,7 @@ See [AI_SIMULATOR_TESTING.md](AI_SIMULATOR_TESTING.md) for details.
 Core Data model uses manual NSManagedObject subclasses:
 ```bash
 # Ensure ManagedObjects directory exists
-ls VoiceLearn/Core/Persistence/ManagedObjects/
+ls UnaMentis/Core/Persistence/ManagedObjects/
 ```
 
 ### Build fails with llama.cpp errors
@@ -229,7 +229,7 @@ xcrun simctl list devices
 
 | Document | Purpose |
 |----------|---------|
-| [VoiceLearn_TDD.md](VoiceLearn_TDD.md) | Full technical design |
+| [UnaMentis_TDD.md](UnaMentis_TDD.md) | Full technical design |
 | [SETUP.md](SETUP.md) | Detailed setup instructions |
 | [TESTING.md](TESTING.md) | Testing guide |
 | [GLM_ASR_ON_DEVICE_GUIDE.md](GLM_ASR_ON_DEVICE_GUIDE.md) | On-device STT setup |
@@ -245,7 +245,7 @@ xcrun simctl list devices
 
 1. **Run the app** - Build and launch in simulator
 2. **Explore the code** - Start with SessionManager.swift
-3. **Read the TDD** - [VoiceLearn_TDD.md](VoiceLearn_TDD.md) has full architecture details
+3. **Read the TDD** - [UnaMentis_TDD.md](UnaMentis_TDD.md) has full architecture details
 4. **Set up models** - For on-device STT, see [GLM_ASR_ON_DEVICE_GUIDE.md](GLM_ASR_ON_DEVICE_GUIDE.md)
 5. **Configure APIs** - Add provider keys for cloud services
 6. **Explore curriculum format** - See [Curriculum Overview](../curriculum/README.md) for VLCF specification
@@ -254,7 +254,7 @@ xcrun simctl list devices
 
 ## Curriculum System (VLCF)
 
-VoiceLearn uses the **VoiceLearn Curriculum Format (VLCF)** for structured educational content. This is a JSON-based format designed specifically for conversational AI tutoring.
+UnaMentis uses the **UnaMentis Curriculum Format (VLCF)** for structured educational content. This is a JSON-based format designed specifically for conversational AI tutoring.
 
 ### Quick Overview
 
