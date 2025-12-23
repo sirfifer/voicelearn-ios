@@ -23,7 +23,6 @@ final class STTProviderRouterTests: XCTestCase {
     // MARK: - Setup / Teardown
 
     override func setUp() async throws {
-        try await super.setUp()
         mockGLMASR = MockSTTService(identifier: "glm-asr")
         mockDeepgram = MockSTTService(identifier: "deepgram")
         mockHealthMonitor = MockHealthMonitor()
@@ -33,7 +32,6 @@ final class STTProviderRouterTests: XCTestCase {
         mockGLMASR = nil
         mockDeepgram = nil
         mockHealthMonitor = nil
-        try await super.tearDown()
     }
 
     // MARK: - Provider Selection Tests
@@ -149,7 +147,7 @@ final class STTProviderRouterTests: XCTestCase {
             healthMonitor: mockHealthMonitor
         )
 
-        guard let format = AVAudioFormat(
+        guard let format1 = AVAudioFormat(
             standardFormatWithSampleRate: 16000,
             channels: 1
         ) else {
@@ -158,7 +156,7 @@ final class STTProviderRouterTests: XCTestCase {
         }
 
         // Start streaming with healthy GLM-ASR
-        _ = try await router.startStreaming(audioFormat: format)
+        _ = try await router.startStreaming(audioFormat: format1)
 
         // Verify GLM-ASR was used
         var glmWasCalled = await mockGLMASR.startStreamingWasCalled
@@ -174,8 +172,17 @@ final class STTProviderRouterTests: XCTestCase {
         // Change health status to unhealthy
         await mockHealthMonitor.setStatus(.unhealthy)
 
+        // Create new format for second streaming session (avoid data race)
+        guard let format2 = AVAudioFormat(
+            standardFormatWithSampleRate: 16000,
+            channels: 1
+        ) else {
+            XCTFail("Failed to create audio format")
+            return
+        }
+
         // Start new streaming session
-        _ = try await router.startStreaming(audioFormat: format)
+        _ = try await router.startStreaming(audioFormat: format2)
 
         // Verify Deepgram was used this time
         glmWasCalled = await mockGLMASR.startStreamingWasCalled
@@ -197,7 +204,7 @@ final class STTProviderRouterTests: XCTestCase {
             healthMonitor: mockHealthMonitor
         )
 
-        guard let format = AVAudioFormat(
+        guard let format1 = AVAudioFormat(
             standardFormatWithSampleRate: 16000,
             channels: 1
         ) else {
@@ -206,7 +213,7 @@ final class STTProviderRouterTests: XCTestCase {
         }
 
         // Start with Deepgram (fallback)
-        _ = try await router.startStreaming(audioFormat: format)
+        _ = try await router.startStreaming(audioFormat: format1)
         await router.cancelStreaming()
         await mockGLMASR.reset()
         await mockDeepgram.reset()
@@ -214,8 +221,17 @@ final class STTProviderRouterTests: XCTestCase {
         // Recover to healthy
         await mockHealthMonitor.setStatus(.healthy)
 
+        // Create new format for second streaming session (avoid data race)
+        guard let format2 = AVAudioFormat(
+            standardFormatWithSampleRate: 16000,
+            channels: 1
+        ) else {
+            XCTFail("Failed to create audio format")
+            return
+        }
+
         // Should now use GLM-ASR again
-        _ = try await router.startStreaming(audioFormat: format)
+        _ = try await router.startStreaming(audioFormat: format2)
 
         let glmWasCalled = await mockGLMASR.startStreamingWasCalled
         XCTAssertTrue(glmWasCalled, "Should return to GLM-ASR when healthy")

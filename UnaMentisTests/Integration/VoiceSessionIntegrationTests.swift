@@ -32,8 +32,6 @@ final class VoiceSessionIntegrationTests: XCTestCase {
 
     @MainActor
     override func setUp() async throws {
-        try await super.setUp()
-
         // Use in-memory Core Data store
         persistenceController = PersistenceController(inMemory: true)
         context = persistenceController.container.viewContext
@@ -45,13 +43,13 @@ final class VoiceSessionIntegrationTests: XCTestCase {
         mockLLM = MockLLMService()
     }
 
+    @MainActor
     override func tearDown() async throws {
         cancellables.removeAll()
         telemetry = nil
         mockLLM = nil
         context = nil
         persistenceController = nil
-        try await super.tearDown()
     }
 
     // MARK: - Telemetry Integration Tests
@@ -336,7 +334,6 @@ final class AudioPipelineIntegrationTests: XCTestCase {
 
     @MainActor
     override func setUp() async throws {
-        try await super.setUp()
         mockVAD = MockVADService()
         telemetry = TelemetryEngine()
         audioEngine = AudioEngine(
@@ -346,12 +343,12 @@ final class AudioPipelineIntegrationTests: XCTestCase {
         )
     }
 
+    @MainActor
     override func tearDown() async throws {
         await audioEngine.stop()
         audioEngine = nil
         mockVAD = nil
         telemetry = nil
-        try await super.tearDown()
     }
 
     func testAudioEngine_configuresVAD() async throws {
@@ -422,7 +419,6 @@ final class ThermalManagementIntegrationTests: XCTestCase {
 
     @MainActor
     override func setUp() async throws {
-        try await super.setUp()
         mockVAD = MockVADService()
         telemetry = TelemetryEngine()
         audioEngine = AudioEngine(
@@ -432,12 +428,12 @@ final class ThermalManagementIntegrationTests: XCTestCase {
         )
     }
 
+    @MainActor
     override func tearDown() async throws {
         await audioEngine.stop()
         audioEngine = nil
         mockVAD = nil
         telemetry = nil
-        try await super.tearDown()
     }
 
     func testThermalStateChange_recordsTelemetry() async throws {
