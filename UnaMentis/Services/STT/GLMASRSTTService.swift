@@ -110,7 +110,7 @@ public actor GLMASRSTTService: STTService {
     /// Start streaming transcription
     /// - Parameter audioFormat: Audio format (must be 16kHz mono)
     /// - Returns: AsyncStream of STT results
-    public func startStreaming(audioFormat: AVAudioFormat) async throws -> AsyncStream<STTResult> {
+    public func startStreaming(audioFormat: sending AVAudioFormat) async throws -> AsyncStream<STTResult> {
         guard !isStreaming else {
             throw STTError.alreadyStreaming
         }

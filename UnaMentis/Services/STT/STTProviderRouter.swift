@@ -166,7 +166,7 @@ public actor STTProviderRouter: STTService {
     /// Start streaming transcription
     /// - Parameter audioFormat: Audio format
     /// - Returns: AsyncStream of STT results
-    public func startStreaming(audioFormat: AVAudioFormat) async throws -> AsyncStream<STTResult> {
+    public func startStreaming(audioFormat: sending AVAudioFormat) async throws -> AsyncStream<STTResult> {
         // Select provider based on health
         activeProvider = selectProvider()
         _isStreaming = true

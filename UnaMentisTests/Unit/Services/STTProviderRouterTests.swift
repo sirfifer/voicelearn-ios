@@ -328,7 +328,7 @@ actor MockSTTService: STTService {
         self._costPerHour = Decimal(0)
     }
 
-    func startStreaming(audioFormat: AVAudioFormat) async throws -> AsyncStream<STTResult> {
+    func startStreaming(audioFormat: sending AVAudioFormat) async throws -> AsyncStream<STTResult> {
         startStreamingWasCalled = true
         isStreaming = true
         return AsyncStream { continuation in

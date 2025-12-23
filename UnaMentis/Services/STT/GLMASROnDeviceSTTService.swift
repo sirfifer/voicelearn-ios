@@ -259,7 +259,7 @@ public actor GLMASROnDeviceSTTService: STTService {
 
     // MARK: - STTService Protocol
 
-    public func startStreaming(audioFormat: AVAudioFormat) async throws -> AsyncStream<STTResult> {
+    public func startStreaming(audioFormat: sending AVAudioFormat) async throws -> AsyncStream<STTResult> {
         guard !isStreaming else {
             throw STTError.alreadyStreaming
         }

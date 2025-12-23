@@ -105,7 +105,7 @@ public protocol STTService: Actor {
     /// Start streaming transcription
     /// - Parameter audioFormat: Format of audio that will be sent
     /// - Returns: AsyncStream of STT results
-    func startStreaming(audioFormat: AVAudioFormat) async throws -> AsyncStream<STTResult>
+    func startStreaming(audioFormat: sending AVAudioFormat) async throws -> AsyncStream<STTResult>
     
     /// Send audio data for transcription
     /// - Parameter buffer: Audio buffer to transcribe

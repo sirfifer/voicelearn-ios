@@ -44,7 +44,7 @@ public actor DeepgramSTTService: STTService {
     
     // MARK: - STTService Protocol
     
-    public func startStreaming(audioFormat: AVAudioFormat) async throws -> AsyncStream<STTResult> {
+    public func startStreaming(audioFormat: sending AVAudioFormat) async throws -> AsyncStream<STTResult> {
         guard !isStreaming else { throw STTError.alreadyStreaming }
         
         logger.info("Starting Deepgram stream with format: \(audioFormat.sampleRate)Hz")
