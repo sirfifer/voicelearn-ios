@@ -123,7 +123,7 @@ public actor AudioEngine: ObservableObject {
             try session.setCategory(
                 .playAndRecord,
                 mode: .voiceChat,
-                options: [.defaultToSpeaker, .allowBluetoothHFP, .allowBluetoothA2DP]
+                options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP]
             )
             try session.setPreferredSampleRate(config.sampleRate)
             try session.setPreferredIOBufferDuration(Double(config.bufferSize) / config.sampleRate)
@@ -259,17 +259,18 @@ public actor AudioEngine: ObservableObject {
     /// Process an incoming audio buffer (for testing and direct injection)
     public func processAudioBuffer(_ buffer: AVAudioPCMBuffer) async {
         let startTime = Date()
-        
+
         // Check thermal state if adaptive quality enabled
         if config.enableAdaptiveQuality {
             await checkAndAdaptToThermalState()
         }
-        
+
         // Run VAD
         let vadResult = await vadService.processBuffer(buffer)
-        
-        // Emit to subscribers
-        audioStreamSubject.send((buffer, vadResult))
+
+        // Emit to subscribers - capture subject in sendable box to avoid actor isolation issues
+        let audioSubjectBox = UncheckedSendableBox(value: self.audioStreamSubject)
+        audioSubjectBox.value.send((buffer, vadResult))
         
         // Update audio level if monitoring enabled
         if config.enableAudioLevelMonitoring {

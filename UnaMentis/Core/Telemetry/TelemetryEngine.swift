@@ -3,6 +3,7 @@
 //
 // Part of Core Components (TDD Section 3)
 
+@preconcurrency import Darwin
 import Foundation
 import Logging
 
