@@ -1,4 +1,4 @@
-# VoiceLearn Curriculum Format (VLCF) Specification
+# Una Mentis Curriculum Format (UMLCF) Specification
 
 **Version:** 1.0.0
 **Status:** Draft
@@ -26,7 +26,7 @@
 
 ## Introduction
 
-The VoiceLearn Curriculum Format (VLCF) is a JSON-based specification for educational curriculum designed specifically for conversational AI tutoring. Unlike traditional LMS-oriented formats (SCORM, IMS Common Cartridge), VLCF is optimized for:
+The Una Mentis Curriculum Format (UMLCF) is a JSON-based specification for educational curriculum designed specifically for conversational AI tutoring. Unlike traditional LMS-oriented formats (SCORM, IMS Common Cartridge), UMLCF is optimized for:
 
 - **Voice-first learning experiences** - Every text field can have a `spokenText` variant
 - **Conversational AI tutoring** - Native support for transcripts, checkpoints, and branching
@@ -43,7 +43,7 @@ The VoiceLearn Curriculum Format (VLCF) is a JSON-based specification for educat
 
 ### Goals
 
-1. Serve as the **canonical internal format** for VoiceLearn
+1. Serve as the **canonical internal format** for Una Mentis
 2. Enable **import from** IMSCC, QTI, SCORM, and other standards
 3. Enable **export to** established interchange formats
 4. Maximize **reusability** of curriculum content
@@ -54,7 +54,7 @@ The VoiceLearn Curriculum Format (VLCF) is a JSON-based specification for educat
 
 ### Hub-and-Spoke Model
 
-VLCF is designed as the "hub" format:
+UMLCF is designed as the "hub" format:
 
 ```
                     ┌─────────────┐
@@ -62,7 +62,7 @@ VLCF is designed as the "hub" format:
                     └──────┬──────┘
                            │ import
 ┌─────────────┐     ┌──────▼──────┐     ┌─────────────┐
-│     QTI     │────►│    VLCF     │────►│   Export    │
+│     QTI     │────►│    UMLCF     │────►│   Export    │
 └─────────────┘     │   (hub)     │     │  (IMSCC)    │
                     └──────▲──────┘     └─────────────┘
                            │ import
@@ -76,7 +76,7 @@ VLCF is designed as the "hub" format:
 
 ### Tutoring-First Design
 
-Unlike LMS formats that focus on packaging and launching content, VLCF focuses on:
+Unlike LMS formats that focus on packaging and launching content, UMLCF focuses on:
 
 - **Dialogue flow** - How the AI tutor converses with learners
 - **Comprehension verification** - Checkpoints and assessments
@@ -85,7 +85,7 @@ Unlike LMS formats that focus on packaging and launching content, VLCF focuses o
 
 ### Standards Traceability
 
-Every VLCF field traces to one or more established standards:
+Every UMLCF field traces to one or more established standards:
 
 | Standard | What We Borrow |
 |----------|----------------|
@@ -189,7 +189,7 @@ Every VLCF field traces to one or more established standards:
 
 ### Identifier
 
-Used throughout VLCF for stable references:
+Used throughout UMLCF for stable references:
 
 ```json
 {
@@ -272,7 +272,7 @@ curriculum/
 
 ## Media and Visual Assets
 
-VLCF supports rich media content that can be displayed alongside or synchronized with audio content.
+UMLCF supports rich media content that can be displayed alongside or synchronized with audio content.
 
 ### Media Collection
 
@@ -403,7 +403,7 @@ All visual content MUST include:
 
 ## Tutoring Elements
 
-These elements are unique to VLCF, designed for conversational AI tutoring.
+These elements are unique to UMLCF, designed for conversational AI tutoring.
 
 ### Transcript
 
@@ -569,7 +569,7 @@ AI behavior settings:
 
 ## Assessments
 
-VLCF v1.0 supports basic assessment types:
+UMLCF v1.0 supports basic assessment types:
 
 ### Assessment Types
 
@@ -722,7 +722,7 @@ For corporate training and certification:
 
 ## Extensions
 
-VLCF uses namespaced extensions (inspired by xAPI) for custom data:
+UMLCF uses namespaced extensions (inspired by xAPI) for custom data:
 
 ```json
 {
@@ -752,7 +752,7 @@ VLCF uses namespaced extensions (inspired by xAPI) for custom data:
 
 ### JSON Schema
 
-VLCF uses JSON Schema Draft 2020-12 for validation. The schema is available at:
+UMLCF uses JSON Schema Draft 2020-12 for validation. The schema is available at:
 
 ```
 https://voicelearn.io/schemas/vlcf/v1.0.0/curriculum.json

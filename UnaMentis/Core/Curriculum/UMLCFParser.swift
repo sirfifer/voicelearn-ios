@@ -746,38 +746,3 @@ extension Document {
     }
 }
 
-// MARK: - Backward Compatibility Type Aliases
-
-/// Type alias for backward compatibility with existing code
-public typealias VLCFDocument = UMLCFDocument
-public typealias VLCFParser = UMLCFParser
-public typealias VLCFIdentifier = UMLCFIdentifier
-public typealias VLCFVersionInfo = UMLCFVersionInfo
-public typealias VLCFLifecycle = UMLCFLifecycle
-public typealias VLCFContributor = UMLCFContributor
-public typealias VLCFMetadata = UMLCFMetadata
-public typealias VLCFEducationalContext = UMLCFEducationalContext
-public typealias VLCFAlignment = UMLCFAlignment
-public typealias VLCFStandard = UMLCFStandard
-public typealias VLCFTargetAudience = UMLCFTargetAudience
-public typealias VLCFAgeRange = UMLCFAgeRange
-public typealias VLCFPrerequisite = UMLCFPrerequisite
-public typealias VLCFContentNode = UMLCFContentNode
-public typealias VLCFLearningObjective = UMLCFLearningObjective
-public typealias VLCFTimeEstimates = UMLCFTimeEstimates
-public typealias VLCFTranscript = UMLCFTranscript
-public typealias VLCFTranscriptSegment = UMLCFTranscriptSegment
-public typealias VLCFSpeakingNotes = UMLCFSpeakingNotes
-public typealias VLCFCheckpoint = UMLCFCheckpoint
-public typealias VLCFExpectedResponse = UMLCFExpectedResponse
-public typealias VLCFStoppingPoint = UMLCFStoppingPoint
-public typealias VLCFAlternativeExplanation = UMLCFAlternativeExplanation
-public typealias VLCFVoiceProfile = UMLCFVoiceProfile
-public typealias VLCFExample = UMLCFExample
-public typealias VLCFAssessment = UMLCFAssessment
-public typealias VLCFAssessmentOption = UMLCFAssessmentOption
-public typealias VLCFFeedback = UMLCFFeedback
-public typealias VLCFMisconception = UMLCFMisconception
-public typealias VLCFTutoringConfig = UMLCFTutoringConfig
-public typealias VLCFGlossary = UMLCFGlossary
-public typealias VLCFGlossaryTerm = UMLCFGlossaryTerm

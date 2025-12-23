@@ -646,7 +646,7 @@ struct ServerCurriculumBrowser: View {
 
         do {
             Self.logger.info("⬇️ Step 1: Creating parser...")
-            let parser = VLCFParser()
+            let parser = UMLCFParser()
 
             Self.logger.info("⬇️ Step 2: Starting download from server...")
             downloadProgress = "Downloading curriculum data..."

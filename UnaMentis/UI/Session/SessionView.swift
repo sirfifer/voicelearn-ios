@@ -890,8 +890,8 @@ class SessionViewModel: ObservableObject {
     /// Full conversation history for display
     @Published var conversationHistory: [ConversationMessage] = []
 
-    /// VLCF transcript data for this topic (if available)
-    @Published var vlcfTranscript: TopicTranscriptResponse?
+    /// UMLCF transcript data for this topic (if available)
+    @Published var umlcfTranscript: TopicTranscriptResponse?
     @Published var currentSegmentIndex: Int = 0
 
     /// Track last known transcripts to detect changes
@@ -1017,9 +1017,9 @@ class SessionViewModel: ObservableObject {
         topic != nil
     }
 
-    /// Whether we have VLCF transcript data to use
+    /// Whether we have UMLCF transcript data to use
     var hasTranscript: Bool {
-        vlcfTranscript?.segments.isEmpty == false
+        umlcfTranscript?.segments.isEmpty == false
     }
 
     init(topic: Topic? = nil) {
@@ -1040,7 +1040,7 @@ class SessionViewModel: ObservableObject {
         if let document = topic.documentSet.first(where: { $0.documentType == .transcript }),
            let transcriptData = document.decodedTranscript() {
             // Convert local TranscriptData to TopicTranscriptResponse format
-            vlcfTranscript = TopicTranscriptResponse(
+            umlcfTranscript = TopicTranscriptResponse(
                 topicId: topicId.uuidString,
                 topicTitle: topic.title,
                 segments: transcriptData.segments.map { segment in
@@ -1074,11 +1074,11 @@ class SessionViewModel: ObservableObject {
                 let host = serverIP.isEmpty ? "localhost" : serverIP
                 try await CurriculumService.shared.configure(host: host, port: 8766)
 
-                vlcfTranscript = try await CurriculumService.shared.fetchTopicTranscript(
+                umlcfTranscript = try await CurriculumService.shared.fetchTopicTranscript(
                     curriculumId: curriculumId.uuidString,
                     topicId: topicId.uuidString
                 )
-                logger.info("Fetched transcript from server: \(vlcfTranscript?.segments.count ?? 0) segments")
+                logger.info("Fetched transcript from server: \(umlcfTranscript?.segments.count ?? 0) segments")
             } catch {
                 logger.warning("Could not fetch transcript from server: \(error)")
                 // Not fatal - we'll fall back to AI-generated content
@@ -1101,8 +1101,8 @@ class SessionViewModel: ObservableObject {
         let depth = topic.depthLevel
         let objectives = topic.objectives ?? []
 
-        // If we have VLCF transcript data, use it as the primary source
-        if let transcript = vlcfTranscript, !transcript.segments.isEmpty {
+        // If we have UMLCF transcript data, use it as the primary source
+        if let transcript = umlcfTranscript, !transcript.segments.isEmpty {
             return generateTranscriptBasedPrompt(topic: topic, transcript: transcript)
         }
 
@@ -1148,7 +1148,7 @@ class SessionViewModel: ObservableObject {
         return prompt
     }
 
-    /// Generate system prompt that uses VLCF transcript content
+    /// Generate system prompt that uses UMLCF transcript content
     private func generateTranscriptBasedPrompt(topic: Topic, transcript: TopicTranscriptResponse) -> String {
         let topicTitle = topic.title ?? "the topic"
         let depth = topic.depthLevel
@@ -1208,7 +1208,7 @@ class SessionViewModel: ObservableObject {
 
     /// Get the current segment to deliver (for progressive transcript delivery)
     func getCurrentSegment() -> TranscriptSegmentInfo? {
-        guard let transcript = vlcfTranscript,
+        guard let transcript = umlcfTranscript,
               currentSegmentIndex < transcript.segments.count else {
             return nil
         }
@@ -1217,7 +1217,7 @@ class SessionViewModel: ObservableObject {
 
     /// Advance to the next transcript segment
     func advanceToNextSegment() -> Bool {
-        guard let transcript = vlcfTranscript else { return false }
+        guard let transcript = umlcfTranscript else { return false }
         if currentSegmentIndex < transcript.segments.count - 1 {
             currentSegmentIndex += 1
             return true
