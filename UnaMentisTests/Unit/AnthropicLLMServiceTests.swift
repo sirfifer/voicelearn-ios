@@ -17,13 +17,11 @@ final class AnthropicLLMServiceTests: XCTestCase {
     let apiKey = "test_anthropic_key"
     
     override func setUp() async throws {
-        try await super.setUp()
         service = AnthropicLLMService(apiKey: apiKey)
     }
-    
+
     override func tearDown() async throws {
         service = nil
-        try await super.tearDown()
     }
     
     func testAnthropicServiceInitialization() async {
