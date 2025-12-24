@@ -37,6 +37,7 @@ struct CurriculumView: View {
             NavigationSplitView {
                 curriculumListContent
                     .navigationTitle("Curriculum")
+                    .navigationSplitViewColumnWidth(min: 280, ideal: 320, max: 400)
             } detail: {
                 if let curriculum = selectedCurriculum {
                     CurriculumDetailView(curriculum: curriculum)
@@ -49,7 +50,7 @@ struct CurriculumView: View {
                     )
                 }
             }
-            .navigationSplitViewStyle(.balanced)
+            .navigationSplitViewStyle(.prominentDetail)
         } else {
             // iPhone: Use NavigationStack with sheet for detail
             NavigationStack {

@@ -444,19 +444,25 @@ class ImportOrchestrator:
         if lectures:
             lecture_children = []
             for idx, lecture in enumerate(lectures):
+                # Use transcript_text if available, otherwise fall back to text_preview
+                text_content = lecture.get("transcript_text", "") or lecture.get("text_preview", "")
+                has_transcript = bool(lecture.get("transcript_text"))
+
                 lecture_topic = {
                     "id": {"value": lecture.get("id", f"lecture-{idx + 1}")},
                     "title": lecture.get("title", f"Lecture {lecture.get('number', idx + 1)}"),
                     "type": "topic",
                     "orderIndex": idx,
                     "content": {
-                        "text": lecture.get("text_preview", ""),
+                        "text": text_content,
                         "hasVideo": lecture.get("has_video", False),
-                        "hasTranscript": lecture.get("has_transcript", False),
+                        "hasTranscript": has_transcript or lecture.get("has_transcript", False),
                     },
                 }
                 if lecture.get("file"):
                     lecture_topic["content"]["sourceFile"] = lecture["file"]
+                if lecture.get("transcript_url"):
+                    lecture_topic["content"]["transcriptUrl"] = lecture["transcript_url"]
                 lecture_children.append(lecture_topic)
 
             content_modules.append({

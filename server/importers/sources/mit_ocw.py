@@ -21,6 +21,7 @@ import io
 import json
 import logging
 import re
+import subprocess
 import zipfile
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -542,6 +543,132 @@ class MITOCWHandler(CurriculumSourceHandler):
             logger.debug(f"Error fetching page title: {e}")
             return None
 
+    async def _fetch_transcript_url(self, lecture_url: str) -> Optional[str]:
+        """
+        Fetch the transcript PDF URL from a lecture page.
+
+        MIT OCW provides transcripts as PDF files linked from lecture pages.
+        """
+        session = await self._get_session()
+        try:
+            async with session.get(lecture_url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                if resp.status != 200:
+                    return None
+                html = await resp.text()
+                soup = BeautifulSoup(html, "html.parser")
+
+                # Look for transcript download link
+                for link in soup.find_all("a", href=True):
+                    href = link.get("href", "")
+                    text = link.get_text(strip=True).lower()
+                    # Transcript links typically contain "transcript" in text and end with .pdf
+                    if "transcript" in text and href.endswith(".pdf"):
+                        return urljoin(lecture_url, href)
+
+                return None
+        except Exception as e:
+            logger.debug(f"Error fetching transcript URL: {e}")
+            return None
+
+    def _extract_text_from_pdf(self, pdf_path: Path) -> str:
+        """
+        Extract text from a PDF file using pdftotext.
+
+        Falls back to empty string if extraction fails.
+        """
+        try:
+            # Try multiple paths for pdftotext
+            pdftotext_paths = [
+                "/opt/homebrew/bin/pdftotext",  # macOS ARM Homebrew
+                "/usr/local/bin/pdftotext",     # macOS Intel Homebrew
+                "pdftotext",                     # System PATH
+            ]
+
+            pdftotext_cmd = None
+            for path in pdftotext_paths:
+                try:
+                    subprocess.run([path, "-v"], capture_output=True, timeout=5)
+                    pdftotext_cmd = path
+                    break
+                except (FileNotFoundError, subprocess.TimeoutExpired):
+                    continue
+
+            if not pdftotext_cmd:
+                logger.warning("pdftotext not found. Install poppler for PDF extraction.")
+                return ""
+
+            result = subprocess.run(
+                [pdftotext_cmd, "-layout", str(pdf_path), "-"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            if result.returncode == 0:
+                text = result.stdout.strip()
+                # Clean up the text
+                # Remove excessive whitespace while preserving paragraph breaks
+                text = re.sub(r'\n{3,}', '\n\n', text)
+                text = re.sub(r'[ \t]+', ' ', text)
+                return text
+            else:
+                logger.warning(f"pdftotext failed for {pdf_path}: {result.stderr}")
+                return ""
+        except FileNotFoundError:
+            logger.warning("pdftotext not found. Install poppler-utils for PDF extraction.")
+            return ""
+        except subprocess.TimeoutExpired:
+            logger.warning(f"PDF extraction timed out for {pdf_path}")
+            return ""
+        except Exception as e:
+            logger.warning(f"Failed to extract text from {pdf_path}: {e}")
+            return ""
+
+    async def _fetch_lecture_with_transcript(
+        self,
+        lecture: Dict[str, Any],
+        course_output_dir: Path,
+    ) -> Dict[str, Any]:
+        """
+        Fetch transcript for a single lecture.
+
+        Fetches the transcript PDF URL from the lecture page, finds the
+        corresponding PDF in the downloaded content, and extracts text.
+        """
+        lecture_url = lecture.get("url", "")
+        if not lecture_url:
+            return lecture
+
+        # Get transcript URL from lecture page
+        transcript_url = await self._fetch_transcript_url(lecture_url)
+        if transcript_url:
+            lecture["transcript_url"] = transcript_url
+
+            # Try to find the PDF in the downloaded content
+            # The URL is like: /courses/.../33f61131009a6cd12d9a4c0e42eb7f44_ErlP_SBcA1s.pdf
+            # The file is at: static_resources/33f61131009a6cd12d9a4c0e42eb7f44_ErlP_SBcA1s.pdf
+            pdf_filename = transcript_url.split("/")[-1]
+
+            # Search for the PDF in the extracted content
+            possible_paths = [
+                course_output_dir / "static_resources" / pdf_filename,
+                course_output_dir / pdf_filename,
+            ]
+
+            # Also search recursively in case it's in a subdirectory
+            for pdf_path in course_output_dir.rglob(pdf_filename):
+                possible_paths.append(pdf_path)
+
+            for pdf_path in possible_paths:
+                if pdf_path.exists():
+                    logger.info(f"Found transcript PDF: {pdf_path}")
+                    transcript_text = self._extract_text_from_pdf(pdf_path)
+                    if transcript_text:
+                        lecture["transcript_text"] = transcript_text
+                        logger.info(f"Extracted {len(transcript_text)} chars from {pdf_filename}")
+                    break
+
+        return lecture
+
     # =========================================================================
     # Download Methods
     # =========================================================================
@@ -792,19 +919,37 @@ class MITOCWHandler(CurriculumSourceHandler):
 
         # Use pre-fetched lecture titles if available
         if fetched_lectures:
+            # Filter to selected lectures first
+            lectures_to_process = []
             for lec in fetched_lectures:
                 lecture_id = lec["id"]
                 # Skip if not in selected lectures
                 if selected_lectures and lecture_id not in selected_lectures:
                     continue
+                lectures_to_process.append(lec)
 
+            # Fetch transcripts for selected lectures (limit concurrency)
+            logger.info(f"Fetching transcripts for {len(lectures_to_process)} lectures...")
+            semaphore = asyncio.Semaphore(3)  # Limit to 3 concurrent requests
+
+            async def fetch_with_semaphore(lec: Dict[str, Any]) -> Dict[str, Any]:
+                async with semaphore:
+                    return await self._fetch_lecture_with_transcript(lec, output_dir)
+
+            enriched_lectures = await asyncio.gather(
+                *[fetch_with_semaphore(lec) for lec in lectures_to_process]
+            )
+
+            for lec in enriched_lectures:
                 content["lectures"].append({
-                    "id": lecture_id,
+                    "id": lec["id"],
                     "number": lec["number"],
                     "title": lec["title"],
                     "has_video": has_video,
                     "has_transcript": has_transcript,
                     "url": lec.get("url", ""),
+                    "transcript_text": lec.get("transcript_text", ""),
+                    "transcript_url": lec.get("transcript_url", ""),
                 })
         else:
             # Fall back to parsing HTML files from the output directory

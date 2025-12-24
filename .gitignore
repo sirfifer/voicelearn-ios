@@ -79,3 +79,7 @@ tools/llama.cpp/
 
 # Website (separate repo - see documentation/website/)
 documentation/website/
+
+# Importer downloads and output (large course files)
+server/importers/output/downloads/
+server/importers/output/curricula/
