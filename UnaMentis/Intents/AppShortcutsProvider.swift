@@ -15,7 +15,25 @@ import AppIntents
 public struct UnaMentisShortcuts: AppShortcutsProvider {
     /// Define the shortcuts exposed to the system
     public static var appShortcuts: [AppShortcut] {
-        // Start Lesson shortcut
+        // Start Conversation shortcut - for freeform voice chat
+        // This is the primary hands-free entry point for spontaneous learning
+        AppShortcut(
+            intent: StartConversationIntent(),
+            phrases: [
+                "Start a conversation with \(.applicationName)",
+                "Talk to \(.applicationName)",
+                "Chat with \(.applicationName)",
+                "Open \(.applicationName) voice chat",
+                "I want to learn something with \(.applicationName)",
+                "Ask \(.applicationName) a question",
+                "Start \(.applicationName)",
+                "Hey \(.applicationName)"
+            ],
+            shortTitle: "Start Conversation",
+            systemImageName: "waveform.circle.fill"
+        )
+
+        // Start Lesson shortcut - for curriculum-based learning
         AppShortcut(
             intent: StartLessonIntent(),
             phrases: [
@@ -69,7 +87,13 @@ public struct UnaMentisShortcuts: AppShortcutsProvider {
 
  After building and running the app, users can use these voice commands:
 
- ### Starting a Lesson
+ ### Starting a Freeform Conversation (Hands-Free)
+ - "Hey Siri, talk to UnaMentis"
+ - "Hey Siri, start a conversation with UnaMentis"
+ - "Hey Siri, chat with UnaMentis"
+ - "Hey Siri, I want to learn something with UnaMentis"
+
+ ### Starting a Lesson (Curriculum-Based)
  - "Hey Siri, start a lesson in UnaMentis"
  - "Hey Siri, teach me about Quantum Mechanics in UnaMentis"
  - "Hey Siri, study Physics with UnaMentis"
@@ -89,7 +113,7 @@ public struct UnaMentisShortcuts: AppShortcutsProvider {
  1. Open Shortcuts app
  2. Create new Shortcut
  3. Search for "UnaMentis"
- 4. Add actions like "Start Lesson", "Resume Learning", "Show Progress"
+ 4. Add actions like "Start Conversation", "Start Lesson", "Resume Learning", "Show Progress"
 
  ## Spotlight Integration
 
@@ -106,9 +130,11 @@ public struct UnaMentisShortcuts: AppShortcutsProvider {
  ## Deep Link URL Scheme
 
  The intents use deep links to open the app:
- - unamentis://lesson?id=UUID&depth=intermediate
- - unamentis://resume?id=UUID
- - unamentis://analytics
+ - unamentis://chat - Start freeform voice conversation
+ - unamentis://chat?prompt=... - Start with an initial question
+ - unamentis://lesson?id=UUID&depth=intermediate - Start curriculum lesson
+ - unamentis://resume?id=UUID - Resume a specific topic
+ - unamentis://analytics - Show progress/analytics
 
  Add URL scheme to Info.plist:
  ```xml

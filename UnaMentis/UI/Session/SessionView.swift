@@ -21,6 +21,9 @@ public struct SessionView: View {
     /// The topic being studied (optional - for curriculum-based sessions)
     let topic: Topic?
 
+    /// Whether to auto-start the session (for Siri-triggered freeform chat)
+    let autoStart: Bool
+
     #if os(iOS)
     private static let backgroundGradientColors: [Color] = [Color(.systemBackground), Color(.systemGray6)]
     #else
@@ -32,8 +35,9 @@ public struct SessionView: View {
         horizontalSizeClass == .regular && topic != nil && viewModel.isDirectStreamingMode
     }
 
-    public init(topic: Topic? = nil) {
+    public init(topic: Topic? = nil, autoStart: Bool = false) {
         self.topic = topic
+        self.autoStart = autoStart
         // Initialize viewModel with topic context
         _viewModel = StateObject(wrappedValue: SessionViewModel(topic: topic))
     }
@@ -182,8 +186,11 @@ public struct SessionView: View {
                 Text(viewModel.errorMessage)
             }
             .task {
-                // Auto-start session when initiated from a topic (lecture mode)
-                if topic != nil && !viewModel.isSessionActive && !viewModel.isLoading {
+                // Auto-start session when:
+                // 1. Initiated from a topic (lecture mode)
+                // 2. Triggered via Siri for freeform chat (autoStart = true)
+                let shouldAutoStart = (topic != nil || autoStart)
+                if shouldAutoStart && !viewModel.isSessionActive && !viewModel.isLoading {
                     await viewModel.toggleSession(appState: appState)
                 }
             }

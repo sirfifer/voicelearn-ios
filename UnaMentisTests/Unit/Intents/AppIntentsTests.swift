@@ -326,6 +326,35 @@ final class DeepLinkTests: XCTestCase {
         XCTAssertEqual(url?.scheme, "unamentis")
         XCTAssertEqual(url?.host, "analytics")
     }
+
+    func testDeepLink_chatURL_formatsCorrectly() {
+        // When - Simple chat URL
+        let url = URL(string: "unamentis://chat")
+
+        // Then
+        XCTAssertNotNil(url)
+        XCTAssertEqual(url?.scheme, "unamentis")
+        XCTAssertEqual(url?.host, "chat")
+    }
+
+    func testDeepLink_chatURLWithPrompt_formatsCorrectly() {
+        // Given
+        let prompt = "What is quantum physics?"
+        let encodedPrompt = prompt.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+
+        // When
+        let urlString = "unamentis://chat?prompt=\(encodedPrompt)"
+        let url = URL(string: urlString)
+
+        // Then
+        XCTAssertNotNil(url)
+        XCTAssertEqual(url?.scheme, "unamentis")
+        XCTAssertEqual(url?.host, "chat")
+
+        let components = URLComponents(url: url!, resolvingAgainstBaseURL: false)
+        let promptParam = components?.queryItems?.first(where: { $0.name == "prompt" })
+        XCTAssertNotNil(promptParam)
+    }
 }
 
 // MARK: - Error Handling Tests
@@ -358,6 +387,50 @@ final class IntentErrorTests: XCTestCase {
             XCTAssertNotNil(resource)
         }
     }
+
+    func testStartConversationError_hasLocalizedDescriptions() {
+        // Verify all errors have user-friendly descriptions
+        let errors: [StartConversationError] = [
+            .invalidConfiguration,
+            .appNotReady
+        ]
+
+        for error in errors {
+            let resource = error.localizedStringResource
+            XCTAssertNotNil(resource)
+        }
+    }
+}
+
+// MARK: - Start Conversation Intent Tests
+
+final class StartConversationIntentTests: XCTestCase {
+
+    func testStartConversationIntent_canBeInitialized() {
+        // When
+        let intent = StartConversationIntent()
+
+        // Then
+        XCTAssertNotNil(intent)
+        XCTAssertNil(intent.initialPrompt)
+    }
+
+    func testStartConversationIntent_hasCorrectMetadata() {
+        // Then
+        XCTAssertEqual(StartConversationIntent.title.key, "Start Conversation")
+        XCTAssertNotNil(StartConversationIntent.description)
+    }
+
+    func testStartConversationIntent_acceptsOptionalPrompt() {
+        // Given
+        var intent = StartConversationIntent()
+
+        // When
+        intent.initialPrompt = "What is quantum physics?"
+
+        // Then
+        XCTAssertEqual(intent.initialPrompt, "What is quantum physics?")
+    }
 }
 
 // MARK: - App Shortcuts Provider Tests
@@ -368,8 +441,8 @@ final class AppShortcutsProviderTests: XCTestCase {
         // When
         let shortcuts = UnaMentisShortcuts.appShortcuts
 
-        // Then
-        XCTAssertGreaterThanOrEqual(shortcuts.count, 3, "Should have at least 3 shortcuts defined")
+        // Then - Should have 4 shortcuts: Start Conversation, Start Lesson, Resume Learning, Show Progress
+        XCTAssertGreaterThanOrEqual(shortcuts.count, 4, "Should have at least 4 shortcuts defined")
     }
 
     func testAppShortcuts_haveValidPhrases() {
@@ -469,6 +542,12 @@ final class AppIntentsIntegrationTests: XCTestCase {
         // When - Generate analytics URL
         let analyticsURL = URL(string: "unamentis://analytics")!
 
+        // When - Generate chat URL (freeform conversation)
+        let chatURL = URL(string: "unamentis://chat")!
+
+        // When - Generate chat URL with prompt
+        let chatWithPromptURL = URL(string: "unamentis://chat?prompt=hello")!
+
         // Then - All URLs are valid
         XCTAssertEqual(lessonURL.scheme, "unamentis")
         XCTAssertEqual(lessonURL.host, "lesson")
@@ -478,5 +557,11 @@ final class AppIntentsIntegrationTests: XCTestCase {
 
         XCTAssertEqual(analyticsURL.scheme, "unamentis")
         XCTAssertEqual(analyticsURL.host, "analytics")
+
+        XCTAssertEqual(chatURL.scheme, "unamentis")
+        XCTAssertEqual(chatURL.host, "chat")
+
+        XCTAssertEqual(chatWithPromptURL.scheme, "unamentis")
+        XCTAssertEqual(chatWithPromptURL.host, "chat")
     }
 }

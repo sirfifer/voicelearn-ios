@@ -143,6 +143,20 @@ struct UnaMentisApp: App {
             print("[DeepLink] Show analytics")
             NotificationCenter.default.post(name: .showAnalyticsFromDeepLink, object: nil)
 
+        case "chat":
+            // Handle: unamentis://chat?prompt=optional
+            var userInfo: [String: Any] = [:]
+            if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+               let prompt = components.queryItems?.first(where: { $0.name == "prompt" })?.value {
+                userInfo["prompt"] = prompt
+            }
+            print("[DeepLink] Start chat\(userInfo.isEmpty ? "" : " with prompt")")
+            NotificationCenter.default.post(
+                name: .startChatFromDeepLink,
+                object: nil,
+                userInfo: userInfo.isEmpty ? nil : userInfo
+            )
+
         default:
             print("[DeepLink] Unknown path: \(url.host ?? "nil")")
         }
@@ -158,6 +172,8 @@ extension Notification.Name {
     static let resumeLessonFromDeepLink = Notification.Name("resumeLessonFromDeepLink")
     /// Posted when analytics should be shown from a deep link
     static let showAnalyticsFromDeepLink = Notification.Name("showAnalyticsFromDeepLink")
+    /// Posted when freeform chat should start from a deep link
+    static let startChatFromDeepLink = Notification.Name("startChatFromDeepLink")
 }
 
 // MARK: - Launch Screen View
@@ -190,12 +206,42 @@ struct LaunchScreenView: View {
     }
 }
 
+/// Tab indices for programmatic navigation
+enum AppTab: Int {
+    #if DEBUG
+    case debug = 0
+    case session = 1
+    case curriculum = 2
+    case history = 3
+    case analytics = 4
+    case settings = 5
+    #else
+    case session = 0
+    case curriculum = 1
+    case history = 2
+    case analytics = 3
+    case settings = 4
+    #endif
+}
+
 /// Root content view with tab navigation
 struct ContentView: View {
     @EnvironmentObject private var appState: AppState
     @State private var debugTestResult: String = ""
     @State private var isTestingLLM: Bool = false
     @State private var isLoading: Bool = true
+
+    /// Selected tab for programmatic navigation from deep links
+    @State private var selectedTab: Int = AppTab.session.rawValue
+
+    /// Topic to open in session (from deep link)
+    @State private var deepLinkTopicId: UUID?
+
+    /// Whether to auto-start freeform chat (from deep link)
+    @State private var autoStartChat: Bool = false
+
+    /// Initial prompt for freeform chat (from deep link)
+    @State private var chatPrompt: String?
 
     var body: some View {
         ZStack {
@@ -212,11 +258,57 @@ struct ContentView: View {
                 isLoading = false
             }
         }
+        // Deep link notification observers
+        .onReceive(NotificationCenter.default.publisher(for: .startLessonFromDeepLink)) { notification in
+            handleStartLesson(notification)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .resumeLessonFromDeepLink)) { notification in
+            handleResumeLesson(notification)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showAnalyticsFromDeepLink)) { _ in
+            handleShowAnalytics()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .startChatFromDeepLink)) { notification in
+            handleStartChat(notification)
+        }
+    }
+
+    // MARK: - Deep Link Handlers
+
+    private func handleStartLesson(_ notification: Notification) {
+        guard let topicIdString = notification.userInfo?["topicId"] as? String,
+              let topicId = UUID(uuidString: topicIdString) else { return }
+
+        deepLinkTopicId = topicId
+        autoStartChat = false
+        selectedTab = AppTab.session.rawValue
+    }
+
+    private func handleResumeLesson(_ notification: Notification) {
+        guard let topicIdString = notification.userInfo?["topicId"] as? String,
+              let topicId = UUID(uuidString: topicIdString) else { return }
+
+        deepLinkTopicId = topicId
+        autoStartChat = false
+        selectedTab = AppTab.session.rawValue
+    }
+
+    private func handleShowAnalytics() {
+        deepLinkTopicId = nil
+        autoStartChat = false
+        selectedTab = AppTab.analytics.rawValue
+    }
+
+    private func handleStartChat(_ notification: Notification) {
+        deepLinkTopicId = nil
+        autoStartChat = true
+        chatPrompt = notification.userInfo?["prompt"] as? String
+        selectedTab = AppTab.session.rawValue
     }
 
     @ViewBuilder
     private var mainContent: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             // Debug LLM test view on first tab in DEBUG builds
             #if DEBUG
             VStack(spacing: 20) {
@@ -247,34 +339,44 @@ struct ContentView: View {
             .tabItem {
                 Label("Debug", systemImage: "ladybug")
             }
+            .tag(AppTab.debug.rawValue)
             // Note: Auto-LLM test removed - it caused hangs on physical device
             // when trying to connect to localhost. Use the Test button manually.
             #endif
 
-            SessionView()
-                .tabItem {
-                    Label("Session", systemImage: "waveform")
-                }
-            
+            SessionTabContent(
+                deepLinkTopicId: $deepLinkTopicId,
+                autoStartChat: $autoStartChat,
+                chatPrompt: $chatPrompt
+            )
+            .tabItem {
+                Label("Session", systemImage: "waveform")
+            }
+            .tag(AppTab.session.rawValue)
+
             CurriculumView()
                 .tabItem {
                     Label("Curriculum", systemImage: "book")
                 }
-            
+                .tag(AppTab.curriculum.rawValue)
+
             HistoryView()
                 .tabItem {
                     Label("History", systemImage: "clock")
                 }
-            
+                .tag(AppTab.history.rawValue)
+
             AnalyticsView()
                 .tabItem {
                     Label("Analytics", systemImage: "chart.bar")
                 }
-            
+                .tag(AppTab.analytics.rawValue)
+
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
+                .tag(AppTab.settings.rawValue)
         }
     }
 
@@ -329,7 +431,114 @@ struct ContentView: View {
     #endif
 }
 
+// MARK: - Session Tab Content
 
+/// Container view for the Session tab that handles deep link navigation
+///
+/// This view manages the session state based on incoming deep links:
+/// - Deep link with topic ID: Opens SessionView with the specified topic
+/// - Deep link for chat: Opens SessionView for freeform conversation
+/// - No deep link: Shows the default session selector
+struct SessionTabContent: View {
+    @EnvironmentObject private var appState: AppState
+    @Environment(\.managedObjectContext) private var viewContext
+
+    /// Topic ID from deep link (binding to parent so we can clear it)
+    @Binding var deepLinkTopicId: UUID?
+
+    /// Whether to auto-start freeform chat
+    @Binding var autoStartChat: Bool
+
+    /// Initial prompt for chat (optional)
+    @Binding var chatPrompt: String?
+
+    /// The fetched topic for deep link navigation
+    @State private var deepLinkTopic: Topic?
+
+    /// Whether we're showing a deep-link triggered session
+    @State private var showingDeepLinkSession: Bool = false
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if showingDeepLinkSession {
+                    // Show session triggered by deep link
+                    if let topic = deepLinkTopic {
+                        // Curriculum-based session
+                        SessionView(topic: topic)
+                    } else if autoStartChat {
+                        // Freeform chat session with auto-start
+                        FreeformSessionView(initialPrompt: chatPrompt)
+                    } else {
+                        // Fallback to regular session
+                        SessionView()
+                    }
+                } else {
+                    // Default session view - user can start a new session
+                    SessionView()
+                }
+            }
+        }
+        .onChange(of: deepLinkTopicId) { _, newValue in
+            if let topicId = newValue {
+                fetchTopic(id: topicId)
+            }
+        }
+        .onChange(of: autoStartChat) { _, newValue in
+            if newValue {
+                // Freeform chat requested
+                deepLinkTopic = nil
+                showingDeepLinkSession = true
+            }
+        }
+        .onDisappear {
+            // Clear deep link state when navigating away
+            clearDeepLinkState()
+        }
+    }
+
+    private func fetchTopic(id: UUID) {
+        let request = Topic.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        request.fetchLimit = 1
+
+        do {
+            let context = PersistenceController.shared.container.viewContext
+            if let topic = try context.fetch(request).first {
+                deepLinkTopic = topic
+                showingDeepLinkSession = true
+            } else {
+                print("[SessionTabContent] Topic not found: \(id)")
+                // Clear the deep link state since topic wasn't found
+                clearDeepLinkState()
+            }
+        } catch {
+            print("[SessionTabContent] Error fetching topic: \(error)")
+            clearDeepLinkState()
+        }
+    }
+
+    private func clearDeepLinkState() {
+        deepLinkTopicId = nil
+        autoStartChat = false
+        chatPrompt = nil
+        deepLinkTopic = nil
+        showingDeepLinkSession = false
+    }
+}
+
+// MARK: - Freeform Session View
+
+/// A wrapper around SessionView specifically for freeform voice chat
+/// that auto-starts the session when triggered from Siri
+struct FreeformSessionView: View {
+    let initialPrompt: String?
+
+    var body: some View {
+        // Use SessionView with autoStart=true for hands-free operation
+        SessionView(topic: nil, autoStart: true)
+    }
+}
 
 // MARK: - App State
 
