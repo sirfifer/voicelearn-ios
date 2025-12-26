@@ -41,63 +41,61 @@ struct TopicSelectionView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Download/Progress Section
-                downloadHeaderSection
-                    .padding(.horizontal)
-                    .padding(.vertical, 12)
-                    .background(Color(.systemBackground))
+        VStack(spacing: 0) {
+            // Download/Progress Section
+            downloadHeaderSection
+                .padding(.horizontal)
+                .padding(.vertical, 12)
+                .background(Color(.systemBackground))
 
-                Divider()
+            Divider()
 
-                // Topic List
-                if let detail = detail {
-                    topicListContent(detail: detail)
-                } else {
-                    ProgressView("Loading topics...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
+            // Topic List
+            if let detail = detail {
+                topicListContent(detail: detail)
+            } else {
+                ProgressView("Loading topics...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .navigationTitle("Select Topics")
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        if isDownloading {
-                            Task {
-                                await CurriculumDownloadManager.shared.cancelDownload(for: curriculum.id)
-                            }
+        }
+        .navigationTitle("Select Topics")
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Back") {
+                    if isDownloading {
+                        Task {
+                            await CurriculumDownloadManager.shared.cancelDownload(for: curriculum.id)
                         }
-                        onCancel()
                     }
+                    onCancel()
                 }
             }
-            .alert("Download Failed", isPresented: $showingError) {
-                Button("OK") { }
-            } message: {
-                Text(downloadError ?? "An unknown error occurred.")
-            }
-            .onAppear {
-                // Select all topics by default
-                selectedTopicIds = Set(topics.map { $0.id })
-            }
-            .onChange(of: currentProgress?.state) { _, newState in
-                if let state = newState {
-                    switch state {
-                    case .completed:
-                        isDownloading = false
-                    case .failed(let error):
-                        isDownloading = false
-                        downloadError = error
-                        showingError = true
-                    case .notStarted:
-                        isDownloading = false
-                    default:
-                        break
-                    }
+        }
+        .alert("Download Failed", isPresented: $showingError) {
+            Button("OK") { }
+        } message: {
+            Text(downloadError ?? "An unknown error occurred.")
+        }
+        .onAppear {
+            // Select all topics by default
+            selectedTopicIds = Set(topics.map { $0.id })
+        }
+        .onChange(of: currentProgress?.state) { _, newState in
+            if let state = newState {
+                switch state {
+                case .completed:
+                    isDownloading = false
+                case .failed(let error):
+                    isDownloading = false
+                    downloadError = error
+                    showingError = true
+                case .notStarted:
+                    isDownloading = false
+                default:
+                    break
                 }
             }
         }

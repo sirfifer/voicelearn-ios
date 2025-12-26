@@ -565,7 +565,6 @@ struct ServerCurriculumBrowser: View {
     @State private var searchText = ""
     @State private var selectedCurriculum: CurriculumSummary?
     @State private var curriculumDetail: CurriculumDetail?
-    @State private var showingTopicSelection = false
     @State private var downloadError: String?
     @State private var showingDownloadError = false
 
@@ -636,27 +635,16 @@ struct ServerCurriculumBrowser: View {
                 await loadCurricula()
             }
             .sheet(item: $selectedCurriculum) { curriculum in
-                ServerCurriculumDetailView(
+                CurriculumDownloadFlowView(
                     curriculum: curriculum,
                     detail: curriculumDetail,
-                    onSelectTopics: {
-                        showingTopicSelection = true
+                    onDownload: { selectedTopicIds in
+                        await downloadCurriculum(curriculum, selectedTopicIds: selectedTopicIds)
+                    },
+                    onDismiss: {
+                        selectedCurriculum = nil
                     }
                 )
-            }
-            .sheet(isPresented: $showingTopicSelection) {
-                if let curriculum = selectedCurriculum {
-                    TopicSelectionView(
-                        curriculum: curriculum,
-                        detail: curriculumDetail,
-                        onDownload: { selectedTopicIds in
-                            await downloadCurriculum(curriculum, selectedTopicIds: selectedTopicIds)
-                        },
-                        onCancel: {
-                            showingTopicSelection = false
-                        }
-                    )
-                }
             }
             .alert("Download Failed", isPresented: $showingDownloadError) {
                 Button("OK") { }
@@ -705,6 +693,7 @@ struct ServerCurriculumBrowser: View {
     @MainActor
     private func downloadCurriculum(_ curriculum: CurriculumSummary, selectedTopicIds: Set<String>) async {
         Self.logger.info("⬇️ Download initiated for curriculum: \(curriculum.title) (id: \(curriculum.id)) with \(selectedTopicIds.count) topics")
+        Self.logger.info("⬇️ Selected topic IDs: \(selectedTopicIds)")
 
         downloadError = nil
 
@@ -712,27 +701,26 @@ struct ServerCurriculumBrowser: View {
             // Configure download manager with same server settings
             let serverIP = UserDefaults.standard.string(forKey: "primaryServerIP") ?? ""
             let host = serverIP.isEmpty ? "localhost" : serverIP
-            try await CurriculumDownloadManager.shared.configure(host: host, port: 8766)
+            Self.logger.info("⬇️ Configuring download manager with host: \(host):8766")
+            try CurriculumDownloadManager.shared.configure(host: host, port: 8766)
 
             Self.logger.info("⬇️ Starting download via CurriculumDownloadManager...")
-            let parser = UMLCFParser()
 
             let downloadedCurriculum = try await CurriculumDownloadManager.shared.downloadCurriculum(
                 id: curriculum.id,
                 title: curriculum.title,
-                selectedTopicIds: selectedTopicIds,
-                parser: parser
+                selectedTopicIds: selectedTopicIds
             )
 
             Self.logger.info("✅ Successfully downloaded and imported curriculum: \(curriculum.title)")
             Self.logger.info("✅ Curriculum has \(downloadedCurriculum.topics?.count ?? 0) topics")
 
-            // Close sheets and notify parent
-            showingTopicSelection = false
+            // Close sheet and notify parent
             selectedCurriculum = nil
             onDownload(downloadedCurriculum)
         } catch {
             Self.logger.error("❌ Failed to download curriculum: \(error)")
+            Self.logger.error("❌ Error type: \(type(of: error))")
 
             var errorDetail = error.localizedDescription
 
@@ -740,26 +728,68 @@ struct ServerCurriculumBrowser: View {
                 switch decodingError {
                 case .keyNotFound(let key, let context):
                     let path = context.codingPath.map { $0.stringValue }.joined(separator: ".")
+                    Self.logger.error("❌ DecodingError: Missing key '\(key.stringValue)' at path: \(path)")
                     errorDetail = "Missing data field: \(key.stringValue) at \(path)"
                 case .typeMismatch(let type, let context):
                     let path = context.codingPath.map { $0.stringValue }.joined(separator: ".")
+                    Self.logger.error("❌ DecodingError: Type mismatch for \(type) at path: \(path)")
                     errorDetail = "Data format error at: \(path)"
                 case .valueNotFound(let type, let context):
                     let path = context.codingPath.map { $0.stringValue }.joined(separator: ".")
+                    Self.logger.error("❌ DecodingError: Value not found for \(type) at path: \(path)")
                     errorDetail = "Missing value at: \(path)"
                 case .dataCorrupted(let context):
                     let path = context.codingPath.map { $0.stringValue }.joined(separator: ".")
+                    Self.logger.error("❌ DecodingError: Data corrupted at path: \(path)")
                     errorDetail = "Corrupted data at: \(path)"
                 @unknown default:
+                    Self.logger.error("❌ DecodingError: Unknown")
                     errorDetail = "Unknown data format error"
                 }
             } else if let serviceError = error as? CurriculumServiceError {
+                Self.logger.error("❌ CurriculumServiceError: \(serviceError)")
                 errorDetail = serviceError.errorDescription ?? error.localizedDescription
             }
 
-            showingTopicSelection = false
+            // Show error alert, then dismiss sheet
             downloadError = errorDetail
             showingDownloadError = true
+            selectedCurriculum = nil
+        }
+    }
+}
+
+// MARK: - Curriculum Download Flow View
+// Wrapper view that handles navigation between detail and topic selection
+
+struct CurriculumDownloadFlowView: View {
+    let curriculum: CurriculumSummary
+    let detail: CurriculumDetail?
+    let onDownload: (Set<String>) async -> Void
+    let onDismiss: () -> Void
+
+    @State private var showingTopicSelection = false
+
+    var body: some View {
+        NavigationStack {
+            if showingTopicSelection {
+                TopicSelectionView(
+                    curriculum: curriculum,
+                    detail: detail,
+                    onDownload: onDownload,
+                    onCancel: {
+                        showingTopicSelection = false
+                    }
+                )
+            } else {
+                ServerCurriculumDetailView(
+                    curriculum: curriculum,
+                    detail: detail,
+                    onSelectTopics: {
+                        showingTopicSelection = true
+                    }
+                )
+            }
         }
     }
 }
@@ -865,54 +895,53 @@ struct ServerCurriculumDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Download Button - Opens topic selection
-                Button {
-                    onSelectTopics()
-                } label: {
-                    HStack {
-                        Image(systemName: "arrow.down.circle.fill")
-                        Text("Download Topics")
-                    }
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+        VStack(spacing: 0) {
+            // Download Button - Opens topic selection
+            Button {
+                onSelectTopics()
+            } label: {
+                HStack {
+                    Image(systemName: "arrow.down.circle.fill")
+                    Text("Download Topics")
                 }
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity)
-                .background(Color(.systemBackground))
+                .font(.subheadline.weight(.semibold))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+            }
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .background(Color(.systemBackground))
 
-                Divider()
+            Divider()
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Header
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(curriculum.title)
-                                .font(.title2.bold())
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Header
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(curriculum.title)
+                            .font(.title2.bold())
 
-                            Text(curriculum.description)
-                                .font(.body)
-                                .foregroundStyle(.secondary)
+                        Text(curriculum.description)
+                            .font(.body)
+                            .foregroundStyle(.secondary)
 
-                            HStack(spacing: 16) {
-                                if let difficulty = curriculum.difficulty {
-                                    Label(difficulty, systemImage: "gauge")
-                                }
-                                Label("\(curriculum.topicCount) topics", systemImage: "list.bullet")
-                                if let duration = curriculum.totalDuration {
-                                    Label(formatDuration(duration), systemImage: "clock")
-                                }
+                        HStack(spacing: 16) {
+                            if let difficulty = curriculum.difficulty {
+                                Label(difficulty, systemImage: "gauge")
                             }
-                            .font(.subheadline)
-                            .foregroundStyle(.tertiary)
+                            Label("\(curriculum.topicCount) topics", systemImage: "list.bullet")
+                            if let duration = curriculum.totalDuration {
+                                Label(formatDuration(duration), systemImage: "clock")
+                            }
                         }
+                        .font(.subheadline)
+                        .foregroundStyle(.tertiary)
+                    }
 
-                        Divider()
+                    Divider()
 
                     // Topics
                     if let detail = detail, !detail.topics.isEmpty {
@@ -987,14 +1016,13 @@ struct ServerCurriculumDetailView: View {
             }
         }
         .navigationTitle("Curriculum Details")
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") {
-                        dismiss()
-                    }
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Close") {
+                    dismiss()
                 }
             }
         }

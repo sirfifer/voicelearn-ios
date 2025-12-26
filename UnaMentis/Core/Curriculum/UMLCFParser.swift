@@ -369,6 +369,26 @@ public actor UMLCFParser {
         self.persistenceController = persistenceController
     }
 
+    // MARK: - Static Import (MainActor safe)
+
+    /// Import a UMLCF document into Core Data directly from MainActor context
+    /// This static method avoids actor isolation issues when called from @MainActor code
+    /// - Parameters:
+    ///   - document: The UMLCF document to import
+    ///   - replaceExisting: Whether to replace existing curriculum with same sourceId
+    ///   - selectedTopicIds: Optional set of topic IDs to import. If nil or empty, imports all topics.
+    ///   - persistenceController: The persistence controller to use
+    @MainActor
+    public static func importDocument(
+        _ document: UMLCFDocument,
+        replaceExisting: Bool = true,
+        selectedTopicIds: Set<String>? = nil,
+        persistenceController: PersistenceController = .shared
+    ) throws -> Curriculum {
+        let parser = UMLCFParserHelper(persistenceController: persistenceController)
+        return try parser.importToCoreData(document: document, replaceExisting: replaceExisting, selectedTopicIds: selectedTopicIds)
+    }
+
     // MARK: - Parsing
 
     /// Parse UMLCF JSON data into a UMLCFDocument
@@ -397,13 +417,13 @@ public actor UMLCFParser {
     ) throws -> Curriculum {
         let context = persistenceController.container.viewContext
 
-        // Check for existing curriculum with same ID
+        // Check for existing curriculum with same sourceId (the UMLCF identifier)
         let curriculumIdValue = document.id.value
         if replaceExisting {
             let fetchRequest: NSFetchRequest<Curriculum> = Curriculum.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "id == %@", curriculumIdValue)
+            fetchRequest.predicate = NSPredicate(format: "sourceId == %@", curriculumIdValue)
 
-            if let existing = try? context.fetch(fetchRequest).first {
+            if let existing = try context.fetch(fetchRequest).first {
                 // Delete existing and all related data
                 context.delete(existing)
             }
@@ -743,5 +763,267 @@ extension Document {
     public func decodedTranscript() -> TranscriptData? {
         guard let data = embedding, documentType == .transcript else { return nil }
         return try? JSONDecoder().decode(TranscriptData.self, from: data)
+    }
+}
+
+// MARK: - UMLCF Parser Helper (MainActor Safe)
+
+/// Non-actor helper class for Core Data imports that runs entirely on MainActor
+/// This avoids the actor isolation issues that can occur when calling @MainActor methods
+/// from within an actor context
+@MainActor
+public final class UMLCFParserHelper {
+    private let persistenceController: PersistenceController
+
+    public init(persistenceController: PersistenceController = .shared) {
+        self.persistenceController = persistenceController
+    }
+
+    /// Import a UMLCF document into Core Data
+    /// - Parameters:
+    ///   - document: The UMLCF document to import
+    ///   - replaceExisting: Whether to replace existing curriculum with same sourceId
+    ///   - selectedTopicIds: Optional set of topic IDs to import. If nil or empty, imports all topics.
+    public func importToCoreData(
+        document: UMLCFDocument,
+        replaceExisting: Bool = true,
+        selectedTopicIds: Set<String>? = nil
+    ) throws -> Curriculum {
+        let context = persistenceController.container.viewContext
+
+        // Check for existing curriculum with same sourceId (the UMLCF identifier)
+        let curriculumIdValue = document.id.value
+        if replaceExisting {
+            let fetchRequest: NSFetchRequest<Curriculum> = Curriculum.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "sourceId == %@", curriculumIdValue)
+
+            if let existing = try context.fetch(fetchRequest).first {
+                context.delete(existing)
+            }
+        }
+
+        // Create new Curriculum
+        let curriculum = Curriculum(context: context)
+        curriculum.id = UUID(uuidString: curriculumIdValue) ?? UUID()
+        curriculum.sourceId = curriculumIdValue
+        curriculum.name = document.title
+        curriculum.summary = document.description
+        curriculum.createdAt = parseDate(document.lifecycle?.created) ?? Date()
+        curriculum.updatedAt = parseDate(document.lifecycle?.modified) ?? Date()
+
+        // Process content nodes to create topics (filtering by selectedTopicIds if provided)
+        var orderIndex: Int32 = 0
+        for contentNode in document.content {
+            orderIndex = createTopics(
+                from: contentNode,
+                curriculum: curriculum,
+                context: context,
+                startingIndex: orderIndex,
+                glossary: document.glossary,
+                selectedTopicIds: selectedTopicIds
+            )
+        }
+
+        try context.save()
+        return curriculum
+    }
+
+    private func createTopics(
+        from node: UMLCFContentNode,
+        curriculum: Curriculum,
+        context: NSManagedObjectContext,
+        startingIndex: Int32,
+        glossary: UMLCFGlossary?,
+        parentObjectives: [String]? = nil,
+        selectedTopicIds: Set<String>? = nil
+    ) -> Int32 {
+        var currentIndex = startingIndex
+
+        // Check if this topic should be included (if filtering is active)
+        let shouldInclude = selectedTopicIds == nil || selectedTopicIds!.isEmpty || selectedTopicIds!.contains(node.id.value)
+
+        if node.type == "topic" || node.type == "subtopic" || node.type == "lesson" {
+            // Only create the topic if it's in the selected set (or no filtering)
+            if shouldInclude {
+                let topic = Topic(context: context)
+                topic.id = UUID(uuidString: node.id.value) ?? UUID()
+                topic.sourceId = node.id.value
+                topic.title = node.title
+                topic.orderIndex = currentIndex
+                topic.mastery = 0.0
+                topic.outline = node.description
+
+                if let depthString = node.tutoringConfig?.contentDepth,
+                   let depth = ContentDepth(rawValue: depthString) {
+                    topic.depthLevel = depth
+                } else {
+                    topic.depthLevel = .intermediate
+                }
+
+                var objectives: [String] = []
+                if let nodeObjectives = node.learningObjectives {
+                    objectives = nodeObjectives.map { $0.statement }
+                }
+                if let parentObjectives = parentObjectives {
+                    objectives.append(contentsOf: parentObjectives)
+                }
+                if !objectives.isEmpty {
+                    topic.objectives = objectives
+                }
+
+                if let transcript = node.transcript {
+                    let document = createTranscriptDocument(for: topic, transcript: transcript, context: context)
+                    topic.addToDocuments(document)
+                }
+
+                if let media = node.media {
+                    createVisualAssets(from: media, for: topic, context: context)
+                }
+
+                curriculum.addToTopics(topic)
+                currentIndex += 1
+            }
+        }
+
+        if let children = node.children {
+            let nodeObjectives = node.learningObjectives?.map { $0.statement }
+            for child in children {
+                currentIndex = createTopics(
+                    from: child,
+                    curriculum: curriculum,
+                    context: context,
+                    startingIndex: currentIndex,
+                    glossary: glossary,
+                    parentObjectives: nodeObjectives,
+                    selectedTopicIds: selectedTopicIds
+                )
+            }
+        }
+
+        return currentIndex
+    }
+
+    private func createTranscriptDocument(
+        for topic: Topic,
+        transcript: UMLCFTranscript,
+        context: NSManagedObjectContext
+    ) -> Document {
+        let document = Document(context: context)
+        document.id = UUID()
+        document.title = "Transcript: \(topic.title ?? "Untitled")"
+        document.type = DocumentType.transcript.rawValue
+
+        let contentParts = transcript.segments?.map { segment -> String in
+            var text = segment.content
+            text = "[\(segment.type.uppercased())] \(text)"
+            if let notes = segment.speakingNotes {
+                if let pace = notes.pace { text += "\n[PACE: \(pace)]" }
+                if let tone = notes.emotionalTone { text += "\n[TONE: \(tone)]" }
+            }
+            return text
+        } ?? []
+
+        document.content = contentParts.joined(separator: "\n\n---\n\n")
+
+        if let segments = transcript.segments {
+            let pronunciationEntries: [String: TranscriptData.PronunciationEntry]? = transcript.pronunciationGuide?.mapValues { entry in
+                TranscriptData.PronunciationEntry(ipa: entry.ipa, respelling: entry.respelling, language: entry.language)
+            }
+
+            let transcriptData = TranscriptData(
+                segments: segments.map { seg in
+                    TranscriptData.Segment(
+                        id: seg.id,
+                        type: seg.type,
+                        content: seg.content,
+                        speakingNotes: seg.speakingNotes.map { notes in
+                            TranscriptData.SpeakingNotes(pace: notes.pace, emotionalTone: notes.emotionalTone, pauseAfter: notes.pauseAfter)
+                        },
+                        checkpointQuestion: seg.checkpoint?.question,
+                        stoppingPointType: seg.stoppingPoint?.type
+                    )
+                },
+                totalDuration: transcript.totalDuration,
+                pronunciationGuide: pronunciationEntries
+            )
+
+            if let jsonData = try? JSONEncoder().encode(transcriptData) {
+                document.embedding = jsonData
+            }
+        }
+
+        return document
+    }
+
+    private func createVisualAssets(
+        from media: UMLCFMediaCollection,
+        for topic: Topic,
+        context: NSManagedObjectContext
+    ) {
+        if let embeddedAssets = media.embedded {
+            for asset in embeddedAssets {
+                let visualAsset = createVisualAsset(from: asset, isReference: false, context: context)
+                topic.addToVisualAssets(visualAsset)
+            }
+        }
+        if let referenceAssets = media.reference {
+            for asset in referenceAssets {
+                let visualAsset = createVisualAsset(from: asset, isReference: true, context: context)
+                topic.addToVisualAssets(visualAsset)
+            }
+        }
+    }
+
+    private func createVisualAsset(
+        from asset: UMLCFMediaAsset,
+        isReference: Bool,
+        context: NSManagedObjectContext
+    ) -> VisualAsset {
+        let visualAsset = VisualAsset(context: context)
+        visualAsset.id = UUID()
+        visualAsset.assetId = asset.id
+        visualAsset.type = asset.type
+        visualAsset.title = asset.title
+        visualAsset.altText = asset.alt
+        visualAsset.caption = asset.caption
+        visualAsset.mimeType = asset.mimeType
+        visualAsset.latex = asset.latex
+        visualAsset.audioDescription = asset.audioDescription
+        visualAsset.isReference = isReference
+
+        if let urlString = asset.url, let url = URL(string: urlString) {
+            visualAsset.remoteURL = url
+        }
+        visualAsset.localPath = asset.localPath
+
+        if let dimensions = asset.dimensions {
+            visualAsset.width = Int32(dimensions.width)
+            visualAsset.height = Int32(dimensions.height)
+        }
+
+        if let timing = asset.segmentTiming {
+            visualAsset.startSegment = Int32(timing.startSegment)
+            visualAsset.endSegment = Int32(timing.endSegment)
+            visualAsset.displayMode = timing.displayMode ?? "persistent"
+        } else {
+            visualAsset.startSegment = -1
+            visualAsset.endSegment = -1
+            visualAsset.displayMode = "persistent"
+        }
+
+        if let keywords = asset.keywords {
+            visualAsset.keywords = keywords as NSObject
+        }
+
+        return visualAsset
+    }
+
+    private func parseDate(_ dateString: String?) -> Date? {
+        guard let dateString = dateString else { return nil }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: dateString) { return date }
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: dateString)
     }
 }

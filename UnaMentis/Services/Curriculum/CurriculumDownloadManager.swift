@@ -115,12 +115,9 @@ public final class CurriculumDownloadManager: ObservableObject {
     // Active downloads tracking
     @Published public private(set) var activeDownloads: [String: CurriculumDownloadProgress] = [:]
 
-    public init(session: URLSession = .shared) {
-        // Configure session for background downloads
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForResource = 600 // 10 minutes
-        config.waitsForConnectivity = true
-        self.session = URLSession(configuration: config)
+    public init() {
+        // Use shared session - simpler and works correctly
+        self.session = URLSession.shared
     }
 
     // MARK: - Configuration
@@ -165,8 +162,7 @@ public final class CurriculumDownloadManager: ObservableObject {
     public func downloadCurriculum(
         id curriculumId: String,
         title curriculumTitle: String,
-        selectedTopicIds: Set<String>,
-        parser: UMLCFParser
+        selectedTopicIds: Set<String>
     ) async throws -> Curriculum {
         guard let baseURL = baseURL else {
             throw CurriculumServiceError.noServerConfigured
@@ -188,13 +184,17 @@ public final class CurriculumDownloadManager: ObservableObject {
         updateProgress(progress)
 
         let url = baseURL.appendingPathComponent("api/curricula/\(curriculumId)/full-with-assets")
+        Self.logger.info("Fetching from URL: \(url.absoluteString)")
 
         let data: Data
         let response: URLResponse
 
         do {
+            Self.logger.info("Starting network request...")
             (data, response) = try await session.data(from: url)
+            Self.logger.info("Network request completed, received \(data.count) bytes")
         } catch {
+            Self.logger.error("Network request failed: \(error)")
             progress.state = .failed("Network error: \(error.localizedDescription)")
             updateProgress(progress)
             throw CurriculumServiceError.networkError(error.localizedDescription)
@@ -245,8 +245,9 @@ public final class CurriculumDownloadManager: ObservableObject {
         progress.state = .downloading(progress: 0.5)
         updateProgress(progress)
 
-        // Import to Core Data
-        let curriculum = try await parser.importToCoreData(document: filteredDocument, replaceExisting: true)
+        // Import to Core Data using static method (avoids actor isolation issues)
+        // Pass selectedTopicIds to filter which topics get imported
+        let curriculum = try UMLCFParser.importDocument(filteredDocument, replaceExisting: true, selectedTopicIds: selectedTopicIds)
 
         // Extract and cache assets
         progress.currentTopicTitle = "Caching visual assets..."
