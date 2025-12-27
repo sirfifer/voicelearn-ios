@@ -1,0 +1,89 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unamentis-importers"
+version = "1.0.0"
+description = "UnaMentis Curriculum Importer Framework with Plugin Architecture"
+readme = "CLAUDE.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "UnaMentis Team"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Education",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["curriculum", "importer", "plugin", "education", "opencourseware"]
+
+dependencies = [
+    "aiohttp>=3.8.0",
+    "beautifulsoup4>=4.12.0",
+    "pluggy>=1.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/sirfifer/voicelearn-ios"
+
+# Entry points for external plugins to register
+# External plugins can add themselves here via their own pyproject.toml
+[project.entry-points."unamentis.importers.sources"]
+# Built-in sources are discovered via local import
+# External sources register here:
+# my_source = "my_package.sources:MySourcePlugin"
+
+[project.entry-points."unamentis.importers.parsers"]
+# pdf = "unamentis_importers.parsers.pdf:PDFParserPlugin"
+
+[project.entry-points."unamentis.importers.enrichers"]
+# ai_enrich = "unamentis_importers.enrichment.ai:AIEnrichmentPlugin"
+
+[project.entry-points."unamentis.importers.exporters"]
+# umlcf = "unamentis_importers.exporters.umlcf:UMLCFExporterPlugin"
+
+[project.entry-points."unamentis.importers.validators"]
+# schema = "unamentis_importers.validators.schema:SchemaValidatorPlugin"
+
+[tool.setuptools]
+packages = ["importers", "importers.core", "importers.sources", "importers.parsers", "importers.enrichment"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
