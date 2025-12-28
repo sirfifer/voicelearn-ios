@@ -1,0 +1,166 @@
+{
+  "umlcf": "1.0.0",
+  "id": {
+    "catalog": "UnaMentis",
+    "value": "test-course-assessments"
+  },
+  "title": "Test Course",
+  "description": "A test course for unit testing",
+  "version": {
+    "number": "1.0.0",
+    "date": "2025-12-28"
+  },
+  "lifecycle": {
+    "status": "draft",
+    "contributors": [
+      {
+        "role": "publisher",
+        "name": "UnaMentis Importer"
+      },
+      {
+        "role": "instructor",
+        "name": "Test Instructor"
+      }
+    ]
+  },
+  "metadata": {
+    "language": "en-US",
+    "keywords": [],
+    "department": "Testing"
+  },
+  "educational": {
+    "audience": {
+      "type": "learner",
+      "educationalLevel": "undergraduate-upper"
+    }
+  },
+  "rights": {
+    "type": "CC-BY-4.0",
+    "name": "Creative Commons Attribution 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "permissions": [
+      "share",
+      "adapt"
+    ],
+    "conditions": [
+      "attribution"
+    ],
+    "attributionRequired": true,
+    "attributionFormat": "Test attribution",
+    "holder": {
+      "name": "Test Holder",
+      "url": "https://example.com"
+    },
+    "restrictions": []
+  },
+  "content": [
+    {
+      "id": {
+        "value": "lectures"
+      },
+      "title": "Lectures",
+      "type": "module",
+      "orderIndex": 0,
+      "children": [
+        {
+          "id": {
+            "value": "lecture-1"
+          },
+          "title": "Introduction to Testing",
+          "type": "topic",
+          "orderIndex": 0,
+          "content": {
+            "text": "",
+            "hasVideo": true,
+            "hasTranscript": true
+          }
+        },
+        {
+          "id": {
+            "value": "lecture-2"
+          },
+          "title": "Unit Test Fundamentals",
+          "type": "topic",
+          "orderIndex": 1,
+          "content": {
+            "text": "",
+            "hasVideo": true,
+            "hasTranscript": true
+          }
+        },
+        {
+          "id": {
+            "value": "lecture-3"
+          },
+          "title": "Advanced Testing Patterns",
+          "type": "topic",
+          "orderIndex": 2,
+          "content": {
+            "text": "",
+            "hasVideo": false,
+            "hasTranscript": true
+          }
+        }
+      ]
+    },
+    {
+      "id": {
+        "value": "assignments"
+      },
+      "title": "Assignments",
+      "type": "module",
+      "orderIndex": 1,
+      "children": [
+        {
+          "id": {
+            "value": "assignment-1"
+          },
+          "title": "Problem Set 1",
+          "type": "assessment",
+          "orderIndex": 0,
+          "content": {
+            "assessmentType": "assignment",
+            "sourceFile": "assignment1.pdf"
+          }
+        }
+      ]
+    },
+    {
+      "id": {
+        "value": "exams"
+      },
+      "title": "Exams",
+      "type": "module",
+      "orderIndex": 2,
+      "children": [
+        {
+          "id": {
+            "value": "exam-1"
+          },
+          "title": "Midterm Exam",
+          "type": "assessment",
+          "orderIndex": 0,
+          "content": {
+            "assessmentType": "exam",
+            "sourceFile": "midterm.pdf"
+          }
+        }
+      ]
+    }
+  ],
+  "glossary": {
+    "terms": []
+  },
+  "_import_metadata": {
+    "source": "mock_source",
+    "course_id": "test-course-assessments",
+    "imported_at": "2025-12-28T07:25:56.973852",
+    "attribution": "Test attribution text",
+    "stats": {
+      "lectures": 3,
+      "assignments": 1,
+      "exams": 1,
+      "resources": 0
+    }
+  }
+}

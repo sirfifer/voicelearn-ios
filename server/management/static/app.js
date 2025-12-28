@@ -1233,6 +1233,9 @@ function initTabs() {
                 case 'sources':
                     initSourcesTab();
                     break;
+                case 'plugins':
+                    refreshPlugins();
+                    break;
             }
         });
     });
@@ -3804,6 +3807,162 @@ function formatBytes(bytes) {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+// =============================================================================
+// Plugin Manager Functions
+// =============================================================================
+
+let pluginsData = { plugins: [], first_run: false };
+
+async function refreshPlugins() {
+    try {
+        const data = await fetchAPI('/plugins');
+        if (data.success) {
+            pluginsData = data;
+            updatePluginStats(data.plugins);
+            renderPlugins(data.plugins);
+
+            // Show first-run banner if needed
+            const banner = document.getElementById('plugins-first-run-banner');
+            if (data.first_run && banner) {
+                banner.classList.remove('hidden');
+            } else if (banner) {
+                banner.classList.add('hidden');
+            }
+        }
+    } catch (e) {
+        console.error('Failed to refresh plugins:', e);
+    }
+}
+
+function updatePluginStats(plugins) {
+    const discovered = plugins.length;
+    const enabled = plugins.filter(p => p.enabled).length;
+    const disabled = discovered - enabled;
+    const sources = plugins.filter(p => p.plugin_type === 'sources').length;
+
+    document.getElementById('plugins-discovered').textContent = discovered;
+    document.getElementById('plugins-enabled').textContent = enabled;
+    document.getElementById('plugins-disabled').textContent = disabled;
+    document.getElementById('plugins-sources').textContent = sources;
+}
+
+function renderPlugins(plugins) {
+    const grid = document.getElementById('plugins-grid');
+    const emptyState = document.getElementById('plugins-empty');
+
+    if (plugins.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+    }
+
+    emptyState.classList.add('hidden');
+
+    grid.innerHTML = plugins.map(plugin => `
+        <div class="rounded-xl bg-dark-800/50 border ${plugin.enabled ? 'border-accent-success/30' : 'border-dark-700/50'} p-4 transition-all hover:border-dark-600">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 rounded-lg ${plugin.enabled ? 'bg-accent-success/20' : 'bg-dark-700'} flex items-center justify-center flex-shrink-0">
+                        ${getPluginIcon(plugin.plugin_type, plugin.enabled)}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-medium truncate">${escapeHtml(plugin.name)}</h3>
+                            <span class="text-xs px-2 py-0.5 rounded ${plugin.enabled ? 'bg-accent-success/20 text-accent-success' : 'bg-dark-700 text-dark-400'}">
+                                ${plugin.enabled ? 'Enabled' : 'Disabled'}
+                            </span>
+                        </div>
+                        <p class="text-sm text-dark-400 mt-1 line-clamp-2">${escapeHtml(plugin.description)}</p>
+                        <div class="flex items-center gap-3 mt-2 text-xs text-dark-500">
+                            <span class="capitalize">${plugin.plugin_type}</span>
+                            ${plugin.license_type ? `<span>${escapeHtml(plugin.license_type)}</span>` : ''}
+                            <span>v${plugin.version}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <button onclick="togglePlugin('${plugin.plugin_id}', ${!plugin.enabled})"
+                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${plugin.enabled ? 'bg-accent-success' : 'bg-dark-600'}">
+                        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${plugin.enabled ? 'translate-x-6' : 'translate-x-1'}"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getPluginIcon(pluginType, enabled) {
+    const color = enabled ? 'text-accent-success' : 'text-dark-500';
+    if (pluginType === 'sources') {
+        return `<svg class="w-5 h-5 ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+        </svg>`;
+    } else if (pluginType === 'parsers') {
+        return `<svg class="w-5 h-5 ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>`;
+    } else {
+        return `<svg class="w-5 h-5 ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>`;
+    }
+}
+
+async function togglePlugin(pluginId, enable) {
+    try {
+        const endpoint = enable ? 'enable' : 'disable';
+        const response = await fetchAPI(`/plugins/${pluginId}/${endpoint}`, { method: 'POST' });
+        if (response.success) {
+            await refreshPlugins();
+        } else {
+            alert(`Failed to ${endpoint} plugin: ${response.error || 'Unknown error'}`);
+        }
+    } catch (e) {
+        console.error(`Failed to toggle plugin ${pluginId}:`, e);
+        alert(`Failed to toggle plugin: ${e.message}`);
+    }
+}
+
+function showFirstRunWizard() {
+    // For now, just show a confirmation dialog
+    const enableAll = confirm('Would you like to enable all discovered plugins?\n\nClick OK to enable all, or Cancel to keep them disabled and configure manually.');
+
+    if (enableAll) {
+        initializeAllPlugins();
+    }
+}
+
+async function initializeAllPlugins() {
+    try {
+        const pluginIds = pluginsData.plugins.map(p => p.plugin_id);
+        const response = await fetchAPI('/plugins/initialize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled_plugins: pluginIds })
+        });
+
+        if (response.success) {
+            await refreshPlugins();
+            // Hide the first-run banner
+            const banner = document.getElementById('plugins-first-run-banner');
+            if (banner) banner.classList.add('hidden');
+        } else {
+            alert('Failed to initialize plugins: ' + (response.error || 'Unknown error'));
+        }
+    } catch (e) {
+        console.error('Failed to initialize plugins:', e);
+        alert('Failed to initialize plugins: ' + e.message);
+    }
+}
+
+// Utility function to escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Start the application

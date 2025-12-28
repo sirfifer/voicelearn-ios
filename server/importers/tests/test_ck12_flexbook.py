@@ -39,7 +39,7 @@ from ..core.plugin import (
     get_plugin_manager,
     reset_plugin_manager,
 )
-from ..sources.ck12_flexbook import (
+from ..plugins.sources.ck12_flexbook import (
     CK12_LICENSE,
     CK12FlexBookHandler,
     _load_courses_from_catalog,
@@ -518,25 +518,33 @@ class TestCK12EPUBParsing:
 class TestCK12PluginIntegration:
     """Tests for plugin architecture integration."""
 
-    def test_handler_registered_via_source_registry(self, plugin_manager):
-        """Test that handler is registered via SourceRegistry decorator."""
-        from ..core.registry import SourceRegistry
+    def test_handler_discovered_by_plugin_system(self, plugin_manager):
+        """Test that handler is discovered by the plugin discovery system."""
+        from ..core.discovery import get_plugin_discovery, reset_plugin_discovery
 
-        # The handler should be in the registry
-        handlers = list(SourceRegistry._handlers.keys())
-        assert "ck12_flexbook" in handlers
+        # Reset to ensure fresh discovery
+        reset_plugin_discovery()
+        discovery = get_plugin_discovery()
+        discovery.discover_all()
 
-    def test_source_in_plugin_manager(self, plugin_manager):
-        """Test that source appears in plugin manager after discovery."""
-        from ..core.registry import init_plugin_system
+        # The handler should be discovered
+        discovered_ids = list(discovery._discovered.keys())
+        assert "ck12_flexbook" in discovered_ids
 
-        # Initialize and discover plugins
-        manager = init_plugin_system()
+    def test_source_info_available_after_discovery(self, plugin_manager):
+        """Test that source info is available after discovery."""
+        from ..core.discovery import get_plugin_discovery, reset_plugin_discovery
 
-        # Should find the CK-12 source
-        source = manager.get_source("ck12_flexbook")
-        # Note: May be None if not fully initialized via adapter
-        # but the handler should be in SourceRegistry
+        # Reset and discover
+        reset_plugin_discovery()
+        discovery = get_plugin_discovery()
+        discovery.discover_all()
+
+        # Get the plugin metadata
+        plugin = discovery._discovered.get("ck12_flexbook")
+        assert plugin is not None
+        assert plugin.name == "CK-12 FlexBooks"
+        assert plugin.plugin_type == "sources"
 
 
 # =============================================================================
@@ -728,7 +736,7 @@ class TestCK12DataQuality:
 
     def test_catalog_json_valid(self):
         """Test that catalog JSON file is valid."""
-        from ..sources.ck12_flexbook import CATALOG_FILE
+        from ..plugins.sources.ck12_flexbook import CATALOG_FILE
 
         assert CATALOG_FILE.exists(), "Catalog file should exist"
 

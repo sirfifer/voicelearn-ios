@@ -30,12 +30,12 @@ from urllib.parse import urljoin
 import aiohttp
 from bs4 import BeautifulSoup
 
-from ..core.base import (
+from ...core.base import (
     CurriculumSourceHandler,
     LicenseRestrictionError,
     LicenseValidationResult,
 )
-from ..core.models import (
+from ...core.models import (
     AssignmentInfo,
     CourseCatalogEntry,
     CourseDetail,
@@ -45,7 +45,7 @@ from ..core.models import (
     LectureInfo,
     LicenseInfo,
 )
-from ..core.registry import SourceRegistry
+from ...core.registry import SourceRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,8 @@ MIT_OCW_LICENSE = LicenseInfo(
 
 # Path to the comprehensive course catalog JSON file
 # This catalog contains 247 courses with full metadata, URLs, and keywords
-CATALOG_FILE = Path(__file__).parent.parent / "data" / "mit_ocw_catalog.json"
+# Note: Goes up 3 levels from plugins/sources/ to importers/ to reach data/
+CATALOG_FILE = Path(__file__).parent.parent.parent / "data" / "mit_ocw_catalog.json"
 
 # In-memory cache of courses loaded from JSON
 _COURSES_CACHE: Optional[List[Dict[str, Any]]] = None

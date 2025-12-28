@@ -35,12 +35,12 @@ from xml.etree import ElementTree as ET
 import aiohttp
 from bs4 import BeautifulSoup
 
-from ..core.base import (
+from ...core.base import (
     CurriculumSourceHandler,
     LicenseRestrictionError,
     LicenseValidationResult,
 )
-from ..core.models import (
+from ...core.models import (
     AssignmentInfo,
     CourseCatalogEntry,
     CourseDetail,
@@ -50,7 +50,7 @@ from ..core.models import (
     LectureInfo,
     LicenseInfo,
 )
-from ..core.registry import SourceRegistry
+from ...core.registry import SourceRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,8 @@ CK12_LICENSE = LicenseInfo(
 # =============================================================================
 
 # Path to the comprehensive course catalog JSON file
-CATALOG_FILE = Path(__file__).parent.parent / "data" / "ck12_catalog.json"
+# Note: Goes up 3 levels from plugins/sources/ to importers/ to reach data/
+CATALOG_FILE = Path(__file__).parent.parent.parent / "data" / "ck12_catalog.json"
 
 # In-memory cache of courses loaded from JSON
 _COURSES_CACHE: Optional[List[Dict[str, Any]]] = None

@@ -4,7 +4,6 @@ Tests for the plugin architecture.
 Tests cover:
 - Plugin registration and discovery
 - Hook specifications and implementations
-- Legacy adapter compatibility
 - Configuration management
 - Entry point discovery
 """
@@ -36,7 +35,6 @@ from ..core.plugin import (
     hookimpl,
     reset_plugin_manager,
 )
-from ..core.adapter import LegacySourceAdapter
 
 
 # =============================================================================
@@ -457,69 +455,6 @@ class TestHooks:
 
 
 # =============================================================================
-# Legacy Adapter Tests
-# =============================================================================
-
-
-class TestLegacyAdapter:
-    """Tests for the legacy handler adapter."""
-
-    def test_create_adapter(self):
-        """Test creating an adapter from a legacy handler."""
-        handler = MockLegacyHandler()
-        adapter = LegacySourceAdapter(handler)
-
-        assert adapter.plugin_id == "legacy_source"
-        assert adapter.plugin_type == PluginType.SOURCE
-        assert adapter.handler is handler
-
-    def test_adapter_metadata(self):
-        """Test adapter metadata extraction."""
-        handler = MockLegacyHandler()
-        adapter = LegacySourceAdapter(handler)
-
-        metadata = adapter.metadata
-        assert metadata.name == "Legacy Source"
-        assert metadata.plugin_type == PluginType.SOURCE
-        assert "source:legacy_source" in metadata.provides
-
-    def test_adapter_from_class(self):
-        """Test creating adapter from handler class."""
-        adapter = LegacySourceAdapter.from_handler_class(MockLegacyHandler)
-        assert adapter.plugin_id == "legacy_source"
-
-    def test_adapter_hook_delegation(self, plugin_manager):
-        """Test that adapter properly delegates to handler."""
-        handler = MockLegacyHandler()
-        adapter = LegacySourceAdapter(handler)
-        plugin_manager.register(adapter)
-
-        source_info = plugin_manager.hook.get_source_info()
-        assert source_info.id == "legacy_source"
-
-        license_info = plugin_manager.hook.get_default_license()
-        assert license_info.type == "CC-BY-NC-4.0"
-
-    @pytest.mark.asyncio
-    async def test_adapter_async_hooks(self, plugin_manager):
-        """Test adapter with async hooks."""
-        handler = MockLegacyHandler()
-        adapter = LegacySourceAdapter(handler)
-        plugin_manager.register(adapter)
-
-        result = await plugin_manager.call_async_hook_first(
-            "get_course_catalog",
-            page=1,
-            page_size=20,
-            filters=None,
-            search=None,
-        )
-        assert result is not None
-        courses, total, _ = result
-        assert total == 0
-
-
-# =============================================================================
 # Plugin Configuration Tests
 # =============================================================================
 
@@ -718,24 +653,6 @@ class TestPluginIntegration:
         source_ids = [s.plugin_id for s in sources]
         assert "source_a" in source_ids
         assert "source_b" in source_ids
-
-    def test_mixed_legacy_and_native(self, plugin_manager):
-        """Test using both legacy adapters and native plugins."""
-        # Native plugin
-        native = MockSourcePlugin("native_source")
-        plugin_manager.register(native)
-
-        # Legacy adapter
-        handler = MockLegacyHandler()
-        adapter = LegacySourceAdapter(handler)
-        plugin_manager.register(adapter)
-
-        sources = plugin_manager.list_sources()
-        assert len(sources) == 2
-
-        # Both should work via hooks
-        native_info = plugin_manager.hook.get_source_info()
-        assert native_info is not None
 
     @pytest.mark.asyncio
     async def test_full_import_workflow(self, plugin_manager, tmp_path):

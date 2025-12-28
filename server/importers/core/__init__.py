@@ -1,14 +1,19 @@
 """
 Core importer components: models, base classes, orchestration, plugins.
 
-This module provides both the legacy handler-based architecture and the
-new industry-standard plugin architecture based on pluggy.
+This module provides the plugin architecture for curriculum importers.
+Plugins are auto-discovered from the plugins/ folder but must be enabled
+through the Plugin Manager in the Management Console.
 
-For new code, prefer the plugin architecture:
-    from importers.core import PluginManager, BaseImporterPlugin, hookimpl
+Usage:
+    from importers.core import PluginDiscovery, SourceRegistry
 
-For legacy compatibility:
-    from importers.core import CurriculumSourceHandler, SourceRegistry
+    # Discover available plugins
+    discovery = get_plugin_discovery()
+    plugins = discovery.discover_all()
+
+    # Access enabled plugins
+    sources = SourceRegistry.get_all_sources()
 """
 
 from .models import (
@@ -31,7 +36,16 @@ from .base import CurriculumSourceHandler, LicenseValidationResult, ValidationRe
 from .orchestrator import ImportOrchestrator
 from .registry import SourceRegistry, discover_handlers, init_plugin_system
 
-# Plugin architecture components
+# Plugin discovery components
+from .discovery import (
+    DiscoveredPlugin,
+    PluginState,
+    PluginDiscovery,
+    get_plugin_discovery,
+    reset_plugin_discovery,
+)
+
+# Plugin architecture components (kept for compatibility but simplified)
 from .plugin import (
     # Markers
     hookspec,
@@ -52,7 +66,6 @@ from .plugin import (
     reset_plugin_manager,
     PROJECT_NAME,
 )
-from .adapter import LegacySourceAdapter, wrap_legacy_handlers
 
 __all__ = [
     # Models
@@ -70,13 +83,19 @@ __all__ = [
     "ImportProgress",
     "ImportResult",
     "ImportStatus",
-    # Legacy Classes
+    # Base Classes
     "CurriculumSourceHandler",
     "LicenseValidationResult",
     "ValidationResult",
     "ImportOrchestrator",
     "SourceRegistry",
     "discover_handlers",
+    # Plugin Discovery
+    "DiscoveredPlugin",
+    "PluginState",
+    "PluginDiscovery",
+    "get_plugin_discovery",
+    "reset_plugin_discovery",
     # Plugin Architecture
     "hookspec",
     "hookimpl",
@@ -92,7 +111,4 @@ __all__ = [
     "reset_plugin_manager",
     "init_plugin_system",
     "PROJECT_NAME",
-    # Adapters
-    "LegacySourceAdapter",
-    "wrap_legacy_handlers",
 ]

@@ -1,11 +1,11 @@
 """
-Source registry for discovering and accessing curriculum source handlers.
+Source registry for curriculum source handlers.
 
-This module provides backwards compatibility with the legacy registry pattern
-while integrating with the new plugin architecture.
+This module provides access to enabled curriculum source plugins.
+Plugins are discovered from the plugins/ folder but only enabled
+plugins are accessible through this registry.
 
-The legacy SourceRegistry is maintained for compatibility but delegates to
-the new PluginManager for plugin discovery and management.
+Use the Plugin Manager in the Management Console to enable/disable plugins.
 """
 
 import logging
@@ -19,34 +19,60 @@ logger = logging.getLogger(__name__)
 
 class SourceRegistry:
     """
-    Registry for curriculum source handlers.
+    Registry for enabled curriculum source handlers.
 
-    LEGACY: This class is maintained for backwards compatibility.
-    New code should use PluginManager directly.
+    This class provides access to ENABLED plugins only. Plugins must be
+    enabled through the Plugin Manager before they appear here.
 
-    Provides:
-    - Source registration
-    - Source discovery
-    - Handler instantiation
-
-    The registry now integrates with the new plugin architecture:
-    - Registered handlers are automatically wrapped and added to PluginManager
-    - get_handler() checks both legacy registry and PluginManager
+    The registry uses the discovery system to find plugins and checks
+    the enabled state before returning them.
     """
 
-    _handlers: Dict[str, Type[CurriculumSourceHandler]] = {}
     _instances: Dict[str, CurriculumSourceHandler] = {}
-    _use_plugin_manager: bool = True
+    _discovery_initialized: bool = False
+
+    @classmethod
+    def _ensure_initialized(cls) -> None:
+        """Ensure the discovery system is initialized."""
+        if cls._discovery_initialized:
+            return
+
+        from .discovery import get_plugin_discovery
+
+        discovery = get_plugin_discovery()
+        discovery.discover_all()
+        discovery.load_state()
+        cls._discovery_initialized = True
+
+    @classmethod
+    def _load_enabled_handlers(cls) -> None:
+        """Load handler instances for all enabled plugins."""
+        from .discovery import get_plugin_discovery
+
+        cls._ensure_initialized()
+        discovery = get_plugin_discovery()
+
+        # Clear existing instances
+        cls._instances.clear()
+
+        # Load enabled plugins
+        for plugin in discovery.get_enabled_plugins():
+            try:
+                handler_class = discovery.get_plugin_class(plugin.plugin_id)
+                if handler_class:
+                    instance = handler_class()
+                    cls._instances[plugin.plugin_id] = instance
+                    logger.debug(f"Loaded enabled handler: {plugin.plugin_id}")
+            except Exception as e:
+                logger.error(f"Failed to load handler {plugin.plugin_id}: {e}")
 
     @classmethod
     def register(cls, handler_class: Type[CurriculumSourceHandler]) -> Type[CurriculumSourceHandler]:
         """
         Register a source handler class.
 
-        Can be used as a decorator:
-            @SourceRegistry.register
-            class MITOCWHandler(CurriculumSourceHandler):
-                ...
+        This decorator is kept for backwards compatibility but handlers
+        are now discovered from the plugins/ folder automatically.
 
         Args:
             handler_class: Handler class to register
@@ -54,26 +80,8 @@ class SourceRegistry:
         Returns:
             The handler class (for decorator use)
         """
-        # Instantiate to get source_id
-        instance = handler_class()
-        cls._handlers[instance.source_id] = handler_class
-        cls._instances[instance.source_id] = instance
-
-        # Also register with new plugin system if available
-        if cls._use_plugin_manager:
-            try:
-                from .adapter import LegacySourceAdapter
-                from .plugin import get_plugin_manager
-
-                manager = get_plugin_manager()
-                adapter = LegacySourceAdapter(instance)
-                manager.register(adapter)
-                logger.debug(f"Registered {instance.source_id} with PluginManager")
-            except ImportError:
-                pass  # Plugin system not available
-            except Exception as e:
-                logger.warning(f"Failed to register with PluginManager: {e}")
-
+        # Just return the class - discovery happens via filesystem scan
+        # This decorator is maintained for backwards compatibility
         return handler_class
 
     @classmethod
@@ -81,208 +89,154 @@ class SourceRegistry:
         """
         Get a handler instance by source ID.
 
-        Checks both the legacy registry and the new PluginManager.
+        Only returns handlers for ENABLED plugins.
 
         Args:
             source_id: Source identifier (e.g., "mit_ocw")
 
         Returns:
-            Handler instance or None if not found
+            Handler instance or None if not found or not enabled
         """
-        # Check legacy registry first
-        handler = cls._instances.get(source_id)
-        if handler:
-            return handler
+        from .discovery import get_plugin_discovery
 
-        # Check plugin manager for wrapped handlers
-        if cls._use_plugin_manager:
+        cls._ensure_initialized()
+        discovery = get_plugin_discovery()
+
+        # Check if plugin is enabled
+        if not discovery.is_enabled(source_id):
+            logger.debug(f"Handler {source_id} not enabled")
+            return None
+
+        # Check if already loaded
+        if source_id in cls._instances:
+            return cls._instances[source_id]
+
+        # Try to load it
+        handler_class = discovery.get_plugin_class(source_id)
+        if handler_class:
             try:
-                from .adapter import LegacySourceAdapter
-                from .plugin import get_plugin_manager
-
-                manager = get_plugin_manager()
-                plugin = manager.get_source(source_id)
-                if plugin and isinstance(plugin, LegacySourceAdapter):
-                    return plugin.handler
-            except ImportError:
-                pass
+                instance = handler_class()
+                cls._instances[source_id] = instance
+                return instance
+            except Exception as e:
+                logger.error(f"Failed to instantiate handler {source_id}: {e}")
 
         return None
 
     @classmethod
     def get_all_handlers(cls) -> List[CurriculumSourceHandler]:
         """
-        Get all registered handlers.
+        Get all enabled handlers.
 
         Returns:
-            List of handler instances
+            List of handler instances for ENABLED plugins only
         """
-        handlers = list(cls._instances.values())
+        from .discovery import get_plugin_discovery
 
-        # Also include handlers from plugin manager
-        if cls._use_plugin_manager:
-            try:
-                from .adapter import LegacySourceAdapter
-                from .plugin import get_plugin_manager
+        cls._ensure_initialized()
+        discovery = get_plugin_discovery()
 
-                manager = get_plugin_manager()
-                for plugin in manager.list_sources():
-                    if isinstance(plugin, LegacySourceAdapter):
-                        if plugin.handler not in handlers:
-                            handlers.append(plugin.handler)
-            except ImportError:
-                pass
+        handlers = []
+        for plugin in discovery.get_enabled_plugins():
+            handler = cls.get_handler(plugin.plugin_id)
+            if handler:
+                handlers.append(handler)
 
         return handlers
 
     @classmethod
     def get_all_sources(cls) -> List[CurriculumSource]:
         """
-        Get source information for all registered handlers.
+        Get source information for all enabled handlers.
 
         Returns:
-            List of CurriculumSource objects
+            List of CurriculumSource objects for ENABLED plugins only
         """
         return [handler.source_info for handler in cls.get_all_handlers()]
 
     @classmethod
     def list_source_ids(cls) -> List[str]:
         """
-        List all registered source IDs.
+        List all enabled source IDs.
 
         Returns:
-            List of source IDs
+            List of source IDs for ENABLED plugins only
         """
-        source_ids = set(cls._handlers.keys())
+        from .discovery import get_plugin_discovery
 
-        # Include plugin manager sources
-        if cls._use_plugin_manager:
-            try:
-                from .plugin import get_plugin_manager
+        cls._ensure_initialized()
+        discovery = get_plugin_discovery()
 
-                manager = get_plugin_manager()
-                for plugin in manager.list_sources():
-                    source_ids.add(plugin.plugin_id)
-            except ImportError:
-                pass
-
-        return list(source_ids)
+        return [plugin.plugin_id for plugin in discovery.get_enabled_plugins()]
 
     @classmethod
     def is_registered(cls, source_id: str) -> bool:
         """
-        Check if a source is registered.
+        Check if a source is registered AND enabled.
 
         Args:
             source_id: Source identifier
 
         Returns:
-            True if registered
+            True if registered and enabled
         """
-        if source_id in cls._handlers:
-            return True
+        from .discovery import get_plugin_discovery
 
-        if cls._use_plugin_manager:
-            try:
-                from .plugin import get_plugin_manager
+        cls._ensure_initialized()
+        discovery = get_plugin_discovery()
 
-                manager = get_plugin_manager()
-                return manager.get_source(source_id) is not None
-            except ImportError:
-                pass
-
-        return False
+        return discovery.is_enabled(source_id)
 
     @classmethod
-    def clear(cls):
-        """Clear all registered handlers. Mainly for testing."""
-        cls._handlers.clear()
+    def clear(cls) -> None:
+        """Clear all loaded handlers. Mainly for testing."""
         cls._instances.clear()
+        cls._discovery_initialized = False
 
     @classmethod
-    def disable_plugin_manager(cls):
-        """Disable plugin manager integration. Mainly for testing."""
-        cls._use_plugin_manager = False
-
-    @classmethod
-    def enable_plugin_manager(cls):
-        """Enable plugin manager integration."""
-        cls._use_plugin_manager = True
+    def refresh(cls) -> None:
+        """Refresh the registry from discovery. Call after enabling/disabling plugins."""
+        cls._instances.clear()
+        cls._discovery_initialized = False
+        cls._ensure_initialized()
 
 
-def discover_handlers():
+def discover_handlers() -> None:
     """
-    Discover and register all available source handlers.
+    Discover all available source handlers.
 
-    This function imports handler modules to trigger registration.
+    This function triggers plugin discovery from the plugins/ folder.
+    Discovered plugins are NOT automatically enabled.
+
     Call this at application startup.
-
-    For the new plugin architecture, also initializes the PluginManager.
     """
-    # Initialize plugin manager and discover plugins
-    try:
-        from .adapter import discover_and_wrap_legacy_handlers
-        from .plugin import PluginRegistry, get_plugin_manager
+    from .discovery import get_plugin_discovery
 
-        manager = get_plugin_manager()
+    discovery = get_plugin_discovery()
+    plugins = discovery.discover_all()
+    discovery.load_state()
 
-        # Register any pending plugin classes
-        PluginRegistry.register_pending(manager)
-
-        # Discover and wrap legacy handlers
-        adapters = discover_and_wrap_legacy_handlers()
-        for adapter in adapters:
-            if not manager.get_plugin(adapter.plugin_id):
-                manager.register(adapter)
-
-        # Discover entry point plugins
-        manager.discover_plugins(include_entry_points=True)
-
-        logger.info(f"Plugin discovery complete: {len(manager.list_sources())} sources")
-
-    except ImportError as e:
-        logger.debug(f"Plugin system not available: {e}")
-        # Fall back to legacy discovery
-
-    # Import handler modules to trigger @SourceRegistry.register decorators
-    try:
-        from ..sources import mit_ocw  # noqa: F401
-    except ImportError:
-        pass
-
-    try:
-        from ..sources import stanford_see  # noqa: F401
-    except ImportError:
-        pass
-
-    try:
-        from ..sources import ck12  # noqa: F401
-    except ImportError:
-        pass
-
-    try:
-        from ..sources import fastai  # noqa: F401
-    except ImportError:
-        pass
+    enabled_count = len(discovery.get_enabled_plugins())
+    logger.info(f"Plugin discovery complete: {len(plugins)} discovered, {enabled_count} enabled")
 
 
-def init_plugin_system() -> "PluginManager":  # type: ignore[name-defined]
+def init_plugin_system() -> "PluginDiscovery":  # type: ignore[name-defined]
     """
     Initialize the plugin system.
 
     This is the recommended way to set up the importer framework.
-    It initializes the PluginManager and discovers all plugins.
+    It discovers all plugins and loads their enabled state.
 
     Returns:
-        The initialized PluginManager
+        The PluginDiscovery instance
 
     Example:
         from importers.core.registry import init_plugin_system
 
-        manager = init_plugin_system()
-        sources = manager.list_sources()
+        discovery = init_plugin_system()
+        enabled = discovery.get_enabled_plugins()
     """
-    from .plugin import get_plugin_manager
+    from .discovery import get_plugin_discovery
 
     discover_handlers()
-    return get_plugin_manager()
+    return get_plugin_discovery()

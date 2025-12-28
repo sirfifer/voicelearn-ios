@@ -4,18 +4,23 @@ Python framework for importing external curriculum sources into UMLCF format.
 
 ## Purpose
 
-Ingest curriculum from external sources (MIT OCW, Stanford SEE, Fast.ai, CK-12) and convert to the UnaMentis Curriculum Format (UMLCF).
+Ingest curriculum from external sources (MIT OCW, CK-12, and future sources) and convert to the UnaMentis Curriculum Format (UMLCF).
 
 ## Plugin Architecture
 
-The framework uses an **industry-standard plugin architecture** based on [Pluggy](https://pluggy.readthedocs.io/) (the same system used by pytest). This enables:
+The framework uses a **filesystem-based plugin architecture** with explicit enable/disable control:
 
-- **External Plugins**: Third-party sources via setuptools entry points
-- **Standardized Contracts**: Hook specifications define clear interfaces
-- **Legacy Compatibility**: Existing handlers work via adapters
-- **Configuration Management**: Per-plugin configuration with validation
+- **Auto-Discovery**: Plugins are automatically discovered from the `plugins/` folder
+- **Explicit Enablement**: Plugins must be enabled via the Plugin Manager UI
+- **Persistent State**: Plugin enabled/disabled state persists in `plugins.json`
+- **First-Run Wizard**: New installations prompt users to select which plugins to enable
 
-See `docs/PLUGIN_ARCHITECTURE.md` for complete documentation.
+### Plugin Lifecycle
+
+1. **Discovery**: Server scans `plugins/sources/`, `plugins/parsers/`, `plugins/enrichers/`
+2. **First-Run**: If no `plugins.json` exists, the Plugin Manager shows a setup wizard
+3. **Enable/Disable**: Users toggle plugins on/off via the Plugin Manager tab
+4. **Runtime**: Only enabled plugins appear in the Source Browser
 
 ### Quick Start
 
@@ -23,129 +28,133 @@ See `docs/PLUGIN_ARCHITECTURE.md` for complete documentation.
 from importers.core import init_plugin_system
 
 # Initialize and discover all plugins
-manager = init_plugin_system()
+discovery = init_plugin_system()
 
-# List available sources
-for source in manager.list_sources():
-    print(f"Source: {source.plugin_id} (v{source.metadata.version})")
+# List enabled plugins
+for plugin in discovery.get_enabled_plugins():
+    print(f"Plugin: {plugin.plugin_id} ({plugin.name})")
 
-# Use a source plugin
-mit = manager.get_source("mit_ocw")
+# Get a specific handler (only if enabled)
+from importers.core.registry import SourceRegistry
+handler = SourceRegistry.get_handler("mit_ocw")
 ```
 
 ### Creating a New Plugin
 
+1. Create a new `.py` file in `plugins/sources/`:
+
 ```python
-from importers.core import BaseImporterPlugin, PluginRegistry, hookimpl
+# plugins/sources/my_source.py
+from ...core.base import CurriculumSourceHandler
+from ...core.models import CurriculumSource, LicenseInfo
+from ...core.registry import SourceRegistry
 
-@PluginRegistry.register
-class MySourcePlugin(BaseImporterPlugin):
-    plugin_id = "my_source"
-    plugin_type = PluginType.SOURCE
+@SourceRegistry.register
+class MySourceHandler(CurriculumSourceHandler):
+    """My curriculum source handler."""
 
-    @hookimpl
-    def get_source_info(self) -> CurriculumSource:
-        return CurriculumSource(...)
+    @property
+    def source_id(self) -> str:
+        return "my_source"
 
-    @hookimpl
+    @property
+    def source_info(self) -> CurriculumSource:
+        return CurriculumSource(
+            id=self.source_id,
+            name="My Source",
+            description="Description of my source",
+            # ... other fields
+        )
+
+    @property
+    def default_license(self) -> LicenseInfo:
+        return LicenseInfo(
+            type="CC-BY-4.0",
+            name="Creative Commons Attribution 4.0",
+            # ... other fields
+        )
+
     async def get_course_catalog(self, page, page_size, filters, search):
+        # Return courses, total count, and filter options
         return courses, total, filter_options
+
+    async def download_course(self, course_id, output_dir, progress_callback):
+        # Download course content
+        return output_path
 ```
+
+2. Restart the server to discover the plugin
+3. Enable it in the Plugin Manager tab
 
 ## Architecture
 
 ```
 importers/
-├── core/              # Framework core
-│   ├── base.py        # Legacy base class (CurriculumSourceHandler)
-│   ├── plugin.py      # Plugin architecture (Pluggy-based)
-│   ├── adapter.py     # Legacy handler adapter
-│   ├── models.py      # Data models
-│   ├── registry.py    # Plugin discovery & registration
-│   └── orchestrator.py # Import orchestration engine
-├── sources/           # Source-specific plugins
-│   └── mit_ocw.py     # MIT OpenCourseWare (legacy handler)
-├── parsers/           # Content parsers (Phase 2)
-├── enrichment/        # AI enrichment pipeline (Phase 3)
-├── tests/             # Plugin & integration tests
-├── docs/              # Documentation
-│   └── PLUGIN_ARCHITECTURE.md  # Full plugin docs
-├── data/              # Runtime data
-└── output/            # Import output
+├── plugins/               # All plugins live here
+│   ├── sources/           # Source importer plugins
+│   │   ├── mit_ocw.py     # MIT OpenCourseWare
+│   │   └── ck12_flexbook.py # CK-12 FlexBooks
+│   ├── parsers/           # Parser plugins (future)
+│   └── enrichers/         # Enricher plugins (future)
+├── core/                  # Framework core
+│   ├── base.py            # CurriculumSourceHandler base class
+│   ├── discovery.py       # Plugin discovery system
+│   ├── registry.py        # SourceRegistry (enabled plugins only)
+│   ├── plugin.py          # PluginManager
+│   ├── models.py          # Data models
+│   └── orchestrator.py    # Import orchestration engine
+├── data/                  # Catalog data files
+├── tests/                 # Unit and integration tests
+└── output/                # Import output
 ```
 
 ## Plugin Types
 
-| Type | Description | Key Hooks |
-|------|-------------|-----------|
-| `SOURCE` | Curriculum sources | `get_course_catalog`, `download_course` |
-| `PARSER` | Content parsers | `parse_content`, `get_supported_formats` |
-| `ENRICHER` | AI enrichment | `enrich_content`, `get_enrichment_stages` |
-| `EXPORTER` | Output exporters | `export_content`, `get_export_formats` |
-| `VALIDATOR` | Content validators | `validate_content` |
+| Type | Location | Description |
+|------|----------|-------------|
+| Sources | `plugins/sources/` | Curriculum source importers |
+| Parsers | `plugins/parsers/` | Content parsers (future) |
+| Enrichers | `plugins/enrichers/` | AI enrichment (future) |
 
-## Key Patterns
+## Management Console
 
-### New Plugin Pattern (Recommended)
+The Plugin Manager is accessible via the Management Console at `http://localhost:8766`:
 
-Use `BaseImporterPlugin` and `@hookimpl` decorators:
+- **Plugins Tab**: View all discovered plugins, enable/disable with toggle switches
+- **First-Run Wizard**: Appears on first launch to help select initial plugins
+- **Persistent State**: Plugin state saved to `management/data/plugins.json`
 
-```python
-@PluginRegistry.register
-class MyPlugin(BaseImporterPlugin):
-    @hookimpl
-    def get_source_info(self) -> CurriculumSource:
-        ...
-```
+### Plugin API Endpoints
 
-### Legacy Handler Pattern
-
-Legacy handlers still work via `@SourceRegistry.register`:
-
-```python
-@SourceRegistry.register
-class MITOCWHandler(CurriculumSourceHandler):
-    ...
-```
-
-They are automatically wrapped and registered with the plugin manager.
-
-## Entry Points
-
-External plugins register via `pyproject.toml`:
-
-```toml
-[project.entry-points."unamentis.importers.sources"]
-my_source = "my_package:MySourcePlugin"
-```
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/plugins` | GET | List all discovered plugins |
+| `/api/plugins/{id}` | GET | Get plugin details |
+| `/api/plugins/{id}/enable` | POST | Enable a plugin |
+| `/api/plugins/{id}/disable` | POST | Disable a plugin |
+| `/api/plugins/{id}/configure` | POST | Update plugin settings |
+| `/api/plugins/initialize` | POST | First-run initialization |
+| `/api/plugins/first-run` | GET | Check if first-run needed |
 
 ## Testing
 
 ```bash
 cd server/importers
-pip install -e ".[dev]"  # Install with dev dependencies
-pytest tests/            # Run all tests
-pytest tests/test_plugin_architecture.py  # Plugin tests only
+python -m pytest tests/ -v           # Run all tests
+python -m pytest tests/test_plugin_architecture.py  # Plugin tests
+python -m pytest tests/test_ck12_flexbook.py       # CK-12 tests
+python -m pytest tests/test_orchestrator.py        # Orchestrator tests
 ```
 
-## Dependencies
+## Key Files
 
-- `pluggy>=1.3.0` - Plugin framework
-- `aiohttp>=3.8.0` - Async HTTP
-- `beautifulsoup4>=4.12.0` - HTML parsing
-
-Install via:
-```bash
-pip install -e .
-```
-
-## Importer Specifications
-
-Detailed specs for each source are in `curriculum/importers/`:
-- `MIT_OCW_IMPORTER_SPEC.md`
-- `STANFORD_SEE_IMPORTER_SPEC.md`
-- `FASTAI_IMPORTER_SPEC.md`
-- `CK12_IMPORTER_SPEC.md`
+| File | Purpose |
+|------|---------|
+| `core/discovery.py` | Plugin discovery and state management |
+| `core/registry.py` | SourceRegistry for accessing enabled plugins |
+| `core/base.py` | CurriculumSourceHandler base class |
+| `management/plugin_api.py` | Plugin management API endpoints |
+| `management/data/plugins.json` | Persistent plugin state |
 
 ## Output Format
 

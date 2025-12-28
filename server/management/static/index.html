@@ -275,6 +275,12 @@
                         </svg>
                         <span>Services</span>
                     </button>
+                    <button class="nav-tab flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-150 border whitespace-nowrap flex-shrink-0 text-dark-400 border-transparent hover:text-dark-200 hover:bg-dark-700/40 hover:border-dark-600/50" data-tab="plugins">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"></path>
+                        </svg>
+                        <span>Plugins</span>
+                    </button>
                 </div>
             </div>
         </nav>
@@ -1330,6 +1336,104 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Plugin Manager Tab -->
+            <div id="tab-plugins" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-semibold">Plugin Manager</h2>
+                        <p class="text-sm text-dark-400 mt-1">Manage curriculum source importers and extensions</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="btn-secondary" onclick="refreshPlugins()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plugin Stats -->
+                <div class="grid md:grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-accent-primary/20 text-accent-primary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="plugins-discovered">0</div>
+                            <div class="stat-label">Discovered</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-accent-success/20 text-accent-success">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="plugins-enabled">0</div>
+                            <div class="stat-label">Enabled</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-dark-500/20 text-dark-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="plugins-disabled">0</div>
+                            <div class="stat-label">Disabled</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-accent-info/20 text-accent-info">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="plugins-sources">0</div>
+                            <div class="stat-label">Source Importers</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- First-Run Wizard Banner (hidden by default) -->
+                <div id="plugins-first-run-banner" class="hidden mb-6 p-4 rounded-xl bg-accent-primary/10 border border-accent-primary/30">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-accent-primary/20 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-accent-primary">Welcome to Plugin Manager</h3>
+                            <p class="text-sm text-dark-300 mt-1">This is your first time here. Select which curriculum source plugins you want to enable to get started.</p>
+                            <button onclick="showFirstRunWizard()" class="mt-3 px-4 py-2 text-sm font-medium rounded-lg bg-accent-primary hover:bg-accent-primary/80 text-white transition-all">
+                                Open Setup Wizard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plugins Grid -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="plugins-grid">
+                    <!-- Plugin cards will be inserted here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="plugins-empty" class="hidden text-center py-12">
+                    <svg class="w-16 h-16 mx-auto text-dark-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-dark-300">No Plugins Found</h3>
+                    <p class="text-sm text-dark-500 mt-1">Add plugin files to the plugins/ folder and restart the server.</p>
                 </div>
             </div>
         </div>

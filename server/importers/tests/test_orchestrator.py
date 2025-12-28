@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from importers.core.orchestrator import ImportOrchestrator
 from importers.core.models import ImportConfig, ImportStatus
 from importers.core.registry import SourceRegistry
+from importers.core.discovery import get_plugin_discovery, reset_plugin_discovery, PluginState
 
 
 class MockHandler:
@@ -143,16 +144,27 @@ class TestImportOrchestrator(unittest.TestCase):
             enrichment_enabled=False,  # Disable enrichment for faster tests
         )
 
-        # Register mock handler
+        # Reset and set up discovery with mock handler
+        reset_plugin_discovery()
+        SourceRegistry.clear()
+
+        # Register mock handler directly in the registry instances
         self.mock_handler = MockHandler()
-        SourceRegistry._handlers["mock_source"] = type(self.mock_handler)
         SourceRegistry._instances["mock_source"] = self.mock_handler
+
+        # Also register the mock in the discovery system
+        discovery = get_plugin_discovery()
+        discovery._loaded_classes["mock_source"] = type(self.mock_handler)
+        discovery._states["mock_source"] = PluginState(enabled=True)
+
+        # Mark as initialized to prevent re-discovery overwriting our mock
+        SourceRegistry._discovery_initialized = True
 
     def tearDown(self):
         """Clean up test fixtures."""
         shutil.rmtree(self.temp_dir, ignore_errors=True)
-        SourceRegistry._handlers.pop("mock_source", None)
-        SourceRegistry._instances.pop("mock_source", None)
+        SourceRegistry.clear()
+        reset_plugin_discovery()
 
     def wait_for_job(self, job_id, timeout_seconds=5):
         """Wait for a job to complete."""

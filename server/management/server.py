@@ -28,6 +28,9 @@ from metrics_history import metrics_history, MetricsHistory
 # Import curriculum importer system
 from import_api import register_import_routes, init_import_system, set_import_complete_callback
 
+# Import plugin management system
+from plugin_api import register_plugin_routes
+
 # Import diagnostic logging system
 from diagnostic_logging import diag_logger, get_diagnostic_config, set_diagnostic_config
 
@@ -3557,6 +3560,9 @@ def create_app() -> web.Application:
     # Asset Pre-Download & Caching
     app.router.add_post("/api/curricula/{curriculum_id}/preload-assets", handle_preload_curriculum_assets)
     app.router.add_get("/api/curricula/{curriculum_id}/full-with-assets", handle_get_curriculum_with_assets)
+
+    # Plugin Management System
+    register_plugin_routes(app)
 
     # Curriculum Import System (Source Browser)
     register_import_routes(app)

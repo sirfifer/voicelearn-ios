@@ -4014,5 +4014,37 @@
       "cold": 1020
     },
     "sample_count": 91
+  },
+  "2025-12-27T22:00:00": {
+    "hour": "2025-12-27T22:00:00",
+    "avg_battery_draw_w": 18.9,
+    "max_battery_draw_w": 87.2,
+    "min_battery_percent": 78.0,
+    "max_battery_percent": 83.0,
+    "avg_thermal_level": 0.0,
+    "max_thermal_level": 0,
+    "avg_cpu_temp_c": 0.0,
+    "max_cpu_temp_c": 0.0,
+    "avg_cpu_percent": 211.1,
+    "max_cpu_percent": 525.5,
+    "service_cpu_avg": {
+      "management": 3.9,
+      "ollama": 0.0,
+      "vibevoice": 0.0,
+      "piper": 0.0
+    },
+    "service_cpu_max": {
+      "management": 8.2,
+      "ollama": 0.0,
+      "vibevoice": 0.0,
+      "piper": 0.0
+    },
+    "total_requests": 0,
+    "total_inferences": 0,
+    "idle_state_seconds": {
+      "warm": 270,
+      "cool": 930
+    },
+    "sample_count": 41
   }
 }
