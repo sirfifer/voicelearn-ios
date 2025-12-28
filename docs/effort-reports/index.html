@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnaMentis Effort Reports</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.25rem; margin: 2rem 0 1rem; color: var(--primary-dark); }
+        .meta { color: var(--text-muted); margin-bottom: 2rem; }
+
+        .current-stats {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        .current-stats h2 { color: white; margin-top: 0; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .stat-box {
+            background: rgba(255,255,255,0.15);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value { font-size: 1.75rem; font-weight: 700; }
+        .stat-label { font-size: 0.8rem; opacity: 0.8; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: var(--bg); font-weight: 600; color: var(--text-muted); font-size: 0.875rem; }
+        .num { text-align: right; font-variant-numeric: tabular-nums; }
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .view-latest {
+            display: inline-block;
+            background: white;
+            color: var(--primary-dark);
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 1rem;
+            text-decoration: none;
+        }
+        .view-latest:hover { background: #f1f5f9; text-decoration: none; }
+
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            body { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>UnaMentis Effort Reports</h1>
+        <p class="meta">Historical tracking of project size and effort estimates</p>
+
+        <div class="current-stats">
+            <h2>Current Status</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value">8-10</div>
+                    <div class="stat-label">AI-Assisted (months)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">28-32</div>
+                    <div class="stat-label">Human Only (months)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">70,633</div>
+                    <div class="stat-label">Lines of Code</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">147</div>
+                    <div class="stat-label">Commits</div>
+                </div>
+            </div>
+            <a href="2025-12-28.html" class="view-latest">View Full Report →</a>
+        </div>
+
+        <h2>Report History</h2>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th class="num">Commits</th>
+                        <th class="num">Lines of Code</th>
+                        <th class="num">Files</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><a href="2025-12-28.html">2025-12-28</a></td><td class="num">147</td><td class="num">70,633</td><td class="num">180</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -529,7 +529,32 @@
         {"framework": "Common Core", "code": "6.EE", "description": "Expressions and Equations"},
         {"framework": "Common Core", "code": "6.G", "description": "Geometry"}
       ],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Ratios and Proportions",
+          "lessons": [
+            {"title": "Understanding Ratios"},
+            {"title": "Equivalent Ratios"},
+            {"title": "Rates and Unit Rates"}
+          ]
+        },
+        {
+          "title": "Expressions and Equations",
+          "lessons": [
+            {"title": "Writing Expressions"},
+            {"title": "Evaluating Expressions"},
+            {"title": "Solving One-Step Equations"}
+          ]
+        },
+        {
+          "title": "Geometry",
+          "lessons": [
+            {"title": "Area of Polygons"},
+            {"title": "Volume of Rectangular Prisms"},
+            {"title": "The Coordinate Plane"}
+          ]
+        }
+      ]
     },
     {
       "id": "7th-grade-math",
@@ -552,7 +577,32 @@
         {"framework": "Common Core", "code": "7.NS", "description": "The Number System"},
         {"framework": "Common Core", "code": "7.G", "description": "Geometry"}
       ],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Proportional Relationships",
+          "lessons": [
+            {"title": "Recognizing Proportional Relationships"},
+            {"title": "Constant of Proportionality"},
+            {"title": "Proportional Equations"}
+          ]
+        },
+        {
+          "title": "Operations with Rational Numbers",
+          "lessons": [
+            {"title": "Adding and Subtracting Rational Numbers"},
+            {"title": "Multiplying and Dividing Rational Numbers"},
+            {"title": "Complex Fractions"}
+          ]
+        },
+        {
+          "title": "Geometry",
+          "lessons": [
+            {"title": "Scale Drawings"},
+            {"title": "Circles and Circumference"},
+            {"title": "Area and Volume"}
+          ]
+        }
+      ]
     },
     {
       "id": "civics",
@@ -656,7 +706,38 @@
       "practice_count": 47,
       "quiz_count": 12,
       "keywords": ["world history", "ancient civilizations", "medieval", "modern", "high school"],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Ancient Civilizations",
+          "lessons": [
+            {"title": "Early Humans and the Neolithic Revolution"},
+            {"title": "Mesopotamia and Egypt"},
+            {"title": "Ancient India and China"},
+            {"title": "Classical Greece"},
+            {"title": "The Roman Empire"}
+          ]
+        },
+        {
+          "title": "Medieval and Early Modern Period",
+          "lessons": [
+            {"title": "The Byzantine Empire"},
+            {"title": "The Rise of Islam"},
+            {"title": "Medieval Europe"},
+            {"title": "The Renaissance"},
+            {"title": "The Reformation"}
+          ]
+        },
+        {
+          "title": "Modern World History",
+          "lessons": [
+            {"title": "The Age of Exploration"},
+            {"title": "The Enlightenment"},
+            {"title": "The Industrial Revolution"},
+            {"title": "World Wars"},
+            {"title": "The Modern Era"}
+          ]
+        }
+      ]
     },
     {
       "id": "elementary-math-3",
@@ -674,7 +755,33 @@
       "practice_count": 32,
       "quiz_count": 8,
       "keywords": ["3rd grade math", "multiplication", "division", "fractions", "elementary"],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Multiplication and Division",
+          "lessons": [
+            {"title": "Understanding Multiplication"},
+            {"title": "Multiplication Facts"},
+            {"title": "Understanding Division"},
+            {"title": "Division Facts"}
+          ]
+        },
+        {
+          "title": "Fractions",
+          "lessons": [
+            {"title": "Introduction to Fractions"},
+            {"title": "Fractions on a Number Line"},
+            {"title": "Comparing Fractions"}
+          ]
+        },
+        {
+          "title": "Measurement",
+          "lessons": [
+            {"title": "Time and Elapsed Time"},
+            {"title": "Mass and Volume"},
+            {"title": "Perimeter and Area"}
+          ]
+        }
+      ]
     },
     {
       "id": "elementary-math-4",
@@ -692,7 +799,32 @@
       "practice_count": 35,
       "quiz_count": 9,
       "keywords": ["4th grade math", "multi-digit", "fractions", "decimals", "elementary"],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Multi-Digit Operations",
+          "lessons": [
+            {"title": "Multi-Digit Addition and Subtraction"},
+            {"title": "Multi-Digit Multiplication"},
+            {"title": "Multi-Digit Division"}
+          ]
+        },
+        {
+          "title": "Fractions and Decimals",
+          "lessons": [
+            {"title": "Equivalent Fractions"},
+            {"title": "Adding and Subtracting Fractions"},
+            {"title": "Decimals and Place Value"}
+          ]
+        },
+        {
+          "title": "Geometry",
+          "lessons": [
+            {"title": "Points, Lines, and Angles"},
+            {"title": "Classifying Shapes"},
+            {"title": "Symmetry"}
+          ]
+        }
+      ]
     },
     {
       "id": "elementary-math-5",
@@ -710,7 +842,32 @@
       "practice_count": 36,
       "quiz_count": 9,
       "keywords": ["5th grade math", "fractions", "decimals", "volume", "elementary"],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Operations with Fractions",
+          "lessons": [
+            {"title": "Adding and Subtracting Fractions with Unlike Denominators"},
+            {"title": "Multiplying Fractions"},
+            {"title": "Dividing Fractions"}
+          ]
+        },
+        {
+          "title": "Decimals",
+          "lessons": [
+            {"title": "Decimal Place Value"},
+            {"title": "Operations with Decimals"},
+            {"title": "Dividing Decimals"}
+          ]
+        },
+        {
+          "title": "Geometry and Measurement",
+          "lessons": [
+            {"title": "Volume of Rectangular Prisms"},
+            {"title": "Coordinate Graphing"},
+            {"title": "Classifying 2D Shapes"}
+          ]
+        }
+      ]
     },
     {
       "id": "algebra-2",
@@ -728,7 +885,32 @@
       "practice_count": 67,
       "quiz_count": 17,
       "keywords": ["algebra 2", "polynomials", "logarithms", "exponentials", "trigonometry", "high school"],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Polynomial Functions",
+          "lessons": [
+            {"title": "Polynomial Operations"},
+            {"title": "Factoring Polynomials"},
+            {"title": "Polynomial Equations"}
+          ]
+        },
+        {
+          "title": "Exponential and Logarithmic Functions",
+          "lessons": [
+            {"title": "Exponential Functions"},
+            {"title": "Logarithmic Functions"},
+            {"title": "Properties of Logarithms"}
+          ]
+        },
+        {
+          "title": "Trigonometry",
+          "lessons": [
+            {"title": "Trigonometric Functions"},
+            {"title": "Graphs of Trigonometric Functions"},
+            {"title": "Trigonometric Identities"}
+          ]
+        }
+      ]
     },
     {
       "id": "precalculus",
@@ -746,7 +928,32 @@
       "practice_count": 55,
       "quiz_count": 14,
       "keywords": ["precalculus", "trigonometry", "functions", "limits", "high school"],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Functions and Graphs",
+          "lessons": [
+            {"title": "Function Notation and Operations"},
+            {"title": "Transformations of Functions"},
+            {"title": "Polynomial and Rational Functions"}
+          ]
+        },
+        {
+          "title": "Trigonometry",
+          "lessons": [
+            {"title": "Unit Circle and Trigonometric Functions"},
+            {"title": "Inverse Trigonometric Functions"},
+            {"title": "Trigonometric Equations"}
+          ]
+        },
+        {
+          "title": "Analytic Geometry and Limits",
+          "lessons": [
+            {"title": "Conic Sections"},
+            {"title": "Sequences and Series"},
+            {"title": "Introduction to Limits"}
+          ]
+        }
+      ]
     },
     {
       "id": "calculus",
@@ -764,7 +971,32 @@
       "practice_count": 47,
       "quiz_count": 12,
       "keywords": ["calculus", "limits", "derivatives", "integrals", "AP", "high school"],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Limits and Continuity",
+          "lessons": [
+            {"title": "Evaluating Limits"},
+            {"title": "Limits at Infinity"},
+            {"title": "Continuity"}
+          ]
+        },
+        {
+          "title": "Derivatives",
+          "lessons": [
+            {"title": "Definition of the Derivative"},
+            {"title": "Differentiation Rules"},
+            {"title": "Applications of Derivatives"}
+          ]
+        },
+        {
+          "title": "Integrals",
+          "lessons": [
+            {"title": "Antiderivatives"},
+            {"title": "Definite Integrals"},
+            {"title": "Applications of Integration"}
+          ]
+        }
+      ]
     },
     {
       "id": "statistics",
@@ -782,7 +1014,32 @@
       "practice_count": 42,
       "quiz_count": 10,
       "keywords": ["statistics", "probability", "data analysis", "distributions", "high school"],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Data Analysis",
+          "lessons": [
+            {"title": "Measures of Central Tendency"},
+            {"title": "Measures of Spread"},
+            {"title": "Data Visualization"}
+          ]
+        },
+        {
+          "title": "Probability",
+          "lessons": [
+            {"title": "Basic Probability"},
+            {"title": "Conditional Probability"},
+            {"title": "Probability Distributions"}
+          ]
+        },
+        {
+          "title": "Statistical Inference",
+          "lessons": [
+            {"title": "Sampling and Estimation"},
+            {"title": "Hypothesis Testing"},
+            {"title": "Correlation and Regression"}
+          ]
+        }
+      ]
     },
     {
       "id": "anatomy-physiology",
@@ -801,7 +1058,32 @@
       "video_count": 22,
       "quiz_count": 11,
       "keywords": ["anatomy", "physiology", "human body", "body systems", "high school"],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Structure and Support",
+          "lessons": [
+            {"title": "The Skeletal System"},
+            {"title": "Bones and Joints"},
+            {"title": "The Muscular System"}
+          ]
+        },
+        {
+          "title": "Control and Coordination",
+          "lessons": [
+            {"title": "The Nervous System"},
+            {"title": "The Brain and Spinal Cord"},
+            {"title": "The Endocrine System"}
+          ]
+        },
+        {
+          "title": "Transport and Respiration",
+          "lessons": [
+            {"title": "The Cardiovascular System"},
+            {"title": "Blood and Circulation"},
+            {"title": "The Respiratory System"}
+          ]
+        }
+      ]
     },
     {
       "id": "environmental-science",
@@ -820,7 +1102,32 @@
       "video_count": 18,
       "quiz_count": 9,
       "keywords": ["environmental science", "ecology", "sustainability", "pollution", "high school"],
-      "chapters": []
+      "chapters": [
+        {
+          "title": "Ecology",
+          "lessons": [
+            {"title": "Ecosystems and Biomes"},
+            {"title": "Energy Flow in Ecosystems"},
+            {"title": "Nutrient Cycles"}
+          ]
+        },
+        {
+          "title": "Natural Resources",
+          "lessons": [
+            {"title": "Water Resources"},
+            {"title": "Land and Soil Resources"},
+            {"title": "Energy Resources"}
+          ]
+        },
+        {
+          "title": "Human Impact",
+          "lessons": [
+            {"title": "Pollution and Waste"},
+            {"title": "Climate Change"},
+            {"title": "Sustainability and Conservation"}
+          ]
+        }
+      ]
     }
   ]
 }

@@ -2536,6 +2536,7 @@ function showSourceCards() {
 
 // Select a source and show its content
 async function selectSource(sourceId) {
+    console.log('selectSource called with:', sourceId);
     currentSourceId = sourceId;
 
     // Hide source cards, show content area
@@ -2545,20 +2546,24 @@ async function selectSource(sourceId) {
 
     // Hide all source views
     document.querySelectorAll('.source-view').forEach(v => v.classList.add('hidden'));
+    console.log('All source views hidden');
 
     // Built-in sources that have special handling (not plugins)
     const builtinSources = ['github', 'custom'];
 
     if (builtinSources.includes(sourceId)) {
         // Use dedicated view for built-in sources
+        console.log('Using builtin view for:', sourceId);
         const sourceView = document.getElementById(`source-view-${sourceId}`);
         if (sourceView) {
             sourceView.classList.remove('hidden');
         }
     } else {
         // ALL plugin sources use the generic view
+        console.log('Using generic view for plugin:', sourceId);
         const genericView = document.getElementById('source-view-generic');
         genericView.classList.remove('hidden');
+        console.log('Generic view is now visible');
 
         // Get plugin info to populate the generic view header
         try {
@@ -2676,8 +2681,7 @@ function switchToTab(tabId) {
 // Generic Plugin UI Functions (Source-Agnostic)
 // ============================================================================
 
-// State for the current source being viewed
-let currentSourceId = null;
+// State for the current source being viewed (currentSourceId declared above at line 2523)
 let currentSourceCourses = [];
 let currentFilteredCourses = [];
 let currentSourcePage = 1;
@@ -2688,6 +2692,7 @@ const COURSES_PER_PAGE = 20;
  * Uses the generic /api/sources/{source_id}/courses endpoint.
  */
 async function loadSourceCourses(sourceId) {
+    console.log('loadSourceCourses called with:', sourceId);
     currentSourceId = sourceId;
 
     // Get container elements
@@ -2908,9 +2913,11 @@ function renderCourseCard(course) {
  * Works with ANY source plugin.
  */
 async function viewGenericCourseDetail(sourceId, courseId) {
+    console.log('viewGenericCourseDetail called:', { sourceId, courseId });
     try {
         showToast('Loading course details...', 'info');
         const response = await fetchAPI(`/sources/${sourceId}/courses/${courseId}`);
+        console.log('API response:', response);
         const course = response.course;
 
         // Hide pagination when viewing course details
@@ -2938,6 +2945,18 @@ function renderGenericCourseDetail(sourceId, course) {
 
     // Calculate total topics
     const totalTopics = units.reduce((sum, u) => sum + (u.topics?.length || 0), 0);
+
+    // Debug logging
+    console.log('renderGenericCourseDetail:', {
+        sourceId,
+        courseId: course.id,
+        unitLabel,
+        topicLabel,
+        isFlat,
+        unitsCount: units.length,
+        totalTopics,
+        units: units.map(u => ({ id: u.id, title: u.title, topicsCount: u.topics?.length || 0 }))
+    });
 
     return `
         <div class="mb-4">
@@ -3016,6 +3035,7 @@ function renderGenericCourseDetail(sourceId, course) {
                         <h4 class="text-sm font-medium text-dark-400">Select ${isFlat ? topicLabel + 's' : unitLabel + 's (' + topicLabel + 's)'} to Import</h4>
                         <div class="flex items-center gap-2">
                             <span id="content-selection-count" class="text-xs text-dark-500">0 of ${totalTopics} selected</span>
+                            ${!isFlat ? `<button class="text-xs text-dark-400 hover:text-dark-300" onclick="expandAllUnits()">Expand All</button><span class="text-dark-600">|</span>` : ''}
                             <button class="text-xs text-accent-primary hover:text-accent-primary/80" onclick="selectAllGenericContent(true)">Select All</button>
                             <span class="text-dark-600">|</span>
                             <button class="text-xs text-dark-400 hover:text-dark-300" onclick="selectAllGenericContent(false)">Clear</button>
@@ -3024,9 +3044,21 @@ function renderGenericCourseDetail(sourceId, course) {
                     <div class="max-h-80 overflow-y-auto rounded-lg border border-dark-700/50 bg-dark-900/50">
                         ${renderContentStructure(units, unitLabel, topicLabel, isFlat)}
                     </div>
-                    <p class="text-xs text-dark-500 mt-2">💡 Tip: Start with a few ${topicLabel.toLowerCase()}s to evaluate the content before importing everything.</p>
+                    <p class="text-xs text-dark-500 mt-2">Tip: Click on a ${unitLabel.toLowerCase()} to expand/collapse. Start with a few ${topicLabel.toLowerCase()}s to evaluate the content.</p>
                 </div>
-                ` : ''}
+                ` : `
+                <div class="border-t border-dark-700/50 pt-4">
+                    <div class="flex items-center gap-3 p-4 rounded-lg bg-accent-warning/10 border border-accent-warning/20">
+                        <svg class="w-6 h-6 text-accent-warning flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <div>
+                            <h4 class="text-sm font-medium text-accent-warning">Content Structure Not Available</h4>
+                            <p class="text-sm text-dark-400 mt-1">This course does not have detailed chapter/lesson data in our catalog. You can still import the entire course using the button below, which will download all available content.</p>
+                        </div>
+                    </div>
+                </div>
+                `}
 
                 <div class="border-t border-dark-700/50 pt-4">
                     <h4 class="text-sm font-medium text-dark-400 mb-2">AI Enrichment Options</h4>
@@ -3051,7 +3083,7 @@ function renderGenericCourseDetail(sourceId, course) {
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                         </svg>
-                        Import Selected
+                        ${totalTopics > 0 ? 'Import Selected' : 'Import Entire Course'}
                     </button>
                     ${course.sourceUrl ? `
                     <a href="${escapeHtml(course.sourceUrl)}" target="_blank" rel="noopener" class="btn-secondary">
@@ -3082,12 +3114,13 @@ function renderContentStructure(units, unitLabel, topicLabel, isFlat) {
     }
 
     // Nested structure: show units with collapsible topics
+    // First unit is expanded by default so users see there are selectable items
     return `
         <div class="divide-y divide-dark-700/30">
             ${units.map((unit, unitIdx) => `
                 <div class="bg-dark-800/20">
                     <div class="flex items-center gap-2 px-3 py-2 bg-dark-700/30 cursor-pointer" onclick="toggleUnitExpand(${unitIdx})">
-                        <svg id="unit-chevron-${unitIdx}" class="w-4 h-4 text-dark-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg id="unit-chevron-${unitIdx}" class="w-4 h-4 text-dark-500 transform transition-transform ${unitIdx === 0 ? 'rotate-90' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                         <input type="checkbox" class="unit-checkbox rounded border-dark-600 bg-dark-800 text-accent-primary focus:ring-accent-primary"
@@ -3096,7 +3129,7 @@ function renderContentStructure(units, unitLabel, topicLabel, isFlat) {
                         <span class="text-sm font-medium text-dark-300">${unitLabel} ${unit.number}: ${escapeHtml(unit.title)}</span>
                         <span class="text-xs text-dark-500 ml-auto">${unit.topics?.length || 0} ${topicLabel.toLowerCase()}${(unit.topics?.length || 0) !== 1 ? 's' : ''}</span>
                     </div>
-                    <div id="unit-topics-${unitIdx}" class="hidden pl-6">
+                    <div id="unit-topics-${unitIdx}" class="${unitIdx === 0 ? '' : 'hidden '}pl-6">
                         ${(unit.topics || []).map(topic => renderTopicCheckbox(topic, topicLabel, unitIdx)).join('')}
                     </div>
                 </div>
@@ -3139,6 +3172,22 @@ function toggleUnitExpand(unitIdx) {
     }
     if (chevron) {
         chevron.classList.toggle('rotate-90');
+    }
+}
+
+/**
+ * Expand all units to show all topics.
+ */
+function expandAllUnits() {
+    // Find all unit topic containers and expand them
+    let idx = 0;
+    while (true) {
+        const topicsDiv = document.getElementById(`unit-topics-${idx}`);
+        const chevron = document.getElementById(`unit-chevron-${idx}`);
+        if (!topicsDiv) break;
+        topicsDiv.classList.remove('hidden');
+        if (chevron) chevron.classList.add('rotate-90');
+        idx++;
     }
 }
 
