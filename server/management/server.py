@@ -8,6 +8,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -427,6 +428,155 @@ class ManagementState:
 
 # Global state
 state = ManagementState()
+
+
+# =============================================================================
+# Text Chunking for Natural Speech
+# =============================================================================
+
+def chunk_text_for_tts(text: str, max_chars: int = 300, min_chars: int = 50) -> list[dict]:
+    """
+    Split text into natural segments for TTS streaming.
+
+    This creates segments that:
+    - End at sentence boundaries when possible
+    - Are small enough for fast TTS response (<300 chars ideal)
+    - Are large enough to sound natural (>50 chars when possible)
+    - Preserve paragraph breaks as natural pause points
+
+    Returns list of segment dicts with 'content' and 'type' keys.
+    """
+    if not text or not text.strip():
+        return []
+
+    # Clean up the text
+    text = text.strip()
+
+    # Remove common metadata headers that shouldn't be spoken
+    # These are often video/document identifiers that the TTS shouldn't read
+    # Pattern for MIT OCW headers like "MITOCW | MIT8_01F16_L00v01_360p"
+    text = re.sub(r'^MITOCW\s*\|\s*[A-Za-z0-9_]+\s*', '', text, flags=re.IGNORECASE)
+    # Pattern for standalone video markers like "MIT8_01F16_L00v01_360p"
+    text = re.sub(r'^MIT\d+[A-Za-z]*_[A-Za-z0-9_]+\s*', '', text, flags=re.IGNORECASE)
+    # Pattern for leftover video quality markers like "v01_360p"
+    text = re.sub(r'^[vV]\d+_\d+p\s*', '', text)
+    text = text.strip()
+
+    if not text:
+        return []
+
+    # Split into paragraphs first (double newlines or single newlines with blank content)
+    paragraphs = []
+    current_para = []
+
+    for line in text.split('\n'):
+        stripped = line.strip()
+        if not stripped:
+            if current_para:
+                paragraphs.append(' '.join(current_para))
+                current_para = []
+        else:
+            current_para.append(stripped)
+
+    if current_para:
+        paragraphs.append(' '.join(current_para))
+
+    segments = []
+
+    for para_idx, paragraph in enumerate(paragraphs):
+        if not paragraph:
+            continue
+
+        # Split paragraph into sentences
+        # Handle common sentence endings while preserving abbreviations
+        # Split on sentence-ending punctuation followed by space or end
+        sentence_pattern = r'(?<=[.!?])\s+(?=[A-Z])|(?<=[.!?])$'
+        sentences = re.split(sentence_pattern, paragraph)
+        sentences = [s.strip() for s in sentences if s.strip()]
+
+        # Now group sentences into chunks of appropriate size
+        current_chunk = []
+        current_length = 0
+
+        for sentence in sentences:
+            sentence_len = len(sentence)
+
+            # If this single sentence is too long, we need to split it
+            if sentence_len > max_chars:
+                # Flush current chunk first
+                if current_chunk:
+                    chunk_text = ' '.join(current_chunk)
+                    segments.append({
+                        "content": chunk_text,
+                        "type": "lecture" if para_idx == 0 else "explanation"
+                    })
+                    current_chunk = []
+                    current_length = 0
+
+                # Split long sentence on clause boundaries (commas, semicolons)
+                clause_pattern = r'(?<=[,;:])\s+'
+                clauses = re.split(clause_pattern, sentence)
+
+                clause_chunk = []
+                clause_length = 0
+
+                for clause in clauses:
+                    clause = clause.strip()
+                    if not clause:
+                        continue
+
+                    if clause_length + len(clause) + 1 > max_chars and clause_chunk:
+                        segments.append({
+                            "content": ' '.join(clause_chunk),
+                            "type": "lecture"
+                        })
+                        clause_chunk = []
+                        clause_length = 0
+
+                    clause_chunk.append(clause)
+                    clause_length += len(clause) + 1
+
+                if clause_chunk:
+                    current_chunk = clause_chunk
+                    current_length = clause_length
+            else:
+                # Normal case: accumulate sentences
+                if current_length + sentence_len + 1 > max_chars and current_chunk:
+                    # Flush current chunk
+                    chunk_text = ' '.join(current_chunk)
+                    segments.append({
+                        "content": chunk_text,
+                        "type": "lecture" if len(segments) == 0 else "explanation"
+                    })
+                    current_chunk = []
+                    current_length = 0
+
+                current_chunk.append(sentence)
+                current_length += sentence_len + 1
+
+        # Flush remaining chunk for this paragraph
+        if current_chunk:
+            chunk_text = ' '.join(current_chunk)
+            # Only add if it meets minimum length or it's all we have
+            if len(chunk_text) >= min_chars or not segments:
+                segments.append({
+                    "content": chunk_text,
+                    "type": "lecture" if len(segments) == 0 else "explanation"
+                })
+            elif segments:
+                # Append to previous segment if too short
+                prev = segments[-1]
+                prev["content"] = prev["content"] + " " + chunk_text
+
+    # Add segment IDs
+    for idx, seg in enumerate(segments):
+        seg["id"] = f"chunk-{idx}"
+
+    logger.info(f"Chunked {len(text)} chars into {len(segments)} segments")
+    for idx, seg in enumerate(segments):
+        logger.debug(f"  Segment {idx}: {len(seg['content'])} chars - {seg['content'][:50]}...")
+
+    return segments
 
 
 # =============================================================================
@@ -1552,6 +1702,18 @@ async def handle_get_topic_transcript(request: web.Request) -> web.Response:
                 # Extract segments directly for iOS client compatibility
                 segments = transcript.get("segments", []) if isinstance(transcript, dict) else []
 
+                # FALLBACK: If no transcript.segments, check for content.text
+                # This handles imported curricula (like MIT physics) that use content.text
+                if not segments:
+                    content_obj = child.get("content", {})
+                    if isinstance(content_obj, dict):
+                        raw_text = content_obj.get("text", "")
+                        if raw_text:
+                            logger.info(f"Topic {topic_id} has no transcript.segments, using content.text ({len(raw_text)} chars)")
+                            # Chunk the raw text into natural speech segments
+                            segments = chunk_text_for_tts(raw_text, max_chars=300, min_chars=50)
+                            logger.info(f"Created {len(segments)} segments from content.text")
+
                 # Get media assets
                 media = child.get("media", {})
                 embedded_assets = media.get("embedded", [])
@@ -1617,6 +1779,18 @@ async def handle_stream_topic_audio(request: web.Request) -> web.StreamResponse:
                 transcript = child.get("transcript", {})
                 transcript_segments = transcript.get("segments", []) if isinstance(transcript, dict) else []
                 topic_title = child.get("title", "")
+
+                # FALLBACK: If no transcript.segments, check for content.text
+                # This handles imported curricula (like MIT physics) that use content.text
+                if not transcript_segments:
+                    content_obj = child.get("content", {})
+                    if isinstance(content_obj, dict):
+                        raw_text = content_obj.get("text", "")
+                        if raw_text:
+                            logger.info(f"[stream] Topic {topic_id} has no transcript.segments, using content.text ({len(raw_text)} chars)")
+                            # Chunk the raw text into natural speech segments
+                            transcript_segments = chunk_text_for_tts(raw_text, max_chars=300, min_chars=50)
+                            logger.info(f"[stream] Created {len(transcript_segments)} segments from content.text")
                 break
 
         if transcript_segments is None:

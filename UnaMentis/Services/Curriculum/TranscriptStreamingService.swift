@@ -82,6 +82,10 @@ public actor TranscriptStreamingService {
     /// Preferred TTS server order (will try in order, falling back if one fails)
     private var ttsServerOrder: [TTSServer] = [.piper, .vibeVoice]
 
+    /// The TTS server that successfully processed the first segment.
+    /// Once a server works, we stick with it for the entire session to avoid voice switching.
+    private var confirmedTTSServer: TTSServer?
+
     // Audio player for playback
     private var audioPlayer: AVAudioPlayer?
     private var audioQueue: [Data] = []
@@ -133,6 +137,9 @@ public actor TranscriptStreamingService {
         // Cancel any existing stream
         currentTask?.cancel()
 
+        // Reset confirmed server for new session (allows fresh server discovery)
+        confirmedTTSServer = nil
+
         currentTask = Task {
             do {
                 try await performStreaming(
@@ -159,6 +166,8 @@ public actor TranscriptStreamingService {
         currentTask = nil
         audioQueue.removeAll()
         isPlaying = false
+        // Reset confirmed server so next session can discover anew
+        confirmedTTSServer = nil
         logger.info("Streaming stopped")
     }
 
@@ -261,7 +270,8 @@ public actor TranscriptStreamingService {
         onComplete()
     }
 
-    /// Request TTS with fallback to alternate servers
+    /// Request TTS with fallback to alternate servers.
+    /// Once a server succeeds, we stick with it for the entire session to avoid voice switching.
     private func requestTTSWithFallback(
         host: String,
         text: String,
@@ -269,6 +279,26 @@ public actor TranscriptStreamingService {
         segmentIndex: Int,
         totalSegments: Int
     ) async throws -> Data {
+        // If we already found a working server, use it exclusively
+        if let confirmedServer = confirmedTTSServer {
+            do {
+                return try await requestTTS(
+                    host: host,
+                    server: confirmedServer,
+                    text: text,
+                    voice: voice,
+                    segmentIndex: segmentIndex,
+                    totalSegments: totalSegments
+                )
+            } catch {
+                // If our confirmed server fails, log it but don't switch servers mid-session
+                // This prevents jarring voice changes. Better to fail the segment than switch voices.
+                logger.error("Confirmed TTS server \(confirmedServer.rawValue) failed: \(error.localizedDescription)")
+                throw error
+            }
+        }
+
+        // First segment: try servers in order and remember which one works
         var lastError: Error?
 
         for server in ttsServerOrder {
@@ -281,6 +311,9 @@ public actor TranscriptStreamingService {
                     segmentIndex: segmentIndex,
                     totalSegments: totalSegments
                 )
+                // Success! Remember this server for the rest of the session
+                confirmedTTSServer = server
+                logger.info("Confirmed TTS server for session: \(server.rawValue)")
                 return audioData
             } catch {
                 lastError = error
