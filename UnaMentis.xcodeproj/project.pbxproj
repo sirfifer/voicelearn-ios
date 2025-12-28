@@ -115,7 +115,6 @@
 		F6515847BF5C9C7953D34854 /* LLMTaskType.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD07E27AF281275DC11BE0 /* LLMTaskType.swift */; };
 		F98DD78B3D71992AFF824066 /* HelpComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6087261F00AD3F73BC9BDBA9 /* HelpComponents.swift */; };
 		FAD3F8A6F3DD20E8B474CF37 /* GLMASRIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED7DFE0AA0EFDFDA0E2997B /* GLMASRIntegrationTests.swift */; };
-		FB4536FB09E712F73760A143 /* llama-3.2-3b-instruct-q4_k_m.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADF33B783CB8AAF071997F6 /* llama-3.2-3b-instruct-q4_k_m.gguf */; };
 		FFF26AE98F6DDE371CA0B169 /* VADService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F889719749AE4061E8AD19F /* VADService.swift */; };
 /* End PBXBuildFile section */
 
@@ -191,7 +190,6 @@
 		982A6B1F33A22B67C9A23567 /* CurriculumDownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurriculumDownloadManager.swift; sourceTree = "<group>"; };
 		99F01835E4A6FD36F8723764 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		9A39F3F414367641F29F2D0D /* CurriculumService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurriculumService.swift; sourceTree = "<group>"; };
-		9ADF33B783CB8AAF071997F6 /* llama-3.2-3b-instruct-q4_k_m.gguf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "llama-3.2-3b-instruct-q4_k_m.gguf"; sourceTree = "<group>"; };
 		9ED21B50524DB5FEFE3F9E99 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A008CBD6F2FA374F46DDB324 /* AudioEngineConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngineConfig.swift; sourceTree = "<group>"; };
 		A0587423D8A881D64F373B4D /* PatchPanelServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchPanelServiceTests.swift; sourceTree = "<group>"; };
@@ -269,7 +267,6 @@
 		055E45F23C261742139BA3CD /* models */ = {
 			isa = PBXGroup;
 			children = (
-				9ADF33B783CB8AAF071997F6 /* llama-3.2-3b-instruct-q4_k_m.gguf */,
 			);
 			path = models;
 			sourceTree = "<group>";
@@ -787,7 +784,6 @@
 				9FF33043A3535D20BB665608 /* CLAUDE.md in Resources */,
 				3EE6A10EB470F1654EA8EE1C /* LaunchScreen.storyboard in Resources */,
 				4B12FB0AF2279C8F7769DCC8 /* Localizable.strings in Resources */,
-				FB4536FB09E712F73760A143 /* llama-3.2-3b-instruct-q4_k_m.gguf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

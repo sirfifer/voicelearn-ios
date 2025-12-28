@@ -46,16 +46,35 @@ xcodebuild test -project UnaMentis.xcodeproj -scheme UnaMentis \
 ./scripts/health-check.sh
 ```
 
-## MANDATORY: Test Before Commit
+## MANDATORY: Definition of Done
 
-**Work is NOT complete until all tests pass locally.** This is non-negotiable.
+**NO IMPLEMENTATION IS COMPLETE UNTIL TESTS PASS.** This is the single most important rule.
 
-Before considering any implementation complete:
-1. Run `./scripts/test-quick.sh` or full test suite
-2. Verify ALL tests pass (not just "no new failures")
-3. If tests fail, fix them before committing
+### The Golden Rule
+You MUST run `./scripts/test-quick.sh` (or `./scripts/test-all.sh` for significant changes) and verify ALL tests pass BEFORE:
+- Telling the user the work is "done" or "complete"
+- Summarizing what you accomplished
+- Moving on to the next task
+- Committing any changes
 
-**If you tell the user "tests are passing" or "implementation is complete" when tests are actually failing, that is a failure.** Always verify by running tests locally.
+### What "Complete" Means
+1. Code is written and compiles
+2. `./scripts/lint.sh` passes with no violations
+3. `./scripts/test-quick.sh` passes with ALL tests green
+4. You have ACTUALLY RUN these commands and seen the results yourself
+
+### Failure Mode to Avoid
+**WRONG:** Write code, see it compiles, tell user "implementation is complete"
+**RIGHT:** Write code, run tests, verify all pass, THEN tell user "implementation is complete"
+
+If you tell the user "tests are passing" or "implementation is complete" when tests are actually failing, you have failed at your job. Always verify by running tests locally.
+
+### Pre-Commit Checklist
+```bash
+./scripts/lint.sh && ./scripts/test-quick.sh
+```
+
+If either command fails, fix the issues before proceeding.
 
 ## Key Technical Requirements
 
@@ -77,7 +96,12 @@ Check `docs/TASK_STATUS.md` before starting work. Claim tasks before working to 
 
 Follow Conventional Commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `perf:`, `ci:`, `chore:`
 
-Before committing: `./scripts/lint.sh && ./scripts/test-quick.sh`
+**BEFORE EVERY COMMIT:**
+```bash
+./scripts/lint.sh && ./scripts/test-quick.sh
+```
+
+Do NOT commit if either command fails. Fix the issues first.
 
 ## Key Documentation
 

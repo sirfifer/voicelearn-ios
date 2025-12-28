@@ -132,8 +132,24 @@ xcodebuild test -project UnaMentis.xcodeproj -scheme UnaMentis \
 4. Use TodoWrite to track progress on multi-step tasks
 5. **Follow iOS Style Guide requirements for accessibility and i18n**
 
+### CRITICAL: Definition of Done
+
+**YOU MUST RUN TESTS BEFORE DECLARING WORK COMPLETE.** This is the most important rule.
+
+Work is NOT complete until you have:
+1. Run `./scripts/lint.sh` and verified 0 violations
+2. Run `./scripts/test-quick.sh` and verified ALL tests pass
+3. Actually observed the test output yourself (not assumed it passes)
+
+**FAILURE MODE TO AVOID:**
+- Writing code, seeing it compile, and telling the user "done"
+- Summarizing accomplishments without running tests first
+- Saying "tests should pass" instead of "tests pass" (you ran them)
+
+If you tell the user "implementation is complete" when tests are failing, you have failed at your job.
+
 ### Quality Gates
-- All tests pass
+- All tests pass (you must verify by running them)
 - Build succeeds for iOS Simulator
 - No force unwraps (!)
 - Public APIs documented with /// comments

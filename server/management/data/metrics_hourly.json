@@ -3984,35 +3984,35 @@
   },
   "2025-12-27T21:00:00": {
     "hour": "2025-12-27T21:00:00",
-    "avg_battery_draw_w": 6.8,
-    "max_battery_draw_w": 18.62,
-    "min_battery_percent": 100.0,
+    "avg_battery_draw_w": 17.11,
+    "max_battery_draw_w": 80.04,
+    "min_battery_percent": 93.0,
     "max_battery_percent": 100.0,
     "avg_thermal_level": 0.0,
     "max_thermal_level": 0,
     "avg_cpu_temp_c": 0.0,
     "max_cpu_temp_c": 0.0,
-    "avg_cpu_percent": 176.0,
-    "max_cpu_percent": 313.8,
+    "avg_cpu_percent": 249.6,
+    "max_cpu_percent": 1325.5,
     "service_cpu_avg": {
-      "management": 4.6,
+      "management": 4.0,
       "ollama": 0.0,
       "vibevoice": 0.0,
-      "nextjs": 0.3,
-      "piper": 0.2
+      "piper": 0.0
     },
     "service_cpu_max": {
-      "management": 5.3,
+      "management": 8.5,
       "ollama": 0.0,
       "vibevoice": 0.0,
-      "nextjs": 0.7,
-      "piper": 0.9
+      "piper": 0.0
     },
     "total_requests": 0,
     "total_inferences": 0,
     "idle_state_seconds": {
-      "dormant": 245
+      "warm": 270,
+      "cool": 1498,
+      "cold": 1020
     },
-    "sample_count": 8
+    "sample_count": 91
   }
 }
