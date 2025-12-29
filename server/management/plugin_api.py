@@ -209,7 +209,7 @@ async def handle_configure_plugin(request: web.Request) -> web.Response:
         body = await request.json()
         settings = body.get("settings", {})
 
-        # Update settings
+        # Update settings in discovery state
         if plugin_id not in discovery._states:
             from importers.core.discovery import PluginState
             discovery._states[plugin_id] = PluginState()
@@ -217,12 +217,135 @@ async def handle_configure_plugin(request: web.Request) -> web.Response:
         discovery._states[plugin_id].settings = settings
         discovery.save_state()
 
+        # Also notify the plugin instance if it supports configuration
+        try:
+            handler = SourceRegistry.get_handler(plugin_id)
+            if handler and hasattr(handler, "configure"):
+                handler.configure(settings)
+        except Exception as e:
+            logger.warning(f"Could not notify plugin of configuration change: {e}")
+
         return web.json_response({
             "success": True,
             "message": f"Plugin {plugin_id} configured",
         })
     except Exception as e:
         logger.exception(f"Error configuring plugin {plugin_id}")
+        return web.json_response({
+            "success": False,
+            "error": str(e),
+        }, status=500)
+
+
+async def handle_get_plugin_config_schema(request: web.Request) -> web.Response:
+    """
+    GET /api/plugins/{plugin_id}/config-schema
+
+    Get the configuration schema for a plugin.
+    Returns the settings fields and their types for the UI to render.
+    """
+    plugin_id = request.match_info["plugin_id"]
+
+    try:
+        discovery = get_discovery()
+
+        if plugin_id not in discovery._discovered:
+            return web.json_response({
+                "success": False,
+                "error": f"Plugin not found: {plugin_id}",
+            }, status=404)
+
+        # Try to get schema from the handler
+        try:
+            handler_class = discovery.get_plugin_class(plugin_id)
+            if handler_class:
+                handler = handler_class()
+                if hasattr(handler, "get_configuration_schema"):
+                    schema = handler.get_configuration_schema()
+                    return web.json_response({
+                        "success": True,
+                        "schema": schema,
+                        "has_config": True,
+                    })
+        except Exception as e:
+            logger.warning(f"Could not get config schema from plugin: {e}")
+
+        # No configuration schema available
+        return web.json_response({
+            "success": True,
+            "schema": None,
+            "has_config": False,
+        })
+    except Exception as e:
+        logger.exception(f"Error getting config schema for {plugin_id}")
+        return web.json_response({
+            "success": False,
+            "error": str(e),
+        }, status=500)
+
+
+async def handle_test_plugin(request: web.Request) -> web.Response:
+    """
+    POST /api/plugins/{plugin_id}/test
+
+    Test plugin configuration (e.g., test API key validity).
+
+    Body: { "settings": { "api_key": "..." } }  (optional, uses saved settings if not provided)
+    """
+    plugin_id = request.match_info["plugin_id"]
+
+    try:
+        discovery = get_discovery()
+
+        if plugin_id not in discovery._discovered:
+            return web.json_response({
+                "success": False,
+                "error": f"Plugin not found: {plugin_id}",
+            }, status=404)
+
+        # Get test settings from body (or use saved settings)
+        body = {}
+        try:
+            body = await request.json()
+        except Exception:
+            pass  # No body is fine
+
+        test_settings = body.get("settings", {})
+
+        # Try to test using the handler
+        try:
+            handler_class = discovery.get_plugin_class(plugin_id)
+            if handler_class:
+                handler = handler_class()
+
+                # Check if handler has test method
+                if hasattr(handler, "test_api_key"):
+                    api_key = test_settings.get("api_key")
+                    result = await handler.test_api_key(api_key)
+                    return web.json_response({
+                        "success": True,
+                        "test_result": result,
+                    })
+                else:
+                    return web.json_response({
+                        "success": True,
+                        "test_result": {
+                            "valid": True,
+                            "message": "Plugin does not support testing",
+                        },
+                    })
+        except Exception as e:
+            logger.warning(f"Plugin test failed: {e}")
+            return web.json_response({
+                "success": True,
+                "test_result": {
+                    "valid": False,
+                    "message": f"Test failed: {str(e)}",
+                },
+            })
+
+    except Exception as e:
+        logger.exception(f"Error testing plugin {plugin_id}")
         return web.json_response({
             "success": False,
             "error": str(e),
@@ -484,6 +607,8 @@ def register_plugin_routes(app: web.Application):
     app.router.add_post("/api/plugins/{plugin_id}/enable", handle_enable_plugin)
     app.router.add_post("/api/plugins/{plugin_id}/disable", handle_disable_plugin)
     app.router.add_post("/api/plugins/{plugin_id}/configure", handle_configure_plugin)
+    app.router.add_get("/api/plugins/{plugin_id}/config-schema", handle_get_plugin_config_schema)
+    app.router.add_post("/api/plugins/{plugin_id}/test", handle_test_plugin)
 
     # Source Browser API (Generic Plugin UI)
     app.router.add_get("/api/sources", handle_get_enabled_sources)

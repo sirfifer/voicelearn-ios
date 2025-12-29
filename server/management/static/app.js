@@ -4627,6 +4627,7 @@ function formatBytes(bytes) {
 // =============================================================================
 
 let pluginsData = { plugins: [], first_run: false };
+let pluginConfigSchemas = {};  // Cache for plugin configuration schemas
 
 async function refreshPlugins() {
     try {
@@ -4643,9 +4644,25 @@ async function refreshPlugins() {
             } else if (banner) {
                 banner.classList.add('hidden');
             }
+
+            // Fetch config schemas for all plugins (in background)
+            for (const plugin of data.plugins) {
+                fetchPluginConfigSchema(plugin.plugin_id);
+            }
         }
     } catch (e) {
         console.error('Failed to refresh plugins:', e);
+    }
+}
+
+async function fetchPluginConfigSchema(pluginId) {
+    try {
+        const data = await fetchAPI(`/plugins/${pluginId}/config-schema`);
+        if (data.success && data.has_config) {
+            pluginConfigSchemas[pluginId] = data.schema;
+        }
+    } catch (e) {
+        console.debug(`No config schema for ${pluginId}`);
     }
 }
 
@@ -4673,19 +4690,24 @@ function renderPlugins(plugins) {
 
     emptyState.classList.add('hidden');
 
-    grid.innerHTML = plugins.map(plugin => `
-        <div class="rounded-xl bg-dark-800/50 border ${plugin.enabled ? 'border-accent-success/30' : 'border-dark-700/50'} p-4 transition-all hover:border-dark-600">
+    grid.innerHTML = plugins.map(plugin => {
+        const hasConfig = plugin.features && plugin.features.includes('configurable');
+        const needsConfig = !plugin.enabled && hasConfig;
+
+        return `
+        <div class="rounded-xl bg-dark-800/50 border ${plugin.enabled ? 'border-accent-success/30' : needsConfig ? 'border-accent-warning/30' : 'border-dark-700/50'} p-4 transition-all hover:border-dark-600">
             <div class="flex items-start justify-between gap-4">
                 <div class="flex items-start gap-3 flex-1 min-w-0">
-                    <div class="w-10 h-10 rounded-lg ${plugin.enabled ? 'bg-accent-success/20' : 'bg-dark-700'} flex items-center justify-center flex-shrink-0">
+                    <div class="w-10 h-10 rounded-lg ${plugin.enabled ? 'bg-accent-success/20' : needsConfig ? 'bg-accent-warning/20' : 'bg-dark-700'} flex items-center justify-center flex-shrink-0">
                         ${getPluginIcon(plugin.plugin_type, plugin.enabled)}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <h3 class="font-medium truncate">${escapeHtml(plugin.name)}</h3>
                             <span class="text-xs px-2 py-0.5 rounded ${plugin.enabled ? 'bg-accent-success/20 text-accent-success' : 'bg-dark-700 text-dark-400'}">
                                 ${plugin.enabled ? 'Enabled' : 'Disabled'}
                             </span>
+                            ${needsConfig ? '<span class="text-xs px-2 py-0.5 rounded bg-accent-warning/20 text-accent-warning">Needs Config</span>' : ''}
                         </div>
                         <p class="text-sm text-dark-400 mt-1 line-clamp-2">${escapeHtml(plugin.description)}</p>
                         <div class="flex items-center gap-3 mt-2 text-xs text-dark-500">
@@ -4693,6 +4715,18 @@ function renderPlugins(plugins) {
                             ${plugin.license_type ? `<span>${escapeHtml(plugin.license_type)}</span>` : ''}
                             <span>v${plugin.version}</span>
                         </div>
+                        ${hasConfig ? `
+                        <div class="mt-3 pt-3 border-t border-dark-700/50">
+                            <button onclick="showPluginConfig('${plugin.plugin_id}')"
+                                    class="text-xs px-3 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-dark-300 hover:text-white transition-colors flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Configure
+                            </button>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
                 <div class="flex-shrink-0">
@@ -4703,7 +4737,7 @@ function renderPlugins(plugins) {
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function getPluginIcon(pluginType, enabled) {
@@ -4768,6 +4802,263 @@ async function initializeAllPlugins() {
         console.error('Failed to initialize plugins:', e);
         alert('Failed to initialize plugins: ' + e.message);
     }
+}
+
+// =============================================================================
+// Plugin Configuration Modal
+// =============================================================================
+
+let currentConfigPlugin = null;
+
+async function showPluginConfig(pluginId) {
+    currentConfigPlugin = pluginId;
+
+    // Find the plugin data
+    const plugin = pluginsData.plugins.find(p => p.plugin_id === pluginId);
+    if (!plugin) {
+        alert('Plugin not found');
+        return;
+    }
+
+    // Fetch schema if not cached
+    if (!pluginConfigSchemas[pluginId]) {
+        try {
+            const data = await fetchAPI(`/plugins/${pluginId}/config-schema`);
+            if (data.success && data.has_config) {
+                pluginConfigSchemas[pluginId] = data.schema;
+            } else {
+                alert('This plugin does not have configurable settings');
+                return;
+            }
+        } catch (e) {
+            alert('Failed to load configuration schema');
+            return;
+        }
+    }
+
+    const schema = pluginConfigSchemas[pluginId];
+    const currentSettings = plugin.settings || {};
+
+    // Build the modal
+    const modalHtml = `
+        <div id="plugin-config-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-dark-800 rounded-2xl border border-dark-700 w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-dark-700">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-semibold">Configure ${escapeHtml(plugin.name)}</h2>
+                            <p class="text-sm text-dark-400 mt-1">${escapeHtml(plugin.description)}</p>
+                        </div>
+                        <button onclick="closePluginConfig()" class="p-2 rounded-lg hover:bg-dark-700 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6 overflow-y-auto flex-1">
+                    <form id="plugin-config-form" class="space-y-6">
+                        ${renderConfigFields(schema.settings, currentSettings)}
+                    </form>
+                    <div id="plugin-test-result" class="hidden mt-4 p-3 rounded-lg"></div>
+                </div>
+                <div class="p-6 border-t border-dark-700 flex items-center justify-between gap-4">
+                    <button onclick="testPluginConfig('${pluginId}')" type="button"
+                            class="px-4 py-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-dark-300 hover:text-white transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Test Connection
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <button onclick="closePluginConfig()" type="button"
+                                class="px-4 py-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-dark-300 hover:text-white transition-colors">
+                            Cancel
+                        </button>
+                        <button onclick="savePluginConfig('${pluginId}')" type="button"
+                                class="px-4 py-2 rounded-lg bg-accent-primary hover:bg-accent-primary/80 text-white transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Save Configuration
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add modal to DOM
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Add keyboard listener for escape key
+    document.addEventListener('keydown', handleConfigModalKeydown);
+}
+
+function renderConfigFields(settings, currentValues) {
+    return settings.map(setting => {
+        const value = currentValues[setting.key] || '';
+        const inputType = setting.type === 'password' ? 'password' : 'text';
+        const required = setting.required ? 'required' : '';
+
+        return `
+            <div class="space-y-2">
+                <label for="config-${setting.key}" class="block text-sm font-medium">
+                    ${escapeHtml(setting.label)}
+                    ${setting.required ? '<span class="text-accent-error">*</span>' : ''}
+                </label>
+                <div class="relative">
+                    <input type="${inputType}"
+                           id="config-${setting.key}"
+                           name="${setting.key}"
+                           value="${escapeHtml(value)}"
+                           placeholder="${escapeHtml(setting.placeholder || '')}"
+                           ${required}
+                           class="w-full px-4 py-2.5 rounded-lg bg-dark-700 border border-dark-600 focus:border-accent-primary focus:ring-1 focus:ring-accent-primary outline-none transition-colors text-white placeholder-dark-500">
+                    ${inputType === 'password' ? `
+                        <button type="button" onclick="togglePasswordVisibility('config-${setting.key}')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    ` : ''}
+                </div>
+                ${setting.help_text ? `
+                    <p class="text-xs text-dark-400">
+                        ${escapeHtml(setting.help_text)}
+                        ${setting.help_url ? `<a href="${setting.help_url}" target="_blank" rel="noopener" class="text-accent-primary hover:underline ml-1">Learn more</a>` : ''}
+                    </p>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+function togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+}
+
+function closePluginConfig() {
+    const modal = document.getElementById('plugin-config-modal');
+    if (modal) {
+        modal.remove();
+    }
+    document.removeEventListener('keydown', handleConfigModalKeydown);
+    currentConfigPlugin = null;
+}
+
+function handleConfigModalKeydown(e) {
+    if (e.key === 'Escape') {
+        closePluginConfig();
+    }
+}
+
+function getConfigFormValues() {
+    const form = document.getElementById('plugin-config-form');
+    if (!form) return {};
+
+    const formData = new FormData(form);
+    const values = {};
+    for (const [key, value] of formData.entries()) {
+        values[key] = value;
+    }
+    return values;
+}
+
+async function testPluginConfig(pluginId) {
+    const resultDiv = document.getElementById('plugin-test-result');
+    const settings = getConfigFormValues();
+
+    resultDiv.className = 'mt-4 p-3 rounded-lg bg-dark-700 text-dark-300';
+    resultDiv.classList.remove('hidden');
+    resultDiv.innerHTML = '<span class="animate-pulse">Testing connection...</span>';
+
+    try {
+        const response = await fetchAPI(`/plugins/${pluginId}/test`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings })
+        });
+
+        if (response.success && response.test_result) {
+            const result = response.test_result;
+            if (result.valid) {
+                resultDiv.className = 'mt-4 p-3 rounded-lg bg-accent-success/20 text-accent-success flex items-center gap-2';
+                resultDiv.innerHTML = `
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>${escapeHtml(result.message)}</span>
+                `;
+            } else {
+                resultDiv.className = 'mt-4 p-3 rounded-lg bg-accent-error/20 text-accent-error flex items-center gap-2';
+                resultDiv.innerHTML = `
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>${escapeHtml(result.message)}</span>
+                `;
+            }
+        } else {
+            throw new Error(response.error || 'Test failed');
+        }
+    } catch (e) {
+        resultDiv.className = 'mt-4 p-3 rounded-lg bg-accent-error/20 text-accent-error flex items-center gap-2';
+        resultDiv.innerHTML = `
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Test failed: ${escapeHtml(e.message)}</span>
+        `;
+    }
+}
+
+async function savePluginConfig(pluginId) {
+    const settings = getConfigFormValues();
+
+    try {
+        const response = await fetchAPI(`/plugins/${pluginId}/configure`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings })
+        });
+
+        if (response.success) {
+            closePluginConfig();
+            await refreshPlugins();
+
+            // Show success toast (or alert for now)
+            showToast('Configuration saved successfully', 'success');
+        } else {
+            alert('Failed to save configuration: ' + (response.error || 'Unknown error'));
+        }
+    } catch (e) {
+        console.error('Failed to save plugin config:', e);
+        alert('Failed to save configuration: ' + e.message);
+    }
+}
+
+function showToast(message, type = 'info') {
+    // Simple toast notification
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-accent-success' : type === 'error' ? 'bg-accent-error' : 'bg-accent-primary';
+    toast.className = `fixed bottom-4 right-4 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slide-up`;
+    toast.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>${escapeHtml(message)}</span>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
 }
 
 // Start the application
