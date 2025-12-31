@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -14,14 +15,39 @@ import {
   Edit2,
   Save,
   X,
+  Layout
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { CurriculumDetail, CurriculumTopic } from '@/types';
+import { CurriculumStudio } from '@/components/curriculum/CurriculumEditor';
+import { Curriculum, ContentNode } from '@/types/curriculum';
 
 interface CurriculumDetailPanelProps {
   curriculumId: string;
   onBack: () => void;
+}
+
+// Adapter to convert API response to UMCF format for the editor
+function adaptToUMCF(detail: CurriculumDetail): Curriculum {
+  const isExternal = detail.document?.sourceProvenance?.originType === 'external';
+
+  return {
+    umcf: "1.0.0",
+    id: { value: detail.id || 'unknown' },
+    title: detail.title,
+    description: detail.description,
+    version: { number: detail.version || '1.0.0' },
+    locked: isExternal, // Lock if external
+    content: detail.topics?.map((t, i) => ({
+      id: { value: t.id.value || `topic-${i}` },
+      title: t.title,
+      type: 'topic',
+      description: t.description,
+      // Map other fields as best as possible
+      transcript: t.transcript ? { segments: [] /* TODO: Map segments properly */ } : undefined
+    })) || []
+  };
 }
 
 async function getCurriculumDetail(id: string): Promise<CurriculumDetail> {
@@ -52,6 +78,7 @@ export function CurriculumDetailPanel({ curriculumId, onBack }: CurriculumDetail
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [saving, setSaving] = useState(false);
+  const [isStudioOpen, setIsStudioOpen] = useState(false);
 
   const fetchCurriculum = useCallback(async () => {
     setLoading(true);
@@ -140,6 +167,21 @@ export function CurriculumDetailPanel({ curriculumId, onBack }: CurriculumDetail
     );
   }
 
+  // Render Studio Mode
+  if (isStudioOpen) {
+    return (
+      <CurriculumStudio
+        initialData={adaptToUMCF(curriculum)}
+        onSave={async (data) => {
+          // TODO: Implement save back to API
+          console.log('Saving UMCF:', data);
+          setIsStudioOpen(false);
+        }}
+        onBack={() => setIsStudioOpen(false)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -178,16 +220,18 @@ export function CurriculumDetailPanel({ curriculumId, onBack }: CurriculumDetail
                 </button>
               </div>
             ) : (
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3 group">
-                <BookOpen className="w-6 h-6 text-orange-400" />
-                {curriculum.title}
-                <button
-                  onClick={() => startEditing('title', curriculum.title)}
-                  className="p-1 text-slate-500 hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-all"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-              </h2>
+              <div className="flex items-center gap-4">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-3 group">
+                  <BookOpen className="w-6 h-6 text-orange-400" />
+                  {curriculum.title}
+                  <button
+                    onClick={() => startEditing('title', curriculum.title)}
+                    className="p-1 text-slate-500 hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                </h2>
+              </div>
             )}
 
             {editingField === 'description' ? (
@@ -227,25 +271,36 @@ export function CurriculumDetailPanel({ curriculumId, onBack }: CurriculumDetail
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            {curriculum.status && (
-              <Badge
-                className={
-                  curriculum.status === 'final'
-                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                    : curriculum.status === 'draft'
-                    ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
-                    : 'bg-slate-500/20 text-slate-400 border-slate-500/30'
-                }
+          <div className="flex flex-col items-end gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsStudioOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-all shadow-lg shadow-indigo-500/20 font-medium text-sm"
               >
-                {curriculum.status}
-              </Badge>
-            )}
-            {curriculum.version && (
-              <Badge className="bg-slate-700/50 text-slate-300 border-slate-600">
-                v{curriculum.version}
-              </Badge>
-            )}
+                <Layout className="w-4 h-4" />
+                {curriculum.document?.sourceProvenance?.originType === 'external' ? 'View in Studio' : 'Open Studio'}
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              {curriculum.status && (
+                <Badge
+                  className={
+                    curriculum.status === 'final'
+                      ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                      : curriculum.status === 'draft'
+                        ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                        : 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+                  }
+                >
+                  {curriculum.status}
+                </Badge>
+              )}
+              {curriculum.version && (
+                <Badge className="bg-slate-700/50 text-slate-300 border-slate-600">
+                  v{curriculum.version}
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -437,3 +492,4 @@ function TopicItem({ topic, index, expanded, onToggle }: TopicItemProps) {
     </div>
   );
 }
+

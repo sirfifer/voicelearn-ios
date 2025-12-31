@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { BookOpen, Search, Archive, Trash2, RefreshCw, Eye } from 'lucide-react';
+import { BookOpen, Search, Archive, Trash2, RefreshCw, Eye, Plus } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CurriculumDetailPanel } from './curriculum-detail-panel';
 import type { CurriculumSummary, CurriculaResponse } from '@/types';
+import { CurriculumStudio } from '@/components/curriculum/CurriculumEditor';
+import { Curriculum } from '@/types/curriculum';
 
 // API functions for curricula
 async function getCurricula(params?: {
@@ -54,6 +56,7 @@ export function CurriculaPanel() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [selectedCurriculumId, setSelectedCurriculumId] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   const fetchCurricula = useCallback(async () => {
     setLoading(true);
@@ -74,6 +77,35 @@ export function CurriculaPanel() {
   useEffect(() => {
     fetchCurricula();
   }, [fetchCurricula]);
+
+  // If creating new, show studio
+  if (isCreating) {
+    const newCurriculum: Curriculum = {
+      umcf: "1.0.0",
+      id: { value: crypto.randomUUID() },
+      title: "New Curriculum",
+      version: { number: "0.1.0" },
+      content: [{
+        id: { value: 'unit-1' },
+        title: 'Unit 1',
+        type: 'unit',
+        children: []
+      }]
+    };
+
+    return (
+      <CurriculumStudio
+        initialData={newCurriculum}
+        onSave={async (data) => {
+          // TODO: POST to API
+          console.log('Creating curriculum:', data);
+          setIsCreating(false);
+          fetchCurricula();
+        }}
+        onBack={() => setIsCreating(false)}
+      />
+    );
+  }
 
   // If a curriculum is selected, show the detail panel
   if (selectedCurriculumId) {
@@ -131,6 +163,13 @@ export function CurriculaPanel() {
 
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setIsCreating(true)}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-md transition-colors shadow-lg shadow-indigo-500/20"
+          >
+            <Plus className="w-4 h-4" />
+            Create New
+          </button>
+          <button
             onClick={handleReload}
             className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-md transition-colors"
           >
@@ -155,11 +194,10 @@ export function CurriculaPanel() {
 
         <button
           onClick={() => setShowArchived(!showArchived)}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-            showArchived
-              ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
-              : 'text-slate-400 bg-slate-800 hover:bg-slate-700 border border-slate-700'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${showArchived
+            ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
+            : 'text-slate-400 bg-slate-800 hover:bg-slate-700 border border-slate-700'
+            }`}
         >
           <Archive className="w-4 h-4" />
           {showArchived ? 'Showing Archived' : 'Show Archived'}
@@ -209,8 +247,8 @@ export function CurriculaPanel() {
                         curriculum.status === 'final'
                           ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                           : curriculum.status === 'draft'
-                          ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
-                          : 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+                            ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                            : 'bg-slate-500/20 text-slate-400 border-slate-500/30'
                       }
                     >
                       {curriculum.status}
