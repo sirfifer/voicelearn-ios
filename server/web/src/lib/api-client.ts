@@ -900,6 +900,6 @@ export async function cancelImport(jobId: string): Promise<{ success: boolean; e
 // =============================================================================
 // Curriculum & Visual Asset Management
 // =============================================================================
-// NOTE: Curriculum management has been consolidated to the Management Console (port 8766).
-// These APIs and components are NOT part of the Operations Console.
-// The Operations Console focuses on DevOps tasks: system health, logs, metrics, and services.
+// NOTE: Curriculum data is served by the Management API (port 8766) and proxied through
+// the UnaMentis Server's Next.js API routes. The Curriculum Studio provides a unified
+// interface for viewing and editing curriculum content alongside system management.

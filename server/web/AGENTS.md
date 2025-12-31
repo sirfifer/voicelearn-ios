@@ -1,16 +1,25 @@
-# Operations Console
+# UnaMentis Server
 
-Next.js/React web application for DevOps monitoring and system health.
+Next.js/React web application providing a unified interface for system management and curriculum content.
 
 **URL:** http://localhost:3000
 
 ## Purpose
 
+The UnaMentis Server is the main web interface for managing UnaMentis deployments, from single home/school setups to large enterprise installations.
+
+### System Management
 - System health monitoring (CPU, memory, thermal, battery)
 - Service status (Ollama, VibeVoice, Piper, etc.)
 - Power/idle management profiles
 - Logs, metrics, and performance data
 - Client connection monitoring
+
+### Content Management
+- Curriculum browsing and management
+- Curriculum Studio for viewing/editing UMCF content
+- Import source configuration and job monitoring
+- Plugin management for content sources
 
 ## Tech Stack
 
@@ -26,8 +35,13 @@ Next.js/React web application for DevOps monitoring and system health.
 ```
 src/
 ├── app/           # Next.js App Router pages
+│   └── api/       # API routes (proxy to Management API)
 ├── components/    # React components
-└── ...
+│   ├── curriculum/  # Curriculum Studio components
+│   ├── dashboard/   # Dashboard panels
+│   └── ui/          # Reusable UI components
+├── lib/           # Utilities and API client
+└── types/         # TypeScript type definitions
 public/            # Static assets
 ```
 

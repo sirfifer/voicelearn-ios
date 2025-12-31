@@ -14,8 +14,8 @@ This repository contains multiple components, each with its own CLAUDE.md:
 |-----------|----------|---------|
 | iOS App | `UnaMentis/` | Swift/SwiftUI voice tutoring client |
 | Server | `server/` | Backend infrastructure |
-| Management Console | `server/management/` | Python/aiohttp content admin (port 8766) |
-| Operations Console | `server/web/` | Next.js/React DevOps monitoring (port 3000) |
+| Management API | `server/management/` | Python/aiohttp backend API (port 8766) |
+| UnaMentis Server | `server/web/` | Next.js/React web interface (port 3000) |
 | Importers | `server/importers/` | Curriculum import framework |
 | Curriculum | `curriculum/` | UMCF format specification |
 

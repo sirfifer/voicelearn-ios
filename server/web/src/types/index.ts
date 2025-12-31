@@ -332,10 +332,9 @@ export interface MetricsHistorySummary {
 // =============================================================================
 // Curriculum & Visual Asset Types
 // =============================================================================
-// NOTE: These types are no longer used in the Operations Console.
-// Curriculum management has been consolidated to the Management Console (port 8766).
-// These type definitions are retained for reference but all curriculum UI has been removed.
-// The Operations Console focuses exclusively on DevOps tasks.
+// NOTE: These types support the Curriculum Studio in the UnaMentis Server interface.
+// Curriculum data is fetched from the Management API (port 8766) and displayed here.
+// The UnaMentis Server provides a unified interface for both DevOps and content management.
 
 /** Types of visual assets supported in UMCF */
 export type VisualAssetType =

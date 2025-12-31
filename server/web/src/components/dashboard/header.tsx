@@ -37,10 +37,10 @@ export function Header({ stats, connected = false }: HeaderProps) {
             </div>
             <div className="min-w-0">
               <h1 className="text-sm sm:text-lg font-bold text-slate-100 truncate">
-                Operations Console
+                UnaMentis Server
               </h1>
               <p className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-wider hidden sm:block">
-                UnaMentis System Monitor
+                System Management Console
               </p>
             </div>
           </div>
