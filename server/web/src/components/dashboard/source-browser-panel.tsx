@@ -92,7 +92,8 @@ interface ImportJob {
 
 type ViewMode = 'sources' | 'catalog' | 'detail';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+// Use relative URLs to go through Next.js API proxy routes
+const BACKEND_URL = '';
 
 /**
  * Source Browser Panel
@@ -495,10 +496,12 @@ export function SourceBrowserPanel() {
                   </div>
 
                   {/* License */}
-                  <div className="flex items-center gap-2 mt-4 text-xs text-slate-500">
-                    <Scale className="w-3.5 h-3.5" />
-                    <span>{source.license.name}</span>
-                  </div>
+                  {source.license && (
+                    <div className="flex items-center gap-2 mt-4 text-xs text-slate-500">
+                      <Scale className="w-3.5 h-3.5" />
+                      <span>{source.license.name}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -796,54 +799,58 @@ export function SourceBrowserPanel() {
             </Card>
 
             {/* License */}
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  <Scale className="w-5 h-5" />
-                  License Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium text-slate-100">
-                      {selectedCourse.license.name}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {selectedCourse.license.type}
-                    </p>
-                  </div>
-
-                  {selectedCourse.license.attributionFormat && (
-                    <div className="p-3 bg-slate-800/50 rounded-lg">
-                      <p className="text-xs text-slate-400 mb-1">Required Attribution:</p>
-                      <p className="text-sm text-slate-300 italic">
-                        "{selectedCourse.license.attributionFormat}"
+            {selectedCourse.license && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <Scale className="w-5 h-5" />
+                    License Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm font-medium text-slate-100">
+                        {selectedCourse.license.name}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {selectedCourse.license.type}
                       </p>
                     </div>
-                  )}
 
-                  <div className="flex flex-wrap gap-2">
-                    {selectedCourse.license.conditions.map((condition) => (
-                      <Badge key={condition} variant="warning" className="text-xs">
-                        {condition}
-                      </Badge>
-                    ))}
+                    {selectedCourse.license.attributionFormat && (
+                      <div className="p-3 bg-slate-800/50 rounded-lg">
+                        <p className="text-xs text-slate-400 mb-1">Required Attribution:</p>
+                        <p className="text-sm text-slate-300 italic">
+                          &quot;{selectedCourse.license.attributionFormat}&quot;
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedCourse.license.conditions && (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCourse.license.conditions.map((condition) => (
+                          <Badge key={condition} variant="warning" className="text-xs">
+                            {condition}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {selectedCourse.license.url && (
+                      <a
+                        href={selectedCourse.license.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm text-orange-400 hover:text-orange-300"
+                      >
+                        View full license <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
                   </div>
-
-                  {selectedCourse.license.url && (
-                    <a
-                      href={selectedCourse.license.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm text-orange-400 hover:text-orange-300"
-                    >
-                      View full license <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Import Panel */}

@@ -32,7 +32,7 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true' || !BACKEND_URL;
 
 // In-memory state for demo mode (simulates backend state)
 let demoLogs: LogEntry[] = [...mockLogs];
-let demoMetrics: MetricsSnapshot[] = [...mockMetrics];
+const demoMetrics: MetricsSnapshot[] = [...mockMetrics];
 let lastLogTime = Date.now();
 
 // Add periodic log generation for demo

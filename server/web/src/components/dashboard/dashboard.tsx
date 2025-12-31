@@ -1,22 +1,27 @@
 /**
- * UnaMentis Operations Console
+ * UnaMentis Unified Console
  *
- * This console provides operations monitoring features:
+ * This console provides:
+ *
+ * OPERATIONS SECTION:
  * - System health monitoring (CPU, memory, thermal, battery)
  * - Service status and management (Ollama, VibeVoice, Piper, etc.)
  * - Power/idle management profiles and thresholds
  * - Logs, metrics, and performance data
  * - Client connection monitoring
  *
- * Note: Curriculum management (Source Browser, import, enrichment) is in
- * the Management Console at port 8766.
+ * CONTENT SECTION:
+ * - Curriculum management (browse, edit, delete)
+ * - Source browser for external curriculum import (MIT OCW, Stanford, etc.)
+ * - Plugin management for importers
+ * - Import job monitoring and management
  */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Zap, CheckCircle, Users, FileText, AlertTriangle, AlertCircle } from 'lucide-react';
 import { Header } from './header';
-import { NavTabs, TabId } from './nav-tabs';
+import { SectionNav, NavTabs, SectionId, TabId } from './nav-tabs';
 import { StatCard } from '@/components/ui/stat-card';
 import { LogsPanel, LogsPanelCompact } from './logs-panel';
 import { ServersPanelCompact, ServersPanel } from './servers-panel';
@@ -24,13 +29,21 @@ import { ClientsPanelCompact, ClientsPanel } from './clients-panel';
 import { MetricsPanel, LatencyOverview } from './metrics-panel';
 import { ModelsPanel } from './models-panel';
 import { HealthPanel } from './health-panel';
+// Content section components (to be created)
+import { CurriculaPanel } from './curricula-panel';
+import { SourceBrowserPanel } from './source-browser-panel';
+import { PluginsPanel } from './plugins-panel';
+import { ImportJobsPanel } from './import-jobs-panel';
 import type { DashboardStats } from '@/types';
 import { getStats } from '@/lib/api-client';
 import { formatDuration } from '@/lib/utils';
+import { useWebSocketStatus } from '@/lib/websocket-provider';
 
 export function Dashboard() {
+  const [activeSection, setActiveSection] = useState<SectionId>('operations');
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const { connected } = useWebSocketStatus();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -45,6 +58,17 @@ export function Dashboard() {
     fetchStats();
     const interval = setInterval(fetchStats, 10000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Handle section change and set appropriate default tab
+  const handleSectionChange = useCallback((section: SectionId) => {
+    setActiveSection(section);
+    // Set default tab for each section
+    if (section === 'operations') {
+      setActiveTab('dashboard');
+    } else {
+      setActiveTab('curricula');
+    }
   }, []);
 
   return (
@@ -62,9 +86,10 @@ export function Dashboard() {
             logsCount: stats?.total_logs ?? 0,
             clientsCount: stats?.online_clients ?? 0,
           }}
-          connected={true}
+          connected={connected}
         />
-        <NavTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <SectionNav activeSection={activeSection} onSectionChange={handleSectionChange} />
+        <NavTabs activeSection={activeSection} activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
 
       {/* Scrollable Content Area */}
@@ -175,6 +200,38 @@ export function Dashboard() {
           {activeTab === 'health' && (
             <div className="animate-in fade-in duration-300">
               <HealthPanel />
+            </div>
+          )}
+
+          {/* ============================================= */}
+          {/* CONTENT SECTION TABS                         */}
+          {/* ============================================= */}
+
+          {/* Curricula Tab */}
+          {activeTab === 'curricula' && (
+            <div className="animate-in fade-in duration-300">
+              <CurriculaPanel />
+            </div>
+          )}
+
+          {/* Sources Tab */}
+          {activeTab === 'sources' && (
+            <div className="animate-in fade-in duration-300">
+              <SourceBrowserPanel />
+            </div>
+          )}
+
+          {/* Plugins Tab */}
+          {activeTab === 'plugins' && (
+            <div className="animate-in fade-in duration-300">
+              <PluginsPanel />
+            </div>
+          )}
+
+          {/* Import Jobs Tab */}
+          {activeTab === 'imports' && (
+            <div className="animate-in fade-in duration-300">
+              <ImportJobsPanel />
             </div>
           )}
         </div>

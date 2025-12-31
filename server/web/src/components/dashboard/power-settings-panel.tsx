@@ -617,7 +617,7 @@ export function PowerSettingsPanel() {
               <ul className="space-y-1 list-disc list-inside">
                 <li>Create custom profiles for different work scenarios (coding, demos, background)</li>
                 <li>Shorter thresholds save more power but increase wake-up latency</li>
-                <li>Use "Keep Awake" in the Health panel for temporary override</li>
+                <li>Use &quot;Keep Awake&quot; in the Health panel for temporary override</li>
                 <li>Duplicate a built-in profile to customize it</li>
               </ul>
             </div>
@@ -639,11 +639,8 @@ function DuplicateForm({
   onCancel: () => void;
 }) {
   const [newName, setNewName] = useState(`${sourceName} (Copy)`);
-  const [newId, setNewId] = useState('');
-
-  useEffect(() => {
-    setNewId(newName.toLowerCase().replace(/[^a-z0-9]+/g, '_'));
-  }, [newName]);
+  // Derive newId from newName directly instead of using useEffect + setState
+  const newId = newName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
 
   return (
     <div className="mt-3 p-3 bg-slate-700/30 rounded-lg">

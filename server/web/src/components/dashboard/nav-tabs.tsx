@@ -9,17 +9,42 @@ import {
   Server,
   FlaskConical,
   Activity,
+  BookOpen,
+  Library,
+  Puzzle,
+  Download,
+  MonitorCog,
 } from 'lucide-react';
 
-// Operations console tabs (curriculum management is in the Management Console at port 8766)
-export type TabId = 'dashboard' | 'metrics' | 'logs' | 'clients' | 'servers' | 'models' | 'health';
+// Section types
+export type SectionId = 'operations' | 'content';
+
+// Operations tabs
+export type OpsTabId = 'dashboard' | 'metrics' | 'logs' | 'clients' | 'servers' | 'models' | 'health';
+
+// Content tabs
+export type ContentTabId = 'curricula' | 'sources' | 'plugins' | 'imports';
+
+// Combined tab type
+export type TabId = OpsTabId | ContentTabId;
+
+interface SectionNavProps {
+  activeSection: SectionId;
+  onSectionChange: (section: SectionId) => void;
+}
 
 interface NavTabsProps {
+  activeSection: SectionId;
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
 }
 
-const tabs: { id: TabId; label: string; shortLabel: string; icon: typeof LayoutDashboard }[] = [
+const sections: { id: SectionId; label: string; icon: typeof MonitorCog }[] = [
+  { id: 'operations', label: 'Operations', icon: MonitorCog },
+  { id: 'content', label: 'Content', icon: Library },
+];
+
+const opsTabs: { id: OpsTabId; label: string; shortLabel: string; icon: typeof LayoutDashboard }[] = [
   { id: 'dashboard', label: 'Dashboard', shortLabel: 'Home', icon: LayoutDashboard },
   { id: 'health', label: 'System Health', shortLabel: 'Health', icon: Activity },
   { id: 'metrics', label: 'Metrics', shortLabel: 'Metrics', icon: BarChart3 },
@@ -29,7 +54,47 @@ const tabs: { id: TabId; label: string; shortLabel: string; icon: typeof LayoutD
   { id: 'models', label: 'Models', shortLabel: 'Models', icon: FlaskConical },
 ];
 
-export function NavTabs({ activeTab, onTabChange }: NavTabsProps) {
+const contentTabs: { id: ContentTabId; label: string; shortLabel: string; icon: typeof BookOpen }[] = [
+  { id: 'curricula', label: 'Curricula', shortLabel: 'Curricula', icon: BookOpen },
+  { id: 'sources', label: 'Sources', shortLabel: 'Sources', icon: Library },
+  { id: 'plugins', label: 'Plugins', shortLabel: 'Plugins', icon: Puzzle },
+  { id: 'imports', label: 'Import Jobs', shortLabel: 'Imports', icon: Download },
+];
+
+export function SectionNav({ activeSection, onSectionChange }: SectionNavProps) {
+  return (
+    <nav className="bg-slate-900/80 border-b border-slate-700/30">
+      <div className="max-w-[1920px] mx-auto px-2 sm:px-4">
+        <div className="flex items-center gap-2 py-1.5">
+          {sections.map((section) => {
+            const Icon = section.icon;
+            const isActive = activeSection === section.id;
+
+            return (
+              <button
+                key={section.id}
+                onClick={() => onSectionChange(section.id)}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-150',
+                  isActive
+                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                )}
+              >
+                <Icon className={cn('w-4 h-4', isActive ? 'text-orange-400' : '')} />
+                <span>{section.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+export function NavTabs({ activeSection, activeTab, onTabChange }: NavTabsProps) {
+  const tabs = activeSection === 'operations' ? opsTabs : contentTabs;
+
   return (
     <nav className="bg-slate-800/50 border-b border-slate-700/50">
       <div className="max-w-[1920px] mx-auto px-2 sm:px-4">

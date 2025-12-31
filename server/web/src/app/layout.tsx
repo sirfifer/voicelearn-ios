@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "UnaMentis Operations Console",
-  description: "Operations console for monitoring system health, resources, and service status",
+  title: "UnaMentis Console",
+  description: "Unified console for operations monitoring and content management",
   icons: {
     icon: "/favicon.ico",
   },
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="font-sans antialiased">
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

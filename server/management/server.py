@@ -2905,17 +2905,25 @@ async def handle_websocket(request: web.Request) -> web.WebSocketResponse:
 # =============================================================================
 
 async def handle_dashboard(request: web.Request) -> web.Response:
-    """Serve the main dashboard HTML."""
-    static_dir = Path(__file__).parent / "static"
-    index_file = static_dir / "index.html"
+    """Redirect to the unified Next.js console on port 3000.
 
-    if index_file.exists():
-        return web.FileResponse(index_file)
-    else:
+    The legacy vanilla JS dashboard has been replaced by the unified
+    Next.js console. This redirect ensures users are directed to the
+    new interface while maintaining API compatibility on port 8766.
+    """
+    # Check if redirect is disabled via query param for backward compatibility
+    if request.query.get("legacy") == "true":
+        static_dir = Path(__file__).parent / "static"
+        index_file = static_dir / "index.html"
+        if index_file.exists():
+            return web.FileResponse(index_file)
         return web.Response(
-            text="Dashboard not found. Please ensure static/index.html exists.",
+            text="Legacy dashboard not found.",
             status=404
         )
+
+    # Redirect to the unified console
+    return web.HTTPFound("http://localhost:3000")
 
 
 async def handle_health(request: web.Request) -> web.Response:
