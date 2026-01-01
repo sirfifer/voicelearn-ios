@@ -174,3 +174,73 @@
 "shortcut.pauseResume" = "Pause/Resume";
 "shortcut.openSettings" = "Open Settings";
 "shortcut.search" = "Search";
+
+// MARK: - Feedback
+
+"feedback.title" = "Send Feedback";
+"feedback.cancel" = "Cancel";
+"feedback.submit" = "Submit Feedback";
+"feedback.submitting" = "Sending...";
+
+// Category
+"feedback.category.label" = "Category";
+"feedback.category.header" = "What is this about?";
+"feedback.category.footer" = "Select the category that best describes your feedback.";
+
+// Rating
+"feedback.rating.header" = "Rating (Optional)";
+"feedback.rating.footer" = "How would you rate this aspect of UnaMentis?";
+"feedback.rating.clear" = "Clear rating";
+"feedback.rating.accessibility %lld" = "%lld star";
+"feedback.rating.accessibility.plural %lld" = "%lld stars";
+
+// Message
+"feedback.message.header" = "Your Feedback";
+"feedback.message.footer" = "Please be as detailed as possible. This helps us address your feedback effectively.";
+"feedback.message.accessibility.label" = "Feedback message";
+"feedback.message.accessibility.hint" = "Enter your detailed feedback here";
+"feedback.message.count %lld" = "%lld characters";
+"feedback.message.quality.hint" = "Adding more detail helps us address your feedback";
+
+// Category-Specific Prompts (TestFlight Best Practice)
+"feedback.prompt.bug" = "What happened? What were you trying to do? Can you reproduce it?";
+"feedback.prompt.feature" = "What would you like to see? How would this improve your learning experience?";
+"feedback.prompt.performance" = "What felt slow or laggy? How long had you been using the app?";
+"feedback.prompt.audio" = "Describe the audio issue. Was it choppy, delayed, unclear, or cutting out?";
+"feedback.prompt.content" = "Which curriculum or topic? What could be improved or clarified?";
+"feedback.prompt.ui" = "Which screen or element? What was confusing or difficult to use?";
+"feedback.prompt.other" = "Please share your thoughts, ideas, or suggestions. Be as detailed as you like.";
+
+// Privacy (GDPR/CCPA Compliance)
+"feedback.privacy.header" = "Privacy & Data Collection";
+"feedback.privacy.notice.title" = "What We Collect";
+"feedback.privacy.notice.basic" = "Your feedback will include device model, iOS version, app version, and an anonymous device identifier.";
+"feedback.privacy.diagnostics.toggle" = "Include diagnostic data";
+"feedback.privacy.diagnostics.help" = "Memory usage, battery level, network status, and low power mode";
+"feedback.privacy.policy.link" = "Privacy Policy";
+"feedback.privacy.footer" = "Data is stored securely and used only to improve UnaMentis. You can view and delete your feedback anytime. Feedback is retained for 90 days.";
+
+// Success/Error
+"feedback.success.title" = "Feedback Sent";
+"feedback.success.message" = "Thank you for helping us improve UnaMentis!";
+"feedback.error.title" = "Error";
+"feedback.error.saved.locally" = "Feedback saved locally. Will upload when server is available.";
+"feedback.error.validation" = "Please enter a message before submitting.";
+"feedback.error.not.configured" = "Feedback service not configured. Please check Settings.";
+"feedback.error.invalid.url" = "Invalid server URL";
+"feedback.error.invalid.response" = "Invalid server response";
+"feedback.error.server %d %@" = "Server error %d: %@";
+"feedback.error.network %@" = "Network error: %@";
+
+// Accessibility Labels
+"feedback.accessibility.submit.hint" = "Sends your feedback to the UnaMentis team";
+"feedback.accessibility.category.hint" = "Select what type of feedback you are providing";
+
+// Settings Integration
+"settings.feedback.label" = "Send Feedback";
+"settings.feedback.section.header" = "Beta Testing";
+"settings.feedback.section.footer" = "Share your thoughts, report bugs, or suggest features.";
+
+// SessionView Contextual Button
+"session.feedback.button" = "Feedback";
+"session.feedback.accessibility" = "Send feedback about this session";

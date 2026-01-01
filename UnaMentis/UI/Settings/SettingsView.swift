@@ -11,6 +11,7 @@ public struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
     @State private var showingSettingsHelp = false
     @State private var showingOnboarding = false
+    @State private var showingFeedback = false
 
     public init() { }
 
@@ -455,6 +456,19 @@ public struct SettingsView: View {
                     Text("Learn how to use the app with Siri voice commands and the welcome tour.")
                 }
 
+                // Beta Testing Section
+                Section {
+                    Button {
+                        showingFeedback = true
+                    } label: {
+                        Label("settings.feedback.label", systemImage: "envelope")
+                    }
+                } header: {
+                    Text("settings.feedback.section.header")
+                } footer: {
+                    Text("settings.feedback.section.footer")
+                }
+
                 // About Section
                 Section("About") {
                     HStack {
@@ -484,6 +498,9 @@ public struct SettingsView: View {
             #endif
             .sheet(isPresented: $showingSettingsHelp) {
                 SettingsHelpSheet()
+            }
+            .sheet(isPresented: $showingFeedback) {
+                FeedbackView()
             }
             .fullScreenCover(isPresented: $showingOnboarding) {
                 OnboardingView(hasCompletedOnboarding: .constant(true))

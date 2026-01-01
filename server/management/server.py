@@ -200,6 +200,34 @@ class CurriculumSummary:
 
 
 @dataclass
+class FeedbackEntry:
+    """Represents a feedback submission from a beta tester."""
+    id: str
+    timestamp: str
+    client_id: str
+    client_name: str
+    category: str
+    rating: Optional[int]
+    message: str
+    current_screen: str
+    navigation_path: List[str]
+    device_model: str
+    ios_version: str
+    app_version: str
+    included_diagnostics: bool
+    memory_usage_mb: Optional[int] = None
+    battery_level: Optional[float] = None
+    network_type: Optional[str] = None
+    low_power_mode: Optional[bool] = None
+    session_id: Optional[str] = None
+    topic_id: Optional[str] = None
+    session_duration_seconds: Optional[int] = None
+    session_state: Optional[str] = None
+    turn_count: Optional[int] = None
+    received_at: float = field(default_factory=time.time)
+
+
+@dataclass
 class TopicSummary:
     """Summary of a topic within a curriculum."""
     id: str
@@ -237,6 +265,7 @@ class ManagementState:
     def __init__(self):
         self.logs: deque = deque(maxlen=MAX_LOG_ENTRIES)
         self.metrics_history: deque = deque(maxlen=MAX_METRICS_HISTORY)
+        self.feedback: deque = deque(maxlen=1000)  # Last 1000 feedback entries
         self.clients: Dict[str, RemoteClient] = {}
         self.servers: Dict[str, ServerStatus] = {}
         self.models: Dict[str, ModelInfo] = {}
@@ -832,6 +861,104 @@ async def handle_get_metrics(request: web.Request) -> web.Response:
 
     except Exception as e:
         logger.error(f"Error getting metrics: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
+
+# =============================================================================
+# API Handlers - Feedback
+# =============================================================================
+
+async def handle_receive_feedback(request: web.Request) -> web.Response:
+    """Receive feedback from iOS clients."""
+    try:
+        data = await request.json()
+        client_id = request.headers.get("X-Client-ID", "unknown")
+        client_name = request.headers.get("X-Client-Name", "Unknown Device")
+
+        entry = FeedbackEntry(
+            id=data.get("id", str(uuid.uuid4())),
+            timestamp=data.get("timestamp", datetime.utcnow().isoformat() + "Z"),
+            client_id=client_id,
+            client_name=client_name,
+            category=data.get("category", "other"),
+            rating=data.get("rating"),
+            message=data.get("message", ""),
+            current_screen=data.get("currentScreen", ""),
+            navigation_path=data.get("navigationPath", []),
+            device_model=data.get("deviceModel", ""),
+            ios_version=data.get("iOSVersion", ""),
+            app_version=data.get("appVersion", ""),
+            included_diagnostics=data.get("includedDiagnostics", False),
+            memory_usage_mb=data.get("memoryUsageMB"),
+            battery_level=data.get("batteryLevel"),
+            network_type=data.get("networkType"),
+            low_power_mode=data.get("lowPowerMode"),
+            session_id=data.get("sessionId"),
+            topic_id=data.get("topicId"),
+            session_duration_seconds=data.get("sessionDurationSeconds"),
+            session_state=data.get("sessionState"),
+            turn_count=data.get("turnCount")
+        )
+
+        state.feedback.append(entry)
+        logger.info(f"Received feedback from {client_name}: {entry.category} - {entry.message[:50]}...")
+
+        # Broadcast to connected WebSocket clients
+        await broadcast_message("feedback", asdict(entry))
+
+        return web.json_response({"status": "ok", "id": entry.id})
+
+    except Exception as e:
+        logger.error(f"Error receiving feedback: {e}")
+        return web.json_response({"error": str(e)}, status=400)
+
+
+async def handle_get_feedback(request: web.Request) -> web.Response:
+    """Get all feedback entries."""
+    try:
+        limit = int(request.query.get("limit", "100"))
+        category_filter = request.query.get("category", "")
+
+        feedback_list = list(state.feedback)
+
+        # Apply category filter if specified
+        if category_filter:
+            feedback_list = [f for f in feedback_list if f.category == category_filter]
+
+        # Sort by received_at descending
+        feedback_list.sort(key=lambda x: x.received_at, reverse=True)
+        feedback_list = feedback_list[:limit]
+
+        # Get unique categories for filter dropdown
+        categories = list(set(f.category for f in state.feedback))
+
+        return web.json_response({
+            "feedback": [asdict(f) for f in feedback_list],
+            "total": len(feedback_list),
+            "categories": sorted(categories)
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting feedback: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
+
+async def handle_delete_feedback(request: web.Request) -> web.Response:
+    """Delete a specific feedback entry."""
+    try:
+        feedback_id = request.match_info.get("id")
+
+        # Find and remove from deque
+        state.feedback = deque(
+            (f for f in state.feedback if f.id != feedback_id),
+            maxlen=1000
+        )
+
+        logger.info(f"Deleted feedback entry: {feedback_id}")
+        return web.json_response({"status": "ok"})
+
+    except Exception as e:
+        logger.error(f"Error deleting feedback: {e}")
         return web.json_response({"error": str(e)}, status=500)
 
 
@@ -3516,6 +3643,11 @@ def create_app() -> web.Application:
     # Metrics
     app.router.add_post("/api/metrics", handle_receive_metrics)
     app.router.add_get("/api/metrics", handle_get_metrics)
+
+    # Feedback
+    app.router.add_post("/api/feedback", handle_receive_feedback)
+    app.router.add_get("/api/feedback", handle_get_feedback)
+    app.router.add_delete("/api/feedback/{id}", handle_delete_feedback)
 
     # Clients
     app.router.add_get("/api/clients", handle_get_clients)

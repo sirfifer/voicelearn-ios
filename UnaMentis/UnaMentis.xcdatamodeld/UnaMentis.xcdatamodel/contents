@@ -81,4 +81,28 @@
         <attribute name="timestamp" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="session" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="transcript" inverseEntity="Session"/>
     </entity>
+    <entity name="Feedback" representedClassName="Feedback" syncable="YES">
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="timestamp" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="category" attributeType="String" defaultValueString="other"/>
+        <attribute name="rating" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="message" attributeType="String"/>
+        <attribute name="currentScreen" optional="YES" attributeType="String"/>
+        <attribute name="navigationPath" optional="YES" attributeType="String"/>
+        <attribute name="deviceModel" optional="YES" attributeType="String"/>
+        <attribute name="iOSVersion" optional="YES" attributeType="String"/>
+        <attribute name="appVersion" optional="YES" attributeType="String"/>
+        <attribute name="includedDiagnostics" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="memoryUsageMB" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="batteryLevel" optional="YES" attributeType="Float" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="networkType" optional="YES" attributeType="String"/>
+        <attribute name="lowPowerMode" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="sessionDurationSeconds" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="sessionState" optional="YES" attributeType="String"/>
+        <attribute name="turnCount" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="submitted" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="submittedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="session" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Session"/>
+        <relationship name="topic" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Topic"/>
+    </entity>
 </model>
