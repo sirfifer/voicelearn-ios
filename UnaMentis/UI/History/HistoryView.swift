@@ -18,11 +18,11 @@ public struct HistoryView: View {
     private static let logger = Logger(label: "com.unamentis.ui.history.view")
 
     public init() {
-        Self.logger.info("HistoryView init() called")
+        // NOTE: Removed debug logging from init to prevent side effects
     }
 
     public var body: some View {
-        let _ = Self.logger.debug("HistoryView body START")
+        // NOTE: Removed debug logging from view body to prevent side effects
         NavigationStack {
             Group {
                 if viewModel.sessions.isEmpty {

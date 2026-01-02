@@ -48,7 +48,7 @@ public struct SessionView: View {
     }
 
     public var body: some View {
-        let _ = Self.logger.debug("SessionView body START")
+        // NOTE: Removed debug logging from view body to prevent side effects
         NavigationStack {
             ZStack {
                 // Background gradient
@@ -226,16 +226,16 @@ public struct SessionView: View {
                 Self.logger.info("SessionView .task COMPLETED")
             }
             // Update session activity state for tab bar visibility
+            // Using setter methods with built-in change guards to prevent re-render loops
             .onChange(of: viewModel.isSessionActive) { _, newValue in
-                sessionActivityState.isSessionActive = newValue
+                sessionActivityState.setSessionActive(newValue)
             }
             .onChange(of: viewModel.isPaused) { _, newValue in
-                sessionActivityState.isPaused = newValue
+                sessionActivityState.setPaused(newValue)
             }
             .onDisappear {
                 // Reset session activity state when view disappears
-                sessionActivityState.isSessionActive = false
-                sessionActivityState.isPaused = false
+                sessionActivityState.reset()
             }
         }
     }

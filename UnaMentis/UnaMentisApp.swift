@@ -229,17 +229,52 @@ enum AppTab: Int {
 
 /// Observable state for tracking whether a tutoring session is active
 /// Used to show/hide the tab bar during active sessions
+///
+/// IMPORTANT: This class uses explicit change guards to prevent unnecessary
+/// SwiftUI re-renders. Always use the update methods rather than setting
+/// properties directly.
 @MainActor
 final class SessionActivityState: ObservableObject {
     /// Whether a tutoring session is currently active (not paused)
-    @Published var isSessionActive: Bool = false
+    @Published private(set) var isSessionActive: Bool = false
 
     /// Whether the session is paused (tab bar should be visible when paused)
-    @Published var isPaused: Bool = false
+    @Published private(set) var isPaused: Bool = false
 
-    /// Whether the tab bar should be hidden
-    var shouldHideTabBar: Bool {
-        isSessionActive && !isPaused
+    /// Whether the tab bar should be hidden (derived from isSessionActive and isPaused)
+    /// Using @Published instead of computed property to avoid re-render loops
+    @Published private(set) var shouldHideTabBar: Bool = false
+
+    /// Update session active state with change guard to prevent unnecessary publishes
+    func setSessionActive(_ newValue: Bool) {
+        guard isSessionActive != newValue else { return }
+        isSessionActive = newValue
+        updateShouldHideTabBar()
+    }
+
+    /// Update paused state with change guard to prevent unnecessary publishes
+    func setPaused(_ newValue: Bool) {
+        guard isPaused != newValue else { return }
+        isPaused = newValue
+        updateShouldHideTabBar()
+    }
+
+    /// Reset all state (used when leaving session view)
+    func reset() {
+        let wasHiding = shouldHideTabBar
+        isSessionActive = false
+        isPaused = false
+        // Only publish shouldHideTabBar change if it actually changed
+        if wasHiding {
+            shouldHideTabBar = false
+        }
+    }
+
+    /// Internal method to update derived shouldHideTabBar state
+    private func updateShouldHideTabBar() {
+        let newValue = isSessionActive && !isPaused
+        guard shouldHideTabBar != newValue else { return }
+        shouldHideTabBar = newValue
     }
 }
 
@@ -334,7 +369,7 @@ struct ContentView: View {
     @ViewBuilder
     private var mainContent: some View {
         TabView(selection: $selectedTab) {
-            let _ = Self.logger.info("TabView body evaluated, selectedTab=\(selectedTab)")
+            // NOTE: Removed debug logging from view body to prevent potential side effects
             SessionTabContent(
                 deepLinkTopicId: $deepLinkTopicId,
                 autoStartChat: $autoStartChat,
@@ -372,9 +407,9 @@ struct ContentView: View {
                 }
                 .tag(AppTab.settings.rawValue)
         }
-        #if os(iOS)
-        .animation(.easeInOut(duration: 0.25), value: sessionActivityState.shouldHideTabBar)
-        #endif
+        // NOTE: Removed .animation() modifier here - it was causing continuous view re-renders
+        // The tab bar visibility change is now handled without animation to prevent lockups
+        // If animation is needed, use withAnimation() at the point where shouldHideTabBar is set
         .onChange(of: selectedTab) { oldTab, newTab in
             let oldName = AppTab(rawValue: oldTab).map { "\($0)" } ?? "unknown"
             let newName = AppTab(rawValue: newTab).map { "\($0)" } ?? "unknown"

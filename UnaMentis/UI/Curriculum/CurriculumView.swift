@@ -22,11 +22,11 @@ struct CurriculumView: View {
     private static let logger = Logger(label: "com.unamentis.curriculum.view")
 
     init() {
-        Self.logger.info("CurriculumView init() called")
+        // NOTE: Removed debug logging from init to prevent side effects
     }
 
     var body: some View {
-        let _ = Self.logger.debug("CurriculumView body START")
+        // NOTE: Removed debug logging from view body to prevent side effects
         adaptiveNavigation
     }
 
