@@ -286,6 +286,7 @@ struct CurriculumView: View {
 
 struct CurriculumRow: View {
     @ObservedObject var curriculum: Curriculum
+    @State private var showingAddedConfirmation = false
 
     private var topicCount: Int {
         curriculum.topics?.count ?? 0
@@ -332,6 +333,34 @@ struct CurriculumRow: View {
         .accessibilityLabel("\(curriculum.name ?? "Untitled Curriculum")")
         .accessibilityValue("\(topicCount) topics")
         .accessibilityHint("Double-tap to view curriculum details")
+        .contextMenu {
+            Button {
+                addToTodoList()
+            } label: {
+                Label("Add to To-Do", systemImage: "checklist")
+            }
+        }
+        .sensoryFeedback(.success, trigger: showingAddedConfirmation)
+    }
+
+    private func addToTodoList() {
+        guard let curriculumId = curriculum.id else { return }
+
+        Task {
+            guard let manager = TodoManager.shared else { return }
+            do {
+                _ = try await manager.createCurriculumItem(
+                    title: curriculum.name ?? "Untitled Curriculum",
+                    curriculumId: curriculumId,
+                    topicId: nil,
+                    granularity: "curriculum",
+                    source: .manual
+                )
+                showingAddedConfirmation = true
+            } catch {
+                // Error handling would go here
+            }
+        }
     }
 }
 
@@ -341,6 +370,7 @@ struct CurriculumDetailView: View {
     @EnvironmentObject var appState: AppState
     @ObservedObject var curriculum: Curriculum
     @State private var selectedTopic: Topic?
+    @State private var showingAddedConfirmation = false
 
     private static let logger = Logger(label: "com.unamentis.curriculum.detail")
 
@@ -385,6 +415,17 @@ struct CurriculumDetailView: View {
         #if os(iOS)
         .navigationBarTitleDisplayMode(.large)
         #endif
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    addCurriculumToTodo()
+                } label: {
+                    Image(systemName: "checklist.checked")
+                }
+                .accessibilityLabel("Add curriculum to to-do list")
+            }
+        }
+        .sensoryFeedback(.success, trigger: showingAddedConfirmation)
         .sheet(item: $selectedTopic) { topic in
             NavigationStack {
                 TopicDetailView(topic: topic)
@@ -399,10 +440,31 @@ struct CurriculumDetailView: View {
             }
         }
     }
+
+    private func addCurriculumToTodo() {
+        guard let curriculumId = curriculum.id else { return }
+
+        Task {
+            guard let manager = TodoManager.shared else { return }
+            do {
+                _ = try await manager.createCurriculumItem(
+                    title: curriculum.name ?? "Untitled Curriculum",
+                    curriculumId: curriculumId,
+                    topicId: nil,
+                    granularity: "curriculum",
+                    source: .manual
+                )
+                showingAddedConfirmation = true
+            } catch {
+                // Error handling would go here
+            }
+        }
+    }
 }
 
 struct TopicRow: View {
     @ObservedObject var topic: Topic
+    @State private var showingAddedConfirmation = false
 
     var body: some View {
         HStack {
@@ -439,11 +501,39 @@ struct TopicRow: View {
         .accessibilityLabel("\(topic.title ?? "Untitled Topic")")
         .accessibilityValue("Status: \(topic.status.accessibilityDescription), \(Int(topic.mastery * 100)) percent mastery")
         .accessibilityHint("Double-tap to view topic details and start lesson")
+        .contextMenu {
+            Button {
+                addToTodoList()
+            } label: {
+                Label("Add to To-Do", systemImage: "checklist")
+            }
+        }
+        .sensoryFeedback(.success, trigger: showingAddedConfirmation)
     }
 
     private func formatTime(_ seconds: Double) -> String {
         let minutes = Int(seconds) / 60
         return "\(minutes)m spent"
+    }
+
+    private func addToTodoList() {
+        guard let topicId = topic.id else { return }
+
+        Task {
+            guard let manager = TodoManager.shared else { return }
+            do {
+                _ = try await manager.createCurriculumItem(
+                    title: topic.title ?? "Untitled Topic",
+                    curriculumId: topic.curriculum?.id ?? UUID(),
+                    topicId: topicId,
+                    granularity: "topic",
+                    source: .manual
+                )
+                showingAddedConfirmation = true
+            } catch {
+                // Error handling would go here
+            }
+        }
     }
 }
 
@@ -486,30 +576,53 @@ struct TopicDetailView: View {
     @EnvironmentObject var appState: AppState
     @ObservedObject var topic: Topic
     @State private var showingSession = false
+    @State private var showingAddedConfirmation = false
 
     var body: some View {
         VStack(spacing: 0) {
-            // Start Session Button - Always visible at top
-            // Uses waveform icon (not microphone) because the AI speaks first in curriculum sessions
-            Button {
-                showingSession = true
-            } label: {
-                HStack {
-                    Image(systemName: "waveform")
-                    Text("Start Lesson")
+            // Action Buttons - Start Session and Add to To-Do
+            HStack(spacing: 16) {
+                // Start Session Button
+                // Uses waveform icon (not microphone) because the AI speaks first in curriculum sessions
+                Button {
+                    showingSession = true
+                } label: {
+                    HStack {
+                        Image(systemName: "waveform")
+                        Text("Start Lesson")
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
                 }
-                .font(.subheadline.weight(.semibold))
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
+                .accessibilityLabel("Start Lesson")
+                .accessibilityHint("Begin a voice-guided lesson on \(topic.title ?? "this topic")")
+
+                // Add to To-Do Button
+                Button {
+                    addToTodoList()
+                } label: {
+                    HStack {
+                        Image(systemName: "checklist")
+                        Text("Add to To-Do")
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                }
+                .accessibilityLabel("Add to to-do list")
+                .accessibilityHint("Add this topic to your to-do list for later study")
             }
-            .accessibilityLabel("Start Lesson")
-            .accessibilityHint("Begin a voice-guided lesson on \(topic.title ?? "this topic")")
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
             .background(Color(.systemBackground))
+            .sensoryFeedback(.success, trigger: showingAddedConfirmation)
 
             Divider()
 
@@ -594,6 +707,26 @@ struct TopicDetailView: View {
                             }
                         }
                     }
+            }
+        }
+    }
+
+    private func addToTodoList() {
+        guard let topicId = topic.id else { return }
+
+        Task {
+            guard let manager = TodoManager.shared else { return }
+            do {
+                _ = try await manager.createCurriculumItem(
+                    title: topic.title ?? "Untitled Topic",
+                    curriculumId: topic.curriculum?.id ?? UUID(),
+                    topicId: topicId,
+                    granularity: "topic",
+                    source: .manual
+                )
+                showingAddedConfirmation = true
+            } catch {
+                // Error handling would go here
             }
         }
     }

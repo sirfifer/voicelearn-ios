@@ -255,13 +255,14 @@ public struct SettingsView: View {
                         if viewModel.selfHostedEnabled {
                             Text("Piper (22kHz)").tag(TTSProvider.selfHosted)
                             Text("VibeVoice (24kHz)").tag(TTSProvider.vibeVoice)
+                            Text("Chatterbox (24kHz)").tag(TTSProvider.chatterbox)
                         }
                         Text("ElevenLabs").tag(TTSProvider.elevenLabsFlash)
                         Text("Deepgram Aura").tag(TTSProvider.deepgramAura2)
                     }
                     .accessibilityHint("Choose the voice synthesis provider")
 
-                    // Voice picker for self-hosted TTS providers
+                    // Voice picker for self-hosted TTS providers (not Chatterbox, which has its own settings)
                     if viewModel.ttsProvider == .selfHosted || viewModel.ttsProvider == .vibeVoice {
                         Picker("Voice", selection: $viewModel.ttsVoice) {
                             // Use discovered voices if available, otherwise show default OpenAI-compatible voices
@@ -273,8 +274,37 @@ public struct SettingsView: View {
                         .accessibilityHint("Select the AI tutor's voice")
                     }
 
+                    // Chatterbox-specific settings
+                    if viewModel.ttsProvider == .chatterbox {
+                        NavigationLink {
+                            ChatterboxSettingsView()
+                        } label: {
+                            HStack {
+                                Label("Chatterbox Settings", systemImage: "slider.horizontal.3")
+                                Spacer()
+                                Text(viewModel.chatterboxPresetName)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+
+                        // Quick emotion slider for convenience
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text("Emotion Level")
+                                Spacer()
+                                Text(String(format: "%.1f", viewModel.chatterboxExaggeration))
+                                    .font(.caption.monospacedDigit())
+                                    .foregroundStyle(.secondary)
+                            }
+                            Slider(value: $viewModel.chatterboxExaggeration, in: 0.0...1.5, step: 0.1)
+                                .accessibilityLabel("Emotion level")
+                                .accessibilityHint("Adjust voice expressiveness from monotone to dramatic")
+                        }
+                    }
+
                     // Show TTS provider info
-                    if viewModel.ttsProvider == .selfHosted || viewModel.ttsProvider == .vibeVoice {
+                    if viewModel.ttsProvider == .selfHosted || viewModel.ttsProvider == .vibeVoice || viewModel.ttsProvider == .chatterbox {
                         HStack {
                             Text("Port")
                             Spacer()
@@ -308,6 +338,7 @@ public struct SettingsView: View {
                                 .foregroundStyle(.green)
                             Text(viewModel.ttsProvider == .selfHosted ? "Uses Piper server - Free" :
                                  viewModel.ttsProvider == .vibeVoice ? "Uses VibeVoice server - Free" :
+                                 viewModel.ttsProvider == .chatterbox ? "Uses Chatterbox server - Free" :
                                  "Works offline - Free")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
@@ -657,6 +688,15 @@ class SettingsViewModel: ObservableObject {
     }
     @AppStorage("speakingRate") var speakingRate: Double = 1.0
     @AppStorage("ttsVoice") var ttsVoice: String = "nova"
+
+    // Chatterbox TTS settings
+    @AppStorage("chatterbox_exaggeration") var chatterboxExaggeration: Double = 0.5
+    @AppStorage("chatterbox_preset") var chatterboxPresetRaw: String = "default"
+
+    /// Chatterbox preset display name
+    var chatterboxPresetName: String {
+        ChatterboxPreset(rawValue: chatterboxPresetRaw)?.displayName ?? "Default"
+    }
 
     // Debug
     @AppStorage("debugMode") var debugMode = false
@@ -1209,65 +1249,144 @@ class DiagnosticsViewModel: ObservableObject {
         // STT Check - raw values are display names like "Apple Speech (On-Device)"
         sttStatus = .checking
         await Task.yield()
-        let isOnDeviceSTT = sttProviderRaw.contains("On-Device")
+        let isOnDeviceSTT = sttProviderRaw.contains("On-Device") || sttProviderRaw.contains("GLM")
         if isOnDeviceSTT {
             sttStatus = .ok
-            sttDetail = "On-device (no API needed)"
+            let providerName = sttProviderRaw.isEmpty ? "On-device" : sttProviderRaw
+            sttDetail = "\(providerName) (no API needed)"
+        } else if sttProviderRaw.contains("Deepgram") {
+            let hasKey = await apiKeys.hasKey(.deepgram)
+            if hasKey {
+                sttStatus = .ok
+                sttDetail = "Deepgram configured"
+            } else {
+                sttStatus = .error
+                sttDetail = "Deepgram: No API key"
+            }
+        } else if sttProviderRaw.contains("AssemblyAI") {
+            let hasKey = await apiKeys.hasKey(.assemblyAI)
+            if hasKey {
+                sttStatus = .ok
+                sttDetail = "AssemblyAI configured"
+            } else {
+                sttStatus = .error
+                sttDetail = "AssemblyAI: No API key"
+            }
+        } else if sttProviderRaw.contains("Groq") {
+            let hasKey = await apiKeys.hasKey(.groq)
+            if hasKey {
+                sttStatus = .ok
+                sttDetail = "Groq Whisper configured"
+            } else {
+                sttStatus = .error
+                sttDetail = "Groq: No API key"
+            }
         } else {
+            // Fall back to checking any available STT key
             let hasDeepgram = await apiKeys.hasKey(.deepgram)
             let hasAssemblyAI = await apiKeys.hasKey(.assemblyAI)
             if hasDeepgram || hasAssemblyAI {
                 sttStatus = .ok
                 sttDetail = "API key configured"
             } else {
-                sttStatus = .error
-                sttDetail = "No API key"
+                sttStatus = .warning
+                sttDetail = "No provider selected"
             }
         }
 
         // TTS Check - raw values are display names like "Apple TTS (On-Device)", "Self-Hosted (Piper)"
         ttsStatus = .checking
         await Task.yield()
-        let isOnDeviceTTS = ttsProviderRaw.contains("On-Device")
-        let isSelfHostedTTS = ttsProviderRaw.contains("Self-Hosted")
+        let isOnDeviceTTS = ttsProviderRaw.contains("On-Device") || ttsProviderRaw.contains("Apple")
+        let isSelfHostedTTS = ttsProviderRaw.contains("Self-Hosted") || ttsProviderRaw.contains("Piper")
         if isOnDeviceTTS {
             ttsStatus = .ok
-            ttsDetail = "On-device (no API needed)"
-        } else if isSelfHostedTTS && selfHostedEnabled {
-            ttsStatus = .ok
-            ttsDetail = "Using self-hosted server"
+            let providerName = ttsProviderRaw.isEmpty ? "Apple TTS" : ttsProviderRaw
+            ttsDetail = "\(providerName) (no API needed)"
+        } else if isSelfHostedTTS {
+            if selfHostedEnabled {
+                ttsStatus = .ok
+                ttsDetail = "Piper TTS on self-hosted server"
+            } else {
+                ttsStatus = .warning
+                ttsDetail = "Self-hosted disabled in settings"
+            }
+        } else if ttsProviderRaw.contains("ElevenLabs") {
+            let hasKey = await apiKeys.hasKey(.elevenLabs)
+            if hasKey {
+                ttsStatus = .ok
+                ttsDetail = "ElevenLabs configured"
+            } else {
+                ttsStatus = .error
+                ttsDetail = "ElevenLabs: No API key"
+            }
+        } else if ttsProviderRaw.contains("Deepgram") {
+            let hasKey = await apiKeys.hasKey(.deepgram)
+            if hasKey {
+                ttsStatus = .ok
+                ttsDetail = "Deepgram TTS configured"
+            } else {
+                ttsStatus = .error
+                ttsDetail = "Deepgram: No API key"
+            }
         } else {
+            // Fall back to checking any available TTS key
             let hasElevenLabs = await apiKeys.hasKey(.elevenLabs)
             let hasDeepgram = await apiKeys.hasKey(.deepgram)
             if hasElevenLabs || hasDeepgram {
                 ttsStatus = .ok
                 ttsDetail = "API key configured"
             } else {
-                ttsStatus = .error
-                ttsDetail = "No API key"
+                ttsStatus = .warning
+                ttsDetail = "No provider selected"
             }
         }
 
         // LLM Check - raw values are display names like "Local MLX", "Self-Hosted"
         llmStatus = .checking
         await Task.yield()
-        let isOnDeviceLLM = llmProviderRaw.contains("Local")
-        let isSelfHostedLLM = llmProviderRaw.contains("Self-Hosted")
+        let isOnDeviceLLM = llmProviderRaw.contains("Local") || llmProviderRaw.contains("MLX")
+        let isSelfHostedLLM = llmProviderRaw.contains("Self-Hosted") || llmProviderRaw.contains("Ollama")
         if isOnDeviceLLM {
             llmStatus = .ok
-            llmDetail = "On-device (no API needed)"
-        } else if isSelfHostedLLM && selfHostedEnabled {
-            llmStatus = .ok
-            llmDetail = "Using self-hosted server"
+            let providerName = llmProviderRaw.isEmpty ? "Local MLX" : llmProviderRaw
+            llmDetail = "\(providerName) (no API needed)"
+        } else if isSelfHostedLLM {
+            if selfHostedEnabled {
+                llmStatus = .ok
+                llmDetail = "Ollama on self-hosted server"
+            } else {
+                llmStatus = .warning
+                llmDetail = "Self-hosted disabled in settings"
+            }
+        } else if llmProviderRaw.contains("Anthropic") || llmProviderRaw.contains("Claude") {
+            let hasKey = await apiKeys.hasKey(.anthropic)
+            if hasKey {
+                llmStatus = .ok
+                llmDetail = "Anthropic Claude configured"
+            } else {
+                llmStatus = .error
+                llmDetail = "Anthropic: No API key"
+            }
+        } else if llmProviderRaw.contains("OpenAI") || llmProviderRaw.contains("GPT") {
+            let hasKey = await apiKeys.hasKey(.openAI)
+            if hasKey {
+                llmStatus = .ok
+                llmDetail = "OpenAI GPT configured"
+            } else {
+                llmStatus = .error
+                llmDetail = "OpenAI: No API key"
+            }
         } else {
+            // Fall back to checking any available LLM key
             let hasAnthropic = await apiKeys.hasKey(.anthropic)
             let hasOpenAI = await apiKeys.hasKey(.openAI)
             if hasAnthropic || hasOpenAI {
                 llmStatus = .ok
                 llmDetail = "API key configured"
             } else {
-                llmStatus = .error
-                llmDetail = "No API key"
+                llmStatus = .warning
+                llmDetail = "No provider selected"
             }
         }
 

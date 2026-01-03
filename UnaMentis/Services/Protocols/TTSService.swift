@@ -245,6 +245,7 @@ public enum TTSProvider: String, Codable, Sendable, CaseIterable {
     case appleTTS = "Apple TTS (On-Device)"
     case selfHosted = "Self-Hosted (Piper)"
     case vibeVoice = "Self-Hosted (VibeVoice)"
+    case chatterbox = "Chatterbox TTS"
 
     /// Display name for UI
     public var displayName: String {
@@ -261,6 +262,7 @@ public enum TTSProvider: String, Codable, Sendable, CaseIterable {
         case .appleTTS: return "apple"
         case .selfHosted: return "piper"
         case .vibeVoice: return "vibevoice"
+        case .chatterbox: return "chatterbox"
         }
     }
 
@@ -269,7 +271,7 @@ public enum TTSProvider: String, Codable, Sendable, CaseIterable {
         switch self {
         case .appleTTS:
             return false
-        case .selfHosted, .vibeVoice:
+        case .selfHosted, .vibeVoice, .chatterbox:
             return true  // Requires local network to self-hosted server
         default:
             return true
@@ -279,7 +281,7 @@ public enum TTSProvider: String, Codable, Sendable, CaseIterable {
     /// Whether this provider requires an API key
     public var requiresAPIKey: Bool {
         switch self {
-        case .appleTTS, .selfHosted, .vibeVoice:
+        case .appleTTS, .selfHosted, .vibeVoice, .chatterbox:
             return false
         default:
             return true
@@ -291,6 +293,7 @@ public enum TTSProvider: String, Codable, Sendable, CaseIterable {
         switch self {
         case .selfHosted: return 11402  // Piper
         case .vibeVoice: return 8880    // VibeVoice
+        case .chatterbox: return 8004   // Chatterbox TTS Server
         default: return 0
         }
     }
@@ -300,7 +303,18 @@ public enum TTSProvider: String, Codable, Sendable, CaseIterable {
         switch self {
         case .selfHosted: return 22050  // Piper outputs 22050 Hz
         case .vibeVoice: return 24000   // VibeVoice outputs 24000 Hz
+        case .chatterbox: return 24000  // Chatterbox outputs 24000 Hz
         default: return 24000
+        }
+    }
+
+    /// Whether this is a self-hosted provider (runs on user's server)
+    public var isSelfHosted: Bool {
+        switch self {
+        case .selfHosted, .vibeVoice, .chatterbox:
+            return true
+        default:
+            return false
         }
     }
 }

@@ -62,6 +62,13 @@ public actor TodoManager {
         try persistenceController.save()
         logger.debug("Created to-do item: \(title) [\(type.displayName)]")
 
+        // For learning targets, fetch curriculum suggestions asynchronously
+        if type == .learningTarget {
+            Task {
+                await CurriculumSuggestionService.shared.updateTodoWithSuggestions(item)
+            }
+        }
+
         return item
     }
 

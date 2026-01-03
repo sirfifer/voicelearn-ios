@@ -98,7 +98,7 @@ public actor AudioEngine: ObservableObject {
     
     // Thermal monitoring
     private var thermalStateObserver: NSObjectProtocol?
-    
+
     // Level monitoring handled on MainActor
     @MainActor private static var levelMonitorTimer: Timer?
     

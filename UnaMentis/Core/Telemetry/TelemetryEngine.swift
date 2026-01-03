@@ -217,6 +217,31 @@ public actor TelemetryEngine {
     private var deviceMetricsHistory: [DeviceMetrics] = []
     private let maxMetricsHistory = 60 // Keep 1 minute of samples at 1/sec
 
+    // MARK: - Rate Limiting
+
+    /// Last time each event type was recorded (for rate limiting)
+    private var lastEventTimes: [String: Date] = [:]
+
+    /// Rate limits by event type (minimum seconds between events)
+    private let eventRateLimits: [String: TimeInterval] = [
+        "vadSpeechDetected": 0.5,        // Max 2/sec for VAD events
+        "vadSilenceDetected": 1.0,       // Max 1/sec for silence
+        "adaptiveQualityAdjusted": 5.0   // Max 1 per 5 sec
+    ]
+
+    /// Track whether we're currently in a speech segment (for VAD edge detection)
+    private var inSpeechSegment = false
+
+    /// Total events recorded this session (for monitoring)
+    private var totalEventsRecorded: Int = 0
+
+    /// Maximum events per minute (hard limit to prevent runaway)
+    private let maxEventsPerMinute = 300
+
+    /// Events recorded in current minute window
+    private var eventsThisMinute: Int = 0
+    private var minuteWindowStart: Date = Date()
+
     // MARK: - Initialization
 
     public init() {
@@ -247,6 +272,15 @@ public actor TelemetryEngine {
         sessionStartTime = Date()
         metrics = SessionMetrics()
         events.removeAll()
+
+        // Reset rate limiting state
+        lastEventTimes.removeAll()
+        lastLatencyTimes.removeAll()
+        inSpeechSegment = false
+        totalEventsRecorded = 0
+        eventsThisMinute = 0
+        minuteWindowStart = Date()
+
         logger.info("Session started")
         recordEvent(.sessionStarted)
     }
@@ -264,6 +298,55 @@ public actor TelemetryEngine {
 
     /// Record a telemetry event
     public func recordEvent(_ event: TelemetryEvent) {
+        let now = Date()
+
+        // Check global rate limit (reset window if needed)
+        if now.timeIntervalSince(minuteWindowStart) > 60 {
+            minuteWindowStart = now
+            eventsThisMinute = 0
+        }
+
+        // Enforce hard global limit
+        if eventsThisMinute >= maxEventsPerMinute {
+            // Log warning once when hitting limit
+            if eventsThisMinute == maxEventsPerMinute {
+                logger.warning("Telemetry rate limit hit: \(maxEventsPerMinute) events/min - throttling")
+            }
+            eventsThisMinute += 1
+            return
+        }
+
+        // Get event type key for rate limiting
+        let eventKey = getEventKey(event)
+
+        // Check event-specific rate limit
+        if let rateLimit = eventRateLimits[eventKey] {
+            if let lastTime = lastEventTimes[eventKey],
+               now.timeIntervalSince(lastTime) < rateLimit {
+                // Rate limited - skip this event
+                return
+            }
+        }
+
+        // Special handling for VAD events - only log on speech segment transitions
+        switch event {
+        case .vadSpeechDetected:
+            if inSpeechSegment {
+                // Already in speech, don't log every frame
+                return
+            }
+            inSpeechSegment = true
+        case .vadSilenceDetected:
+            inSpeechSegment = false
+        default:
+            break
+        }
+
+        // Update rate limiting tracking
+        lastEventTimes[eventKey] = now
+        eventsThisMinute += 1
+        totalEventsRecorded += 1
+
         // Add to buffer
         events.append(RecordedEvent(event: event))
         if events.count > maxEventBuffer {
@@ -292,13 +375,52 @@ public actor TelemetryEngine {
         }
     }
 
+    /// Get a string key for an event type (for rate limiting lookups)
+    private func getEventKey(_ event: TelemetryEvent) -> String {
+        switch event {
+        case .vadSpeechDetected: return "vadSpeechDetected"
+        case .vadSilenceDetected: return "vadSilenceDetected"
+        case .adaptiveQualityAdjusted: return "adaptiveQualityAdjusted"
+        case .sttPartialReceived: return "sttPartialReceived"
+        case .ttsChunkCompleted: return "ttsChunkCompleted"
+        default: return "other"
+        }
+    }
+
     /// Record an error
     public func recordError(_ error: Error) {
         logger.error("Error: \(error.localizedDescription)")
     }
 
+    /// Last time a latency of each type was recorded (for rate limiting)
+    private var lastLatencyTimes: [LatencyType: Date] = [:]
+
+    /// Rate limits for latency types (minimum seconds between records)
+    private let latencyRateLimits: [LatencyType: TimeInterval] = [
+        .audioProcessing: 1.0,  // Max 1/sec for audio processing
+        .sttEmission: 0.1       // Max 10/sec for STT emission
+    ]
+
     /// Record a latency measurement
     public func recordLatency(_ type: LatencyType, _ value: TimeInterval) {
+        let now = Date()
+
+        // Check rate limit for this latency type
+        if let rateLimit = latencyRateLimits[type] {
+            if let lastTime = lastLatencyTimes[type],
+               now.timeIntervalSince(lastTime) < rateLimit {
+                // Rate limited - skip logging but still update metrics for non-debug types
+                switch type {
+                case .audioProcessing:
+                    return // Skip entirely for audio processing
+                default:
+                    break // Store metrics but don't log
+                }
+            }
+        }
+
+        lastLatencyTimes[type] = now
+
         switch type {
         case .sttEmission:
             metrics.sttLatencies.append(value)
@@ -309,7 +431,7 @@ public actor TelemetryEngine {
         case .endToEndTurn:
             metrics.e2eLatencies.append(value)
         case .audioProcessing:
-            // Not stored in session metrics, just logged
+            // Not stored in session metrics, just sampled for logging
             break
         }
 
@@ -336,6 +458,15 @@ public actor TelemetryEngine {
         events.removeAll()
         sessionStartTime = nil
         deviceMetricsHistory.removeAll()
+
+        // Reset rate limiting state
+        lastEventTimes.removeAll()
+        lastLatencyTimes.removeAll()
+        inSpeechSegment = false
+        totalEventsRecorded = 0
+        eventsThisMinute = 0
+        minuteWindowStart = Date()
+
         logger.info("TelemetryEngine reset")
 
         // Update publisher

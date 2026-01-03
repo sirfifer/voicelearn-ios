@@ -17,24 +17,49 @@ public actor MetricsUploadService {
     private var serverURL: URL?
     private var isUploading = false
 
-    /// Device ID for client identification
-    private let clientId: String
+    /// Device ID for client identification (set from MainActor context)
+    private var clientId: String
 
-    /// Device name for display
-    private let clientName: String
+    /// Device name for display (set from MainActor context)
+    private var clientName: String
 
     // MARK: - Initialization
 
     public init() {
         self.queue = MetricsUploadQueue()
 
-        // Use device identifierForVendor as client ID
-        self.clientId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        // Use stored device ID or generate new one
+        // Real device info will be set via configureDeviceInfo() from MainActor
+        if let storedId = UserDefaults.standard.string(forKey: "MetricsClientId") {
+            self.clientId = storedId
+        } else {
+            self.clientId = UUID().uuidString
+            UserDefaults.standard.set(self.clientId, forKey: "MetricsClientId")
+        }
+        self.clientName = UserDefaults.standard.string(forKey: "MetricsClientName") ?? "UnaMentis Client"
 
-        // Use device name
-        self.clientName = UIDevice.current.name
+        // Capture value for logging to avoid autoclosure isolation issue
+        let logClientId = self.clientId
+        logger.info("MetricsUploadService initialized with clientId: \(logClientId)")
+    }
 
-        logger.info("MetricsUploadService initialized with clientId: \(clientId)")
+    /// Configure device identification from MainActor context
+    @MainActor
+    public func configureDeviceInfo() async {
+        let deviceId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        let deviceName = UIDevice.current.name
+
+        // Store for persistence
+        UserDefaults.standard.set(deviceId, forKey: "MetricsClientId")
+        UserDefaults.standard.set(deviceName, forKey: "MetricsClientName")
+
+        await updateDeviceInfo(id: deviceId, name: deviceName)
+    }
+
+    private func updateDeviceInfo(id: String, name: String) {
+        self.clientId = id
+        self.clientName = name
+        logger.info("Device info updated: \(id) - \(name)")
     }
 
     // MARK: - Configuration

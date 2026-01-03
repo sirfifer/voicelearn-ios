@@ -272,7 +272,12 @@ public final class SessionManager: ObservableObject {
     private var prefetchedAudioCache: [String: TTSAudioChunk] = [:]  // sentence -> audio chunk
     private var prefetchTasks: [String: Task<TTSAudioChunk?, Never>] = [:]  // sentence -> prefetch task
     private var currentPrefetchCount: Int = 0
-    
+
+    /// Metrics upload
+    private let metricsUploadService: MetricsUploadService
+    private var metricsUploadTimer: Task<Void, Never>?
+    private let metricsUploadInterval: TimeInterval = 300  // 5 minutes
+
     // MARK: - Initialization
     
     public init(
@@ -288,6 +293,7 @@ public final class SessionManager: ObservableObject {
         self.telemetry = telemetry
         self.curriculum = curriculum
         self.persistenceController = persistenceController
+        self.metricsUploadService = MetricsUploadService()
         logger.info("SessionManager initialized with TTS config: prefetch=\(mutableConfig.ttsPlayback.enablePrefetch), lookahead=\(mutableConfig.ttsPlayback.prefetchLookaheadSeconds)s")
     }
 
@@ -380,6 +386,16 @@ public final class SessionManager: ObservableObject {
         await telemetry.startSession()
         await telemetry.startDeviceMetricsSampling()
         sessionStartTime = Date()
+
+        // Configure and start metrics upload service
+        let selfHostedEnabled = UserDefaults.standard.bool(forKey: "selfHostedEnabled")
+        let serverIP = UserDefaults.standard.string(forKey: "serverIP") ?? ""
+        if selfHostedEnabled && !serverIP.isEmpty {
+            await metricsUploadService.configure(serverHost: serverIP)
+            // Drain any queued metrics from previous sessions
+            await metricsUploadService.drainQueue()
+        }
+        startMetricsUploadTimer()
 
         // Initialize silence tracking
         hasDetectedSpeech = false
@@ -477,6 +493,14 @@ public final class SessionManager: ObservableObject {
         // STEP 5: End telemetry and stop device metrics sampling
         await telemetry.stopDeviceMetricsSampling()
         await telemetry.endSession()
+
+        // STEP 5.5: Stop metrics upload timer and upload final metrics
+        stopMetricsUploadTimer()
+        if previousState.isActive, let startTime = sessionStartTime {
+            let duration = Date().timeIntervalSince(startTime)
+            let snapshot = await telemetry.exportMetrics()
+            await metricsUploadService.upload(snapshot, sessionDuration: duration)
+        }
 
         // STEP 6: Persist session to Core Data before clearing state
         // Only if we were actually in an active state
@@ -850,6 +874,33 @@ public final class SessionManager: ObservableObject {
             await telemetry.recordCost(.tts, amount: cost, description: "TTS (\(text.count) chars)")
             logger.info("Recorded TTS cost: $\(cost) for \(text.count) chars")
         }
+    }
+
+    // MARK: - Metrics Upload Timer
+
+    /// Start the periodic metrics upload timer
+    private func startMetricsUploadTimer() {
+        metricsUploadTimer?.cancel()
+        metricsUploadTimer = Task {
+            while !Task.isCancelled {
+                // Wait for the interval
+                try? await Task.sleep(nanoseconds: UInt64(metricsUploadInterval * 1_000_000_000))
+
+                // Upload interim metrics if session is still active
+                if state.isActive, let startTime = sessionStartTime {
+                    let duration = Date().timeIntervalSince(startTime)
+                    let snapshot = await telemetry.exportMetrics()
+                    await metricsUploadService.upload(snapshot, sessionDuration: duration)
+                    logger.info("Uploaded interim metrics at \(String(format: "%.0f", duration))s")
+                }
+            }
+        }
+    }
+
+    /// Stop the periodic metrics upload timer
+    private func stopMetricsUploadTimer() {
+        metricsUploadTimer?.cancel()
+        metricsUploadTimer = nil
     }
 
     // MARK: - Utterance Processing

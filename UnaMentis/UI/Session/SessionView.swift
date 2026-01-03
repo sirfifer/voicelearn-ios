@@ -1161,6 +1161,9 @@ class SessionViewModel: ObservableObject {
     /// Completed segment count for progress tracking
     @Published var completedSegmentCount: Int = 0
 
+    /// Session start time for duration tracking
+    private var sessionStartTime: Date?
+
     /// Topic for curriculum-based sessions (optional)
     let topic: Topic?
 
@@ -1486,6 +1489,9 @@ class SessionViewModel: ObservableObject {
             isLoading = false
         }
 
+        // Track session start time for auto-resume duration calculation
+        sessionStartTime = Date()
+
         logger.info("🟢 startSession called")
 
         // Get self-hosted server settings
@@ -1679,6 +1685,27 @@ class SessionViewModel: ObservableObject {
                 logger.warning("VibeVoice TTS selected but no server IP configured - falling back to Apple TTS")
                 ttsService = AppleTTSService()
             }
+        case .chatterbox:
+            // Use ChatterboxTTSService with full configuration
+            if selfHostedEnabled && !serverIP.isEmpty {
+                let config = ChatterboxConfig(
+                    exaggeration: Float(UserDefaults.standard.double(forKey: "chatterbox_exaggeration")),
+                    cfgWeight: Float(UserDefaults.standard.double(forKey: "chatterbox_cfg_weight")),
+                    speed: Float(UserDefaults.standard.double(forKey: "chatterbox_speed")),
+                    enableParalinguisticTags: UserDefaults.standard.bool(forKey: "chatterbox_paralinguistic_tags"),
+                    useMultilingual: UserDefaults.standard.bool(forKey: "chatterbox_use_multilingual"),
+                    language: UserDefaults.standard.string(forKey: "chatterbox_language") ?? "en",
+                    useStreaming: UserDefaults.standard.bool(forKey: "chatterbox_streaming"),
+                    seed: UserDefaults.standard.bool(forKey: "chatterbox_use_fixed_seed") ?
+                          UserDefaults.standard.integer(forKey: "chatterbox_seed") : nil,
+                    referenceAudioPath: nil
+                )
+                logger.info("Using Chatterbox TTS at \(serverIP):8004 with exaggeration=\(config.exaggeration)")
+                ttsService = ChatterboxTTSService.chatterbox(host: serverIP, config: config)
+            } else {
+                logger.warning("Chatterbox TTS selected but no server IP configured - falling back to Apple TTS")
+                ttsService = AppleTTSService()
+            }
         case .elevenLabsFlash, .elevenLabsTurbo:
             if let apiKey = await appState.apiKeys.getKey(.elevenLabs) {
                 ttsService = ElevenLabsTTSService(apiKey: apiKey)
@@ -1870,6 +1897,9 @@ class SessionViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
+        // Create auto-resume item BEFORE clearing state
+        await createAutoResumeIfNeeded()
+
         // Stop direct streaming if active
         if isDirectStreamingMode {
             await transcriptStreamer.stopStreaming()
@@ -1887,6 +1917,7 @@ class SessionViewModel: ObservableObject {
         sessionManager = nil
         subscribers.removeAll()
         state = .idle
+        sessionStartTime = nil
 
         // Clear conversation history when session ends
         conversationHistory.removeAll()
@@ -1968,6 +1999,11 @@ class SessionViewModel: ObservableObject {
 
         logger.info("Stopping playback at segment \(currentSegmentIndex)/\(totalSegments)")
 
+        // Create auto-resume item before clearing state
+        Task {
+            await createAutoResumeIfNeeded()
+        }
+
         // Stop audio and metering
         stopAudioMeteringTimer()
         audioPlayer?.stop()
@@ -1990,6 +2026,7 @@ class SessionViewModel: ObservableObject {
         // Transition to idle
         isDirectStreamingMode = false
         state = .idle
+        sessionStartTime = nil
     }
 
     /// Save progress to the topic
@@ -2022,6 +2059,64 @@ class SessionViewModel: ObservableObject {
             logger.info("Progress saved successfully")
         } catch {
             logger.error("Failed to save progress: \(error)")
+        }
+    }
+
+    /// Create an auto-resume to-do item if the session was interrupted mid-curriculum
+    private func createAutoResumeIfNeeded() async {
+        // Only for curriculum sessions
+        guard let topic = topic,
+              let topicId = topic.id else {
+            logger.debug("No auto-resume: not a curriculum session")
+            return
+        }
+
+        // Check session duration (minimum 2 minutes for substantive session)
+        let minDuration: TimeInterval = 120 // 2 minutes
+        let sessionDuration = sessionStartTime.map { Date().timeIntervalSince($0) } ?? 0
+        guard sessionDuration >= minDuration else {
+            logger.debug("No auto-resume: session too short (\(Int(sessionDuration))s < \(Int(minDuration))s)")
+            return
+        }
+
+        // Check if we've made progress (not at beginning)
+        guard currentSegmentIndex > 0 else {
+            logger.debug("No auto-resume: still at beginning (segment 0)")
+            return
+        }
+
+        // Check if topic not completed (some segments remaining)
+        let isCompleted = totalSegments > 0 && completedSegmentCount >= totalSegments
+        guard !isCompleted else {
+            logger.debug("No auto-resume: topic already completed")
+            // Clear any existing auto-resume for this topic since it's done
+            await AutoResumeService.shared.clearAutoResume(for: topicId)
+            return
+        }
+
+        // Build conversation context from history (last 10 messages)
+        let recentMessages = conversationHistory.suffix(10).map { msg in
+            ResumeConversationMessage(
+                role: msg.isUser ? "user" : "assistant",
+                content: msg.text
+            )
+        }
+
+        // Create auto-resume context
+        let context = AutoResumeContext(
+            topicId: topicId,
+            topicTitle: topic.title ?? "Unknown Topic",
+            curriculumId: topic.curriculum?.id,
+            segmentIndex: Int32(currentSegmentIndex),
+            totalSegments: Int32(totalSegments),
+            sessionDuration: sessionDuration,
+            conversationMessages: Array(recentMessages)
+        )
+
+        // Create or update auto-resume item
+        let created = await AutoResumeService.shared.handleSessionStop(context: context)
+        if created {
+            logger.info("Created auto-resume item for topic '\(topic.title ?? "")' at segment \(currentSegmentIndex)/\(totalSegments)")
         }
     }
 
@@ -2092,6 +2187,23 @@ class SessionViewModel: ObservableObject {
         case .selfHosted:
             if selfHostedEnabled && !serverIP.isEmpty {
                 bargeInTTSService = SelfHostedTTSService.piper(host: serverIP, voice: ttsVoiceSetting)
+            } else {
+                bargeInTTSService = AppleTTSService()
+            }
+        case .chatterbox:
+            if selfHostedEnabled && !serverIP.isEmpty {
+                let config = ChatterboxConfig(
+                    exaggeration: Float(UserDefaults.standard.double(forKey: "chatterbox_exaggeration")),
+                    cfgWeight: Float(UserDefaults.standard.double(forKey: "chatterbox_cfg_weight")),
+                    speed: Float(UserDefaults.standard.double(forKey: "chatterbox_speed")),
+                    enableParalinguisticTags: UserDefaults.standard.bool(forKey: "chatterbox_paralinguistic_tags"),
+                    useMultilingual: UserDefaults.standard.bool(forKey: "chatterbox_use_multilingual"),
+                    language: UserDefaults.standard.string(forKey: "chatterbox_language") ?? "en",
+                    useStreaming: UserDefaults.standard.bool(forKey: "chatterbox_streaming"),
+                    seed: nil,
+                    referenceAudioPath: nil
+                )
+                bargeInTTSService = ChatterboxTTSService.chatterbox(host: serverIP, config: config)
             } else {
                 bargeInTTSService = AppleTTSService()
             }

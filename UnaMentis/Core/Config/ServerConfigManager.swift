@@ -74,6 +74,7 @@ public enum ServerType: String, Codable, Sendable, CaseIterable {
     case whisperServer = "whisper"          // Whisper STT server
     case piperServer = "piper"              // Piper TTS server
     case vibeVoiceServer = "vibevoice"      // VibeVoice TTS server (Microsoft VibeVoice-Realtime-0.5B)
+    case chatterboxServer = "chatterbox"    // Chatterbox TTS server (Resemble AI)
     case llamaCpp = "llama.cpp"             // llama.cpp server
     case vllm = "vllm"                      // vLLM server
     case custom = "custom"                  // Custom OpenAI-compatible
@@ -85,6 +86,7 @@ public enum ServerType: String, Codable, Sendable, CaseIterable {
         case .whisperServer: return "Whisper"
         case .piperServer: return "Piper TTS"
         case .vibeVoiceServer: return "VibeVoice TTS"
+        case .chatterboxServer: return "Chatterbox TTS"
         case .llamaCpp: return "llama.cpp"
         case .vllm: return "vLLM"
         case .custom: return "Custom Server"
@@ -98,6 +100,7 @@ public enum ServerType: String, Codable, Sendable, CaseIterable {
         case .whisperServer: return 11401
         case .piperServer: return 11402
         case .vibeVoiceServer: return 8880
+        case .chatterboxServer: return 8004
         case .llamaCpp: return 8080
         case .vllm: return 8000
         case .custom: return 8080
@@ -234,7 +237,18 @@ public actor ServerConfigManager {
             server.isEnabled &&
             server.healthStatus.isUsable &&
             (server.serverType == .piperServer ||
+             server.serverType == .vibeVoiceServer ||
+             server.serverType == .chatterboxServer ||
              server.serverType == .unamentisGateway)
+        }
+    }
+
+    /// Get all healthy Chatterbox TTS servers
+    public func getHealthyChatterboxServers() -> [ServerConfig] {
+        servers.values.filter { server in
+            server.isEnabled &&
+            server.healthStatus.isUsable &&
+            server.serverType == .chatterboxServer
         }
     }
 
@@ -593,25 +607,103 @@ public actor ServerConfigManager {
         return []
     }
 
+    /// Check if Chatterbox TTS server is available and get its capabilities
+    public func discoverChatterboxCapabilities(host: String, port: Int = 8004) async -> ChatterboxServerInfo? {
+        guard let healthURL = URL(string: "http://\(host):\(port)/health") else {
+            return nil
+        }
+
+        do {
+            var request = URLRequest(url: healthURL)
+            request.timeoutInterval = 5
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                return nil
+            }
+
+            // Parse health response to get model info
+            var modelType = "turbo"
+            var device = "unknown"
+
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                if let model = json["model"] as? String {
+                    modelType = model
+                }
+                if let dev = json["device"] as? String {
+                    device = dev
+                }
+            }
+
+            // Check for multilingual model availability
+            let isMultilingualAvailable = await checkChatterboxMultilingual(host: host, port: port)
+
+            return ChatterboxServerInfo(
+                isAvailable: true,
+                modelType: modelType,
+                device: device,
+                isMultilingualAvailable: isMultilingualAvailable
+            )
+        } catch {
+            logger.debug("Failed to discover Chatterbox server: \(error.localizedDescription)")
+        }
+
+        return nil
+    }
+
+    /// Check if Chatterbox multilingual model is available
+    private func checkChatterboxMultilingual(host: String, port: Int) async -> Bool {
+        guard let modelsURL = URL(string: "http://\(host):\(port)/v1/models") else {
+            return false
+        }
+
+        do {
+            var request = URLRequest(url: modelsURL)
+            request.timeoutInterval = 5
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                return false
+            }
+
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let models = json["models"] as? [String] {
+                return models.contains { $0.lowercased().contains("multilingual") }
+            }
+        } catch {
+            // Models endpoint may not exist
+        }
+
+        return false
+    }
+
     /// Full capability discovery for a given host (checks all known services)
     public func discoverCapabilities(host: String) async -> ServerCapabilities {
         async let ollamaModels = discoverOllamaModels(host: host, port: 11434)
         async let piperVoices = discoverPiperVoices(host: host, port: 11402)
         async let vibeVoiceVoices = discoverVibeVoiceVoices(host: host, port: 8880)
+        async let chatterboxInfo = discoverChatterboxCapabilities(host: host, port: 8004)
 
         let models = await ollamaModels
         let piper = await piperVoices
         let vibeVoice = await vibeVoiceVoices
+        let chatterbox = await chatterboxInfo
 
-        logger.info("Discovered capabilities on \(host): \(models.count) LLM models, \(piper.count) Piper voices, \(vibeVoice.count) VibeVoice voices")
+        logger.info("Discovered capabilities on \(host): \(models.count) LLM models, \(piper.count) Piper voices, \(vibeVoice.count) VibeVoice voices, Chatterbox: \(chatterbox != nil)")
 
         return ServerCapabilities(
             llmModels: models,
             piperVoices: piper,
             vibeVoiceVoices: vibeVoice,
+            chatterboxInfo: chatterbox,
             hasOllama: !models.isEmpty,
             hasPiperTTS: !piper.isEmpty,
-            hasVibeVoiceTTS: !vibeVoice.isEmpty
+            hasVibeVoiceTTS: !vibeVoice.isEmpty,
+            hasChatterboxTTS: chatterbox != nil
         )
     }
 
@@ -746,14 +838,36 @@ public actor ServerConfigManager {
 
 // MARK: - Server Capabilities
 
+/// Information about a discovered Chatterbox server
+public struct ChatterboxServerInfo: Sendable {
+    public let isAvailable: Bool
+    public let modelType: String  // "turbo" or "multilingual"
+    public let device: String     // "cuda", "mps", "cpu"
+    public let isMultilingualAvailable: Bool
+
+    public init(
+        isAvailable: Bool,
+        modelType: String,
+        device: String,
+        isMultilingualAvailable: Bool
+    ) {
+        self.isAvailable = isAvailable
+        self.modelType = modelType
+        self.device = device
+        self.isMultilingualAvailable = isMultilingualAvailable
+    }
+}
+
 /// Discovered capabilities from a server
 public struct ServerCapabilities: Sendable {
     public let llmModels: [String]
     public let piperVoices: [String]
     public let vibeVoiceVoices: [String]
+    public let chatterboxInfo: ChatterboxServerInfo?
     public let hasOllama: Bool
     public let hasPiperTTS: Bool
     public let hasVibeVoiceTTS: Bool
+    public let hasChatterboxTTS: Bool
 
     /// All TTS voices (combined from Piper and VibeVoice)
     public var ttsVoices: [String] {
@@ -761,7 +875,7 @@ public struct ServerCapabilities: Sendable {
     }
 
     public var isEmpty: Bool {
-        llmModels.isEmpty && piperVoices.isEmpty && vibeVoiceVoices.isEmpty
+        llmModels.isEmpty && piperVoices.isEmpty && vibeVoiceVoices.isEmpty && !hasChatterboxTTS
     }
 
     public var summary: String {
@@ -774,6 +888,10 @@ public struct ServerCapabilities: Sendable {
         }
         if hasVibeVoiceTTS {
             parts.append("VibeVoice TTS")
+        }
+        if hasChatterboxTTS {
+            let model = chatterboxInfo?.modelType ?? "unknown"
+            parts.append("Chatterbox TTS (\(model))")
         }
         return parts.isEmpty ? "No services found" : parts.joined(separator: ", ")
     }

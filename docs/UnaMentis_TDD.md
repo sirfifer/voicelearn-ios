@@ -1043,6 +1043,147 @@ enum SessionError: Error {
 
 ---
 
+### 3.3 Todo System (Task Management)
+
+**Purpose:** Central hub for tracking learning goals, progress, and resuming interrupted sessions.
+
+**Key Responsibilities:**
+- Manage user-defined learning targets and curriculum items
+- Capture reinforcement requests during voice sessions via LLM tool calls
+- Auto-create resume items when sessions are stopped mid-curriculum
+- Suggest matching curricula for learning targets
+- Handle drag-and-drop prioritization and archival
+
+**Core Data Entity: TodoItem**
+
+```swift
+@objc(TodoItem)
+class TodoItem: NSManagedObject, Identifiable {
+    @NSManaged var id: UUID
+    @NSManaged var title: String
+    @NSManaged var notes: String?
+    @NSManaged var typeRaw: String           // curriculum, module, topic, learning_target, reinforcement, auto_resume
+    @NSManaged var statusRaw: String         // pending, in_progress, completed, archived
+    @NSManaged var priority: Int32           // For drag-drop ordering (lower = higher priority)
+    @NSManaged var createdAt: Date
+    @NSManaged var updatedAt: Date
+    @NSManaged var archivedAt: Date?
+
+    // Curriculum references
+    @NSManaged var curriculumId: UUID?
+    @NSManaged var topicId: UUID?
+    @NSManaged var granularity: String?      // curriculum, module, topic
+
+    // Auto-resume context
+    @NSManaged var resumeTopicId: UUID?
+    @NSManaged var resumeSegmentIndex: Int32
+    @NSManaged var resumeConversationContext: Data?  // JSON encoded last 10 messages
+
+    // Learning target suggestions
+    @NSManaged var suggestedCurriculumIds: [String]?
+
+    // Source tracking
+    @NSManaged var sourceRaw: String         // manual, voice, auto_resume, reinforcement
+    @NSManaged var sourceSessionId: UUID?
+}
+```
+
+**Business Logic Actors:**
+
+```swift
+// TodoManager - CRUD operations for todo items
+actor TodoManager {
+    func createItem(title: String, type: TodoItemType, source: TodoItemSource, notes: String?) throws -> TodoItem
+    func createAutoResumeItem(title: String, topicId: UUID, segmentIndex: Int32, conversationContext: Data) throws -> TodoItem
+    func createReinforcementItem(title: String, notes: String?, sessionId: UUID?) throws -> TodoItem
+    func updatePriorities(_ items: [TodoItem]) throws
+    func markCompleted(_ item: TodoItem) throws
+    func archive(_ item: TodoItem) throws
+}
+
+// AutoResumeService - Detects and creates auto-resume items
+actor AutoResumeService {
+    func handleSessionStop(context: AutoResumeContext) async -> Bool
+    func getConversationContext(for topicId: UUID) async -> [ResumeConversationMessage]?
+    func getResumeSegmentIndex(for topicId: UUID) async -> Int32?
+    func clearAutoResume(for topicId: UUID) async
+}
+
+// CurriculumSuggestionService - Suggests curricula for learning targets
+actor CurriculumSuggestionService {
+    func fetchSuggestions(for query: String) async throws -> [String]
+    func updateTodoWithSuggestions(_ todoItem: TodoItem) async
+}
+```
+
+**LLM Tool Call Infrastructure:**
+
+The Todo system integrates with LLM responses via tool/function calling, enabling voice-triggered todo creation.
+
+```swift
+// Tool definitions sent to LLM
+struct TodoTools {
+    static let addTodo = LLMToolDefinition(
+        name: "add_todo",
+        description: "Add a new item to the user's to-do list for later study",
+        inputSchema: ToolInputSchema(
+            properties: [
+                "title": ToolProperty(type: "string", description: "Brief title of the learning item"),
+                "type": ToolProperty(type: "string", enum: ["learning_target", "reinforcement"]),
+                "notes": ToolProperty(type: "string", description: "Additional context")
+            ],
+            required: ["title", "type"]
+        )
+    )
+
+    static let markForReview = LLMToolDefinition(
+        name: "mark_for_review",
+        description: "Mark the current topic for future review",
+        inputSchema: ToolInputSchema(
+            properties: [
+                "reason": ToolProperty(type: "string", description: "Why this needs review")
+            ],
+            required: []
+        )
+    )
+}
+
+// ToolCallProcessor - Routes tool calls to handlers
+actor ToolCallProcessor {
+    func process(_ toolCall: LLMToolCall) async -> LLMToolResult
+    func processAll(_ toolCalls: [LLMToolCall]) async -> [LLMToolResult]
+}
+
+// TodoToolHandler - Handles todo-related tool calls
+actor TodoToolHandler: ToolHandler {
+    func handle(_ toolCall: LLMToolCall) async throws -> LLMToolResult
+}
+```
+
+**Auto-Resume Detection Logic:**
+
+When a session is stopped, the system evaluates whether to create an auto-resume item:
+
+1. Session is a curriculum session (has topic reference)
+2. Session lasted at least 2 minutes
+3. Progress was made (segmentIndex > 0)
+4. Topic is not completed (segmentIndex < totalSegments - 1)
+
+If all conditions are met, an auto-resume TodoItem is created with:
+- Topic reference and title
+- Segment index for resumption point
+- Last 10 conversation messages (JSON encoded) for context
+
+**UI Components:**
+
+- `TodoListView` - Main list with drag-and-drop reordering
+- `TodoItemRow` - Individual item display with swipe actions
+- `TodoItemDetailView` - Detail view with editing
+- `AddTodoSheet` - Create new items with curriculum suggestions
+- `TodoHelpSheet` - In-app help documentation
+
+---
+
 ## 4. Curriculum Management System
 
 ### 4.1 Overview

@@ -75,6 +75,7 @@ public actor GLMASRSTTService: STTService {
     private var sessionStartTime: Date?
     private var audioBytesSent: Int = 0
     private var latencyMeasurements: [TimeInterval] = []
+    private var totalWordsEmitted: Int = 0
 
     /// Performance metrics
     public private(set) var metrics = STTMetrics(
@@ -147,6 +148,7 @@ public actor GLMASRSTTService: STTService {
         sessionStartTime = Date()
         audioBytesSent = 0
         latencyMeasurements = []
+        totalWordsEmitted = 0
 
         await telemetry.recordEvent(.audioEngineStarted)
 
@@ -254,6 +256,9 @@ public actor GLMASRSTTService: STTService {
             if let result = parseTranscriptionResult(json, isFinal: true) {
                 resultContinuation?.yield(result)
                 recordLatency(result.latency)
+                // Count words for emission rate calculation
+                let wordCount = result.transcript.split(whereSeparator: \.isWhitespace).count
+                totalWordsEmitted += wordCount
             }
 
         case "error":
@@ -415,13 +420,21 @@ public actor GLMASRSTTService: STTService {
             p99Latency = sortedLatencies[p99Index]
         }
 
+        // Calculate word emission rate (words per second)
+        let wordEmissionRate: Double
+        if duration > 0 && totalWordsEmitted > 0 {
+            wordEmissionRate = Double(totalWordsEmitted) / duration
+        } else {
+            wordEmissionRate = 0
+        }
+
         metrics = STTMetrics(
             medianLatency: medianLatency,
             p99Latency: p99Latency,
-            wordEmissionRate: 0  // TODO: Calculate from results
+            wordEmissionRate: wordEmissionRate
         )
 
-        logger.info("Session completed: duration=\(duration)s, median_latency=\(medianLatency)s")
+        logger.info("Session completed: duration=\(String(format: "%.1f", duration))s, words=\(totalWordsEmitted), rate=\(String(format: "%.1f", wordEmissionRate)) wps, median_latency=\(String(format: "%.3f", medianLatency))s")
     }
 
     private func sendJSON<T: Encodable>(_ value: T) async throws {
