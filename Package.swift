@@ -28,6 +28,9 @@ let package = Package(
         // llama.cpp for on-device LLM inference (GLM-ASR decoder)
         // NOTE: Requires Swift/C++ interop enabled in build settings
         .package(url: "https://github.com/StanfordBDHG/llama.cpp.git", from: "0.3.3"),
+
+        // SwiftMath for native LaTeX formula rendering
+        .package(url: "https://github.com/mgriebling/SwiftMath.git", from: "3.4.0"),
     ],
     targets: [
         // Main library target
@@ -38,6 +41,7 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "Collections", package: "swift-collections"),
                 .product(name: "llama", package: "llama.cpp"),
+                .product(name: "SwiftMath", package: "SwiftMath"),
             ],
             path: "UnaMentis",
             resources: [

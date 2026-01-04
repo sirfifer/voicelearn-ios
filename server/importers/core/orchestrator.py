@@ -379,14 +379,15 @@ class ImportOrchestrator:
         progress.update_stage("enrich", "running")
         self._notify_progress(progress)
 
-        # Enrichment substages (now including image acquisition)
+        # Enrichment substages (now including image acquisition and media generation)
         enrichment_stages = [
             ("enrich_analysis", "Content Analysis", config.generate_objectives),
             ("enrich_structure", "Structure Inference", True),
             ("enrich_segment", "Content Segmentation", config.create_checkpoints),
             ("enrich_objectives", "Learning Objectives", config.generate_objectives),
             ("enrich_assessments", "Assessment Enhancement", True),
-            ("enrich_images", "Image Acquisition", True),  # New stage
+            ("enrich_images", "Image Acquisition", True),
+            ("enrich_media", "Media Generation", config.generate_media),  # Maps, diagrams, formulas
             ("enrich_tutoring", "Tutoring Enhancement", config.generate_spoken_text),
             ("enrich_kg", "Knowledge Graph", config.build_knowledge_graph),
         ]
@@ -404,9 +405,11 @@ class ImportOrchestrator:
             progress.update_stage(stage_id, "running")
             self._notify_progress(progress)
 
-            # Run image acquisition stage
+            # Run specific enrichment stages
             if stage_id == "enrich_images":
                 await self._run_image_acquisition(progress, config)
+            elif stage_id == "enrich_media":
+                await self._run_media_generation(progress, config)
             else:
                 # Simulate other enrichment stages (in production, call actual enrichment pipeline)
                 await asyncio.sleep(0.5)
@@ -544,6 +547,106 @@ class ImportOrchestrator:
             progress.add_log("warning", f"Image acquisition not available: {e}")
         except Exception as e:
             progress.add_log("error", f"Image acquisition failed: {e}")
+
+    async def _run_media_generation(self, progress: ImportProgress, config: ImportConfig):  # noqa: ARG002
+        """Generate maps, diagrams, and formula fallbacks for the curriculum."""
+        try:
+            from ..enrichment.media_generation import (
+                MediaGenerationConfig,
+                MediaGenerationService,
+            )
+
+            extracted_content = getattr(progress, "_extracted_content", {})
+            content_path = getattr(progress, "_content_path", None)
+
+            if not content_path:
+                progress.add_log("warning", "No content path for media generation")
+                return
+
+            output_dir = Path(content_path) / "generated_media"
+            media_config = MediaGenerationConfig(
+                generate_maps=True,
+                generate_diagrams=True,
+                generate_formula_fallbacks=True,
+                output_format="png",
+                cache_enabled=True,
+            )
+
+            service = MediaGenerationService(output_dir, media_config)
+
+            try:
+                # Build content nodes from extracted content
+                content_nodes = []
+
+                # Add lectures as content nodes
+                for lecture in extracted_content.get("lectures", []):
+                    content_nodes.append(lecture)
+
+                # Add any top-level generative media
+                if "generativeMedia" in extracted_content:
+                    content_nodes.append({
+                        "generativeMedia": extracted_content["generativeMedia"]
+                    })
+
+                if not content_nodes:
+                    progress.add_log("info", "No content nodes for media generation")
+                    return
+
+                # Process all media
+                def update_progress(media_type: str, pct: float):
+                    progress.add_log(
+                        "debug",
+                        f"Media generation progress: {media_type} {pct:.0f}%"
+                    )
+
+                results, stats = await service.process_curriculum_media(
+                    content_nodes,
+                    progress_callback=update_progress,
+                )
+
+                # Store results for generate stage
+                progress._generated_media = results
+
+                # Log statistics
+                if stats.maps_processed > 0:
+                    progress.add_log(
+                        "info",
+                        f"Maps: {stats.maps_succeeded}/{stats.maps_processed} succeeded"
+                    )
+                if stats.diagrams_processed > 0:
+                    progress.add_log(
+                        "info",
+                        f"Diagrams: {stats.diagrams_succeeded}/{stats.diagrams_processed} succeeded"
+                    )
+                if stats.formulas_processed > 0:
+                    progress.add_log(
+                        "info",
+                        f"Formulas: {stats.formulas_valid}/{stats.formulas_processed} valid, "
+                        f"{stats.formulas_fallbacks_generated} fallbacks generated"
+                    )
+
+                total_processed = (
+                    stats.maps_processed + stats.diagrams_processed + stats.formulas_processed
+                )
+                total_succeeded = (
+                    stats.maps_succeeded + stats.diagrams_succeeded + stats.formulas_valid
+                )
+
+                if total_processed == 0:
+                    progress.add_log("info", "No generative media to process")
+                else:
+                    progress.add_log(
+                        "info",
+                        f"Media generation: {total_succeeded}/{total_processed} items succeeded"
+                    )
+
+            finally:
+                await service.close()
+
+        except ImportError as e:
+            progress.add_log("warning", f"Media generation not available: {e}")
+        except Exception as e:
+            progress.add_log("error", f"Media generation failed: {e}")
 
     async def _run_generate_stage(self, progress: ImportProgress):
         """Generate UMCF output."""
@@ -823,6 +926,8 @@ class ImportOrchestrator:
                     ImportStage(id="enrich_segment", name="Segmentation"),
                     ImportStage(id="enrich_objectives", name="Learning Objectives"),
                     ImportStage(id="enrich_assessments", name="Assessment Enhancement"),
+                    ImportStage(id="enrich_images", name="Image Acquisition"),
+                    ImportStage(id="enrich_media", name="Media Generation"),
                     ImportStage(id="enrich_tutoring", name="Tutoring Enhancement"),
                     ImportStage(id="enrich_kg", name="Knowledge Graph"),
                 ],

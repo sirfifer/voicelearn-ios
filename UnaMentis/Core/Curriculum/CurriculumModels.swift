@@ -224,7 +224,9 @@ public enum VisualAssetType: String, Codable, Sendable, CaseIterable {
     case image = "image"              // Static images (PNG, JPEG, WebP)
     case diagram = "diagram"          // Architectural/flow diagrams (often SVG)
     case equation = "equation"        // Mathematical formulas (LaTeX/MathML)
+    case formula = "formula"          // Enhanced formula with semantics (LaTeX)
     case chart = "chart"              // Data visualizations
+    case map = "map"                  // Geographic/educational maps
     case slideImage = "slideImage"    // Single slide from a presentation
     case slideDeck = "slideDeck"      // Full presentation reference
     case generated = "generated"      // AI-generated on-demand visual
@@ -235,7 +237,9 @@ public enum VisualAssetType: String, Codable, Sendable, CaseIterable {
         case .image: return "Image"
         case .diagram: return "Diagram"
         case .equation: return "Equation"
+        case .formula: return "Formula"
         case .chart: return "Chart"
+        case .map: return "Map"
         case .slideImage: return "Slide"
         case .slideDeck: return "Slide Deck"
         case .generated: return "Generated"
@@ -248,7 +252,9 @@ public enum VisualAssetType: String, Codable, Sendable, CaseIterable {
         case .image: return "photo"
         case .diagram: return "flowchart"
         case .equation: return "function"
+        case .formula: return "x.squareroot"
         case .chart: return "chart.bar"
+        case .map: return "map"
         case .slideImage: return "rectangle.on.rectangle"
         case .slideDeck: return "doc.richtext"
         case .generated: return "sparkles"
@@ -262,10 +268,12 @@ public enum VisualAssetType: String, Codable, Sendable, CaseIterable {
             return ["image/png", "image/jpeg", "image/webp", "image/gif"]
         case .diagram:
             return ["image/svg+xml", "image/png", "image/webp"]
-        case .equation:
-            return ["text/latex", "application/mathml+xml", "image/png"]
+        case .equation, .formula:
+            return ["text/latex", "application/mathml+xml", "image/png", "image/svg+xml"]
         case .chart:
             return ["image/svg+xml", "image/png", "application/json"]
+        case .map:
+            return ["image/png", "image/svg+xml", "text/html"]
         case .slideImage:
             return ["image/png", "image/jpeg", "image/webp"]
         case .slideDeck:

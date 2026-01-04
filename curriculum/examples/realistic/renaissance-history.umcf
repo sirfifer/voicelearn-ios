@@ -1481,6 +1481,99 @@
                 "attribution": "Image from Wikimedia Commons by Theophilos Hatzimihail (Public domain)"
               }
             ]
+          },
+          "generativeMedia": {
+            "maps": [
+              {
+                "id": "map-italian-city-states",
+                "type": "map",
+                "title": "Italian City-States of the Renaissance",
+                "geography": {
+                  "center": {
+                    "latitude": 43.0,
+                    "longitude": 12.0
+                  },
+                  "zoom": 6
+                },
+                "mapStyle": "historical",
+                "timePeriod": {
+                  "year": 1450,
+                  "displayLabel": "c. 1450"
+                },
+                "markers": [
+                  {
+                    "latitude": 43.7696,
+                    "longitude": 11.2558,
+                    "label": "Florence",
+                    "icon": "city",
+                    "popup": "Center of Renaissance art and Medici banking"
+                  },
+                  {
+                    "latitude": 45.4408,
+                    "longitude": 12.3155,
+                    "label": "Venice",
+                    "icon": "city",
+                    "popup": "Maritime trading republic"
+                  },
+                  {
+                    "latitude": 45.4642,
+                    "longitude": 9.1900,
+                    "label": "Milan",
+                    "icon": "city",
+                    "popup": "Duchy of the Sforza family"
+                  },
+                  {
+                    "latitude": 41.9028,
+                    "longitude": 12.4964,
+                    "label": "Rome",
+                    "icon": "city",
+                    "popup": "Papal States and ancient ruins"
+                  },
+                  {
+                    "latitude": 40.8518,
+                    "longitude": 14.2681,
+                    "label": "Naples",
+                    "icon": "city",
+                    "popup": "Kingdom of Naples"
+                  }
+                ],
+                "routes": [
+                  {
+                    "points": [[43.77, 11.26], [44.49, 11.34], [45.44, 12.32]],
+                    "label": "Trade route to Venice",
+                    "color": "#3498DB",
+                    "style": "dashed"
+                  }
+                ],
+                "interactive": true,
+                "segmentTiming": {
+                  "startSegment": 2,
+                  "endSegment": 6,
+                  "displayMode": "persistent"
+                },
+                "audioDescription": "A map of Renaissance Italy showing the major city-states: Florence, the banking and artistic center; Venice, the maritime trading republic; Milan, ruled by the Sforza family; Rome with its Papal States; and Naples in the south."
+              }
+            ],
+            "diagrams": [
+              {
+                "id": "diag-patronage-system",
+                "type": "diagram",
+                "title": "The Renaissance Patronage System",
+                "diagramSubtype": "flowchart",
+                "sourceCode": {
+                  "format": "mermaid",
+                  "code": "graph TD\n    A[Wealthy Patrons] -->|Commission Art| B[Artists]\n    A -->|\"Funds & Resources\"| B\n    B -->|\"Prestige & Fame\"| A\n    B -->|Create| C[Art & Architecture]\n    C -->|Enhances| D[City's Reputation]\n    D -->|Attracts| E[More Wealth & Talent]\n    E -->|Enables| A\n    \n    subgraph Patrons\n        A1[Medici Family]\n        A2[Catholic Church]\n        A3[City Governments]\n        A4[Wealthy Merchants]\n    end\n    A1 --> A\n    A2 --> A\n    A3 --> A\n    A4 --> A"
+                },
+                "generationSource": "ai_generated",
+                "alt": "Flowchart showing the cycle of patronage in Renaissance Italy",
+                "segmentTiming": {
+                  "startSegment": 9,
+                  "endSegment": 12,
+                  "displayMode": "highlight"
+                },
+                "audioDescription": "A diagram illustrating the Renaissance patronage system. Wealthy patrons like the Medici family, the Church, city governments, and merchants commissioned art from artists. Artists created works that enhanced their city's reputation, attracting more wealth and talent in a virtuous cycle."
+              }
+            ]
           }
         },
         {

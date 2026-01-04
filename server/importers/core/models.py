@@ -423,6 +423,7 @@ class ImportConfig:
     generate_spoken_text: bool = True
     build_knowledge_graph: bool = True
     generate_practice_problems: bool = False
+    generate_media: bool = True  # Generate maps, diagrams, formula fallbacks
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -440,6 +441,7 @@ class ImportConfig:
             "generateSpokenText": self.generate_spoken_text,
             "buildKnowledgeGraph": self.build_knowledge_graph,
             "generatePracticeProblems": self.generate_practice_problems,
+            "generateMedia": self.generate_media,
         }
 
     @classmethod
@@ -459,6 +461,7 @@ class ImportConfig:
             generate_spoken_text=data.get("generateSpokenText", True),
             build_knowledge_graph=data.get("buildKnowledgeGraph", True),
             generate_practice_problems=data.get("generatePracticeProblems", False),
+            generate_media=data.get("generateMedia", True),
         )
 
 

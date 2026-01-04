@@ -26,14 +26,23 @@ struct VisualAssetView: View {
                     loadError: loadError,
                     isFullscreen: $isFullscreen
                 )
-            case .equation:
-                EquationAssetView(
+            case .equation, .formula:
+                EnhancedEquationAssetView(
                     latex: asset.latex ?? "",
                     title: asset.title,
+                    semantics: nil,
                     isFullscreen: $isFullscreen
                 )
             case .chart:
                 ChartAssetView(asset: asset, isFullscreen: $isFullscreen)
+            case .map:
+                MapAssetView(
+                    asset: asset,
+                    imageData: imageData,
+                    isLoading: isLoading,
+                    loadError: loadError,
+                    isFullscreen: $isFullscreen
+                )
             case .slideDeck:
                 SlideDeckPreviewView(asset: asset)
             case .generated:
@@ -44,7 +53,18 @@ struct VisualAssetView: View {
             await loadImageData()
         }
         .fullScreenCover(isPresented: $isFullscreen) {
-            FullscreenVisualView(asset: asset, imageData: imageData)
+            switch asset.visualType {
+            case .map:
+                FullscreenMapView(asset: asset, imageData: imageData)
+            case .equation, .formula:
+                FullscreenFormulaView(
+                    latex: asset.latex ?? "",
+                    title: asset.title,
+                    semantics: nil
+                )
+            default:
+                FullscreenVisualView(asset: asset, imageData: imageData)
+            }
         }
     }
 
@@ -719,7 +739,18 @@ struct InlineVisualAssetView: View {
             await loadImageData()
         }
         .fullScreenCover(isPresented: $isFullscreen) {
-            FullscreenVisualView(asset: asset, imageData: imageData)
+            switch asset.visualType {
+            case .map:
+                FullscreenMapView(asset: asset, imageData: imageData)
+            case .equation, .formula:
+                FullscreenFormulaView(
+                    latex: asset.latex ?? "",
+                    title: asset.title,
+                    semantics: nil
+                )
+            default:
+                FullscreenVisualView(asset: asset, imageData: imageData)
+            }
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(asset.altText ?? asset.title ?? "Image")

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://unamentis.com/schemas/umcf/v1.0.0/curriculum.json",
+  "$id": "https://unamentis.com/schemas/umcf/v1.1.0/curriculum.json",
   "title": "Una Mentis Curriculum Format (UMCF)",
   "description": "A JSON schema for conversational AI tutoring curricula with standards traceability. Optimized for voice-first learning experiences.",
   "type": "object",
@@ -15,7 +15,7 @@
       "description": "UMCF schema version. Source: Semantic Versioning.",
       "type": "string",
       "pattern": "^\\d+\\.\\d+\\.\\d+$",
-      "default": "1.0.0"
+      "default": "1.1.0"
     },
     "id": {
       "description": "Globally unique curriculum identifier. Source: LOM General.Identifier, Dublin Core identifier.",
@@ -1074,6 +1074,10 @@
           "description": "Node-level compliance requirements. Source: Corporate training standards.",
           "$ref": "#/$defs/nodeCompliance"
         },
+        "media": {
+          "description": "Visual and media assets for this content node. Source: UMCF native, LOM Technical.",
+          "$ref": "#/$defs/mediaCollection"
+        },
         "extensions": {
           "description": "Node-level extensions. Source: xAPI extensions pattern.",
           "$ref": "#/$defs/extensions"
@@ -1900,6 +1904,414 @@
           }
         }
       ]
+    },
+
+    "mediaCollection": {
+      "description": "Collection of media assets for a content node. Source: UMCF native, LOM Technical.",
+      "type": "object",
+      "properties": {
+        "embedded": {
+          "description": "Media assets displayed inline with content, synchronized to transcript segments.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/embeddedMedia"
+          }
+        },
+        "reference": {
+          "description": "Supplementary media assets users can request on demand.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/referenceMedia"
+          }
+        }
+      }
+    },
+
+    "embeddedMedia": {
+      "description": "Media asset embedded in content flow. Source: UMCF native.",
+      "type": "object",
+      "required": ["id", "type", "alt"],
+      "properties": {
+        "id": {
+          "description": "Unique identifier for this media asset.",
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "description": "Media type. Source: UMCF native, extended for generative content.",
+          "type": "string",
+          "enum": ["image", "diagram", "equation", "formula", "chart", "map", "slideImage", "slideDeck", "video", "videoLecture"]
+        },
+        "url": {
+          "description": "Remote URL for the asset.",
+          "type": "string",
+          "format": "uri"
+        },
+        "localPath": {
+          "description": "Relative path for bundled assets.",
+          "type": "string"
+        },
+        "title": {
+          "description": "Display title.",
+          "type": "string"
+        },
+        "alt": {
+          "description": "Accessibility description (required). Source: W3C WCAG.",
+          "type": "string"
+        },
+        "caption": {
+          "description": "Caption text to display.",
+          "type": "string"
+        },
+        "audioDescription": {
+          "description": "Detailed verbal description for accessibility.",
+          "type": "string"
+        },
+        "mimeType": {
+          "description": "MIME type of the asset.",
+          "type": "string",
+          "examples": ["image/png", "image/svg+xml", "image/webp"]
+        },
+        "dimensions": {
+          "description": "Asset dimensions in pixels.",
+          "type": "object",
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "segmentTiming": {
+          "description": "When to display during playback.",
+          "$ref": "#/$defs/segmentTiming"
+        },
+        "latex": {
+          "description": "LaTeX source for equation/formula type.",
+          "type": "string"
+        },
+        "sourceCode": {
+          "description": "Source code for diagram generation (Mermaid, Graphviz, etc.).",
+          "$ref": "#/$defs/diagramSourceCode"
+        },
+        "geography": {
+          "description": "Geographic specification for map type.",
+          "$ref": "#/$defs/mapGeography"
+        },
+        "mapStyle": {
+          "description": "Visual style for map type.",
+          "type": "string",
+          "enum": ["political", "physical", "topographic", "historical", "satellite", "streetmap", "terrain", "dark", "light"],
+          "default": "political"
+        },
+        "timePeriod": {
+          "description": "Historical time period for maps.",
+          "$ref": "#/$defs/timePeriod"
+        },
+        "markers": {
+          "description": "Map markers/points of interest.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/mapMarker" }
+        },
+        "routes": {
+          "description": "Routes or paths to display on map.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/mapRoute" }
+        },
+        "regions": {
+          "description": "Highlighted geographic regions.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/mapRegion" }
+        },
+        "interactive": {
+          "description": "Whether media supports user interaction (pan, zoom, etc.).",
+          "type": "boolean",
+          "default": false
+        },
+        "displayMode": {
+          "description": "Display mode for formulas.",
+          "type": "string",
+          "enum": ["inline", "block", "display"],
+          "default": "block"
+        },
+        "semanticMeaning": {
+          "description": "Semantic interpretation for formulas.",
+          "$ref": "#/$defs/formulaSemantics"
+        },
+        "fallbackImageUrl": {
+          "description": "Pre-rendered image URL for clients that cannot render dynamically.",
+          "type": "string",
+          "format": "uri"
+        },
+        "fallbackImageLocalPath": {
+          "description": "Local path to pre-rendered fallback image.",
+          "type": "string"
+        },
+        "diagramSubtype": {
+          "description": "Specific type of diagram.",
+          "type": "string",
+          "enum": ["flowchart", "sequence", "class", "state", "entity-relationship", "architecture", "mindmap", "gantt", "pie", "timeline", "tree", "network", "venn", "comparison", "process", "hierarchy", "custom"]
+        },
+        "generationSource": {
+          "description": "How this media was created.",
+          "type": "string",
+          "enum": ["ai_generated", "author_provided", "imported", "derived"],
+          "default": "author_provided"
+        },
+        "generationMetadata": {
+          "description": "Metadata for AI-generated media.",
+          "type": "object",
+          "properties": {
+            "model": { "type": "string" },
+            "prompt": { "type": "string" },
+            "generatedAt": { "type": "string", "format": "date-time" },
+            "humanReviewed": { "type": "boolean" }
+          }
+        }
+      }
+    },
+
+    "referenceMedia": {
+      "description": "Supplementary media that users can request. Source: UMCF native.",
+      "type": "object",
+      "required": ["id", "type", "title"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["image", "diagram", "equation", "formula", "chart", "map", "slideImage", "slideDeck", "video", "videoLecture", "document"]
+        },
+        "url": { "type": "string", "format": "uri" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "keywords": {
+          "description": "Search keywords for matching user requests.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "segmentTiming": {
+      "description": "Controls when media appears during transcript playback. Source: UMCF native.",
+      "type": "object",
+      "properties": {
+        "startSegment": {
+          "description": "Segment ID or index when media should first appear.",
+          "oneOf": [
+            { "type": "string" },
+            { "type": "integer", "minimum": 0 }
+          ]
+        },
+        "endSegment": {
+          "description": "Segment ID or index when media should disappear.",
+          "oneOf": [
+            { "type": "string" },
+            { "type": "integer", "minimum": 0 }
+          ]
+        },
+        "displayMode": {
+          "type": "string",
+          "enum": ["persistent", "highlight", "popup", "inline"],
+          "default": "persistent"
+        }
+      }
+    },
+
+    "diagramSourceCode": {
+      "description": "Source code for diagram generation. Source: Mermaid, Graphviz, PlantUML.",
+      "type": "object",
+      "required": ["format", "code"],
+      "properties": {
+        "format": {
+          "description": "Diagram language/format.",
+          "type": "string",
+          "enum": ["mermaid", "graphviz", "plantuml", "d2", "excalidraw", "drawio", "svg-raw"]
+        },
+        "code": {
+          "description": "The diagram source code.",
+          "type": "string"
+        },
+        "version": {
+          "description": "Version of the diagram format/library.",
+          "type": "string"
+        }
+      }
+    },
+
+    "mapGeography": {
+      "description": "Geographic bounds and positioning for maps. Source: GeoJSON, Leaflet conventions.",
+      "type": "object",
+      "properties": {
+        "center": {
+          "description": "Center point of the map view.",
+          "type": "object",
+          "required": ["latitude", "longitude"],
+          "properties": {
+            "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+            "longitude": { "type": "number", "minimum": -180, "maximum": 180 }
+          }
+        },
+        "zoom": {
+          "description": "Zoom level (1-20). Source: OpenStreetMap/Leaflet.",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 10
+        },
+        "boundingBox": {
+          "description": "Alternative to center/zoom. Bounding box for map extent.",
+          "type": "object",
+          "required": ["north", "south", "east", "west"],
+          "properties": {
+            "north": { "type": "number", "minimum": -90, "maximum": 90 },
+            "south": { "type": "number", "minimum": -90, "maximum": 90 },
+            "east": { "type": "number", "minimum": -180, "maximum": 180 },
+            "west": { "type": "number", "minimum": -180, "maximum": 180 }
+          }
+        }
+      }
+    },
+
+    "timePeriod": {
+      "description": "Historical time period for maps. Source: UMCF native.",
+      "type": "object",
+      "properties": {
+        "year": {
+          "description": "Specific year (positive for CE/AD, negative for BCE/BC).",
+          "type": "integer"
+        },
+        "era": {
+          "description": "Era designation for display.",
+          "type": "string",
+          "enum": ["CE", "BCE", "AD", "BC"]
+        },
+        "range": {
+          "description": "Date range (e.g., '1450-1550').",
+          "type": "string"
+        },
+        "displayLabel": {
+          "description": "Human-readable label (e.g., 'Renaissance Italy, 1494').",
+          "type": "string"
+        }
+      }
+    },
+
+    "mapMarker": {
+      "description": "A point of interest on a map. Source: GeoJSON Point, Leaflet marker.",
+      "type": "object",
+      "required": ["id", "latitude", "longitude", "label"],
+      "properties": {
+        "id": { "type": "string" },
+        "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+        "longitude": { "type": "number", "minimum": -180, "maximum": 180 },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "spokenDescription": {
+          "description": "Voice-optimized description for tutoring.",
+          "type": "string"
+        },
+        "markerType": {
+          "type": "string",
+          "enum": ["pin", "dot", "star", "landmark", "city", "battle", "route-point", "custom"],
+          "default": "pin"
+        },
+        "icon": {
+          "description": "Custom icon URL.",
+          "type": "string",
+          "format": "uri"
+        },
+        "color": {
+          "description": "Marker color (CSS color value).",
+          "type": "string"
+        }
+      }
+    },
+
+    "mapRoute": {
+      "description": "A route or path on a map. Source: GeoJSON LineString.",
+      "type": "object",
+      "required": ["id", "points"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "points": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["latitude", "longitude"],
+            "properties": {
+              "latitude": { "type": "number" },
+              "longitude": { "type": "number" }
+            }
+          }
+        },
+        "color": { "type": "string" },
+        "style": {
+          "type": "string",
+          "enum": ["solid", "dashed", "dotted"],
+          "default": "solid"
+        }
+      }
+    },
+
+    "mapRegion": {
+      "description": "A highlighted geographic region. Source: GeoJSON Polygon.",
+      "type": "object",
+      "required": ["id", "label"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "geoJsonUrl": {
+          "description": "URL to GeoJSON defining the region boundary.",
+          "type": "string",
+          "format": "uri"
+        },
+        "fillColor": { "type": "string" },
+        "strokeColor": { "type": "string" },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.3
+        }
+      }
+    },
+
+    "formulaSemantics": {
+      "description": "Semantic interpretation of a mathematical formula. Source: UMCF native.",
+      "type": "object",
+      "properties": {
+        "category": {
+          "description": "Mathematical category.",
+          "type": "string",
+          "enum": ["algebraic", "geometric", "trigonometric", "calculus", "statistics", "physics", "chemistry", "logic", "set-theory", "linear-algebra", "differential-equations", "probability", "other"]
+        },
+        "purpose": {
+          "description": "What the formula calculates or represents.",
+          "type": "string"
+        },
+        "variables": {
+          "description": "Descriptions of variables in the formula.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["symbol", "meaning"],
+            "properties": {
+              "symbol": { "type": "string" },
+              "meaning": { "type": "string" },
+              "unit": { "type": "string" }
+            }
+          }
+        },
+        "commonName": {
+          "description": "Common name for well-known formulas (e.g., 'Pythagorean theorem').",
+          "type": "string"
+        },
+        "spokenForm": {
+          "description": "How to speak the formula aloud, optimized for TTS.",
+          "type": "string"
+        }
+      }
     }
   }
 }
