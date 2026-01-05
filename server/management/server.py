@@ -31,6 +31,15 @@ from import_api import register_import_routes, init_import_system, set_import_co
 # Import plugin management system
 from plugin_api import register_plugin_routes
 
+# Import media generation system
+from media_api import register_media_routes
+
+# Import authentication system
+from auth import (
+    AuthAPI, register_auth_routes, auth_middleware, rate_limit_middleware,
+    TokenService, TokenConfig, RateLimiter, setup_token_service
+)
+
 # Import diagnostic logging system
 from diagnostic_logging import diag_logger, get_diagnostic_config, set_diagnostic_config
 
@@ -3492,6 +3501,40 @@ async def _metrics_recording_loop():
 # Application Setup
 # =============================================================================
 
+def setup_auth_routes(app: web.Application, db_pool) -> bool:
+    """
+    Initialize auth routes with database connection.
+
+    Call this function after database pool is created to enable auth endpoints.
+    Requires AUTH_SECRET_KEY to be set in environment.
+
+    Args:
+        app: The aiohttp application
+        db_pool: asyncpg connection pool
+
+    Returns:
+        True if auth routes were registered, False otherwise
+    """
+    if "token_service" not in app:
+        logger.warning("Auth not initialized - AUTH_SECRET_KEY not set")
+        return False
+
+    token_service = app["token_service"]
+    rate_limiter = app.get("rate_limiter")
+
+    auth_api = AuthAPI(
+        db_pool=db_pool,
+        token_service=token_service,
+        rate_limiter=rate_limiter,
+    )
+
+    register_auth_routes(app, auth_api)
+    app["auth_api"] = auth_api
+
+    logger.info("Authentication routes registered")
+    return True
+
+
 def create_app() -> web.Application:
     """Create and configure the aiohttp application."""
     app = web.Application()
@@ -3574,6 +3617,40 @@ def create_app() -> web.Application:
 
     # Curriculum Import System (Source Browser)
     register_import_routes(app)
+
+    # Media Generation System (Diagrams, Formulas, Maps)
+    register_media_routes(app)
+
+    # Authentication System
+    # Note: Auth requires a database pool. For now, we set up the routes but
+    # auth_api initialization with db pool happens in main() after db setup.
+    # The auth routes are registered here as placeholders; full initialization
+    # happens when AUTH_SECRET_KEY is set in environment.
+    auth_secret = os.environ.get("AUTH_SECRET_KEY")
+    if auth_secret:
+        token_config = TokenConfig(
+            secret_key=auth_secret,
+            algorithm=os.environ.get("AUTH_ALGORITHM", "HS256"),
+            access_token_lifetime_minutes=int(os.environ.get("AUTH_ACCESS_TOKEN_MINUTES", "15")),
+            refresh_token_lifetime_days=int(os.environ.get("AUTH_REFRESH_TOKEN_DAYS", "30")),
+        )
+        token_service = TokenService(token_config)
+        rate_limiter = RateLimiter()
+
+        # Store in app for later use when db pool is available
+        app["token_service"] = token_service
+        app["rate_limiter"] = rate_limiter
+
+        # Set up token service for middleware
+        setup_token_service(app, auth_secret)
+
+        # Add auth middleware (applies JWT validation to protected routes)
+        app.middlewares.append(auth_middleware)
+        app.middlewares.append(rate_limit_middleware)
+
+        logger.info("Authentication system initialized (routes pending database connection)")
+    else:
+        logger.warning("AUTH_SECRET_KEY not set - authentication disabled")
 
     # Set up callback to reload curricula when import completes
     def on_import_complete(progress):

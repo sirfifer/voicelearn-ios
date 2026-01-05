@@ -681,3 +681,630 @@ COMMENT ON TABLE transcript_segments IS 'Individual speakable content pieces wit
 COMMENT ON TABLE glossary_terms IS 'Vocabulary definitions for a curriculum';
 COMMENT ON TABLE assessments IS 'Questions and quizzes for learner assessment';
 COMMENT ON FUNCTION build_umcf_json IS 'Reconstructs full UMCF JSON from normalized tables';
+
+-- ============================================================================
+-- USER MANAGEMENT AND AUTHENTICATION
+-- ============================================================================
+--
+-- Architecture: User management with privacy tiers
+--
+-- OPEN SOURCE (Free):
+-- - Users: Individual accounts with role-based access
+-- - Devices: Multi-device support per user
+-- - Sessions: Token-based authentication with refresh rotation
+-- - Consent: GDPR/COPPA compliant consent tracking
+-- - Audit: SOC2-ready audit logging
+-- - Privacy Tiers: Configurable data handling
+--
+-- ENTERPRISE EXTENSION POINTS (Commercial Add-on):
+-- - Organizations: Multi-tenant support for schools/institutions
+-- - Organization Memberships: User-to-org role management
+-- - Guardian Relationships: Parent/guardian linking for minors
+-- - SSO Configuration: SAML/OIDC/LDAP integration
+-- - Advanced RBAC: Fine-grained permissions per organization
+--
+-- Note: Users work independently by default (organization_id is null).
+-- Enterprise plugins enable multi-tenant features by populating organizations
+-- and linking users to them.
+--
+-- ============================================================================
+
+-- Enable pgcrypto for password hashing
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- ============================================================================
+-- PRIVACY TIERS
+-- ============================================================================
+
+-- Privacy tier configurations
+CREATE TABLE privacy_tiers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tier_type VARCHAR(20) NOT NULL UNIQUE CHECK (tier_type IN ('minimal', 'standard', 'comprehensive')),
+    display_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    is_system_default BOOLEAN DEFAULT false,
+
+    -- Feature flags
+    allow_progress_sync BOOLEAN DEFAULT false,
+    allow_analytics BOOLEAN DEFAULT false,
+    allow_performance_tracking BOOLEAN DEFAULT false,
+    allow_progress_sharing BOOLEAN DEFAULT false,
+    require_session_logging BOOLEAN DEFAULT false,
+
+    -- Retention
+    retention_days_min INTEGER DEFAULT 0,
+    retention_days_max INTEGER DEFAULT 365,
+
+    -- Compliance
+    require_audit_trail BOOLEAN DEFAULT false,
+    require_data_portability BOOLEAN DEFAULT true,
+    allow_erasure BOOLEAN DEFAULT true,
+
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Seed default privacy tiers
+INSERT INTO privacy_tiers (tier_type, display_name, description, is_system_default,
+    allow_progress_sync, allow_analytics, allow_performance_tracking, allow_progress_sharing,
+    require_session_logging, retention_days_min, retention_days_max,
+    require_audit_trail, require_data_portability, allow_erasure) VALUES
+('minimal', 'Privacy-First', 'Maximum privacy, all data on-device only', false,
+    false, false, false, false, false, 0, 30, false, true, true),
+('standard', 'Standard', 'Balanced privacy with optional syncing', true,
+    true, true, true, true, false, 30, 365, false, true, true),
+('comprehensive', 'Institutional', 'Full compliance for educational institutions', false,
+    true, true, true, true, true, 90, 2555, true, true, false);
+
+-- ============================================================================
+-- ORGANIZATIONS (Multi-tenancy) - ENTERPRISE EXTENSION POINT
+-- ============================================================================
+-- This table and related organization features are extension points for the
+-- enterprise commercial add-on. The open source version operates with users
+-- having organization_id = NULL (personal accounts).
+
+CREATE TABLE organizations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+    -- Identity
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    external_id VARCHAR(255) UNIQUE,
+
+    -- Contact
+    domain VARCHAR(255),
+    contact_email VARCHAR(255),
+
+    -- Type and tier
+    org_type VARCHAR(50) DEFAULT 'personal' CHECK (org_type IN (
+        'personal', 'school', 'district', 'university', 'enterprise', 'homeschool_coop'
+    )),
+    subscription_tier VARCHAR(50) DEFAULT 'free' CHECK (subscription_tier IN (
+        'free', 'basic', 'pro', 'enterprise'
+    )),
+    privacy_tier_id UUID REFERENCES privacy_tiers(id),
+
+    -- Location (for jurisdiction)
+    country_code CHAR(2),
+    region_code VARCHAR(10),
+
+    -- SSO Configuration (Commercial Plugin Extension Point)
+    sso_provider VARCHAR(50),
+    sso_config JSONB,
+
+    -- Legal/Compliance
+    is_educational BOOLEAN DEFAULT false,
+    dpa_signed_at TIMESTAMPTZ,
+    dpa_version VARCHAR(20),
+    dpo_email VARCHAR(255),
+
+    -- Hierarchy (for districts)
+    parent_organization_id UUID REFERENCES organizations(id),
+
+    -- Settings (extensible JSON)
+    settings JSONB DEFAULT '{}',
+
+    -- Status
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+    -- Metadata
+    metadata JSONB DEFAULT '{}'
+);
+
+CREATE INDEX idx_organizations_slug ON organizations(slug);
+CREATE INDEX idx_organizations_domain ON organizations(domain);
+CREATE INDEX idx_organizations_type ON organizations(org_type);
+CREATE INDEX idx_organizations_parent ON organizations(parent_organization_id);
+CREATE INDEX idx_organizations_active ON organizations(is_active) WHERE is_active = true;
+
+-- ============================================================================
+-- USERS
+-- ============================================================================
+
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+    -- Organization relationship (null = personal account)
+    organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+
+    -- Identity
+    email VARCHAR(255) NOT NULL,
+    email_verified BOOLEAN DEFAULT false,
+    email_verified_at TIMESTAMPTZ,
+    external_id VARCHAR(255),
+
+    -- Authentication
+    password_hash VARCHAR(255),
+    password_updated_at TIMESTAMPTZ,
+
+    -- Profile
+    display_name VARCHAR(255),
+    avatar_url TEXT,
+    locale VARCHAR(10) DEFAULT 'en-US',
+    timezone VARCHAR(50) DEFAULT 'UTC',
+
+    -- Age/Minor status (for COPPA)
+    date_of_birth DATE,
+    is_minor BOOLEAN,
+    age_verified_at TIMESTAMPTZ,
+
+    -- Role and permissions
+    role VARCHAR(50) DEFAULT 'user' CHECK (role IN (
+        'user', 'admin', 'org_admin', 'super_admin'
+    )),
+    permissions JSONB DEFAULT '[]',
+
+    -- Status
+    is_active BOOLEAN DEFAULT true,
+    is_locked BOOLEAN DEFAULT false,
+    locked_at TIMESTAMPTZ,
+    locked_reason TEXT,
+
+    -- OAuth/SSO tracking
+    auth_providers JSONB DEFAULT '[]',
+
+    -- MFA
+    mfa_enabled BOOLEAN DEFAULT false,
+    mfa_secret VARCHAR(255),
+    mfa_backup_codes JSONB,
+
+    -- Privacy
+    privacy_tier_id UUID REFERENCES privacy_tiers(id),
+    privacy_consent_at TIMESTAMPTZ,
+    privacy_consent_version VARCHAR(20),
+    marketing_consent BOOLEAN DEFAULT false,
+
+    -- Lifecycle
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    last_login_at TIMESTAMPTZ,
+
+    -- Search
+    search_vector tsvector GENERATED ALWAYS AS (
+        setweight(to_tsvector('english', coalesce(display_name, '')), 'A') ||
+        setweight(to_tsvector('english', coalesce(email, '')), 'B')
+    ) STORED,
+
+    CONSTRAINT unique_email_per_org UNIQUE (organization_id, email)
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_org ON users(organization_id);
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_search ON users USING GIN(search_vector);
+CREATE INDEX idx_users_active ON users(is_active) WHERE is_active = true;
+CREATE INDEX idx_users_external ON users(external_id) WHERE external_id IS NOT NULL;
+
+-- ============================================================================
+-- DEVICES (Multi-device Support)
+-- ============================================================================
+
+CREATE TABLE devices (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    -- Device identification
+    device_fingerprint VARCHAR(255) NOT NULL,
+    device_name VARCHAR(255),
+    device_type VARCHAR(50) CHECK (device_type IN ('ios', 'android', 'web', 'desktop')),
+
+    -- Device metadata
+    device_model VARCHAR(100),
+    os_version VARCHAR(50),
+    app_version VARCHAR(50),
+
+    -- Push notifications
+    push_token TEXT,
+    push_platform VARCHAR(20),
+
+    -- Security
+    is_trusted BOOLEAN DEFAULT false,
+    trust_verified_at TIMESTAMPTZ,
+
+    -- Status
+    is_active BOOLEAN DEFAULT true,
+    last_seen_at TIMESTAMPTZ DEFAULT NOW(),
+    last_ip_address INET,
+
+    -- Lifecycle
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    CONSTRAINT unique_device_per_user UNIQUE (user_id, device_fingerprint)
+);
+
+CREATE INDEX idx_devices_user ON devices(user_id);
+CREATE INDEX idx_devices_fingerprint ON devices(device_fingerprint);
+CREATE INDEX idx_devices_last_seen ON devices(last_seen_at DESC);
+CREATE INDEX idx_devices_active ON devices(is_active) WHERE is_active = true;
+
+-- ============================================================================
+-- REFRESH TOKENS (RFC 9700 Compliant)
+-- ============================================================================
+
+CREATE TABLE refresh_tokens (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    device_id UUID NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+
+    -- Token data (store hash, not plaintext)
+    token_hash VARCHAR(255) NOT NULL UNIQUE,
+    token_family UUID NOT NULL,
+
+    -- Rotation tracking
+    generation INTEGER DEFAULT 1,
+    parent_token_id UUID REFERENCES refresh_tokens(id),
+
+    -- Validity
+    issued_at TIMESTAMPTZ DEFAULT NOW(),
+    expires_at TIMESTAMPTZ NOT NULL,
+
+    -- Revocation
+    is_revoked BOOLEAN DEFAULT false,
+    revoked_at TIMESTAMPTZ,
+    revoked_reason VARCHAR(100),
+
+    -- Security context
+    ip_address INET,
+    user_agent TEXT,
+
+    CONSTRAINT valid_expiry CHECK (expires_at > issued_at)
+);
+
+CREATE INDEX idx_refresh_tokens_user ON refresh_tokens(user_id);
+CREATE INDEX idx_refresh_tokens_device ON refresh_tokens(device_id);
+CREATE INDEX idx_refresh_tokens_family ON refresh_tokens(token_family);
+CREATE INDEX idx_refresh_tokens_expires ON refresh_tokens(expires_at);
+CREATE INDEX idx_refresh_tokens_hash ON refresh_tokens(token_hash);
+CREATE INDEX idx_refresh_tokens_active ON refresh_tokens(is_revoked, expires_at)
+    WHERE is_revoked = false;
+
+-- ============================================================================
+-- SESSIONS
+-- ============================================================================
+
+CREATE TABLE sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    device_id UUID NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+    refresh_token_id UUID REFERENCES refresh_tokens(id) ON DELETE SET NULL,
+
+    -- Session metadata
+    session_type VARCHAR(20) DEFAULT 'normal' CHECK (session_type IN (
+        'normal', 'api', 'impersonation'
+    )),
+
+    -- Context
+    ip_address INET,
+    user_agent TEXT,
+    location_country VARCHAR(2),
+    location_city VARCHAR(100),
+
+    -- Status
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_activity_at TIMESTAMPTZ DEFAULT NOW(),
+    expires_at TIMESTAMPTZ,
+
+    -- Termination
+    ended_at TIMESTAMPTZ,
+    end_reason VARCHAR(50)
+);
+
+CREATE INDEX idx_sessions_user ON sessions(user_id);
+CREATE INDEX idx_sessions_device ON sessions(device_id);
+CREATE INDEX idx_sessions_active ON sessions(is_active, last_activity_at DESC)
+    WHERE is_active = true;
+
+-- ============================================================================
+-- ORGANIZATION MEMBERSHIPS - ENTERPRISE EXTENSION POINT
+-- ============================================================================
+-- Organization membership management is an enterprise feature.
+-- Open source version does not use this table.
+
+CREATE TABLE organization_memberships (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+
+    -- Role within organization
+    role VARCHAR(50) NOT NULL CHECK (role IN (
+        'student', 'teacher', 'admin', 'parent', 'guardian', 'dpo'
+    )),
+
+    -- Permissions (JSON for flexibility)
+    permissions JSONB DEFAULT '{}',
+
+    -- Status
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN (
+        'pending', 'active', 'suspended', 'left'
+    )),
+    joined_at TIMESTAMPTZ DEFAULT NOW(),
+    left_at TIMESTAMPTZ,
+
+    invited_by UUID REFERENCES users(id),
+    invited_at TIMESTAMPTZ,
+
+    UNIQUE(user_id, organization_id)
+);
+
+CREATE INDEX idx_membership_user ON organization_memberships(user_id);
+CREATE INDEX idx_membership_org ON organization_memberships(organization_id);
+CREATE INDEX idx_membership_role ON organization_memberships(organization_id, role);
+CREATE INDEX idx_membership_active ON organization_memberships(status) WHERE status = 'active';
+
+-- ============================================================================
+-- GUARDIAN RELATIONSHIPS (For Minors) - ENTERPRISE EXTENSION POINT
+-- ============================================================================
+-- Guardian relationships for institutional use (schools managing minors).
+-- Enterprise feature for educational compliance.
+
+CREATE TABLE guardian_relationships (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    guardian_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    child_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    organization_id UUID REFERENCES organizations(id),
+
+    -- Relationship type
+    relationship_type VARCHAR(50) NOT NULL CHECK (relationship_type IN (
+        'parent', 'guardian', 'school_authorized'
+    )),
+
+    -- Verification
+    verified BOOLEAN DEFAULT false,
+    verified_at TIMESTAMPTZ,
+    verification_method VARCHAR(50),
+
+    -- Permissions
+    can_view_progress BOOLEAN DEFAULT true,
+    can_view_transcripts BOOLEAN DEFAULT false,
+    can_manage_consent BOOLEAN DEFAULT true,
+    can_delete_data BOOLEAN DEFAULT false,
+
+    -- Status
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN (
+        'pending', 'active', 'revoked'
+    )),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    UNIQUE(guardian_user_id, child_user_id)
+);
+
+CREATE INDEX idx_guardian_guardian ON guardian_relationships(guardian_user_id);
+CREATE INDEX idx_guardian_child ON guardian_relationships(child_user_id);
+CREATE INDEX idx_guardian_active ON guardian_relationships(status) WHERE status = 'active';
+
+-- ============================================================================
+-- CONSENT RECORDS
+-- ============================================================================
+
+CREATE TABLE consent_records (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    -- Consent category
+    consent_category VARCHAR(50) NOT NULL CHECK (consent_category IN (
+        'core_tutoring', 'progress_tracking', 'analytics',
+        'progress_sharing', 'third_party_ai', 'marketing'
+    )),
+
+    -- Status
+    status VARCHAR(20) NOT NULL CHECK (status IN ('granted', 'denied', 'withdrawn')),
+    granted_at TIMESTAMPTZ,
+    withdrawn_at TIMESTAMPTZ,
+
+    -- Legal basis
+    legal_basis VARCHAR(50) NOT NULL CHECK (legal_basis IN (
+        'consent', 'legitimate_interest', 'public_task',
+        'parental_consent', 'school_authorization'
+    )),
+
+    -- For minors
+    is_minor BOOLEAN DEFAULT false,
+    parent_consent_id UUID REFERENCES consent_records(id),
+
+    -- For institutions
+    organization_id UUID REFERENCES organizations(id),
+    authorized_by_role VARCHAR(50),
+
+    -- Versioning
+    privacy_policy_version VARCHAR(20) NOT NULL,
+    consent_version INTEGER DEFAULT 1,
+
+    -- Audit context
+    ip_address_hash VARCHAR(64),
+    user_agent_hash VARCHAR(64),
+    collection_method VARCHAR(50),
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+    UNIQUE(user_id, consent_category)
+);
+
+CREATE INDEX idx_consent_user ON consent_records(user_id);
+CREATE INDEX idx_consent_category ON consent_records(user_id, consent_category);
+CREATE INDEX idx_consent_org ON consent_records(organization_id);
+
+-- Consent audit log
+CREATE TABLE consent_audit_log (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    consent_record_id UUID NOT NULL REFERENCES consent_records(id) ON DELETE CASCADE,
+    action VARCHAR(20) NOT NULL CHECK (action IN ('granted', 'withdrawn', 'updated')),
+    previous_status VARCHAR(20),
+    new_status VARCHAR(20),
+    changed_by UUID REFERENCES users(id),
+    change_reason TEXT,
+    ip_address_hash VARCHAR(64),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_consent_audit_record ON consent_audit_log(consent_record_id);
+CREATE INDEX idx_consent_audit_created ON consent_audit_log(created_at DESC);
+
+-- ============================================================================
+-- DATA RETENTION POLICIES
+-- ============================================================================
+
+CREATE TABLE data_retention_policies (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+    privacy_tier_id UUID NOT NULL REFERENCES privacy_tiers(id),
+
+    -- Per data type retention (days, -1 = indefinite)
+    session_data_days INTEGER DEFAULT 90,
+    progress_data_days INTEGER DEFAULT 365,
+    transcript_data_days INTEGER DEFAULT 30,
+    audit_log_days INTEGER DEFAULT 2555,
+    consent_record_days INTEGER DEFAULT -1,
+
+    -- Anonymization vs deletion
+    anonymize_on_expiry BOOLEAN DEFAULT true,
+
+    -- Educational exceptions
+    maintain_educational_records BOOLEAN DEFAULT true,
+    educational_record_years INTEGER DEFAULT 7,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+    UNIQUE(organization_id)
+);
+
+CREATE INDEX idx_retention_org ON data_retention_policies(organization_id);
+
+-- ============================================================================
+-- AUTHENTICATION AUDIT LOG
+-- ============================================================================
+
+CREATE TABLE auth_audit_log (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+    -- Actor
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    device_id UUID REFERENCES devices(id) ON DELETE SET NULL,
+    organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+
+    -- Event
+    event_type VARCHAR(50) NOT NULL CHECK (event_type IN (
+        'login', 'login_failed', 'logout', 'token_refresh', 'token_revoked',
+        'password_change', 'password_reset_request', 'password_reset_complete',
+        'mfa_enabled', 'mfa_disabled', 'mfa_verified', 'mfa_failed',
+        'device_registered', 'device_removed', 'device_trusted',
+        'session_created', 'session_terminated',
+        'user_created', 'user_updated', 'user_deleted',
+        'role_changed', 'permission_changed',
+        'data_export', 'data_deletion'
+    )),
+    event_status VARCHAR(20) NOT NULL CHECK (event_status IN ('success', 'failure')),
+    event_details JSONB DEFAULT '{}',
+
+    -- Context
+    ip_address INET,
+    user_agent TEXT,
+    request_id VARCHAR(36),
+
+    -- Result
+    error_code VARCHAR(50),
+    error_message TEXT,
+
+    -- Immutability check
+    checksum VARCHAR(64),
+
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_audit_user ON auth_audit_log(user_id);
+CREATE INDEX idx_audit_org ON auth_audit_log(organization_id);
+CREATE INDEX idx_audit_event ON auth_audit_log(event_type);
+CREATE INDEX idx_audit_created ON auth_audit_log(created_at DESC);
+CREATE INDEX idx_audit_status ON auth_audit_log(event_status, created_at DESC);
+
+-- ============================================================================
+-- HELPER FUNCTIONS FOR AUTH
+-- ============================================================================
+
+-- Function to hash password using bcrypt
+CREATE OR REPLACE FUNCTION hash_password(password TEXT)
+RETURNS TEXT AS $$
+BEGIN
+    RETURN crypt(password, gen_salt('bf', 12));
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to verify password
+CREATE OR REPLACE FUNCTION verify_password(password TEXT, hash TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN crypt(password, hash) = hash;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to revoke all tokens in a family (for replay detection)
+CREATE OR REPLACE FUNCTION revoke_token_family(p_family_id UUID, p_reason VARCHAR(100) DEFAULT 'security')
+RETURNS INTEGER AS $$
+DECLARE
+    v_count INTEGER;
+BEGIN
+    UPDATE refresh_tokens
+    SET is_revoked = true,
+        revoked_at = NOW(),
+        revoked_reason = p_reason
+    WHERE token_family = p_family_id
+      AND is_revoked = false;
+
+    GET DIAGNOSTICS v_count = ROW_COUNT;
+    RETURN v_count;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to clean up expired tokens
+CREATE OR REPLACE FUNCTION cleanup_expired_tokens()
+RETURNS INTEGER AS $$
+DECLARE
+    v_count INTEGER;
+BEGIN
+    DELETE FROM refresh_tokens
+    WHERE expires_at < NOW() - INTERVAL '7 days';
+
+    GET DIAGNOSTICS v_count = ROW_COUNT;
+    RETURN v_count;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================================================
+-- AUTH TABLE COMMENTS
+-- ============================================================================
+
+COMMENT ON TABLE privacy_tiers IS 'Privacy tier configurations for data handling';
+COMMENT ON TABLE organizations IS 'Multi-tenant organizations (schools, companies, etc.)';
+COMMENT ON TABLE users IS 'User accounts with authentication and profile data';
+COMMENT ON TABLE devices IS 'Registered devices per user for multi-device support';
+COMMENT ON TABLE refresh_tokens IS 'Refresh tokens with RFC 9700 rotation tracking';
+COMMENT ON TABLE sessions IS 'Active user sessions tied to devices';
+COMMENT ON TABLE organization_memberships IS 'User membership in organizations with roles';
+COMMENT ON TABLE guardian_relationships IS 'Parent/guardian relationships for minors';
+COMMENT ON TABLE consent_records IS 'GDPR/COPPA compliant consent tracking';
+COMMENT ON TABLE consent_audit_log IS 'Audit trail for consent changes';
+COMMENT ON TABLE data_retention_policies IS 'Per-organization data retention configuration';
+COMMENT ON TABLE auth_audit_log IS 'SOC2-ready authentication audit trail';

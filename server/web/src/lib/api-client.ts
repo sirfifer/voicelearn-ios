@@ -903,3 +903,252 @@ export async function cancelImport(jobId: string): Promise<{ success: boolean; e
 // NOTE: Curriculum data is served by the Management API (port 8766) and proxied through
 // the UnaMentis Server's Next.js API routes. The Curriculum Studio provides a unified
 // interface for viewing and editing curriculum content alongside system management.
+
+// =============================================================================
+// Generative Media APIs (Diagrams, Formulas, Maps)
+// =============================================================================
+
+import type {
+  DiagramValidateRequest,
+  DiagramValidateResponse,
+  DiagramRenderRequest,
+  DiagramRenderResponse,
+  FormulaValidateRequest,
+  FormulaValidateResponse,
+  FormulaRenderRequest,
+  FormulaRenderResponse,
+  MapRenderRequest,
+  MapRenderResponse,
+  MapStylesResponse,
+  MediaCapabilitiesResponse,
+} from '@/types';
+
+/**
+ * Get media generation capabilities
+ */
+export async function getMediaCapabilities(): Promise<MediaCapabilitiesResponse> {
+  return fetchWithFallback('/api/media/capabilities', () => ({
+    success: true,
+    capabilities: {
+      diagrams: {
+        formats: ['mermaid', 'graphviz', 'plantuml', 'd2', 'svg-raw'],
+        renderers: {
+          mermaid: false,
+          graphviz: false,
+          plantuml: false,
+          d2: false,
+        },
+      },
+      formulas: {
+        renderers: {
+          katex: false,
+          latex: false,
+        },
+        clientSideSupported: true,
+      },
+      maps: {
+        styles: ['standard', 'historical', 'physical', 'satellite', 'minimal', 'educational'],
+        renderers: {
+          cartopy: false,
+          folium: false,
+          staticTiles: true,
+        },
+        features: ['markers', 'routes', 'regions'],
+      },
+    },
+  }));
+}
+
+/**
+ * Validate diagram syntax
+ */
+export async function validateDiagram(request: DiagramValidateRequest): Promise<DiagramValidateResponse> {
+  if (USE_MOCK) {
+    return {
+      success: true,
+      valid: request.code.trim().length > 0,
+      errors: request.code.trim().length === 0 ? ['Empty diagram source'] : [],
+    };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/media/diagrams/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: 'Validation failed' }));
+    return { success: false, valid: false, errors: [data.error || 'Validation failed'] };
+  }
+
+  return response.json();
+}
+
+/**
+ * Render a diagram to image
+ */
+export async function renderDiagram(request: DiagramRenderRequest): Promise<DiagramRenderResponse> {
+  if (USE_MOCK) {
+    // Return a placeholder SVG in mock mode
+    const placeholderSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">
+      <rect fill="#f5f5f5" width="100%" height="100%" rx="8"/>
+      <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-family="system-ui" font-size="14" fill="#666">
+        Diagram Preview (${request.format})
+      </text>
+    </svg>`;
+    return {
+      success: true,
+      data: btoa(placeholderSvg),
+      mimeType: 'image/svg+xml',
+      width: 400,
+      height: 200,
+      renderMethod: 'placeholder',
+    };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/media/diagrams/render`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: 'Rendering failed' }));
+    return {
+      success: false,
+      error: data.error || 'Rendering failed',
+      validationErrors: data.validationErrors,
+    };
+  }
+
+  return response.json();
+}
+
+/**
+ * Validate LaTeX formula syntax
+ */
+export async function validateFormula(request: FormulaValidateRequest): Promise<FormulaValidateResponse> {
+  if (USE_MOCK) {
+    const hasUnbalancedBraces = (request.latex.match(/{/g) || []).length !== (request.latex.match(/}/g) || []).length;
+    return {
+      success: true,
+      valid: !hasUnbalancedBraces && request.latex.trim().length > 0,
+      errors: hasUnbalancedBraces ? ['Unbalanced braces'] : [],
+      warnings: [],
+    };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/media/formulas/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: 'Validation failed' }));
+    return { success: false, valid: false, errors: [data.error || 'Validation failed'], warnings: [] };
+  }
+
+  return response.json();
+}
+
+/**
+ * Render a LaTeX formula to image
+ */
+export async function renderFormula(request: FormulaRenderRequest): Promise<FormulaRenderResponse> {
+  if (USE_MOCK) {
+    // Return a placeholder SVG in mock mode
+    const displayLatex = request.latex.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const placeholderSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="60">
+      <rect fill="#fafafa" width="100%" height="100%" rx="4"/>
+      <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-family="serif" font-style="italic" font-size="16" fill="#333">
+        ${displayLatex.substring(0, 30)}${displayLatex.length > 30 ? '...' : ''}
+      </text>
+    </svg>`;
+    return {
+      success: true,
+      data: btoa(placeholderSvg),
+      mimeType: 'image/svg+xml',
+      width: 300,
+      height: 60,
+      renderMethod: 'placeholder',
+    };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/media/formulas/render`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: 'Rendering failed' }));
+    return {
+      success: false,
+      error: data.error || 'Rendering failed',
+      validationErrors: data.validationErrors,
+    };
+  }
+
+  return response.json();
+}
+
+/**
+ * Render a map to image
+ */
+export async function renderMap(request: MapRenderRequest): Promise<MapRenderResponse> {
+  if (USE_MOCK) {
+    // Return a placeholder SVG in mock mode
+    const placeholderSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${request.width || 800}" height="${request.height || 600}">
+      <rect fill="#e8f4e8" width="100%" height="100%"/>
+      <text x="50%" y="45%" text-anchor="middle" font-family="system-ui" font-size="18" fill="#2d5a2d">
+        ${request.title || 'Map Preview'}
+      </text>
+      <text x="50%" y="55%" text-anchor="middle" font-family="system-ui" font-size="12" fill="#666">
+        ${request.center.latitude.toFixed(2)}°, ${request.center.longitude.toFixed(2)}° (zoom: ${request.zoom || 5})
+      </text>
+    </svg>`;
+    return {
+      success: true,
+      data: btoa(placeholderSvg),
+      mimeType: 'image/svg+xml',
+      width: request.width || 800,
+      height: request.height || 600,
+      renderMethod: 'placeholder',
+    };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/media/maps/render`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: 'Rendering failed' }));
+    return {
+      success: false,
+      error: data.error || 'Rendering failed',
+    };
+  }
+
+  return response.json();
+}
+
+/**
+ * Get available map styles
+ */
+export async function getMapStyles(): Promise<MapStylesResponse> {
+  return fetchWithFallback('/api/media/maps/styles', () => ({
+    success: true,
+    styles: [
+      { id: 'standard', name: 'Standard', description: 'Modern political map' },
+      { id: 'historical', name: 'Historical', description: 'Aged parchment style' },
+      { id: 'physical', name: 'Physical', description: 'Terrain and elevation focus' },
+      { id: 'satellite', name: 'Satellite', description: 'Aerial imagery' },
+      { id: 'minimal', name: 'Minimal', description: 'Clean, minimal styling' },
+      { id: 'educational', name: 'Educational', description: 'Clear labels for learning' },
+    ],
+  }));
+}

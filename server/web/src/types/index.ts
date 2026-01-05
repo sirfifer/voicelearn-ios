@@ -878,3 +878,204 @@ export interface ImportJobsResponse {
   jobs: ImportProgress[];
   error?: string;
 }
+
+// =============================================================================
+// Generative Media Types (Diagrams, Formulas, Maps)
+// =============================================================================
+
+/** Diagram source format */
+export type DiagramFormat = 'mermaid' | 'graphviz' | 'plantuml' | 'd2' | 'svg-raw';
+
+/** Diagram render method used by server */
+export type DiagramRenderMethod = 'mermaid_cli' | 'graphviz' | 'plantuml' | 'd2' | 'passthrough' | 'placeholder' | 'failed';
+
+/** Request to validate diagram syntax */
+export interface DiagramValidateRequest {
+  format: DiagramFormat;
+  code: string;
+}
+
+/** Response from diagram validation */
+export interface DiagramValidateResponse {
+  success: boolean;
+  valid: boolean;
+  errors: string[];
+  error?: string;
+}
+
+/** Request to render a diagram */
+export interface DiagramRenderRequest {
+  format: DiagramFormat;
+  code: string;
+  outputFormat?: 'svg' | 'png';
+  theme?: string;
+  width?: number;
+  height?: number;
+}
+
+/** Response from diagram rendering */
+export interface DiagramRenderResponse {
+  success: boolean;
+  data?: string; // base64 encoded
+  mimeType?: string;
+  width?: number;
+  height?: number;
+  renderMethod?: DiagramRenderMethod;
+  error?: string;
+  validationErrors?: string[];
+}
+
+/** Formula render method used by server */
+export type FormulaRenderMethod = 'katex' | 'latex' | 'placeholder' | 'failed';
+
+/** Request to validate LaTeX formula */
+export interface FormulaValidateRequest {
+  latex: string;
+}
+
+/** Response from formula validation */
+export interface FormulaValidateResponse {
+  success: boolean;
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+  error?: string;
+}
+
+/** Request to render a formula */
+export interface FormulaRenderRequest {
+  latex: string;
+  outputFormat?: 'svg' | 'png';
+  displayMode?: boolean;
+  fontSize?: number;
+  color?: string;
+}
+
+/** Response from formula rendering */
+export interface FormulaRenderResponse {
+  success: boolean;
+  data?: string; // base64 encoded
+  mimeType?: string;
+  width?: number;
+  height?: number;
+  renderMethod?: FormulaRenderMethod;
+  warnings?: string[];
+  error?: string;
+  validationErrors?: string[];
+}
+
+/** Map style options */
+export type MapStyleOption = 'standard' | 'historical' | 'physical' | 'satellite' | 'minimal' | 'educational';
+
+/** Map render method used by server */
+export type MapRenderMethod = 'cartopy' | 'folium' | 'static_tiles' | 'placeholder' | 'failed';
+
+/** Map marker definition */
+export interface MapMarkerSpec {
+  latitude: number;
+  longitude: number;
+  label: string;
+  icon?: string;
+  color?: string;
+  popup?: string;
+}
+
+/** Map route definition */
+export interface MapRouteSpec {
+  points: [number, number][]; // [lat, lon] pairs
+  label: string;
+  color?: string;
+  width?: number;
+  style?: 'solid' | 'dashed' | 'dotted';
+}
+
+/** Map region definition */
+export interface MapRegionSpec {
+  points: [number, number][]; // polygon vertices [lat, lon]
+  label: string;
+  fillColor?: string;
+  fillOpacity?: number;
+  borderColor?: string;
+  borderWidth?: number;
+}
+
+/** Request to render a map */
+export interface MapRenderRequest {
+  title?: string;
+  center: {
+    latitude: number;
+    longitude: number;
+  };
+  zoom?: number;
+  style?: MapStyleOption;
+  width?: number;
+  height?: number;
+  outputFormat?: 'png' | 'svg';
+  markers?: MapMarkerSpec[];
+  routes?: MapRouteSpec[];
+  regions?: MapRegionSpec[];
+  timePeriod?: string;
+  language?: string;
+  interactive?: boolean;
+}
+
+/** Response from map rendering */
+export interface MapRenderResponse {
+  success: boolean;
+  data?: string; // base64 encoded
+  mimeType?: string;
+  width?: number;
+  height?: number;
+  renderMethod?: MapRenderMethod;
+  htmlContent?: string; // for interactive maps
+  error?: string;
+}
+
+/** Map style info */
+export interface MapStyleInfo {
+  id: MapStyleOption;
+  name: string;
+  description: string;
+}
+
+/** Response from map styles endpoint */
+export interface MapStylesResponse {
+  success: boolean;
+  styles: MapStyleInfo[];
+}
+
+/** Media generation capabilities */
+export interface MediaCapabilities {
+  diagrams: {
+    formats: DiagramFormat[];
+    renderers: {
+      mermaid: boolean;
+      graphviz: boolean;
+      plantuml: boolean;
+      d2: boolean;
+    };
+  };
+  formulas: {
+    renderers: {
+      katex: boolean;
+      latex: boolean;
+    };
+    clientSideSupported: boolean;
+  };
+  maps: {
+    styles: MapStyleOption[];
+    renderers: {
+      cartopy: boolean;
+      folium: boolean;
+      staticTiles: boolean;
+    };
+    features: string[];
+  };
+}
+
+/** Response from capabilities endpoint */
+export interface MediaCapabilitiesResponse {
+  success: boolean;
+  capabilities: MediaCapabilities;
+  error?: string;
+}

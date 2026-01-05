@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { ContentNode, MediaItem, Segment } from '@/types/curriculum';
-import { Save, Image as ImageIcon, MessageSquare, Settings, Plus, Trash2, Mic, PlayCircle, Layers } from 'lucide-react';
+import { Save, Image as ImageIcon, MessageSquare, Settings, Plus, Trash2, Mic, PlayCircle, Layers, GitBranch, FunctionSquare, Map } from 'lucide-react';
 import { MediaPicker } from './MediaPicker';
+import { DiagramEditor, FormulaEditor, MapEditor } from './GenerativeMediaEditors';
 import { clsx } from 'clsx';
 import { HelpTooltip } from '@/components/ui/tooltip';
 
@@ -30,6 +31,9 @@ interface NodeEditorProps {
 export const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, readOnly }) => {
     const [activeTab, setActiveTab] = useState<'general' | 'transcript' | 'media'>('general');
     const [showMediaPicker, setShowMediaPicker] = useState(false);
+    const [showDiagramEditor, setShowDiagramEditor] = useState(false);
+    const [showFormulaEditor, setShowFormulaEditor] = useState(false);
+    const [showMapEditor, setShowMapEditor] = useState(false);
 
     const handleFieldChange = <K extends keyof ContentNode>(field: K, value: ContentNode[K]) => {
         onChange({ ...node, [field]: value });
@@ -85,6 +89,84 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, readOnly
                 })
             }
         });
+    };
+
+    // Handler for adding diagram
+    const handleAddDiagram = (code: string, format: string, renderedData?: string) => {
+        const newMedia = {
+            id: Math.random().toString(36).substr(2, 9),
+            type: 'diagram' as const,
+            url: renderedData ? `data:image/svg+xml;base64,${renderedData}` : '',
+            alt: `Diagram (${format})`,
+            title: `Diagram`,
+            mimeType: 'image/svg+xml',
+            segmentTiming: {
+                startSegment: 0,
+                endSegment: 0,
+                displayMode: 'persistent' as const
+            }
+        };
+        const currentMedia = node.media || { embedded: [], reference: [] };
+        onChange({
+            ...node,
+            media: {
+                ...currentMedia,
+                embedded: [...(currentMedia.embedded || []), newMedia]
+            }
+        });
+        setShowDiagramEditor(false);
+    };
+
+    // Handler for adding formula
+    const handleAddFormula = (latex: string, renderedData?: string) => {
+        const newMedia = {
+            id: Math.random().toString(36).substr(2, 9),
+            type: 'equation' as const,
+            url: renderedData ? `data:image/svg+xml;base64,${renderedData}` : '',
+            alt: `Formula: ${latex.substring(0, 50)}`,
+            title: `Formula`,
+            mimeType: 'image/svg+xml',
+            segmentTiming: {
+                startSegment: 0,
+                endSegment: 0,
+                displayMode: 'persistent' as const
+            }
+        };
+        const currentMedia = node.media || { embedded: [], reference: [] };
+        onChange({
+            ...node,
+            media: {
+                ...currentMedia,
+                embedded: [...(currentMedia.embedded || []), newMedia]
+            }
+        });
+        setShowFormulaEditor(false);
+    };
+
+    // Handler for adding map
+    const handleAddMap = (spec: { title: string }, renderedData?: string) => {
+        const newMedia = {
+            id: Math.random().toString(36).substr(2, 9),
+            type: 'image' as const, // Maps are rendered as images
+            url: renderedData ? `data:image/png;base64,${renderedData}` : '',
+            alt: spec.title || 'Map',
+            title: spec.title || 'Map',
+            mimeType: 'image/png',
+            segmentTiming: {
+                startSegment: 0,
+                endSegment: 0,
+                displayMode: 'persistent' as const
+            }
+        };
+        const currentMedia = node.media || { embedded: [], reference: [] };
+        onChange({
+            ...node,
+            media: {
+                ...currentMedia,
+                embedded: [...(currentMedia.embedded || []), newMedia]
+            }
+        });
+        setShowMapEditor(false);
     };
 
     const tabs = [
@@ -305,15 +387,38 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, readOnly
                             <div className="flex justify-between items-start mb-6">
                                 <div>
                                     <h3 className="text-lg font-bold text-white mb-1">Visual Assets</h3>
-                                    <p className="text-sm text-slate-400">Manage images, diagrams, and videos that appear during the lesson.</p>
+                                    <p className="text-sm text-slate-400">Manage images, diagrams, formulas, and maps that appear during the lesson.</p>
                                 </div>
-                                <button
-                                    onClick={() => setShowMediaPicker(true)}
-                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 font-medium"
-                                >
-                                    <Plus size={18} />
-                                    Find Images
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setShowMediaPicker(true)}
+                                        className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 font-medium text-sm"
+                                    >
+                                        <ImageIcon size={16} />
+                                        Images
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDiagramEditor(true)}
+                                        className="px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg shadow-lg shadow-purple-500/20 transition-all flex items-center gap-2 font-medium text-sm"
+                                    >
+                                        <GitBranch size={16} />
+                                        Diagram
+                                    </button>
+                                    <button
+                                        onClick={() => setShowFormulaEditor(true)}
+                                        className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2 font-medium text-sm"
+                                    >
+                                        <FunctionSquare size={16} />
+                                        Formula
+                                    </button>
+                                    <button
+                                        onClick={() => setShowMapEditor(true)}
+                                        className="px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg shadow-lg shadow-green-500/20 transition-all flex items-center gap-2 font-medium text-sm"
+                                    >
+                                        <Map size={16} />
+                                        Map
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -414,6 +519,27 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, readOnly
                 <MediaPicker
                     onSelect={handleAddMedia}
                     onClose={() => setShowMediaPicker(false)}
+                />
+            )}
+
+            {showDiagramEditor && (
+                <DiagramEditor
+                    onSave={handleAddDiagram}
+                    onClose={() => setShowDiagramEditor(false)}
+                />
+            )}
+
+            {showFormulaEditor && (
+                <FormulaEditor
+                    onSave={handleAddFormula}
+                    onClose={() => setShowFormulaEditor(false)}
+                />
+            )}
+
+            {showMapEditor && (
+                <MapEditor
+                    onSave={handleAddMap}
+                    onClose={() => setShowMapEditor(false)}
                 />
             )}
         </div>
