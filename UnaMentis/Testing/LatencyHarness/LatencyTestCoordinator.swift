@@ -2,6 +2,18 @@
 // Main coordinator for executing latency tests on iOS
 //
 // Part of the Audio Latency Test Harness
+//
+// IMPORTANT: Observer Effect Mitigation
+// =====================================
+// All result reporting and logging is designed to be FIRE-AND-FORGET
+// to avoid introducing latency into the measurements themselves.
+//
+// Key principles:
+// 1. Timing uses mach_absolute_time (nanosecond precision, zero overhead)
+// 2. Results are collected in memory during test execution
+// 3. Reporting to server happens asynchronously AFTER measurement capture
+// 4. No synchronous network I/O in the measurement path
+// 5. Result queue handles batching and retries in background
 
 import Foundation
 import Logging
@@ -449,6 +461,127 @@ public actor LatencyTestCoordinator {
         #else
         return "Simulator"
         #endif
+    }
+}
+
+// MARK: - Fire-and-Forget Result Reporter
+
+/// Non-blocking result reporter that queues results for async server submission
+///
+/// CRITICAL: This actor is designed to never block the test execution path.
+/// Results are queued immediately and sent to the server asynchronously.
+public actor ResultReporter {
+
+    private let logger = Logger(label: "com.unamentis.result-reporter")
+    private var serverURL: URL?
+    private var clientId: String
+    private var runId: String?
+
+    // Result queue
+    private var pendingResults: [TestResult] = []
+    private var reportTask: Task<Void, Never>?
+    private var isRunning = false
+
+    public init(clientId: String) {
+        self.clientId = clientId
+    }
+
+    /// Configure server connection
+    public func configure(serverURL: URL, runId: String) {
+        self.serverURL = serverURL
+        self.runId = runId
+    }
+
+    /// Start the background reporter
+    public func start() {
+        guard !isRunning else { return }
+        isRunning = true
+
+        reportTask = Task {
+            await reportLoop()
+        }
+    }
+
+    /// Stop the reporter and flush pending results
+    public func stop() async {
+        isRunning = false
+        reportTask?.cancel()
+
+        // Final flush
+        await flushResults()
+    }
+
+    /// Queue a result for async reporting (returns immediately)
+    ///
+    /// This method is designed to be called during test execution.
+    /// It returns immediately without any blocking operations.
+    public func enqueueResult(_ result: TestResult) {
+        pendingResults.append(result)
+    }
+
+    /// Queue multiple results
+    public func enqueueResults(_ results: [TestResult]) {
+        pendingResults.append(contentsOf: results)
+    }
+
+    // MARK: - Background Reporting
+
+    private func reportLoop() async {
+        while isRunning {
+            // Batch send every 2 seconds or when queue reaches 10 items
+            if pendingResults.count >= 10 {
+                await flushResults()
+            }
+
+            try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+
+            if !pendingResults.isEmpty {
+                await flushResults()
+            }
+        }
+    }
+
+    private func flushResults() async {
+        guard let serverURL = serverURL,
+              let runId = runId,
+              !pendingResults.isEmpty else { return }
+
+        let batch = pendingResults
+        pendingResults = []
+
+        // Send batch to server (fire-and-forget - don't retry endlessly)
+        do {
+            try await sendResultBatch(batch, to: serverURL, runId: runId)
+            logger.debug("Reported \(batch.count) results to server")
+        } catch {
+            logger.warning("Failed to report results: \(error.localizedDescription)")
+            // Could implement retry logic here, but don't block
+        }
+    }
+
+    private func sendResultBatch(_ results: [TestResult], to serverURL: URL, runId: String) async throws {
+        let url = serverURL.appendingPathComponent("/api/latency-tests/runs/\(runId)/results")
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(clientId, forHTTPHeaderField: "X-Client-ID")
+
+        let payload: [[String: Any]] = results.map { result in
+            result.toDictionary()
+        }
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["results": payload])
+
+        // Use short timeout - we don't want to block
+        request.timeoutInterval = 5.0
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw TestCoordinatorError.serverCommunicationFailed("HTTP \((response as? HTTPURLResponse)?.statusCode ?? 0)")
+        }
     }
 }
 

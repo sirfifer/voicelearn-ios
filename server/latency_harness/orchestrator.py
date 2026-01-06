@@ -50,6 +50,11 @@ class LatencyTestOrchestrator:
 
     Each client type has different capabilities, and the orchestrator
     routes tests appropriately based on configuration requirements.
+
+    IMPORTANT: All observation/logging operations are designed to be
+    fire-and-forget to avoid introducing latency into measurements.
+    Storage and callback operations happen asynchronously and never
+    block the test execution path.
     """
 
     def __init__(self, storage: Optional["LatencyHarnessStorage"] = None):
@@ -61,14 +66,19 @@ class LatencyTestOrchestrator:
         # Optional persistent storage
         self.storage = storage
 
-        # Callbacks for real-time updates
+        # Callbacks for real-time updates (fire-and-forget - never block tests)
         self.on_progress: Optional[Callable[[str, int, int], None]] = None
         self.on_result: Optional[Callable[[str, TestResult], None]] = None
         self.on_run_complete: Optional[Callable[[TestRun], None]] = None
 
         # Background tasks
         self._heartbeat_task: Optional[asyncio.Task] = None
+        self._persistence_task: Optional[asyncio.Task] = None
         self._running = False
+
+        # Result queue for async persistence (fire-and-forget)
+        self._result_queue: asyncio.Queue = asyncio.Queue()
+        self._pending_status_updates: Dict[str, tuple] = {}
 
     # =========================================================================
     # Lifecycle
@@ -78,6 +88,7 @@ class LatencyTestOrchestrator:
         """Start the orchestrator background tasks."""
         self._running = True
         self._heartbeat_task = asyncio.create_task(self._heartbeat_monitor())
+        self._persistence_task = asyncio.create_task(self._persistence_worker())
 
         # Load data from storage if available
         if self.storage:
@@ -115,13 +126,130 @@ class LatencyTestOrchestrator:
     async def stop(self):
         """Stop the orchestrator and cleanup."""
         self._running = False
-        if self._heartbeat_task:
-            self._heartbeat_task.cancel()
-            try:
-                await self._heartbeat_task
-            except asyncio.CancelledError:
-                pass
+
+        # Cancel background tasks
+        for task in [self._heartbeat_task, self._persistence_task]:
+            if task:
+                task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+
+        # Flush any remaining queued results before shutdown
+        await self._flush_result_queue()
+
         logger.info("Latency test orchestrator stopped")
+
+    async def _persistence_worker(self):
+        """
+        Background worker that processes queued results for persistence.
+
+        This runs completely separately from test execution to ensure
+        storage I/O never blocks measurements. Results are batched and
+        written asynchronously.
+        """
+        batch_size = 10
+        flush_interval = 2.0  # seconds
+        last_flush = datetime.now()
+
+        while self._running:
+            try:
+                # Collect results in batches or flush on interval
+                results_to_save = []
+
+                while len(results_to_save) < batch_size:
+                    try:
+                        # Non-blocking get with timeout
+                        item = await asyncio.wait_for(
+                            self._result_queue.get(),
+                            timeout=0.1
+                        )
+                        results_to_save.append(item)
+                    except asyncio.TimeoutError:
+                        break
+
+                # Flush if we have results or interval elapsed
+                elapsed = (datetime.now() - last_flush).total_seconds()
+                if results_to_save or elapsed > flush_interval:
+                    await self._persist_results_batch(results_to_save)
+                    await self._persist_status_updates()
+                    last_flush = datetime.now()
+
+                # Small yield to prevent busy loop
+                await asyncio.sleep(0.01)
+
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Persistence worker error: {e}")
+                await asyncio.sleep(1)
+
+    async def _persist_results_batch(self, items: list):
+        """Persist a batch of results to storage."""
+        if not self.storage or not items:
+            return
+
+        for run_id, result in items:
+            try:
+                await self.storage.save_result(run_id, result)
+            except Exception as e:
+                logger.error(f"Failed to persist result {result.id}: {e}")
+
+    async def _persist_status_updates(self):
+        """Persist any pending run status updates."""
+        if not self.storage or not self._pending_status_updates:
+            return
+
+        updates = dict(self._pending_status_updates)
+        self._pending_status_updates.clear()
+
+        for run_id, (status, completed, completed_at) in updates.items():
+            try:
+                await self.storage.update_run_status(
+                    run_id, status, completed, completed_at
+                )
+            except Exception as e:
+                logger.error(f"Failed to persist status for {run_id}: {e}")
+
+    async def _flush_result_queue(self):
+        """Flush all remaining results from queue (called on shutdown)."""
+        remaining = []
+        while not self._result_queue.empty():
+            try:
+                item = self._result_queue.get_nowait()
+                remaining.append(item)
+            except asyncio.QueueEmpty:
+                break
+
+        if remaining:
+            await self._persist_results_batch(remaining)
+            await self._persist_status_updates()
+            logger.info(f"Flushed {len(remaining)} results on shutdown")
+
+    def _enqueue_result(self, run_id: str, result: TestResult):
+        """
+        Queue a result for async persistence (fire-and-forget).
+
+        This method is designed to return immediately without blocking.
+        The result will be persisted by the background worker.
+        """
+        try:
+            self._result_queue.put_nowait((run_id, result))
+        except asyncio.QueueFull:
+            logger.warning(f"Result queue full, dropping result {result.id}")
+
+    def _enqueue_status_update(
+        self, run_id: str, status: RunStatus,
+        completed: int, completed_at: Optional[datetime] = None
+    ):
+        """
+        Queue a status update for async persistence (fire-and-forget).
+
+        Multiple updates for the same run_id are coalesced - only the
+        latest status is persisted.
+        """
+        self._pending_status_updates[run_id] = (status, completed, completed_at)
 
     # =========================================================================
     # Client Management
@@ -341,20 +469,19 @@ class LatencyTestOrchestrator:
                         client, scenario, config
                     )
 
+                    # Update in-memory state (immediate, non-blocking)
                     run.results.append(result)
                     run.completed_configurations = i + 1
 
-                    # Persist result
-                    if self.storage:
-                        try:
-                            await self.storage.save_result(run.id, result)
-                            await self.storage.update_run_status(
-                                run.id, run.status, run.completed_configurations
-                            )
-                        except Exception as e:
-                            logger.error(f"Failed to persist result: {e}")
+                    # FIRE-AND-FORGET: Queue result for async persistence
+                    # This returns immediately without blocking the test loop
+                    self._enqueue_result(run.id, result)
+                    self._enqueue_status_update(
+                        run.id, run.status, run.completed_configurations
+                    )
 
-                    # Notify progress
+                    # FIRE-AND-FORGET: Notify progress via callbacks
+                    # Callbacks should be non-blocking (use asyncio.create_task internally)
                     if self.on_progress:
                         self.on_progress(
                             run.id,
@@ -398,7 +525,13 @@ class LatencyTestOrchestrator:
             client.status.is_running_test = False
             client.status.current_config_id = None
 
-            # Persist final state
+            # Queue final status update (fire-and-forget)
+            self._enqueue_status_update(
+                run.id, run.status, run.completed_configurations, run.completed_at
+            )
+
+            # Persist final run state - await here is OK since measurements are done
+            # and we want to ensure the full run is saved before reporting completion
             if self.storage:
                 try:
                     await self.storage.save_run(run)

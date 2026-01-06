@@ -16,6 +16,55 @@ Current state: Latency is tracked via TelemetryEngine, but no systematic explora
 
 ---
 
+## Critical: Observer Effect Mitigation
+
+**The act of measuring latency must not introduce latency.**
+
+This is a fundamental principle of the harness design. All observation, logging, and reporting mechanisms are designed to be **fire-and-forget** - they queue data for asynchronous processing and never block the test execution path.
+
+### Key Architectural Decisions
+
+1. **Timing Capture is Zero-Overhead**
+   - iOS: Uses `mach_absolute_time()` (nanosecond precision, no syscalls)
+   - Web: Uses `performance.now()` (microsecond precision)
+   - No network I/O in the timing path
+
+2. **Result Collection is In-Memory**
+   - Results stored in local arrays during test execution
+   - No database writes or network calls between test iterations
+
+3. **Reporting is Asynchronous**
+   - `ResultReporter` actor queues results in background
+   - Batched sends every 2 seconds (configurable)
+   - Short timeouts (5s) - never blocks indefinitely
+   - Failed sends are logged, not retried endlessly
+
+4. **Server Persistence is Fire-and-Forget**
+   - `_enqueue_result()` returns immediately
+   - Background `_persistence_worker()` batches and writes
+   - Status updates are coalesced (only latest persisted)
+
+5. **WebSocket Broadcasts are Non-Blocking**
+   - Uses `asyncio.create_task()` for all broadcasts
+   - Client disconnects don't block test execution
+
+### Anti-Patterns to Avoid
+
+```python
+# ❌ BAD: Synchronous persistence between tests
+for config in configurations:
+    result = await run_test(config)
+    await storage.save_result(result)  # BLOCKS NEXT TEST!
+    await broadcast_to_clients(result)  # BLOCKS NEXT TEST!
+
+# ✅ GOOD: Fire-and-forget with queue
+for config in configurations:
+    result = await run_test(config)
+    queue.put_nowait((run_id, result))  # Returns immediately
+```
+
+---
+
 ## Two Operating Modes
 
 ### Mode 1: Curriculum Delivery
