@@ -68,6 +68,8 @@ extension ExtendedRuntimeManager: WKExtendedRuntimeSessionDelegate {
                 reasonString = "resignedFrontmost"
             case .error:
                 reasonString = "error"
+            case .suppressedBySystem:
+                reasonString = "suppressedBySystem"
             @unknown default:
                 reasonString = "unknown"
             }
