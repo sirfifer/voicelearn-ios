@@ -7,7 +7,7 @@ Statistical analysis and reporting for test results.
 import statistics
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from .models import (
     TestResult,
