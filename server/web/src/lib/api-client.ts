@@ -15,6 +15,11 @@ import type {
   HourlyMetrics,
   DailyMetrics,
   MetricsHistorySummary,
+  ModelLoadRequest,
+  ModelLoadResponse,
+  ModelUnloadResponse,
+  ModelPullProgress,
+  ModelDeleteResponse,
 } from '@/types';
 import {
   mockLogs,
@@ -202,6 +207,44 @@ export async function getServers(): Promise<ServersResponse> {
       unhealthy: servers.filter((s) => s.status === 'unhealthy').length,
     };
   });
+}
+
+export interface AddServerRequest {
+  name: string;
+  type: 'ollama' | 'whisper' | 'piper' | 'vibevoice' | 'custom';
+  url: string;
+  port: number;
+}
+
+export async function addServer(
+  server: AddServerRequest
+): Promise<{ status: string; server: ServersResponse['servers'][0] }> {
+  if (USE_MOCK) {
+    return {
+      status: 'ok',
+      server: {
+        id: `mock-${Date.now()}`,
+        name: server.name,
+        type: server.type,
+        url: `${server.url}:${server.port}`,
+        status: 'healthy',
+        response_time_ms: 50,
+        models: [],
+      },
+    };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/servers`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(server),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+    throw new Error(data.error || `HTTP ${response.status}`);
+  }
+  return response.json();
 }
 
 export async function getModels(): Promise<ModelsResponse> {
@@ -448,6 +491,154 @@ export async function unloadAllModels(): Promise<{
   });
 
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}
+
+export async function loadModel(
+  modelId: string,
+  options?: ModelLoadRequest
+): Promise<ModelLoadResponse> {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return {
+      status: 'ok',
+      model: modelId,
+      vram_bytes: 4 * 1024 ** 3,
+      vram_gb: 4,
+      load_time_ms: 1000,
+      message: 'Model loaded (mock)',
+    };
+  }
+
+  const response = await fetch(
+    `${BACKEND_URL}/api/models/${encodeURIComponent(modelId)}/load`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(options || {}),
+    }
+  );
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+    throw new Error(data.error || `HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function unloadModel(modelId: string): Promise<ModelUnloadResponse> {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return {
+      status: 'ok',
+      model: modelId,
+      freed_vram_bytes: 4 * 1024 ** 3,
+      freed_vram_gb: 4,
+      message: 'Model unloaded (mock)',
+    };
+  }
+
+  const response = await fetch(
+    `${BACKEND_URL}/api/models/${encodeURIComponent(modelId)}/unload`,
+    {
+      method: 'POST',
+    }
+  );
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+    throw new Error(data.error || `HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function pullModel(
+  modelName: string,
+  onProgress?: (progress: ModelPullProgress) => void,
+  signal?: AbortSignal
+): Promise<void> {
+  if (USE_MOCK) {
+    // Simulate pull progress
+    const stages = ['pulling manifest', 'downloading', 'verifying sha256', 'success'];
+    for (let i = 0; i <= 100; i += 5) {
+      if (signal?.aborted) throw new Error('Pull cancelled');
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const stage = i < 10 ? stages[0] : i < 90 ? stages[1] : i < 98 ? stages[2] : stages[3];
+      onProgress?.({
+        status: stage,
+        completed: i * 1024 * 1024 * 40, // Simulate ~4GB download
+        total: 4 * 1024 * 1024 * 1024,
+      });
+    }
+    return;
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/models/pull`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: modelName }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+    throw new Error(data.error || `HTTP ${response.status}`);
+  }
+
+  // Read SSE stream
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+
+  if (!reader) throw new Error('No response body');
+
+  let buffer = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        try {
+          const data = JSON.parse(line.slice(6)) as ModelPullProgress;
+          onProgress?.(data);
+
+          if (data.status === 'error') {
+            throw new Error(data.error || 'Pull failed');
+          }
+        } catch (e) {
+          if (e instanceof SyntaxError) continue;
+          throw e;
+        }
+      }
+    }
+  }
+}
+
+export async function deleteModel(modelId: string): Promise<ModelDeleteResponse> {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return {
+      status: 'ok',
+      model: modelId,
+      message: 'Model deleted (mock)',
+    };
+  }
+
+  const response = await fetch(
+    `${BACKEND_URL}/api/models/${encodeURIComponent(modelId)}`,
+    {
+      method: 'DELETE',
+    }
+  );
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+    throw new Error(data.error || `HTTP ${response.status}`);
+  }
   return response.json();
 }
 

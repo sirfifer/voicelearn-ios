@@ -79,10 +79,54 @@ export interface ModelInfo {
   type: 'llm' | 'stt' | 'tts';
   server_id: string;
   server_name: string;
-  status: 'available' | 'loading' | 'unavailable';
+  status: 'available' | 'loaded' | 'loading' | 'unavailable';
   size_bytes?: number;
+  size_gb?: number;
   parameters?: string;
   quantization?: string;
+  family?: string;
+  vram_bytes?: number;
+  vram_gb?: number;
+}
+
+// Model Management Types
+export interface ModelLoadRequest {
+  keep_alive?: string;
+}
+
+export interface ModelLoadResponse {
+  status: 'ok' | 'error';
+  model: string;
+  vram_bytes?: number;
+  vram_gb?: number;
+  load_time_ms?: number;
+  message: string;
+  error?: string;
+}
+
+export interface ModelUnloadResponse {
+  status: 'ok' | 'error';
+  model: string;
+  freed_vram_bytes?: number;
+  freed_vram_gb?: number;
+  message: string;
+  error?: string;
+}
+
+export interface ModelPullProgress {
+  status: string;
+  digest?: string;
+  completed: number;
+  total: number;
+  model?: string;
+  error?: string;
+}
+
+export interface ModelDeleteResponse {
+  status: 'ok' | 'error';
+  model: string;
+  message?: string;
+  error?: string;
 }
 
 export interface DashboardStats {

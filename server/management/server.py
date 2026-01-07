@@ -1200,6 +1200,291 @@ async def handle_get_models(request: web.Request) -> web.Response:
         return web.json_response({"error": str(e)}, status=500)
 
 
+async def handle_load_model(request: web.Request) -> web.Response:
+    """Load a specific model into memory via Ollama API."""
+    model_id = request.match_info["model_id"]
+
+    try:
+        # Parse optional request body
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+
+        keep_alive = body.get("keep_alive", "5m")
+
+        # Extract model name from model_id (format: "server_id:model_name")
+        if ":" in model_id:
+            _, model_name = model_id.split(":", 1)
+        else:
+            model_name = model_id
+
+        # Load model by sending a minimal request with keep_alive
+        # This triggers Ollama to load the model into VRAM
+        timeout = aiohttp.ClientTimeout(total=120)  # Loading can take time
+        start_time = time.time()
+
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(
+                "http://localhost:11434/api/generate",
+                json={
+                    "model": model_name,
+                    "prompt": "",
+                    "keep_alive": keep_alive
+                }
+            ) as resp:
+                if resp.status != 200:
+                    error_text = await resp.text()
+                    return web.json_response({
+                        "status": "error",
+                        "model": model_name,
+                        "error": f"Ollama returned {resp.status}: {error_text}"
+                    }, status=resp.status)
+
+                # Consume the streaming response
+                async for _ in resp.content:
+                    pass
+
+        load_time_ms = int((time.time() - start_time) * 1000)
+
+        # Get updated VRAM usage
+        vram_bytes = 0
+        try:
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
+                async with session.get("http://localhost:11434/api/ps") as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        for m in data.get("models", []):
+                            if m.get("name") == model_name:
+                                vram_bytes = m.get("size_vram", 0)
+                                break
+        except Exception:
+            pass
+
+        logger.info(f"Loaded model {model_name} in {load_time_ms}ms")
+        await broadcast_message("model_loaded", {"model": model_name, "vram_bytes": vram_bytes})
+
+        return web.json_response({
+            "status": "ok",
+            "model": model_name,
+            "vram_bytes": vram_bytes,
+            "vram_gb": round(vram_bytes / (1024**3), 2),
+            "load_time_ms": load_time_ms,
+            "message": f"Model {model_name} loaded successfully"
+        })
+
+    except asyncio.TimeoutError:
+        return web.json_response({
+            "status": "error",
+            "model": model_id,
+            "error": "Timeout loading model (may still be loading in background)"
+        }, status=504)
+    except Exception as e:
+        logger.error(f"Error loading model {model_id}: {e}")
+        return web.json_response({
+            "status": "error",
+            "model": model_id,
+            "error": str(e)
+        }, status=500)
+
+
+async def handle_unload_model(request: web.Request) -> web.Response:
+    """Unload a specific model from memory."""
+    model_id = request.match_info["model_id"]
+
+    try:
+        # Extract model name from model_id (format: "server_id:model_name")
+        if ":" in model_id:
+            _, model_name = model_id.split(":", 1)
+        else:
+            model_name = model_id
+
+        # Get current VRAM usage before unload
+        vram_before = 0
+        try:
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
+                async with session.get("http://localhost:11434/api/ps") as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        for m in data.get("models", []):
+                            if m.get("name") == model_name:
+                                vram_before = m.get("size_vram", 0)
+                                break
+        except Exception:
+            pass
+
+        if vram_before == 0:
+            return web.json_response({
+                "status": "ok",
+                "model": model_name,
+                "message": "Model was not loaded",
+                "freed_vram_bytes": 0
+            })
+
+        # Unload by setting keep_alive to 0
+        timeout = aiohttp.ClientTimeout(total=30)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(
+                "http://localhost:11434/api/generate",
+                json={
+                    "model": model_name,
+                    "prompt": "",
+                    "keep_alive": 0
+                }
+            ) as resp:
+                if resp.status != 200:
+                    error_text = await resp.text()
+                    return web.json_response({
+                        "status": "error",
+                        "model": model_name,
+                        "error": f"Ollama returned {resp.status}: {error_text}"
+                    }, status=resp.status)
+
+                # Consume the streaming response
+                async for _ in resp.content:
+                    pass
+
+        logger.info(f"Unloaded model {model_name}, freed {vram_before / (1024**3):.2f} GB")
+        await broadcast_message("model_unloaded", {"model": model_name, "freed_vram_bytes": vram_before})
+
+        return web.json_response({
+            "status": "ok",
+            "model": model_name,
+            "freed_vram_bytes": vram_before,
+            "freed_vram_gb": round(vram_before / (1024**3), 2),
+            "message": f"Model {model_name} unloaded"
+        })
+
+    except Exception as e:
+        logger.error(f"Error unloading model {model_id}: {e}")
+        return web.json_response({
+            "status": "error",
+            "model": model_id,
+            "error": str(e)
+        }, status=500)
+
+
+async def handle_pull_model(request: web.Request) -> web.StreamResponse:
+    """Pull (download) a model from Ollama registry with SSE progress streaming."""
+    try:
+        body = await request.json()
+        model_name = body.get("model")
+
+        if not model_name:
+            return web.json_response({"error": "Model name required"}, status=400)
+
+        logger.info(f"Starting pull for model: {model_name}")
+
+        # Set up SSE response
+        response = web.StreamResponse(
+            status=200,
+            reason="OK",
+            headers={
+                "Content-Type": "text/event-stream",
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            }
+        )
+        await response.prepare(request)
+
+        # Stream pull progress from Ollama
+        timeout = aiohttp.ClientTimeout(total=3600)  # 1 hour for large models
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(
+                "http://localhost:11434/api/pull",
+                json={"name": model_name, "stream": True}
+            ) as resp:
+                if resp.status != 200:
+                    error_msg = await resp.text()
+                    await response.write(
+                        f"data: {json.dumps({'status': 'error', 'error': error_msg})}\n\n".encode()
+                    )
+                    await response.write_eof()
+                    return response
+
+                async for line in resp.content:
+                    if line:
+                        try:
+                            data = json.loads(line.decode())
+                            # Forward the progress event
+                            sse_data = {
+                                "status": data.get("status", ""),
+                                "digest": data.get("digest", ""),
+                                "completed": data.get("completed", 0),
+                                "total": data.get("total", 0),
+                            }
+
+                            # Check for completion or error
+                            if "error" in data:
+                                sse_data["error"] = data["error"]
+                                sse_data["status"] = "error"
+
+                            await response.write(f"data: {json.dumps(sse_data)}\n\n".encode())
+
+                        except json.JSONDecodeError:
+                            continue
+
+        # Send completion event
+        await response.write(
+            f"data: {json.dumps({'status': 'success', 'model': model_name})}\n\n".encode()
+        )
+
+        logger.info(f"Model pull completed: {model_name}")
+        await broadcast_message("model_pulled", {"model": model_name})
+        await response.write_eof()
+        return response
+
+    except asyncio.CancelledError:
+        logger.info("Model pull cancelled by client")
+        raise
+    except Exception as e:
+        logger.error(f"Error pulling model: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
+
+async def handle_delete_model(request: web.Request) -> web.Response:
+    """Delete a model from Ollama."""
+    model_id = request.match_info["model_id"]
+
+    try:
+        # Extract model name from model_id (format: "server_id:model_name")
+        if ":" in model_id:
+            _, model_name = model_id.split(":", 1)
+        else:
+            model_name = model_id
+
+        timeout = aiohttp.ClientTimeout(total=30)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.delete(
+                "http://localhost:11434/api/delete",
+                json={"name": model_name}
+            ) as resp:
+                if resp.status == 200:
+                    logger.info(f"Deleted model: {model_name}")
+                    await broadcast_message("model_deleted", {"model": model_name})
+                    return web.json_response({
+                        "status": "ok",
+                        "model": model_name,
+                        "message": f"Model {model_name} deleted"
+                    })
+                else:
+                    error_text = await resp.text()
+                    return web.json_response({
+                        "status": "error",
+                        "model": model_name,
+                        "error": f"Ollama returned {resp.status}: {error_text}"
+                    }, status=resp.status)
+
+    except Exception as e:
+        logger.error(f"Error deleting model {model_id}: {e}")
+        return web.json_response({
+            "status": "error",
+            "model": model_id,
+            "error": str(e)
+        }, status=500)
+
+
 # =============================================================================
 # API Handlers - Dashboard Stats
 # =============================================================================
@@ -3731,6 +4016,10 @@ def create_app() -> web.Application:
 
     # Models
     app.router.add_get("/api/models", handle_get_models)
+    app.router.add_post("/api/models/{model_id}/load", handle_load_model)
+    app.router.add_post("/api/models/{model_id}/unload", handle_unload_model)
+    app.router.add_post("/api/models/pull", handle_pull_model)
+    app.router.add_delete("/api/models/{model_id}", handle_delete_model)
 
     # Managed Services
     app.router.add_get("/api/services", handle_get_services)
