@@ -21,6 +21,20 @@
                ReferencedContainer = "container:UnaMentis.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "8B385E9CB989C455F6041CA2"
+               BuildableName = "UnaMentis Watch App.app"
+               BlueprintName = "UnaMentis Watch App"
+               ReferencedContainer = "container:UnaMentis.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

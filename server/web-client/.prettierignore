@@ -1,0 +1,28 @@
+# Build outputs
+.next
+out
+build
+dist
+coverage
+
+# Dependencies
+node_modules
+
+# Generated files
+*.lock
+package-lock.json
+pnpm-lock.yaml
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# Test results
+test-results
+junit.xml
+
+# IDE
+.idea
+.vscode
+
+# Environment
+.env*
+!.env.example

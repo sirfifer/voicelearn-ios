@@ -20,8 +20,8 @@ if [[ "$FILE_PATH" == *.swift ]]; then
         exit 0
     fi
 
-    # Run swiftlint on the specific file
-    if ! swiftlint lint --path "$FILE_PATH" --quiet --strict 2>/dev/null; then
+    # Run swiftlint on the specific file (positional arg, not --path which is deprecated)
+    if ! swiftlint lint "$FILE_PATH" --quiet --strict 2>/dev/null; then
         echo "SwiftLint violations in $FILE_PATH. Fix before committing." >&2
         exit 2
     fi

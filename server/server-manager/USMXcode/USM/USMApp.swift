@@ -1,5 +1,6 @@
 import SwiftUI
 import Foundation
+import AppKit
 
 // MARK: - Service Model
 
@@ -64,11 +65,19 @@ class ServiceManager: ObservableObject {
             ),
             Service(
                 id: "web-server",
-                displayName: "Web Server",
+                displayName: "Operations Console",
                 processName: "next-server",
                 port: 3000,
                 startCommand: "npm run serve",
                 workingDirectory: "\(serverPath)/web"
+            ),
+            Service(
+                id: "web-client",
+                displayName: "Web Client",
+                processName: "next-server",
+                port: 3001,
+                startCommand: "pnpm dev --port 3001",
+                workingDirectory: "\(serverPath)/web-client"
             ),
             Service(
                 id: "ollama",
@@ -224,6 +233,20 @@ class ServiceManager: ObservableObject {
             NSWorkspace.shared.open(url)
         }
     }
+
+    /// Calculates the width needed for the longest service name plus padding
+    var maxServiceNameWidth: CGFloat {
+        let font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+        let padding: CGFloat = 8
+
+        let maxWidth = services.map { service in
+            let attributes: [NSAttributedString.Key: Any] = [.font: font]
+            let size = (service.displayName as NSString).size(withAttributes: attributes)
+            return size.width
+        }.max() ?? 100
+
+        return maxWidth + padding
+    }
 }
 
 // MARK: - App
@@ -274,7 +297,11 @@ struct PopoverContent: View {
             // Services List
             VStack(spacing: 1) {
                 ForEach(serviceManager.services) { service in
-                    ServiceRow(service: service, serviceManager: serviceManager)
+                    ServiceRow(
+                        service: service,
+                        nameWidth: serviceManager.maxServiceNameWidth,
+                        serviceManager: serviceManager
+                    )
                 }
             }
             .padding(.vertical, 4)
@@ -324,7 +351,7 @@ struct PopoverContent: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
         }
-        .frame(width: 400)
+        .frame(width: 370)
     }
 }
 
@@ -332,6 +359,7 @@ struct PopoverContent: View {
 
 struct ServiceRow: View {
     let service: Service
+    let nameWidth: CGFloat
     @ObservedObject var serviceManager: ServiceManager
 
     var body: some View {
@@ -341,9 +369,10 @@ struct ServiceRow: View {
                 .fill(service.status.color)
                 .frame(width: 8, height: 8)
 
-            // Service name
+            // Service name - fixed width, no wrapping
             Text(service.displayName)
-                .frame(width: 100, alignment: .leading)
+                .lineLimit(1)
+                .frame(width: nameWidth, alignment: .leading)
 
             // CPU
             HStack(spacing: 2) {
@@ -378,8 +407,6 @@ struct ServiceRow: View {
                 }
             }
             .frame(width: 60, alignment: .trailing)
-
-            Spacer()
 
             // Action buttons
             HStack(spacing: 4) {

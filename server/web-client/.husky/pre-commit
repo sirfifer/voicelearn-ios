@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Run lint-staged for web-client
+cd server/web-client
+pnpm lint-staged

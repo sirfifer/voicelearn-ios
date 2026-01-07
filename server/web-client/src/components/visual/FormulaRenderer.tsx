@@ -1,0 +1,107 @@
+'use client';
+
+import * as React from 'react';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+import { cn } from '@/lib/utils';
+import type { SemanticMeaning } from '@/types';
+
+// ===== Types =====
+
+export interface FormulaRendererProps {
+  latex: string;
+  displayMode?: boolean;
+  semanticMeaning?: SemanticMeaning;
+  className?: string;
+  showSemantics?: boolean;
+}
+
+// ===== KaTeX Macros =====
+
+const defaultMacros: Record<string, string> = {
+  '\\R': '\\mathbb{R}',
+  '\\N': '\\mathbb{N}',
+  '\\Z': '\\mathbb{Z}',
+  '\\Q': '\\mathbb{Q}',
+  '\\C': '\\mathbb{C}',
+};
+
+// ===== Formula Renderer Component =====
+
+function FormulaRenderer({
+  latex,
+  displayMode = true,
+  semanticMeaning,
+  className,
+  showSemantics = true,
+}: FormulaRendererProps) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+
+    try {
+      katex.render(latex, containerRef.current, {
+        displayMode,
+        throwOnError: false,
+        errorColor: '#cc0000',
+        trust: true,
+        macros: defaultMacros,
+      });
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to render formula');
+    }
+  }, [latex, displayMode]);
+
+  return (
+    <div className={cn('formula-container', className)}>
+      {error ? (
+        <div className="text-destructive text-sm p-2 bg-destructive/10 rounded-md">
+          <p className="font-medium">Formula error</p>
+          <p className="text-xs mt-1">{error}</p>
+          <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-x-auto">{latex}</pre>
+        </div>
+      ) : (
+        <div
+          ref={containerRef}
+          className={cn('text-center', displayMode ? 'py-4' : 'inline')}
+          role="img"
+          aria-label={semanticMeaning?.spokenForm || `Formula: ${latex}`}
+        />
+      )}
+
+      {showSemantics && semanticMeaning && !error && (
+        <div className="mt-4 p-3 bg-muted/50 rounded-lg text-sm">
+          {semanticMeaning.commonName && (
+            <p className="font-semibold text-foreground">{semanticMeaning.commonName}</p>
+          )}
+          {semanticMeaning.purpose && (
+            <p className="text-muted-foreground mt-1">{semanticMeaning.purpose}</p>
+          )}
+          {semanticMeaning.variables && semanticMeaning.variables.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Variables
+              </p>
+              <ul className="mt-1 space-y-1">
+                {semanticMeaning.variables.map((v, i) => (
+                  <li key={i} className="flex items-baseline gap-2">
+                    <code className="font-mono text-primary">{v.symbol}</code>
+                    <span className="text-muted-foreground">
+                      {v.meaning}
+                      {v.unit && <span className="text-xs ml-1">({v.unit})</span>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export { FormulaRenderer };

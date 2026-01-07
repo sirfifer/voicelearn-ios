@@ -1048,6 +1048,11 @@ class SessionViewModel: ObservableObject {
     private var sessionManager: SessionManager?
     private var subscribers = Set<AnyCancellable>()
 
+    // MARK: - Watch Connectivity
+
+    /// Subscribers for Watch state sync
+    private var watchSyncCancellables = Set<AnyCancellable>()
+
     /// Transcript streaming service for direct TTS playback (bypasses LLM)
     private let transcriptStreamer = TranscriptStreamingService()
 
@@ -1541,6 +1546,9 @@ class SessionViewModel: ObservableObject {
             // Start barge-in monitoring (microphone + VAD) in parallel with playback
             await startBargeInMonitoring(appState: appState)
 
+            // Set up Watch sync for direct streaming mode
+            setupWatchSync()
+
             await transcriptStreamer.streamTopicAudio(
                 curriculumId: curriculumSourceId,
                 topicId: topicSourceId,
@@ -1882,6 +1890,9 @@ class SessionViewModel: ObservableObject {
                 lectureMode: lectureMode
             )
 
+            // Set up Watch sync after session starts
+            setupWatchSync()
+
         } catch {
             logger.error("Session start failed: \(error.localizedDescription)", metadata: [
                 "error_type": "\(type(of: error))",
@@ -1923,6 +1934,9 @@ class SessionViewModel: ObservableObject {
         conversationHistory.removeAll()
         lastUserTranscript = ""
         lastAiResponse = ""
+
+        // Notify Watch of session end
+        teardownWatchSync()
     }
 
     /// Queue audio with associated text for synchronized playback (for transcript streaming mode)
@@ -2027,6 +2041,119 @@ class SessionViewModel: ObservableObject {
         isDirectStreamingMode = false
         state = .idle
         sessionStartTime = nil
+
+        // Notify Watch of session end
+        teardownWatchSync()
+    }
+
+    // MARK: - Watch Sync Methods
+
+    /// Set up Watch connectivity observers for state sync
+    private func setupWatchSync() {
+        logger.info("Setting up Watch sync")
+
+        // Set up command handler for Watch commands
+        WatchConnectivityService.shared.setCommandHandler { [weak self] command in
+            await self?.handleWatchCommand(command) ?? CommandResponse(
+                command: command,
+                success: false,
+                error: "Session not available"
+            )
+        }
+
+        // Sync on state changes
+        $state.sink { [weak self] _ in
+            self?.syncToWatch()
+        }.store(in: &watchSyncCancellables)
+
+        $isPaused.sink { [weak self] _ in
+            self?.syncToWatch()
+        }.store(in: &watchSyncCancellables)
+
+        $isMuted.sink { [weak self] _ in
+            self?.syncToWatch()
+        }.store(in: &watchSyncCancellables)
+
+        $currentSegmentIndex.sink { [weak self] _ in
+            self?.syncToWatch()
+        }.store(in: &watchSyncCancellables)
+
+        $completedSegmentCount.sink { [weak self] _ in
+            self?.syncToWatch()
+        }.store(in: &watchSyncCancellables)
+
+        // Initial sync
+        syncToWatch()
+    }
+
+    /// Sync current state to Watch
+    private func syncToWatch() {
+        let watchState = generateWatchState()
+        WatchConnectivityService.shared.syncSessionState(watchState)
+    }
+
+    /// Generate WatchSessionState from current view model state
+    private func generateWatchState() -> WatchSessionState {
+        let sessionMode: WatchSessionState.SessionMode
+        if isDirectStreamingMode {
+            sessionMode = .directStreaming
+        } else if topic != nil {
+            sessionMode = .curriculum
+        } else {
+            sessionMode = .freeform
+        }
+
+        let elapsedSeconds: TimeInterval
+        if let startTime = sessionStartTime {
+            elapsedSeconds = Date().timeIntervalSince(startTime)
+        } else {
+            elapsedSeconds = 0
+        }
+
+        return WatchSessionState(
+            isActive: state != .idle,
+            isPaused: isPaused,
+            isMuted: isMuted,
+            curriculumTitle: topic?.curriculum?.name,
+            topicTitle: topic?.title,
+            sessionMode: sessionMode,
+            currentSegment: currentSegmentIndex,
+            totalSegments: totalSegments,
+            elapsedSeconds: elapsedSeconds
+        )
+    }
+
+    /// Handle command received from Watch
+    private func handleWatchCommand(_ command: SessionCommand) async -> CommandResponse {
+        logger.info("Handling Watch command: \(command.commandDescription)")
+
+        switch command {
+        case .pause:
+            pausePlayback()
+        case .resume:
+            resumePlayback()
+        case .mute:
+            setMicrophoneMuted(true)
+        case .unmute:
+            setMicrophoneMuted(false)
+        case .stop:
+            stopPlayback()
+        }
+
+        return CommandResponse(
+            command: command,
+            success: true,
+            updatedState: generateWatchState()
+        )
+    }
+
+    /// Tear down Watch sync when session ends
+    private func teardownWatchSync() {
+        logger.info("Tearing down Watch sync")
+        watchSyncCancellables.removeAll()
+        WatchConnectivityService.shared.clearCommandHandler()
+        // Send idle state
+        WatchConnectivityService.shared.syncSessionState(.idle)
     }
 
     /// Save progress to the topic

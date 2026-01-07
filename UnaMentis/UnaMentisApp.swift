@@ -48,6 +48,10 @@ struct UnaMentisApp: App {
         _ = PersistenceController.shared
         print("[Init] Core Data store initialized")
 
+        // Activate Watch connectivity for companion app communication
+        WatchConnectivityService.shared.activateSession()
+        print("[Init] WatchConnectivity activated")
+
         // Configure remote logging server
         // For simulator: localhost works automatically
         // For device: set the IP of your Mac running log_server.py

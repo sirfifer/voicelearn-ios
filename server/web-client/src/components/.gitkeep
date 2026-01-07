@@ -1,0 +1,7 @@
+# React Components
+# This directory will contain:
+# - ui/ (base UI components)
+# - session/ (session-related components)
+# - curriculum/ (curriculum browsing)
+# - visual/ (asset renderers)
+# - auth/ (authentication forms)

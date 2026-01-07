@@ -1,0 +1,17 @@
+# Provider Abstraction Layer
+# This directory will contain:
+# - types.ts (STTProvider, TTSProvider, LLMProvider interfaces)
+# - stt/ (STT provider implementations)
+#   - openai-realtime.ts
+#   - deepgram.ts
+#   - assemblyai.ts
+#   - groq.ts
+# - tts/ (TTS provider implementations)
+#   - openai-realtime.ts
+#   - elevenlabs.ts
+#   - deepgram.ts
+# - llm/ (LLM provider implementations)
+#   - openai.ts
+#   - anthropic.ts
+#   - ollama.ts
+# - manager.ts (ProviderManager class)

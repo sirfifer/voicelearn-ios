@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: com.unamentis
   deploymentTarget:
     iOS: "18.0"
+    watchOS: "26.0"
   xcodeVersion: "15.2"
   minimumXcodeGenVersion: "2.40"
   createIntermediateGroups: true
@@ -48,10 +49,15 @@ targets:
           # ManagedObjects included now - using manual classes with no auto-generation
           - "**/SelfHostedSTTService.swift"  # Has duplicate STTMetrics/STTError types
           - "**/OnDeviceLLMService.swift"  # Uses incompatible llama.cpp API, use SelfHostedLLMService instead
+      - path: Shared
+        excludes:
+          - "**/.DS_Store"
       - path: models/llama-3.2-3b-instruct-q4_k_m.gguf
         buildPhase: resources
         type: file
     dependencies:
+      - target: UnaMentis Watch App
+        embed: true
       - package: LiveKit
       - package: SwiftLog
         product: Logging
@@ -103,6 +109,9 @@ targets:
         excludes:
           - "**/.DS_Store"
           - E2E  # E2E tests separate
+      - path: Shared
+        excludes:
+          - "**/.DS_Store"
     dependencies:
       - target: UnaMentis
     settings:
@@ -111,11 +120,46 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.unamentis.tests
         GENERATE_INFOPLIST_FILE: YES
 
+  UnaMentis Watch App:
+    type: application
+    platform: watchOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: UnaMentis Watch App
+        excludes:
+          - "**/.DS_Store"
+      - path: Shared
+        excludes:
+          - "**/.DS_Store"
+    settings:
+      base:
+        INFOPLIST_FILE: UnaMentis Watch App/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.unamentis.app.watchkitapp
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_EMIT_LOC_STRINGS: YES
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "4"
+    info:
+      path: UnaMentis Watch App/Info.plist
+      properties:
+        CFBundleName: UnaMentis Watch App
+        CFBundleDisplayName: UnaMentis
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0"
+        CFBundlePackageType: APPL
+        WKCompanionAppBundleIdentifier: com.unamentis.app
+        WKRunsIndependentlyOfCompanionApp: false
+        WKApplication: true
+        UIDeviceFamily:
+          - 4
+
 schemes:
   UnaMentis:
     build:
       targets:
         UnaMentis: all
+        UnaMentis Watch App: all
     run:
       config: Debug
     test:
@@ -124,6 +168,19 @@ schemes:
         - name: UnaMentisTests
           parallelizable: true
           randomExecutionOrder: true
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  UnaMentis Watch App:
+    build:
+      targets:
+        UnaMentis Watch App: all
+    run:
+      config: Debug
     profile:
       config: Release
     analyze:
