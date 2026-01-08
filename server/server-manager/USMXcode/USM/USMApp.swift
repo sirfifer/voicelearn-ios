@@ -119,6 +119,33 @@ class ServiceManager: ObservableObject {
     }
 
     private func checkProcess(name: String, port: Int?) -> (running: Bool, pid: Int?, cpuPercent: Double?, memoryMB: Int?) {
+        // If we have a port, use lsof to find the exact process listening on that port
+        // This properly differentiates services that share process names (e.g., multiple next-server instances)
+        if let port = port {
+            let lsofTask = Process()
+            lsofTask.executableURL = URL(fileURLWithPath: "/usr/sbin/lsof")
+            lsofTask.arguments = ["-i", ":\(port)", "-sTCP:LISTEN", "-t"]
+
+            let lsofPipe = Pipe()
+            lsofTask.standardOutput = lsofPipe
+            lsofTask.standardError = FileHandle.nullDevice
+
+            do {
+                try lsofTask.run()
+                lsofTask.waitUntilExit()
+
+                let lsofData = lsofPipe.fileHandleForReading.readDataToEndOfFile()
+                if let lsofOutput = String(data: lsofData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !lsofOutput.isEmpty,
+                   let pid = Int(lsofOutput.components(separatedBy: "\n").first ?? "") {
+                    return getProcessStats(pid: pid)
+                }
+            } catch {
+                // lsof failed, fall through to pgrep
+            }
+        }
+
+        // Fall back to pgrep for services without ports (or if lsof failed)
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/pgrep")
         task.arguments = ["-f", name]
@@ -135,38 +162,47 @@ class ServiceManager: ObservableObject {
             if let output = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
                !output.isEmpty,
                let pid = Int(output.components(separatedBy: "\n").first ?? "") {
-                // Get CPU and memory usage
-                let statsTask = Process()
-                statsTask.executableURL = URL(fileURLWithPath: "/bin/ps")
-                statsTask.arguments = ["-o", "%cpu=,rss=", "-p", "\(pid)"]
-                let statsPipe = Pipe()
-                statsTask.standardOutput = statsPipe
-                statsTask.standardError = FileHandle.nullDevice
-                try statsTask.run()
-                statsTask.waitUntilExit()
-
-                let statsData = statsPipe.fileHandleForReading.readDataToEndOfFile()
-                let statsStr = String(data: statsData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                let parts = statsStr.split(separator: " ").map { String($0) }
-
-                var cpuPercent: Double?
-                var memoryMB: Int?
-
-                if parts.count >= 1 {
-                    cpuPercent = Double(parts[0])
-                }
-                if parts.count >= 2 {
-                    let memoryKB = Int(parts[1]) ?? 0
-                    memoryMB = memoryKB / 1024
-                }
-
-                return (true, pid, cpuPercent, memoryMB)
+                return getProcessStats(pid: pid)
             }
         } catch {
             // Process check failed
         }
 
         return (false, nil, nil, nil)
+    }
+
+    private func getProcessStats(pid: Int) -> (running: Bool, pid: Int?, cpuPercent: Double?, memoryMB: Int?) {
+        let statsTask = Process()
+        statsTask.executableURL = URL(fileURLWithPath: "/bin/ps")
+        statsTask.arguments = ["-o", "%cpu=,rss=", "-p", "\(pid)"]
+        let statsPipe = Pipe()
+        statsTask.standardOutput = statsPipe
+        statsTask.standardError = FileHandle.nullDevice
+
+        do {
+            try statsTask.run()
+            statsTask.waitUntilExit()
+
+            let statsData = statsPipe.fileHandleForReading.readDataToEndOfFile()
+            let statsStr = String(data: statsData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let parts = statsStr.split(separator: " ").map { String($0) }
+
+            var cpuPercent: Double?
+            var memoryMB: Int?
+
+            if parts.count >= 1 {
+                cpuPercent = Double(parts[0])
+            }
+            if parts.count >= 2 {
+                let memoryKB = Int(parts[1]) ?? 0
+                memoryMB = memoryKB / 1024
+            }
+
+            return (true, pid, cpuPercent, memoryMB)
+        } catch {
+            // Stats fetch failed but process exists
+            return (true, pid, nil, nil)
+        }
     }
 
     func start(_ serviceId: String) {
@@ -191,6 +227,7 @@ class ServiceManager: ObservableObject {
 
     func stop(_ serviceId: String) {
         guard let index = services.firstIndex(where: { $0.id == serviceId }) else { return }
+        let service = services[index]
 
         let task = Process()
 
@@ -199,7 +236,21 @@ class ServiceManager: ObservableObject {
             task.executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/brew")
             task.arguments = ["services", "stop", "postgresql@17"]
         } else {
-            guard let pid = services[index].pid else { return }
+            // Try to get PID from stored value, or look it up by port
+            var pidToKill: Int?
+
+            if let pid = service.pid {
+                pidToKill = pid
+            } else if let port = service.port {
+                // Look up the PID by port using lsof
+                pidToKill = findPidByPort(port)
+            }
+
+            guard let pid = pidToKill else {
+                print("No PID found for \(service.displayName)")
+                return
+            }
+
             task.executableURL = URL(fileURLWithPath: "/bin/kill")
             task.arguments = ["\(pid)"]
         }
@@ -219,6 +270,32 @@ class ServiceManager: ObservableObject {
         }
     }
 
+    private func findPidByPort(_ port: Int) -> Int? {
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/sbin/lsof")
+        task.arguments = ["-i", ":\(port)", "-sTCP:LISTEN", "-t"]
+
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = FileHandle.nullDevice
+
+        do {
+            try task.run()
+            task.waitUntilExit()
+
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !output.isEmpty,
+               let pid = Int(output.components(separatedBy: "\n").first ?? "") {
+                return pid
+            }
+        } catch {
+            // Failed to find PID by port
+        }
+
+        return nil
+    }
+
     func restart(_ serviceId: String) {
         stop(serviceId)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -227,14 +304,32 @@ class ServiceManager: ObservableObject {
     }
 
     func startAll() {
-        for service in services where service.status != .running {
-            start(service.id)
+        // Refresh status first to get accurate state
+        updateStatuses()
+
+        // Get list of services to start
+        let servicesToStart = services.filter { $0.status != .running }
+
+        // Start services with a small delay between each to avoid overwhelming the system
+        for (index, service) in servicesToStart.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.5) {
+                self.start(service.id)
+            }
         }
     }
 
     func stopAll() {
-        for service in services where service.status == .running {
-            stop(service.id)
+        // Refresh status first to get accurate PIDs
+        updateStatuses()
+
+        // Get list of services to stop (reverse order: stop dependent services first)
+        let servicesToStop = services.filter { $0.status == .running }.reversed()
+
+        // Stop services with a small delay between each
+        for (index, service) in servicesToStop.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.3) {
+                self.stop(service.id)
+            }
         }
     }
 
