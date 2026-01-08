@@ -502,6 +502,95 @@ See `server/latency_harness/CLAUDE.md` and `docs/LATENCY_TEST_HARNESS_GUIDE.md` 
 
 ---
 
+## Code Quality Infrastructure
+
+UnaMentis implements a comprehensive **5-phase Code Quality Initiative** that enables enterprise-grade quality standards through intelligent automation. This infrastructure allows a small team to maintain quality typically requiring 10+ engineers.
+
+### Quality Gates
+
+| Gate | Threshold | Enforcement |
+|------|-----------|-------------|
+| Code Coverage (iOS) | 80% minimum | CI fails if below |
+| Latency P50 | 500ms | CI warns at +10%, fails at +20% |
+| Latency P99 | 1000ms | CI warns at +10%, fails at +20% |
+| SwiftLint | Zero violations (strict) | Pre-commit hook |
+| Ruff (Python) | Zero violations | Pre-commit hook |
+| ESLint/Prettier | Zero violations | Pre-commit hook |
+| Secrets Detection | Zero findings | Pre-commit + CI |
+| Security Vulnerabilities | Zero critical/high | Security workflow |
+
+### Automation Components
+
+| Component | Tool | Purpose |
+|-----------|------|---------|
+| Pre-commit Hooks | Native git hooks | Lint, format, secrets check |
+| Dependency Management | Renovate | Auto-updates with grouping |
+| AI Code Review | CodeRabbit | Automated PR review (free for OSS) |
+| Performance Testing | Latency Harness | Regression detection |
+| Security Scanning | CodeQL, Gitleaks | Vulnerability detection |
+| DORA Metrics | Apache DevLake | Engineering health |
+| Feature Flags | Unleash | Safe rollouts |
+
+### GitHub Actions Workflows
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| iOS CI | Push/PR | Build, lint, test, coverage |
+| Server CI | Push/PR | Python linting, tests |
+| Web Client CI | Push/PR | Lint, typecheck, build |
+| Nightly E2E | Daily 2am | Full E2E + latency tests |
+| Performance | Push/PR/scheduled | Latency regression check |
+| Security | Push/PR/weekly | Secrets, CodeQL, audits |
+| Quality Metrics | Daily | CI/PR/bug metrics |
+| Feature Flags | Weekly | Stale flag audit |
+
+### Feature Flag System
+
+Self-hosted Unleash infrastructure with SDKs for all platforms:
+
+| Component | Port | Purpose |
+|-----------|------|---------|
+| Unleash Server | 4242 | Flag management |
+| Unleash Proxy | 3063 | Client SDK endpoint |
+| PostgreSQL | 5432 | Data persistence |
+
+**SDK Support:**
+- iOS: Actor-based service with SwiftUI view modifier
+- Web: React context, hooks (`useFlag`, `useFlagVariant`)
+- Lifecycle: Automated stale flag detection + cleanup issues
+
+### DORA Metrics (DevLake)
+
+Apache DevLake provides visibility into engineering health:
+
+| Metric | What It Measures | Elite Target |
+|--------|-----------------|--------------|
+| Deployment Frequency | How often code ships | Multiple/day |
+| Lead Time for Changes | Commit to production | < 1 hour |
+| Change Failure Rate | Failures from deployments | 0-15% |
+| Mean Time to Recovery | Incident resolution | < 1 hour |
+
+**Access:**
+- Config UI: http://localhost:4000
+- Grafana Dashboards: http://localhost:3002
+
+### Quick Setup
+
+```bash
+# Install git hooks
+./scripts/install-hooks.sh
+
+# Start DORA metrics
+cd server/devlake && docker compose up -d
+
+# Start feature flags
+cd server/feature-flags && docker compose up -d
+```
+
+See [CODE_QUALITY_INITIATIVE.md](../CODE_QUALITY_INITIATIVE.md) for complete documentation.
+
+---
+
 ## Current Status
 
 ### Complete
