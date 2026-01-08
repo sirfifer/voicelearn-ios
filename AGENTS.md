@@ -711,3 +711,26 @@ curl -s "http://localhost:8766/api/latency-tests/baselines/{id}/check?runId=run_
 ```
 
 See `server/latency_harness/CLAUDE.md` and `docs/LATENCY_TEST_HARNESS_GUIDE.md` for complete documentation.
+
+---
+
+## Cross-Repository Access
+
+This project has read access to related external repositories via `additionalDirectories` in `.claude/settings.json`.
+
+### Available Repos
+
+| Repo | Path | Purpose |
+|------|------|---------|
+| unamentis-android | /Users/ramerman/dev/unamentis-android | Android client |
+
+### Usage
+
+Use absolute paths with Read, Grep, and Glob tools:
+- `Read /Users/ramerman/dev/unamentis-android/README.md`
+- `Grep pattern in /Users/ramerman/dev/unamentis-android/`
+- `Glob /Users/ramerman/dev/unamentis-android/**/*.kt`
+
+For read-only constraint, invoke `/read-external` skill.
+
+See `.claude/skills/read-external/TEMPLATE.md` to add more repos.

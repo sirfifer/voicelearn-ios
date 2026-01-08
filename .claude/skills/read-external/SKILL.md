@@ -12,7 +12,7 @@ This skill provides constrained read-only access to external repositories config
 
 | Repo | Path | Purpose |
 |------|------|---------|
-| *(add repos here)* | /Users/ramerman/dev/REPO | Description |
+| *unamentis-android* | /Users/ramerman/dev/unamentis-android | Andoid Client for UnaMentis |
 
 ## Usage
 
