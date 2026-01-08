@@ -207,10 +207,7 @@ export function ModelsPanel() {
 
       {/* Parameters Modal */}
       {configuringModel && (
-        <ModelParametersModal
-          model={configuringModel}
-          onClose={() => setConfiguringModel(null)}
-        />
+        <ModelParametersModal model={configuringModel} onClose={() => setConfiguringModel(null)} />
       )}
 
       {/* Error Display */}
