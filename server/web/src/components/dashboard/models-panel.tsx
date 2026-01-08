@@ -29,6 +29,7 @@ import {
 } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { ModelPullDialog } from './model-pull-dialog';
+import { ModelParametersModal } from './model-parameters-modal';
 
 export function ModelsPanel() {
   const [models, setModels] = useState<ModelInfo[]>([]);
@@ -37,6 +38,7 @@ export function ModelsPanel() {
   const [operatingModels, setOperatingModels] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [showPullDialog, setShowPullDialog] = useState(false);
+  const [configuringModel, setConfiguringModel] = useState<ModelInfo | null>(null);
 
   // Service configuration state
   const [showConfig, setShowConfig] = useState(false);
@@ -200,6 +202,14 @@ export function ModelsPanel() {
         <ModelPullDialog
           onClose={() => setShowPullDialog(false)}
           onComplete={() => fetchModels()}
+        />
+      )}
+
+      {/* Parameters Modal */}
+      {configuringModel && (
+        <ModelParametersModal
+          model={configuringModel}
+          onClose={() => setConfiguringModel(null)}
         />
       )}
 
@@ -471,56 +481,65 @@ export function ModelsPanel() {
                     )}
                   </div>
 
-                  {/* Load/Unload buttons for LLM models */}
+                  {/* Load/Unload and Configure buttons for LLM models */}
                   {isLLM && (
-                    <div className="mt-4 pt-3 border-t border-slate-700/50">
-                      {isLoaded ? (
+                    <div className="mt-4 pt-3 border-t border-slate-700/50 space-y-2">
+                      <div className="flex gap-2">
+                        {isLoaded ? (
+                          <button
+                            onClick={() => handleUnloadModel(model)}
+                            disabled={isOperating}
+                            className={cn(
+                              'flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all',
+                              isOperating
+                                ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                                : 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30'
+                            )}
+                          >
+                            {isOperating ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Unloading...
+                              </>
+                            ) : (
+                              <>
+                                <Square className="w-4 h-4" />
+                                Unload
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleLoadModel(model)}
+                            disabled={isOperating}
+                            className={cn(
+                              'flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all',
+                              isOperating
+                                ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                                : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30'
+                            )}
+                          >
+                            {isOperating ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Loading...
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-4 h-4" />
+                                Load
+                              </>
+                            )}
+                          </button>
+                        )}
                         <button
-                          onClick={() => handleUnloadModel(model)}
-                          disabled={isOperating}
-                          className={cn(
-                            'w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all',
-                            isOperating
-                              ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                              : 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30'
-                          )}
+                          onClick={() => setConfiguringModel(model)}
+                          className="px-3 py-2 text-sm font-medium rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50 transition-all"
+                          title="Configure parameters"
                         >
-                          {isOperating ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              Unloading...
-                            </>
-                          ) : (
-                            <>
-                              <Square className="w-4 h-4" />
-                              Unload
-                            </>
-                          )}
+                          <Settings className="w-4 h-4" />
                         </button>
-                      ) : (
-                        <button
-                          onClick={() => handleLoadModel(model)}
-                          disabled={isOperating}
-                          className={cn(
-                            'w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all',
-                            isOperating
-                              ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                              : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30'
-                          )}
-                        >
-                          {isOperating ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              Loading...
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-4 h-4" />
-                              Load
-                            </>
-                          )}
-                        </button>
-                      )}
+                      </div>
                     </div>
                   )}
                 </CardContent>

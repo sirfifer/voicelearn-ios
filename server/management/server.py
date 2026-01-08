@@ -1485,6 +1485,221 @@ async def handle_delete_model(request: web.Request) -> web.Response:
         }, status=500)
 
 
+# Model configuration file path
+MODEL_CONFIG_PATH = Path(__file__).parent / "data" / "model_config.json"
+
+
+def load_model_config() -> dict:
+    """Load model configuration from disk."""
+    if MODEL_CONFIG_PATH.exists():
+        try:
+            with open(MODEL_CONFIG_PATH, "r") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError) as e:
+            logger.warning(f"Failed to load model config: {e}")
+    # Return default config
+    return {
+        "services": {
+            "llm": {"default_model": None, "fallback_model": None},
+            "tts": {"default_provider": "vibevoice", "default_voice": "nova"},
+            "stt": {"default_model": "whisper"}
+        }
+    }
+
+
+def save_model_config(config: dict) -> None:
+    """Save model configuration to disk."""
+    MODEL_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(MODEL_CONFIG_PATH, "w") as f:
+        json.dump(config, f, indent=2)
+
+
+async def handle_get_model_config(request: web.Request) -> web.Response:
+    """Get current model configuration for all services."""
+    try:
+        config = load_model_config()
+        return web.json_response({
+            "status": "ok",
+            "config": config
+        })
+    except Exception as e:
+        logger.error(f"Error getting model config: {e}")
+        return web.json_response({
+            "status": "error",
+            "error": str(e)
+        }, status=500)
+
+
+async def handle_save_model_config(request: web.Request) -> web.Response:
+    """Save model configuration for services."""
+    try:
+        body = await request.json()
+        config = body.get("config", {})
+
+        # Validate structure
+        if "services" not in config:
+            return web.json_response({
+                "status": "error",
+                "error": "Invalid config: 'services' key required"
+            }, status=400)
+
+        # Merge with existing config to preserve unset values
+        existing = load_model_config()
+        for service, settings in config["services"].items():
+            if service in existing["services"]:
+                existing["services"][service].update(settings)
+            else:
+                existing["services"][service] = settings
+
+        save_model_config(existing)
+        logger.info(f"Model config saved: {existing}")
+
+        return web.json_response({
+            "status": "ok",
+            "config": existing,
+            "message": "Configuration saved"
+        })
+
+    except json.JSONDecodeError:
+        return web.json_response({
+            "status": "error",
+            "error": "Invalid JSON"
+        }, status=400)
+    except Exception as e:
+        logger.error(f"Error saving model config: {e}")
+        return web.json_response({
+            "status": "error",
+            "error": str(e)
+        }, status=500)
+
+
+# Model parameters configuration file path
+MODEL_PARAMS_PATH = Path(__file__).parent / "data" / "model_params.json"
+
+# Default parameter definitions with ranges
+DEFAULT_MODEL_PARAMS = {
+    "num_ctx": {"value": 4096, "min": 256, "max": 131072, "description": "Context window size"},
+    "temperature": {"value": 0.8, "min": 0.0, "max": 2.0, "step": 0.1, "description": "Sampling temperature"},
+    "top_p": {"value": 0.9, "min": 0.0, "max": 1.0, "step": 0.05, "description": "Top-p (nucleus) sampling"},
+    "top_k": {"value": 40, "min": 1, "max": 100, "description": "Top-k sampling"},
+    "repeat_penalty": {"value": 1.1, "min": 0.0, "max": 2.0, "step": 0.1, "description": "Repeat penalty"},
+    "seed": {"value": -1, "min": -1, "max": 2147483647, "description": "Random seed (-1 for random)"},
+}
+
+
+def load_model_params(model_name: str) -> dict:
+    """Load model parameters from disk."""
+    if MODEL_PARAMS_PATH.exists():
+        try:
+            with open(MODEL_PARAMS_PATH, "r") as f:
+                all_params = json.load(f)
+                return all_params.get(model_name, {})
+        except (json.JSONDecodeError, IOError) as e:
+            logger.warning(f"Failed to load model params: {e}")
+    return {}
+
+
+def save_model_params(model_name: str, params: dict) -> None:
+    """Save model parameters to disk."""
+    MODEL_PARAMS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    all_params = {}
+    if MODEL_PARAMS_PATH.exists():
+        try:
+            with open(MODEL_PARAMS_PATH, "r") as f:
+                all_params = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+    all_params[model_name] = params
+    with open(MODEL_PARAMS_PATH, "w") as f:
+        json.dump(all_params, f, indent=2)
+
+
+async def handle_get_model_parameters(request: web.Request) -> web.Response:
+    """Get parameters for a specific model with their ranges."""
+    model_id = request.match_info["model_id"]
+
+    try:
+        # Extract model name from model_id (format: "server_id:model_name")
+        if ":" in model_id:
+            _, model_name = model_id.split(":", 1)
+        else:
+            model_name = model_id
+
+        # Load saved parameters for this model
+        saved_params = load_model_params(model_name)
+
+        # Merge with defaults
+        params = {}
+        for key, default_def in DEFAULT_MODEL_PARAMS.items():
+            params[key] = {
+                **default_def,
+                "value": saved_params.get(key, default_def["value"])
+            }
+
+        return web.json_response({
+            "status": "ok",
+            "model": model_name,
+            "parameters": params
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting model parameters: {e}")
+        return web.json_response({
+            "status": "error",
+            "model": model_id,
+            "error": str(e)
+        }, status=500)
+
+
+async def handle_save_model_parameters(request: web.Request) -> web.Response:
+    """Save parameters for a specific model."""
+    model_id = request.match_info["model_id"]
+
+    try:
+        body = await request.json()
+        new_params = body.get("parameters", {})
+
+        # Extract model name from model_id
+        if ":" in model_id:
+            _, model_name = model_id.split(":", 1)
+        else:
+            model_name = model_id
+
+        # Validate parameters
+        validated_params = {}
+        for key, value in new_params.items():
+            if key in DEFAULT_MODEL_PARAMS:
+                param_def = DEFAULT_MODEL_PARAMS[key]
+                # Clamp value to valid range
+                min_val = param_def.get("min", float("-inf"))
+                max_val = param_def.get("max", float("inf"))
+                validated_params[key] = max(min_val, min(max_val, value))
+
+        # Save parameters
+        save_model_params(model_name, validated_params)
+        logger.info(f"Model parameters saved for {model_name}: {validated_params}")
+
+        return web.json_response({
+            "status": "ok",
+            "model": model_name,
+            "parameters": validated_params,
+            "message": "Parameters saved"
+        })
+
+    except json.JSONDecodeError:
+        return web.json_response({
+            "status": "error",
+            "error": "Invalid JSON"
+        }, status=400)
+    except Exception as e:
+        logger.error(f"Error saving model parameters: {e}")
+        return web.json_response({
+            "status": "error",
+            "model": model_id,
+            "error": str(e)
+        }, status=500)
+
+
 # =============================================================================
 # API Handlers - Dashboard Stats
 # =============================================================================
@@ -4020,6 +4235,10 @@ def create_app() -> web.Application:
     app.router.add_post("/api/models/{model_id}/unload", handle_unload_model)
     app.router.add_post("/api/models/pull", handle_pull_model)
     app.router.add_delete("/api/models/{model_id}", handle_delete_model)
+    app.router.add_get("/api/models/config", handle_get_model_config)
+    app.router.add_post("/api/models/config", handle_save_model_config)
+    app.router.add_get("/api/models/{model_id}/parameters", handle_get_model_parameters)
+    app.router.add_post("/api/models/{model_id}/parameters", handle_save_model_parameters)
 
     # Managed Services
     app.router.add_get("/api/services", handle_get_services)

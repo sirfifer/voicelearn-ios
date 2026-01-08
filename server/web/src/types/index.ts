@@ -129,6 +129,71 @@ export interface ModelDeleteResponse {
   error?: string;
 }
 
+// Model Configuration Types
+export interface ServiceModelConfig {
+  llm: {
+    default_model: string | null;
+    fallback_model: string | null;
+  };
+  tts: {
+    default_provider: 'vibevoice' | 'piper';
+    default_voice: string;
+  };
+  stt: {
+    default_model: string;
+  };
+}
+
+export interface ModelConfig {
+  services: ServiceModelConfig;
+}
+
+export interface ModelConfigResponse {
+  status: 'ok' | 'error';
+  config: ModelConfig;
+  error?: string;
+}
+
+export interface SaveModelConfigResponse {
+  status: 'ok' | 'error';
+  config: ModelConfig;
+  message?: string;
+  error?: string;
+}
+
+// Model Parameters Types
+export interface ModelParameterDef {
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  description: string;
+}
+
+export interface ModelParameters {
+  num_ctx: ModelParameterDef;
+  temperature: ModelParameterDef;
+  top_p: ModelParameterDef;
+  top_k: ModelParameterDef;
+  repeat_penalty: ModelParameterDef;
+  seed: ModelParameterDef;
+}
+
+export interface ModelParametersResponse {
+  status: 'ok' | 'error';
+  model: string;
+  parameters: ModelParameters;
+  error?: string;
+}
+
+export interface SaveModelParametersResponse {
+  status: 'ok' | 'error';
+  model: string;
+  parameters: Record<string, number>;
+  message?: string;
+  error?: string;
+}
+
 export interface DashboardStats {
   uptime_seconds: number;
   total_logs: number;
