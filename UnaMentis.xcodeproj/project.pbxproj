@@ -43,6 +43,7 @@
 		2EEEEB5DB12A23BDB9B21EFE /* PronunciationProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0B5CEA1C6A76F74C78EE9C5 /* PronunciationProcessor.swift */; };
 		2FB0FE81578DDA540A5C17E5 /* WatchSessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2323DC6063B348BF9B07DAB /* WatchSessionState.swift */; };
 		30E099403E2B3B621BCAA353 /* UMCFParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72374431DEBCA136EAA215D /* UMCFParser.swift */; };
+		40D9ECAC670B5BA13754A09B /* UMCFFileHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F93B180A93158900655D3D /* UMCFFileHandler.swift */; };
 		30FAEB94763428F187B69D1E /* SelfHostedTTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3BE5EA29C7D8C9D7CC12E45 /* SelfHostedTTSService.swift */; };
 		314C1C9B84E3FDC93EE9993D /* TranscriptEntry+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692AD0E924FA90F347A7DD25 /* TranscriptEntry+CoreDataClass.swift */; };
 		31BEA87313B331DF264325C1 /* TopicEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0036EFE850AA592D96BD5AAE /* TopicEntity.swift */; };
@@ -334,6 +335,7 @@
 		A3E6EEC2F14ED183AE90840F /* MetricsUploadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsUploadService.swift; sourceTree = "<group>"; };
 		A5A9BEAE027358B9B927A6D8 /* GroqSTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqSTTService.swift; sourceTree = "<group>"; };
 		A72374431DEBCA136EAA215D /* UMCFParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UMCFParser.swift; sourceTree = "<group>"; };
+		48F93B180A93158900655D3D /* UMCFFileHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UMCFFileHandler.swift; sourceTree = "<group>"; };
 		A762A01A1D23D9C411A9E650 /* LLMTaskTypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMTaskTypeTests.swift; sourceTree = "<group>"; };
 		AA3C94AF895F9A43676C1F39 /* ShowProgressIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowProgressIntent.swift; sourceTree = "<group>"; };
 		ABA2D0F2C7B340A0F71796A7 /* LMAPIProviderInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMAPIProviderInfo.swift; sourceTree = "<group>"; };
@@ -701,6 +703,7 @@
 				C7939543C761675CCC470CB6 /* DocumentProcessor.swift */,
 				E0B842F50989F4AED5568E96 /* ProgressTracker.swift */,
 				EDDB5A62C7C40A99571DBF01 /* SampleCurriculumSeeder.swift */,
+				48F93B180A93158900655D3D /* UMCFFileHandler.swift */,
 				A72374431DEBCA136EAA215D /* UMCFParser.swift */,
 			);
 			path = Curriculum;
@@ -1293,6 +1296,7 @@
 				314C1C9B84E3FDC93EE9993D /* TranscriptEntry+CoreDataClass.swift in Sources */,
 				A14C6A493861A1F912262F4D /* TranscriptStreamingService.swift in Sources */,
 				30E099403E2B3B621BCAA353 /* UMCFParser.swift in Sources */,
+				40D9ECAC670B5BA13754A09B /* UMCFFileHandler.swift in Sources */,
 				943088FD68891AF893C994A8 /* UnaMentis.xcdatamodeld in Sources */,
 				BB3BA8D9AF549F365E6162EB /* UnaMentisApp.swift in Sources */,
 				FFF26AE98F6DDE371CA0B169 /* VADService.swift in Sources */,

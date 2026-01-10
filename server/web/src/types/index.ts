@@ -83,8 +83,11 @@ export interface ModelInfo {
   size_bytes?: number;
   size_gb?: number;
   parameters?: string;
+  parameter_size?: string;
   quantization?: string;
   family?: string;
+  context_window?: number;
+  context_window_formatted?: string;
   vram_bytes?: number;
   vram_gb?: number;
 }

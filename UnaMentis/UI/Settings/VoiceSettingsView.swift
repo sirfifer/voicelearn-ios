@@ -206,10 +206,35 @@ public struct VoiceSettingsView: View {
             if viewModel.llmProvider != .localMLX {
                 Picker("Model", selection: $viewModel.llmModel) {
                     ForEach(viewModel.availableModels, id: \.self) { model in
-                        Text(model).tag(model)
+                        if let info = viewModel.modelInfo(for: model),
+                           let context = info.contextWindowFormatted {
+                            HStack {
+                                Text(model)
+                                Spacer()
+                                Text(context)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }.tag(model)
+                        } else {
+                            Text(model).tag(model)
+                        }
                     }
                 }
                 .accessibilityHint("Larger models are smarter but slower and more expensive")
+
+                // Show selected model context window if available
+                if viewModel.llmProvider == .selfHosted,
+                   let info = viewModel.modelInfo(for: viewModel.llmModel),
+                   let context = info.contextWindowFormatted {
+                    HStack {
+                        Text("Context Window")
+                        Spacer()
+                        Text(context)
+                            .foregroundStyle(.blue)
+                            .fontWeight(.medium)
+                    }
+                    .font(.footnote)
+                }
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -419,6 +444,14 @@ class VoiceSettingsViewModel: ObservableObject {
     @Published var discoveredPiperVoices: [String] = []
     @Published var discoveredVibeVoiceVoices: [String] = []
 
+    // Management API model info (includes context windows)
+    @Published var managementModels: [ManagementModelInfo] = []
+
+    /// Get management model info for a model name
+    func modelInfo(for name: String) -> ManagementModelInfo? {
+        managementModels.first { $0.name == name }
+    }
+
     /// Chatterbox preset display name
     var chatterboxPresetName: String {
         ChatterboxPreset(rawValue: chatterboxPresetRaw)?.displayName ?? "Default"
@@ -508,10 +541,26 @@ class VoiceSettingsViewModel: ObservableObject {
         if selfHostedEnabled {
             let primaryServerIP = defaults.string(forKey: "primaryServerIP") ?? ""
             if !primaryServerIP.isEmpty {
-                let capabilities = await ServerConfigManager.shared.discoverCapabilities(host: primaryServerIP)
-                discoveredModels = capabilities.llmModels
-                discoveredPiperVoices = capabilities.piperVoices
-                discoveredVibeVoiceVoices = capabilities.vibeVoiceVoices
+                // Try Management API first (includes context window info)
+                let mgmtModels = await ServerConfigManager.shared.discoverManagementModels(host: primaryServerIP)
+                if !mgmtModels.isEmpty {
+                    managementModels = mgmtModels
+                    // Extract LLM model names for the picker
+                    discoveredModels = mgmtModels.filter { $0.type == "llm" }.map { $0.name }
+                } else {
+                    // Fallback to direct discovery
+                    let capabilities = await ServerConfigManager.shared.discoverCapabilities(host: primaryServerIP)
+                    discoveredModels = capabilities.llmModels
+                    discoveredPiperVoices = capabilities.piperVoices
+                    discoveredVibeVoiceVoices = capabilities.vibeVoiceVoices
+                }
+
+                // Still get TTS voices from direct discovery if Management API doesn't have them
+                if discoveredPiperVoices.isEmpty && discoveredVibeVoiceVoices.isEmpty {
+                    let capabilities = await ServerConfigManager.shared.discoverCapabilities(host: primaryServerIP)
+                    discoveredPiperVoices = capabilities.piperVoices
+                    discoveredVibeVoiceVoices = capabilities.vibeVoiceVoices
+                }
             }
         }
     }

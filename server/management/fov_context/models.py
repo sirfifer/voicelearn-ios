@@ -141,6 +141,10 @@ MODEL_CONTEXT_WINDOWS = {
     "llama3.1:70b": 128_000,
     "llama3.1:8b": 128_000,
     "mistral:7b": 32_000,
+    # Mistral December 2025
+    "ministral-3:14b": 256_000,
+    "ministral-3:8b": 256_000,
+    "ministral-3:3b": 256_000,
     # On-device
     "mlx-community/Qwen2.5-7B-Instruct-4bit": 32_000,
     "mlx-community/Llama-3.2-3B-Instruct-4bit": 8_000,

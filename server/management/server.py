@@ -49,6 +49,9 @@ from diagnostic_logging import diag_logger, get_diagnostic_config, set_diagnosti
 # Import FOV context management API
 from fov_context_api import setup_fov_context_routes
 
+# Import model context windows for dynamic parameter limits
+from fov_context.models import MODEL_CONTEXT_WINDOWS
+
 # Add aiohttp for async HTTP server with WebSocket support
 try:
     from aiohttp import web
@@ -1103,6 +1106,10 @@ async def handle_get_models(request: web.Request) -> web.Response:
         total_size_bytes = 0
         total_loaded_vram = 0
 
+        # First, check health of all servers to update their status and models list
+        tasks = [check_server_health(s) for s in state.servers.values()]
+        await asyncio.gather(*tasks, return_exceptions=True)
+
         # Get Ollama model details
         ollama_info = await get_ollama_model_details()
 
@@ -1119,6 +1126,9 @@ async def handle_get_models(request: web.Request) -> web.Response:
                         if is_loaded:
                             total_loaded_vram += loaded_info.get("size_vram", 0)
 
+                        # Get context window from MODEL_CONTEXT_WINDOWS
+                        context_window = MODEL_CONTEXT_WINDOWS.get(model_name, 32_000)
+
                         models.append({
                             "id": f"{srv.id}:{model_name}",
                             "name": model_name,
@@ -1131,6 +1141,8 @@ async def handle_get_models(request: web.Request) -> web.Response:
                             "parameter_size": details.get("parameter_size", ""),
                             "quantization": details.get("quantization", ""),
                             "family": details.get("family", ""),
+                            "context_window": context_window,
+                            "context_window_formatted": f"{context_window // 1000}K" if context_window >= 1000 else str(context_window),
                             "vram_bytes": loaded_info.get("size_vram", 0) if is_loaded else 0,
                             "vram_gb": loaded_info.get("size_vram_gb", 0) if is_loaded else 0
                         })
@@ -1631,18 +1643,30 @@ async def handle_get_model_parameters(request: web.Request) -> web.Response:
         # Load saved parameters for this model
         saved_params = load_model_params(model_name)
 
-        # Merge with defaults
+        # Get model's actual context window from MODEL_CONTEXT_WINDOWS
+        model_context_window = MODEL_CONTEXT_WINDOWS.get(model_name, 32_000)
+
+        # Merge with defaults, adjusting num_ctx max based on model capability
         params = {}
         for key, default_def in DEFAULT_MODEL_PARAMS.items():
-            params[key] = {
+            param = {
                 **default_def,
                 "value": saved_params.get(key, default_def["value"])
             }
+            # Override num_ctx max with model's actual context window
+            if key == "num_ctx":
+                param["max"] = model_context_window
+                param["model_max_context"] = model_context_window
+            params[key] = param
 
         return web.json_response({
             "status": "ok",
             "model": model_name,
-            "parameters": params
+            "parameters": params,
+            "model_info": {
+                "context_window": model_context_window,
+                "context_window_formatted": f"{model_context_window // 1000}K" if model_context_window >= 1000 else str(model_context_window)
+            }
         })
 
     except Exception as e:
@@ -1701,6 +1725,65 @@ async def handle_save_model_parameters(request: web.Request) -> web.Response:
             "model": model_id,
             "error": str(e)
         }, status=500)
+
+
+async def handle_get_model_capabilities(request: web.Request) -> web.Response:
+    """Get all known model capabilities including context windows."""
+    try:
+        # Build capabilities for all known models
+        capabilities = []
+        for model_name, context_window in MODEL_CONTEXT_WINDOWS.items():
+            # Determine model tier based on context window
+            if context_window >= 100_000:
+                tier = "cloud"
+            elif context_window >= 32_000:
+                tier = "mid_range"
+            elif context_window >= 8_000:
+                tier = "on_device"
+            else:
+                tier = "tiny"
+
+            # Determine provider from model name
+            if model_name.startswith("claude"):
+                provider = "anthropic"
+            elif model_name.startswith("gpt"):
+                provider = "openai"
+            elif model_name.startswith("mlx-"):
+                provider = "mlx"
+            else:
+                provider = "ollama"
+
+            capabilities.append({
+                "model": model_name,
+                "context_window": context_window,
+                "context_window_formatted": f"{context_window // 1000}K" if context_window >= 1000 else str(context_window),
+                "tier": tier,
+                "provider": provider
+            })
+
+        # Sort by context window descending
+        capabilities.sort(key=lambda x: x["context_window"], reverse=True)
+
+        return web.json_response({
+            "status": "ok",
+            "capabilities": capabilities,
+            "total": len(capabilities),
+            "by_tier": {
+                "cloud": sum(1 for c in capabilities if c["tier"] == "cloud"),
+                "mid_range": sum(1 for c in capabilities if c["tier"] == "mid_range"),
+                "on_device": sum(1 for c in capabilities if c["tier"] == "on_device"),
+                "tiny": sum(1 for c in capabilities if c["tier"] == "tiny")
+            },
+            "by_provider": {
+                "anthropic": sum(1 for c in capabilities if c["provider"] == "anthropic"),
+                "openai": sum(1 for c in capabilities if c["provider"] == "openai"),
+                "ollama": sum(1 for c in capabilities if c["provider"] == "ollama"),
+                "mlx": sum(1 for c in capabilities if c["provider"] == "mlx")
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error getting model capabilities: {e}")
+        return web.json_response({"error": str(e)}, status=500)
 
 
 # =============================================================================
@@ -4240,6 +4323,7 @@ def create_app() -> web.Application:
     app.router.add_delete("/api/models/{model_id}", handle_delete_model)
     app.router.add_get("/api/models/config", handle_get_model_config)
     app.router.add_post("/api/models/config", handle_save_model_config)
+    app.router.add_get("/api/models/capabilities", handle_get_model_capabilities)
     app.router.add_get("/api/models/{model_id}/parameters", handle_get_model_parameters)
     app.router.add_post("/api/models/{model_id}/parameters", handle_save_model_parameters)
 
