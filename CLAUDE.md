@@ -308,7 +308,7 @@ Skills are focused workflows that provide consistency and predictability. Invoke
 | `/validate` | Pre-commit validation (lint + tests) | Before marking work complete |
 | `/service` | Manage services via USM API | Service control operations |
 | `/debug-logs` | Log server debugging workflow | Troubleshooting issues |
-| `/review` | Code review for changes | Before PRs or code review |
+| `/review` | Code review (CodeRabbit AI + manual) | Before PRs or code review |
 | `/mcp-setup` | Configure MCP session defaults | Start of dev session |
 | `/read-external` | Cross-repo read access | Reference external repos |
 
@@ -332,9 +332,10 @@ Skills are focused workflows that provide consistency and predictability. Invoke
 /debug-logs analyze    # Analyze current logs
 ```
 
-**`/review`** - Code review workflow
+**`/review`** - Code review with CodeRabbit AI + manual checks
 ```
-/review              # Review all changes vs main
+/review              # Full review: CodeRabbit + manual
+/review --quick      # Quick CodeRabbit review only
 /review staged       # Review staged changes only
 ```
 

@@ -41,10 +41,13 @@ from .models import (
 )
 from .session import (
     FOVSession,
+    PlaybackState,
     SessionConfig,
     SessionEvent,
     SessionManager,
     SessionState,
+    UserSession,
+    UserVoiceConfig,
 )
 
 __all__ = [
@@ -81,8 +84,11 @@ __all__ = [
     "ExpansionScope",
     # Session
     "FOVSession",
+    "PlaybackState",
     "SessionConfig",
     "SessionEvent",
     "SessionManager",
     "SessionState",
+    "UserSession",
+    "UserVoiceConfig",
 ]

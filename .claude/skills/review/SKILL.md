@@ -7,34 +7,58 @@ description: Perform a code review on recent changes
 
 ## Purpose
 
-Performs a comprehensive code review of changes in the current branch compared to main. This skill ensures code quality, Swift 6.0 compliance, accessibility standards, and testing requirements are met.
+Performs a comprehensive code review of changes in the current branch compared to main. This skill combines:
+1. **CodeRabbit AI Review** - Automated AI-powered code analysis
+2. **Manual Review** - Claude's targeted review of Swift 6.0 compliance, accessibility, and testing
 
 ## Usage
 
 ```
-/review              # Review all changes vs main branch
+/review              # Full review: CodeRabbit + manual review
 /review staged       # Review only staged changes
-/review <file>       # Review specific file
-/review --quick      # Quick review (skip detailed checks)
+/review <file>       # Review specific file (manual only)
+/review --quick      # Quick review (CodeRabbit only)
+/review --manual     # Skip CodeRabbit, manual review only
 ```
 
 ## Workflow
 
-### 1. Identify Changes
+### 1. Run CodeRabbit Automated Review
+
+Always start with CodeRabbit for comprehensive AI analysis:
+
 ```bash
-git diff main...HEAD           # All changes vs main
-git log main..HEAD --oneline   # Commit history
-git diff --cached              # Staged changes only
+# For uncommitted changes (most common)
+/Users/ramerman/.local/bin/coderabbit review --prompt-only --type uncommitted
+
+# For committed changes not yet merged
+/Users/ramerman/.local/bin/coderabbit review --prompt-only --type committed
+
+# For all changes
+/Users/ramerman/.local/bin/coderabbit review --prompt-only
 ```
 
-### 2. Review Each Changed File
+CodeRabbit provides:
+- File-by-file analysis with line numbers
+- Issue severity classification (potential_issue, nitpick, refactor_suggestion)
+- AI agent prompts for automated fixes
+- Security and performance issue detection
 
-For each file, check the following categories:
+### 2. Fix Critical CodeRabbit Issues
+
+Address issues marked as `potential_issue` before proceeding:
+- These are bugs, security issues, or incorrect behavior
+- Use the provided "Prompt for AI Agent" as guidance
+- Run CodeRabbit again after fixes to verify
+
+### 3. Manual Review Checklist
+
+After CodeRabbit, perform manual checks for project-specific requirements:
 
 #### Swift 6.0 Concurrency Compliance
 - `@MainActor` annotations on UI code
 - Actor-based services for shared state
-- `Sendable` types for cross-actor boundaries
+- `@Sendable` types for cross-actor boundaries
 - No data races or concurrency warnings
 - Proper async/await usage
 
@@ -60,119 +84,87 @@ For each file, check the following categories:
 - Proper memory management (no retain cycles)
 - SwiftUI best practices
 
-### 3. Generate Report
+### 4. Generate Report
 
-Provide feedback in three categories:
+Combine CodeRabbit findings with manual review:
 
-**Critical Issues** - Must fix before merge
-- Security vulnerabilities
-- Data races
-- Memory leaks
-- Missing error handling
-- Broken functionality
+**CodeRabbit Issues**
+- Count of potential_issue items
+- Count of nitpicks
+- Count of refactor_suggestions
 
-**Suggestions** - Nice to have improvements
-- Code organization
-- Naming improvements
-- Additional test coverage
-- Performance optimizations
-
-**Positive Notes** - Well-done aspects
-- Good patterns used
-- Clean code
-- Comprehensive tests
-- Clear documentation
+**Manual Review**
+- Critical Issues (must fix)
+- Suggestions (nice to have)
+- Positive Notes (well-done aspects)
 
 ## Success Criteria
 
-- All critical issues identified
+- All CodeRabbit `potential_issue` items addressed
+- All manual critical issues identified and fixed
 - Clear, actionable feedback provided
-- Suggestions are constructive
-- Positive aspects acknowledged
+- `/validate` passes after all fixes
 
 ## Examples
 
-**Standard review:**
+**Full review with CodeRabbit:**
 ```
 User: /review
-Claude: Reviewing changes in current branch vs main...
+Claude: Running CodeRabbit review on uncommitted changes...
 
-Files changed: 5
-Commits: 3
+[CodeRabbit Output]
+============================================================================
+File: UnaMentis/Core/Audio/AudioSegmentCache.swift
+Line: 61 to 70
+Type: potential_issue
 
-## File Reviews
+Prompt for AI Agent: Fix cache size calculation...
+============================================================================
 
-### UnaMentis/Services/AudioEngine.swift
-**Critical Issues:**
-- Line 142: Force unwrap on optional `audioSession!` - use guard let
-- Line 198: Missing @MainActor on UI callback
+CodeRabbit found:
+- 2 potential_issue items
+- 5 nitpicks
+- 3 refactor_suggestions
 
-**Suggestions:**
-- Line 67-89: Consider extracting audio configuration to separate method
+Fixing potential issues first...
+[Makes fixes]
 
-### UnaMentis/Views/SessionView.swift
-**Critical Issues:** None
-
-**Suggestions:**
-- Line 34: Add accessibility label to mic button
-
-**Positive Notes:**
-- Clean separation of view and view model
-- Good use of @StateObject
-
-### UnaMentisTests/AudioEngineTests.swift
-**Positive Notes:**
-- Comprehensive test coverage
-- Good use of descriptive test names
-- Edge cases well covered
+Running manual review checklist...
 
 ## Summary
-- Critical Issues: 2 (must fix)
-- Suggestions: 2
-- Files approved: 3/5
-
-Fix the critical issues before merging.
+- CodeRabbit issues fixed: 2
+- Nitpicks addressed: 3 (2 skipped as minor)
+- Manual issues found: 0
+- Status: READY FOR COMMIT
 ```
 
-**Quick review:**
+**Quick review (CodeRabbit only):**
 ```
 User: /review --quick
-Claude: Quick review of changes...
+Claude: Running quick CodeRabbit review...
 
-Files changed: 5
-Critical issues found: 2
+Found 2 potential issues:
+1. AudioSegmentCache.swift:61 - Cache size calculation bug
+2. SessionView.swift:2134 - AVAudioPlayer retention issue
 
-1. AudioEngine.swift:142 - Force unwrap
-2. AudioEngine.swift:198 - Missing @MainActor
-
-Run `/review` for detailed analysis.
+Run `/review` for full analysis including manual checks.
 ```
 
-**Review specific file:**
+## CodeRabbit Authentication
+
+If CodeRabbit is not authenticated:
+```bash
+/Users/ramerman/.local/bin/coderabbit auth login
 ```
-User: /review UnaMentis/Services/LLMService.swift
-Claude: Reviewing LLMService.swift...
 
-**Swift 6.0 Compliance:** PASS
-- Actor-based service design
-- Proper Sendable conformance
-- Clean async/await usage
-
-**Code Quality:** PASS
-- Good error handling
-- Clear function names
-- Reasonable function lengths
-
-**Testing:** NEEDS ATTENTION
-- New `streamResponse` method lacks tests
-- Suggest adding: testStreamResponse_success, testStreamResponse_timeout
-
-**Overall:** Approved with minor suggestion for test coverage.
-```
+Follow the prompts to authenticate via browser.
 
 ## Integration
 
-This skill replaces `.claude/commands/review.md` and should be run:
+This skill should be run:
+- After completing any feature implementation
 - Before creating a pull request
-- During code review sessions
-- When reviewing someone else's changes
+- After `/validate` passes
+- When reviewing changes
+
+The workflow is: Code -> `/validate` -> `/review` -> Fix issues -> Commit

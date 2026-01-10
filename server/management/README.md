@@ -10,6 +10,10 @@ A next-generation web management dashboard for monitoring and configuring UnaMen
 - **Remote Clients** - Monitor connected iOS devices
 - **Server Management** - Health checks for Ollama, Whisper, Piper, etc.
 - **Model Discovery** - View available LLM, STT, and TTS models
+- **TTS Caching** - Global audio cache with cross-user sharing
+- **Session Management** - Per-user state with voice config and playback tracking
+- **Audio Streaming** - Real-time WebSocket audio coordination
+- **Scheduled Deployments** - Pre-generate curriculum audio before deployment
 
 ## Quick Start
 

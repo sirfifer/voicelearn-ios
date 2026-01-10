@@ -45,6 +45,9 @@ public struct VoiceSettingsView: View {
 
             // TTS Settings
             ttsSection
+
+            // Curriculum Playback Settings
+            curriculumSection
         }
         .navigationTitle("Voice Settings")
         #if os(iOS)
@@ -384,6 +387,21 @@ public struct VoiceSettingsView: View {
             }
         }
     }
+
+    // MARK: - Curriculum Playback Section
+
+    private var curriculumSection: some View {
+        Section {
+            Toggle("Auto-continue to next topic", isOn: $viewModel.autoContinueTopics)
+                .accessibilityHint("When enabled, automatically starts the next topic when the current one finishes")
+
+            Text("When a topic completes, seamlessly continue to the next topic in the curriculum with an audio announcement.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        } header: {
+            Text("Curriculum Playback")
+        }
+    }
 }
 
 // MARK: - Voice Settings View Model
@@ -438,6 +456,9 @@ class VoiceSettingsViewModel: ObservableObject {
 
     // Self-hosted
     @AppStorage("selfHostedEnabled") var selfHostedEnabled: Bool = false
+
+    // Curriculum Playback
+    @AppStorage("autoContinueTopics") var autoContinueTopics: Bool = true
 
     // Discovered capabilities
     @Published var discoveredModels: [String] = []

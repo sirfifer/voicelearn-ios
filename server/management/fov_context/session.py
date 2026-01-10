@@ -40,6 +40,97 @@ class SessionState(str, Enum):
 
 
 @dataclass
+class PlaybackState:
+    """Server-side playback state for cross-device resume.
+
+    Tracks the exact position in curriculum playback so users can:
+    - Resume on different devices
+    - Resume after app restart
+    - Have server trigger appropriate prefetch
+    """
+    curriculum_id: str = ""
+    topic_id: str = ""
+    segment_index: int = 0
+    segment_offset_ms: int = 0           # Position within current segment
+    is_playing: bool = False
+    last_heartbeat: Optional[datetime] = None
+
+    def update_position(
+        self,
+        segment_index: int,
+        offset_ms: int = 0,
+        is_playing: bool = True
+    ) -> None:
+        """Update playback position from client heartbeat."""
+        self.segment_index = segment_index
+        self.segment_offset_ms = offset_ms
+        self.is_playing = is_playing
+        self.last_heartbeat = datetime.now()
+
+    def set_topic(self, curriculum_id: str, topic_id: str) -> None:
+        """Set current topic being played."""
+        self.curriculum_id = curriculum_id
+        self.topic_id = topic_id
+        self.segment_index = 0
+        self.segment_offset_ms = 0
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSON serialization."""
+        return {
+            "curriculum_id": self.curriculum_id,
+            "topic_id": self.topic_id,
+            "segment_index": self.segment_index,
+            "segment_offset_ms": self.segment_offset_ms,
+            "is_playing": self.is_playing,
+            "last_heartbeat": self.last_heartbeat.isoformat() if self.last_heartbeat else None,
+        }
+
+
+@dataclass
+class UserVoiceConfig:
+    """TTS voice configuration for a user.
+
+    These settings determine the cache key for TTS audio.
+    All users with identical config share cached audio.
+    """
+    voice_id: str = "nova"
+    tts_provider: str = "vibevoice"
+    speed: float = 1.0
+    # Chatterbox-specific (optional)
+    exaggeration: Optional[float] = None
+    cfg_weight: Optional[float] = None
+    language: Optional[str] = None
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSON serialization."""
+        d = {
+            "voice_id": self.voice_id,
+            "tts_provider": self.tts_provider,
+            "speed": self.speed,
+        }
+        if self.exaggeration is not None:
+            d["exaggeration"] = self.exaggeration
+        if self.cfg_weight is not None:
+            d["cfg_weight"] = self.cfg_weight
+        if self.language is not None:
+            d["language"] = self.language
+        return d
+
+    def get_chatterbox_config(self) -> Optional[dict]:
+        """Get Chatterbox-specific config dict, or None if not using Chatterbox."""
+        if self.tts_provider != "chatterbox":
+            return None
+        config = {}
+        if self.exaggeration is not None:
+            config["exaggeration"] = self.exaggeration
+        if self.cfg_weight is not None:
+            config["cfg_weight"] = self.cfg_weight
+        if self.language is not None:
+            config["language"] = self.language
+        return config if config else None
+
+
+@dataclass
 class SessionConfig:
     """Configuration for a session."""
     model_name: str = "claude-3-5-sonnet-20241022"
@@ -423,32 +514,176 @@ class FOVSession:
         self.events.append(event)
 
 
+@dataclass
+class UserSession:
+    """
+    Per-user session with playback state and voice config.
+
+    Separate from FOVSession to allow users to have:
+    - Persistent voice preferences
+    - Cross-device playback resume
+    - User-specific prefetch settings
+
+    The voice config determines TTS cache keys, so users with identical
+    voice settings share cached audio (cross-user cache sharing).
+    """
+    user_id: str
+    session_id: str
+    organization_id: Optional[str] = None
+
+    # Voice configuration (determines cache key)
+    voice_config: UserVoiceConfig = field(default_factory=UserVoiceConfig)
+
+    # Playback state (for cross-device resume)
+    playback_state: PlaybackState = field(default_factory=PlaybackState)
+
+    # Prefetch settings
+    prefetch_lookahead: int = 5
+
+    # Associated FOV session (for conversation context)
+    fov_session: Optional[FOVSession] = None
+
+    # Timing
+    created_at: datetime = field(default_factory=datetime.now)
+    last_active_at: datetime = field(default_factory=datetime.now)
+
+    @classmethod
+    def create(
+        cls,
+        user_id: str,
+        organization_id: Optional[str] = None,
+        voice_config: Optional[UserVoiceConfig] = None,
+    ) -> "UserSession":
+        """Create a new user session."""
+        return cls(
+            user_id=user_id,
+            session_id=str(uuid.uuid4()),
+            organization_id=organization_id,
+            voice_config=voice_config or UserVoiceConfig(),
+        )
+
+    def attach_fov_session(self, fov_session: FOVSession) -> None:
+        """Attach an FOV session for conversation context."""
+        self.fov_session = fov_session
+        self.last_active_at = datetime.now()
+
+    def update_voice_config(
+        self,
+        voice_id: Optional[str] = None,
+        tts_provider: Optional[str] = None,
+        speed: Optional[float] = None,
+        exaggeration: Optional[float] = None,
+        cfg_weight: Optional[float] = None,
+        language: Optional[str] = None,
+    ) -> None:
+        """Update voice configuration settings."""
+        if voice_id is not None:
+            self.voice_config.voice_id = voice_id
+        if tts_provider is not None:
+            self.voice_config.tts_provider = tts_provider
+        if speed is not None:
+            self.voice_config.speed = speed
+        if exaggeration is not None:
+            self.voice_config.exaggeration = exaggeration
+        if cfg_weight is not None:
+            self.voice_config.cfg_weight = cfg_weight
+        if language is not None:
+            self.voice_config.language = language
+        self.last_active_at = datetime.now()
+
+    def update_playback(
+        self,
+        segment_index: int,
+        offset_ms: int = 0,
+        is_playing: bool = True
+    ) -> None:
+        """Update playback position from client heartbeat."""
+        self.playback_state.update_position(segment_index, offset_ms, is_playing)
+        self.last_active_at = datetime.now()
+
+    def set_current_topic(self, curriculum_id: str, topic_id: str) -> None:
+        """Set the current topic being played."""
+        self.playback_state.set_topic(curriculum_id, topic_id)
+        self.last_active_at = datetime.now()
+
+    def get_state(self) -> dict:
+        """Get the current user session state."""
+        return {
+            "user_id": self.user_id,
+            "session_id": self.session_id,
+            "organization_id": self.organization_id,
+            "voice_config": self.voice_config.to_dict(),
+            "playback_state": self.playback_state.to_dict(),
+            "prefetch_lookahead": self.prefetch_lookahead,
+            "fov_session_id": self.fov_session.session_id if self.fov_session else None,
+            "created_at": self.created_at.isoformat(),
+            "last_active_at": self.last_active_at.isoformat(),
+        }
+
+
 class SessionManager:
     """
-    Manages multiple FOV sessions.
+    Manages multiple FOV sessions and user sessions.
 
     Provides session lifecycle management and lookup.
+    Tracks both FOV sessions (conversation context) and user sessions (playback state).
     """
 
     def __init__(self):
         self._sessions: dict[str, FOVSession] = {}
+        self._user_sessions: dict[str, UserSession] = {}  # session_id -> UserSession
+        self._users_to_sessions: dict[str, str] = {}      # user_id -> session_id
 
     def create_session(
         self,
         curriculum_id: str,
         config: Optional[SessionConfig] = None
     ) -> FOVSession:
-        """Create a new session."""
+        """Create a new FOV session."""
         session = FOVSession.create(curriculum_id, config)
         self._sessions[session.session_id] = session
         return session
 
+    def create_user_session(
+        self,
+        user_id: str,
+        organization_id: Optional[str] = None,
+        voice_config: Optional[UserVoiceConfig] = None,
+    ) -> UserSession:
+        """Create or get a user session.
+
+        If user already has an active session, returns that session.
+        """
+        # Check for existing session
+        existing_session_id = self._users_to_sessions.get(user_id)
+        if existing_session_id and existing_session_id in self._user_sessions:
+            return self._user_sessions[existing_session_id]
+
+        # Create new session
+        session = UserSession.create(user_id, organization_id, voice_config)
+        self._user_sessions[session.session_id] = session
+        self._users_to_sessions[user_id] = session.session_id
+
+        logger.info(f"Created user session {session.session_id} for user {user_id}")
+        return session
+
     def get_session(self, session_id: str) -> Optional[FOVSession]:
-        """Get a session by ID."""
+        """Get a FOV session by ID."""
         return self._sessions.get(session_id)
 
+    def get_user_session(self, session_id: str) -> Optional[UserSession]:
+        """Get a user session by ID."""
+        return self._user_sessions.get(session_id)
+
+    def get_user_session_by_user(self, user_id: str) -> Optional[UserSession]:
+        """Get a user session by user ID."""
+        session_id = self._users_to_sessions.get(user_id)
+        if session_id:
+            return self._user_sessions.get(session_id)
+        return None
+
     def end_session(self, session_id: str) -> bool:
-        """End and remove a session."""
+        """End and remove a FOV session."""
         session = self._sessions.get(session_id)
         if session:
             session.end()
@@ -456,15 +691,37 @@ class SessionManager:
             return True
         return False
 
+    def end_user_session(self, session_id: str) -> bool:
+        """End and remove a user session."""
+        session = self._user_sessions.get(session_id)
+        if session:
+            # Remove user mapping
+            if session.user_id in self._users_to_sessions:
+                del self._users_to_sessions[session.user_id]
+            # End attached FOV session if any
+            if session.fov_session:
+                self.end_session(session.fov_session.session_id)
+            del self._user_sessions[session_id]
+            logger.info(f"Ended user session {session_id} for user {session.user_id}")
+            return True
+        return False
+
     def list_sessions(self) -> list[dict]:
-        """List all active sessions."""
+        """List all active FOV sessions."""
         return [
             session.get_state()
             for session in self._sessions.values()
         ]
 
+    def list_user_sessions(self) -> list[dict]:
+        """List all active user sessions."""
+        return [
+            session.get_state()
+            for session in self._user_sessions.values()
+        ]
+
     def cleanup_ended_sessions(self) -> int:
-        """Remove ended sessions. Returns count of removed sessions."""
+        """Remove ended FOV sessions. Returns count of removed sessions."""
         ended = [
             sid for sid, session in self._sessions.items()
             if session.state == SessionState.ENDED
@@ -472,3 +729,21 @@ class SessionManager:
         for sid in ended:
             del self._sessions[sid]
         return len(ended)
+
+    def cleanup_inactive_user_sessions(self, max_inactive_minutes: int = 60) -> int:
+        """Remove user sessions inactive for too long. Returns count removed."""
+        now = datetime.now()
+        inactive = []
+
+        for session_id, session in self._user_sessions.items():
+            age_minutes = (now - session.last_active_at).total_seconds() / 60
+            if age_minutes > max_inactive_minutes:
+                inactive.append(session_id)
+
+        for session_id in inactive:
+            self.end_user_session(session_id)
+
+        if inactive:
+            logger.info(f"Cleaned up {len(inactive)} inactive user sessions")
+
+        return len(inactive)

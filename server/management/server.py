@@ -49,6 +49,22 @@ from diagnostic_logging import diag_logger, get_diagnostic_config, set_diagnosti
 # Import FOV context management API
 from fov_context_api import setup_fov_context_routes
 
+# Import TTS cache system
+from tts_cache import TTSCache, TTSResourcePool, CurriculumPrefetcher
+from tts_api import register_tts_routes
+
+# Import session-cache integration
+from session_cache_integration import SessionCacheIntegration
+
+# Import deployment API
+from deployment_api import register_deployment_routes, ScheduledDeploymentManager
+
+# Import audio WebSocket handler
+from audio_ws import AudioWebSocketHandler, register_audio_websocket
+
+# Import session management (for UserSession, UserVoiceConfig)
+from fov_context import SessionManager, UserVoiceConfig
+
 # Import model context windows for dynamic parameter limits
 from fov_context.models import MODEL_CONTEXT_WINDOWS
 
@@ -4368,6 +4384,9 @@ def create_app() -> web.Application:
     # Media Generation System (Diagrams, Formulas, Maps)
     register_media_routes(app)
 
+    # TTS Cache System
+    register_tts_routes(app)
+
     # Authentication System
     # Note: Auth requires a database pool. For now, we set up the routes but
     # auth_api initialization with db pool happens in main() after db setup.
@@ -4477,6 +4496,62 @@ def create_app() -> web.Application:
         await detect_existing_processes()
         state._load_curricula()  # Load all UMCF curricula on startup
 
+        # Initialize TTS cache
+        cache_dir = Path(__file__).parent / "data" / "tts_cache"
+        tts_cache = TTSCache(cache_dir)
+        await tts_cache.initialize()
+        app["tts_cache"] = tts_cache
+
+        # Initialize TTS resource pool (priority-based generation)
+        resource_pool = TTSResourcePool(
+            max_concurrent_live=7,      # Live users get 7 concurrent slots
+            max_concurrent_background=3  # Background pre-generation gets 3
+        )
+        app["tts_resource_pool"] = resource_pool
+
+        # Initialize TTS prefetcher with resource pool
+        prefetcher = CurriculumPrefetcher(tts_cache, resource_pool)
+        app["tts_prefetcher"] = prefetcher
+
+        # Initialize session manager (handles both FOV and user sessions)
+        session_manager = SessionManager()
+        app["session_manager"] = session_manager
+
+        # Initialize session-cache integration bridge
+        session_cache = SessionCacheIntegration(tts_cache, resource_pool, prefetcher)
+        app["session_cache"] = session_cache
+
+        # Initialize scheduled deployment manager
+        deployment_manager = ScheduledDeploymentManager(tts_cache, resource_pool)
+
+        # Set up segment loader for deployment manager
+        async def load_curriculum_segments(curriculum_id: str) -> list:
+            """Load all segments from a curriculum."""
+            curriculum = state.curriculum_raw.get(curriculum_id)
+            if not curriculum:
+                return []
+            segments = []
+            content = curriculum.get("content", [])
+            if content and content[0].get("children"):
+                for topic in content[0]["children"]:
+                    transcript = topic.get("transcript", {})
+                    for seg in transcript.get("segments", []):
+                        if seg.get("content"):
+                            segments.append(seg["content"])
+            return segments
+
+        deployment_manager.set_segment_loader(load_curriculum_segments)
+        app["deployment_manager"] = deployment_manager
+
+        # Initialize audio WebSocket handler
+        audio_ws_handler = AudioWebSocketHandler(session_manager, session_cache)
+        register_audio_websocket(app, audio_ws_handler)
+
+        # Register deployment API routes
+        register_deployment_routes(app)
+
+        logger.info("[Startup] TTS cache, resource pool, session management, and deployment API initialized")
+
         # Initialize database connection for auth
         database_url = os.environ.get("DATABASE_URL")
         if database_url and "token_service" in app:
@@ -4518,6 +4593,21 @@ def create_app() -> web.Application:
         if "db_pool" in app:
             await app["db_pool"].close()
             logger.info("[Cleanup] Database pool closed")
+
+        # Cleanup inactive user sessions
+        if "session_manager" in app:
+            removed = app["session_manager"].cleanup_inactive_user_sessions(max_inactive_minutes=0)
+            logger.info(f"[Cleanup] Removed {removed} user sessions")
+
+        # Cleanup old deployments
+        if "deployment_manager" in app:
+            removed = app["deployment_manager"].cleanup_old_deployments(max_age_days=0)
+            logger.info(f"[Cleanup] Removed {removed} old deployments")
+
+        # Shutdown TTS cache
+        if "tts_cache" in app:
+            await app["tts_cache"].shutdown()
+            logger.info("[Cleanup] TTS cache saved")
 
         await resource_monitor.stop()
         await idle_manager.stop()

@@ -104,6 +104,7 @@
 		93097C63E8BF951A485F601B /* OpenAIEmbeddingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37875DC192C64C92DDA3CB7 /* OpenAIEmbeddingService.swift */; };
 		943088FD68891AF893C994A8 /* UnaMentis.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C9E6C480A39CD30072D919FF /* UnaMentis.xcdatamodeld */; };
 		977ACF04A479545A8E042174 /* AudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3512907BB86A67A781C6BA88 /* AudioEngine.swift */; };
+		C56682611D5E4EF6510B3A9D /* AudioSegmentCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B1569096D98E31634299E1 /* AudioSegmentCache.swift */; };
 		979AE8F5878DBD378FADD22F /* GLMASRSTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913726F1DED7248C8A332F99 /* GLMASRSTTService.swift */; };
 		9FF33043A3535D20BB665608 /* CLAUDE.md in Resources */ = {isa = PBXBuildFile; fileRef = C106D83D776CAC24BE29F29E /* CLAUDE.md */; };
 		A0569F0FAEBFCCBEA2B1A1AA /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEFD16827DB21DF4C6196187 /* HelpView.swift */; };
@@ -261,6 +262,7 @@
 		32CEE1862B662019B07B4EAB /* STTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTService.swift; sourceTree = "<group>"; };
 		34AE5335D8D46F4E68958AE5 /* AnthropicLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicLLMService.swift; sourceTree = "<group>"; };
 		3512907BB86A67A781C6BA88 /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
+		17B1569096D98E31634299E1 /* AudioSegmentCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSegmentCache.swift; sourceTree = "<group>"; };
 		3717DC2C51F0E7E22A745A9A /* TopicProgress+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TopicProgress+CoreDataClass.swift"; sourceTree = "<group>"; };
 		38431DCF251D88AA3B7D5A84 /* UnaMentisTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = UnaMentisTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B97EDBDFA6980D8ECCAAD88 /* DeepgramSTTServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepgramSTTServiceTests.swift; sourceTree = "<group>"; };
@@ -690,6 +692,7 @@
 			isa = PBXGroup;
 			children = (
 				3512907BB86A67A781C6BA88 /* AudioEngine.swift */,
+				17B1569096D98E31634299E1 /* AudioSegmentCache.swift */,
 				A008CBD6F2FA374F46DDB324 /* AudioEngineConfig.swift */,
 			);
 			path = Audio;
@@ -1200,6 +1203,7 @@
 				4D06057B4FF7CCBBB171EF7F /* AppleTTSService.swift in Sources */,
 				B06E80BFD972E04BBA559DA2 /* AssemblyAISTTService.swift in Sources */,
 				977ACF04A479545A8E042174 /* AudioEngine.swift in Sources */,
+				C56682611D5E4EF6510B3A9D /* AudioSegmentCache.swift in Sources */,
 				D2F16797C496FC64EA2C63F2 /* AudioEngineConfig.swift in Sources */,
 				BA5E327F594E870FFE4F0874 /* AutoResumeService.swift in Sources */,
 				DC0667D359165BC1E3A23B33 /* BrandLogo.swift in Sources */,

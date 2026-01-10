@@ -217,6 +217,24 @@ Microphone -> AudioEngine -> VAD -> STT (streaming)
 
 **Session States:** Idle → User Speaking → Processing → AI Thinking → AI Speaking → (loop)
 
+### Curriculum Auto-Continuation
+
+Seamless topic-to-topic transitions for uninterrupted learning sessions:
+
+**Features:**
+- **Auto-Continue:** Automatically transitions to next topic when current topic completes
+- **Pre-Generation:** Starts generating next topic's audio at 70% progress for seamless transitions
+- **Transition Announcements:** Clear audio and visual notification of topic changes
+- **Audio Segment Caching:** Caches all segments for current topic (up to 50MB) for instant replay
+- **Navigation Controls:** Go back one segment, replay topic, skip to next topic buttons
+- **User Preference:** Settings toggle to enable/disable auto-continuation (default ON)
+
+**Implementation:**
+- `AudioSegmentCache` actor for thread-safe segment caching
+- Pre-generation buffer for next topic audio
+- Transition announcement via Apple TTS
+- `CurriculumControlBar` UI component with navigation buttons
+
 ### FOV Context Management
 
 Foveated context management builds optimal LLM context for voice tutoring, inspired by VR foveated rendering where the center of attention gets full detail.
@@ -313,6 +331,9 @@ A switchboard system for routing LLM calls to any endpoint:
 - Authentication (JWT tokens, rate limiting)
 - Diagnostic logging and resource monitoring
 - **FOV Context Management** for voice tutoring sessions (see [FOV_CONTEXT_MANAGEMENT.md](FOV_CONTEXT_MANAGEMENT.md))
+- **TTS Caching System** - Global cross-user audio cache with priority-based generation
+- **Session Management** - Per-user session state with cross-device resume support
+- **Scheduled Deployments** - Admin-triggered curriculum pre-generation
 
 ### Operations Console (Port 3000)
 
@@ -350,6 +371,58 @@ UnaMentis can connect to local/LAN servers for zero-cost inference:
 - Auto-discovery of available models/voices
 - Health monitoring with automatic fallback
 - OpenAI-compatible API support
+
+### TTS Caching & Session Management
+
+A comprehensive architecture for multi-user tutoring with global audio caching and per-user session state.
+
+**Components:**
+
+| Component | Purpose |
+|-----------|---------|
+| **TTSCache** | Global user-agnostic audio cache (shared across all users) |
+| **TTSResourcePool** | Priority-based TTS generation with concurrency limits |
+| **SessionCacheIntegration** | Bridge between per-user sessions and global cache |
+| **UserSession** | Per-user state with voice config and playback position |
+| **ScheduledDeploymentManager** | Admin-triggered curriculum pre-generation |
+
+**Key Design Principles:**
+
+1. **User-Agnostic Cache Keys:** Cache keys contain only `text + voice_id + provider + speed` (no user_id). Users with identical voice configurations share cached audio.
+
+2. **Cross-User Cache Sharing:** When User A generates audio for "Welcome to the lesson" with voice "nova", User B requesting the same text with the same voice gets an instant cache hit (0ms TTS latency).
+
+3. **Priority-Based Generation:**
+   - `LIVE (10)` - User actively waiting, highest priority (7 concurrent max)
+   - `PREFETCH (5)` - Near-future prefetch, background priority
+   - `SCHEDULED (1)` - Background pre-generation (3 concurrent max)
+
+4. **Separate Semaphores:** Live requests never blocked by background generation. Each priority level has its own concurrency pool.
+
+**Performance (tested):**
+- Sequential cache hits: 1-3ms latency
+- 50 concurrent cache hits: 1,155 req/sec, 35ms avg latency
+- Cache storage: Filesystem-based with async I/O
+
+**API Endpoints:**
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/tts` | POST | Generate TTS (cache-first) |
+| `/api/tts/cache/stats` | GET | Cache and resource pool stats |
+| `/api/tts/cache` | GET | Direct cache lookup |
+| `/api/tts/cache` | PUT | Direct cache insertion (dev) |
+| `/api/tts/cache` | DELETE | Clear cache |
+| `/api/tts/prefetch/topic` | POST | Prefetch topic segments |
+| `/api/deployments` | POST/GET | Scheduled pre-generation |
+
+**Corporate Training Example:**
+```
+500 employees start "Security Training 2024" simultaneously:
+- Admin pre-generates all segments the night before
+- Day-of: 100% cache hits, 0ms TTS latency for everyone
+- Server easily handles 500 concurrent sessions
+```
 
 ### Architecture Relationship
 
@@ -640,6 +713,11 @@ See [CODE_QUALITY_INITIATIVE.md](../CODE_QUALITY_INITIATIVE.md) for complete doc
 - Plugin-based importer framework
 - Latency test harness (CLI, REST API, iOS harness, Web dashboard)
 - FOV Context Management (hierarchical cognitive buffers, confidence monitoring)
+- Curriculum auto-continuation with pre-generation and segment caching
+- CodeRabbit AI code review integration (CLI + VS Code extension)
+- **TTS Caching System** (global cross-user cache, priority-based generation, 1000+ req/sec)
+- **Session Management** (UserSession, PlaybackState, SessionCacheIntegration)
+- **TTSResourcePool** (separate semaphores for live vs background, concurrency control)
 
 ### In Progress
 - Android client (separate repository)
@@ -739,6 +817,10 @@ See [CODE_QUALITY_INITIATIVE.md](../CODE_QUALITY_INITIATIVE.md) for complete doc
 | `curriculum/spec/umcf-schema.json` | UMCF JSON Schema (1,905 lines) |
 | `curriculum/spec/UMCF_SPECIFICATION.md` | Human-readable format spec |
 | `server/management/server.py` | Management API backend |
+| `server/management/tts_cache/cache.py` | Global TTS cache implementation |
+| `server/management/tts_cache/resource_pool.py` | Priority-based TTS generation pool |
+| `server/management/session_cache_integration.py` | Session-cache bridge |
+| `server/management/fov_context/session.py` | UserSession, PlaybackState, SessionManager |
 | `server/importers/plugins/sources/mit_ocw.py` | MIT OCW course handler |
 | `server/web/src/components/curriculum/` | Curriculum Studio components |
 | `server/web-client/src/app/` | Web client application |
