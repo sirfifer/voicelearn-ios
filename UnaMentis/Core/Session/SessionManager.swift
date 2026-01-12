@@ -353,6 +353,12 @@ public final class SessionManager: ObservableObject {
             return
         }
 
+        // Check maintenance mode feature flag
+        if await FeatureFlagService.shared.isEnabled("ops_maintenance_mode") {
+            logger.warning("Session start blocked: maintenance mode is enabled")
+            throw SessionError.maintenanceMode
+        }
+
         logger.info("SessionManager.startSession called (lectureMode: \(lectureMode))")
         logger.info("  LLM service type: \(type(of: llmService))")
         logger.info("  TTS service type: \(type(of: ttsService))")
@@ -1609,7 +1615,8 @@ public enum SessionError: Error, LocalizedError {
     case servicesNotConfigured
     case sessionAlreadyActive
     case sessionNotActive
-    
+    case maintenanceMode
+
     public var errorDescription: String? {
         switch self {
         case .servicesNotConfigured:
@@ -1618,6 +1625,8 @@ public enum SessionError: Error, LocalizedError {
             return "Session is already active"
         case .sessionNotActive:
             return "No active session"
+        case .maintenanceMode:
+            return "System is in maintenance mode. Please try again later."
         }
     }
 }
