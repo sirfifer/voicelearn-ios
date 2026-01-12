@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+# test-quick.sh - Run unit tests quickly (no coverage enforcement)
+#
+# This is a convenience wrapper around test-ci.sh for local development.
+# For CI-identical behavior, use test-ci.sh directly.
+#
+
 set -e
 set -o pipefail
 echo "Running quick tests..."
