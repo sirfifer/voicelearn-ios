@@ -98,8 +98,19 @@ struct UnaMentisApp: App {
             return handler
             #endif
         }
+
+        // Initialize feature flags (non-blocking background task)
+        Task {
+            do {
+                try await FeatureFlagService.shared.start()
+                Self.logger.info("Feature flags initialized")
+            } catch {
+                Self.logger.warning("Feature flags failed to start: \(error.localizedDescription)")
+            }
+        }
+        print("[Init] Feature flags initialization started")
     }
-    
+
     /// Whether the user has completed onboarding
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 

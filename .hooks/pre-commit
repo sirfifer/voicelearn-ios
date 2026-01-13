@@ -11,6 +11,32 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# =============================================================================
+# Bypass Logging
+# =============================================================================
+# Log directory for hook audit trail
+HOOK_LOG_DIR="${HOME}/.unamentis/hook-logs"
+mkdir -p "$HOOK_LOG_DIR"
+
+# Log that the hook ran (helps identify when bypasses occur)
+log_hook_execution() {
+    local status=$1
+    local log_file="${HOOK_LOG_DIR}/pre-commit.log"
+    local timestamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+    local branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+    local commit_msg_file="${GIT_DIR:-$(git rev-parse --git-dir)}/COMMIT_EDITMSG"
+
+    # Rotate log if over 1MB
+    if [ -f "$log_file" ] && [ $(stat -f%z "$log_file" 2>/dev/null || stat -c%s "$log_file" 2>/dev/null || echo 0) -gt 1048576 ]; then
+        mv "$log_file" "${log_file}.1"
+    fi
+
+    echo "${timestamp}|${status}|${branch}|$(whoami)|$$" >> "$log_file"
+}
+
+# Log hook start
+log_hook_execution "STARTED"
+
 echo -e "${YELLOW}Running pre-commit checks...${NC}"
 
 # Track if any checks fail
@@ -81,6 +107,45 @@ if [ -n "$PYTHON_FILES" ]; then
 fi
 
 # =============================================================================
+# Python Coverage Check (Management Server)
+# =============================================================================
+MANAGEMENT_PYTHON_FILES=$(echo "$STAGED_FILES" | grep -E '^server/management/.*\.py$' || true)
+# Exclude test files from the check trigger
+MANAGEMENT_NON_TEST_FILES=$(echo "$MANAGEMENT_PYTHON_FILES" | grep -v '/tests/' || true)
+
+if [ -n "$MANAGEMENT_NON_TEST_FILES" ]; then
+    echo -e "\n${YELLOW}Checking Python test coverage (server/management)...${NC}"
+
+    # Find pytest
+    PYTEST_CMD=""
+    if [ -f "$HOME/Library/Python/3.9/bin/pytest" ]; then
+        PYTEST_CMD="$HOME/Library/Python/3.9/bin/pytest"
+    elif command -v pytest &> /dev/null; then
+        PYTEST_CMD="pytest"
+    fi
+
+    if [ -n "$PYTEST_CMD" ] && [ -d "server/management" ]; then
+        cd server/management
+
+        # Set PYTHONPATH to include server directory for latency_harness imports
+        export PYTHONPATH="${PWD}/..:${PYTHONPATH}"
+
+        echo "Running pytest with coverage (80% minimum required)..."
+        if ! "$PYTEST_CMD" tests/ --cov=. --cov-report=term --cov-fail-under=80 -q 2>&1; then
+            echo -e "${RED}Coverage check failed! Coverage must be at least 80%.${NC}"
+            echo -e "${YELLOW}Run 'pytest tests/ --cov=. --cov-report=term' in server/management to see details.${NC}"
+            FAILED=1
+        else
+            echo -e "${GREEN}Coverage check passed (80%+ achieved).${NC}"
+        fi
+
+        cd - > /dev/null
+    else
+        echo -e "${YELLOW}pytest not found, skipping coverage check.${NC}"
+    fi
+fi
+
+# =============================================================================
 # JavaScript/TypeScript Checks (Web)
 # =============================================================================
 JS_TS_FILES=$(echo "$STAGED_FILES" | grep -E '\.(js|jsx|ts|tsx)$' || true)
@@ -130,10 +195,13 @@ fi
 # =============================================================================
 echo ""
 if [ $FAILED -eq 1 ]; then
+    log_hook_execution "FAILED"
     echo -e "${RED}Pre-commit checks failed. Please fix the issues above.${NC}"
     echo -e "${YELLOW}Tip: You can bypass this check with 'git commit --no-verify' (not recommended)${NC}"
+    echo -e "${YELLOW}Note: Hook bypasses are logged for audit purposes.${NC}"
     exit 1
 else
+    log_hook_execution "PASSED"
     echo -e "${GREEN}All pre-commit checks passed!${NC}"
     exit 0
 fi

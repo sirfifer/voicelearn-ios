@@ -1,0 +1,362 @@
+{
+  "$schema": "../../spec/umcf-schema.json",
+  "formatIdentifier": "umcf",
+  "id": { "value": "kb-science-physics-2024" },
+  "title": "Knowledge Bowl: Physics",
+  "description": "Comprehensive physics preparation for Knowledge Bowl competition covering mechanics, thermodynamics, electromagnetism, waves, and modern physics.",
+  "version": { "number": "1.0.0" },
+  "metadata": {
+    "language": "en-US",
+    "keywords": ["Knowledge Bowl", "physics", "science", "competition", "mechanics", "waves"]
+  },
+  "lifecycle": {
+    "status": "final",
+    "created": "2024-01-15T00:00:00Z",
+    "modified": "2024-01-15T00:00:00Z",
+    "contributors": [
+      {
+        "name": "UnaMentis Curriculum Team",
+        "role": "author"
+      }
+    ]
+  },
+  "rights": {
+    "license": {
+      "type": "CC-BY-NC-SA-4.0"
+    }
+  },
+  "educational": {
+    "typicalAgeRange": "14-18",
+    "context": ["school"],
+    "difficulty": "medium"
+  },
+  "extensions": {
+    "https://unamentis.com/extensions/knowledgeBowl": {
+      "competitionYear": "2024-2025",
+      "questionSource": "custom",
+      "difficultyTier": "varsity",
+      "domain": "science",
+      "category": "physics",
+      "questionWeight": 0.05,
+      "yearlyUpdate": false
+    }
+  },
+  "content": [
+    {
+      "id": { "value": "kb-physics-module" },
+      "title": "Knowledge Bowl Physics Module",
+      "type": "module",
+      "description": "Comprehensive physics preparation for Knowledge Bowl competition",
+      "learningObjectives": [
+        {
+          "id": { "value": "lo-physics-001" },
+          "statement": "Recall and apply Newton's three laws of motion",
+          "bloomsLevel": "apply"
+        },
+        {
+          "id": { "value": "lo-physics-002" },
+          "statement": "Calculate work, energy, and power in mechanical systems",
+          "bloomsLevel": "apply"
+        },
+        {
+          "id": { "value": "lo-physics-003" },
+          "statement": "Identify key physicists and their contributions",
+          "bloomsLevel": "remember"
+        },
+        {
+          "id": { "value": "lo-physics-004" },
+          "statement": "Explain wave phenomena including interference and diffraction",
+          "bloomsLevel": "understand"
+        }
+      ],
+      "transcript": {
+        "segments": [
+          {
+            "id": "intro-segment",
+            "type": "introduction",
+            "content": "Welcome to Knowledge Bowl Physics preparation. This module covers the essential physics concepts you'll encounter in competition, from classical mechanics to modern physics."
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": { "value": "kb-physics-mechanics" },
+          "title": "Classical Mechanics",
+          "type": "topic",
+          "description": "Newton's laws, motion, forces, energy, and momentum",
+          "transcript": {
+            "segments": [
+              {
+                "id": "mechanics-intro",
+                "type": "lecture",
+                "content": "Classical mechanics forms the foundation of physics competition questions. Master Newton's laws and energy concepts."
+              }
+            ]
+          },
+          "children": [
+            {
+              "id": { "value": "kb-physics-newton-laws" },
+              "title": "Newton's Laws of Motion",
+              "type": "segment",
+              "description": "The three fundamental laws governing motion and forces",
+              "transcript": {
+                "segments": [
+                  {
+                    "id": "newton-overview",
+                    "type": "explanation",
+                    "content": "Newton's three laws describe how objects move. The First Law (inertia) states objects maintain their state unless acted upon. The Second Law relates force, mass, and acceleration (F=ma). The Third Law describes action-reaction pairs."
+                  },
+                  {
+                    "id": "newton-intro",
+                    "type": "lecture",
+                    "content": "Let's cover Newton's three laws, which are among the most commonly tested physics concepts in Knowledge Bowl."
+                  }
+                ]
+              },
+              "glossaryTerms": [
+                {
+                  "term": "Inertia",
+                  "definition": "The tendency of an object to resist changes in its state of motion",
+                  "spokenDefinition": "Inertia is an object's resistance to changes in motion"
+                },
+                {
+                  "term": "Net Force",
+                  "definition": "The vector sum of all forces acting on an object",
+                  "spokenDefinition": "Net force is the total of all forces combined"
+                }
+              ],
+              "keyConceptForRetrieval": true,
+              "retrievalConfig": {
+                "difficulty": "medium",
+                "retrievalPrompts": [
+                  "What is Newton's First Law also called?",
+                  "What equation represents Newton's Second Law?",
+                  "If you push a wall, what does Newton's Third Law say happens?"
+                ],
+                "spacingAlgorithm": "sm2",
+                "initialInterval": "P1D",
+                "maxInterval": "P21D"
+              },
+              "assessments": [
+                {
+                  "id": { "value": "assess-newton-tossup-001" },
+                  "type": "choice",
+                  "title": "Newton's First Law",
+                  "prompt": "This law of motion, sometimes called the law of inertia, states that an object at rest will stay at rest unless acted upon by an unbalanced force.",
+                  "choices": [
+                    { "id": "a", "text": "Newton's First Law", "correct": true },
+                    { "id": "b", "text": "Newton's Second Law" },
+                    { "id": "c", "text": "Newton's Third Law" },
+                    { "id": "d", "text": "Law of Conservation of Momentum" }
+                  ],
+                  "feedback": {
+                    "correct": {
+                      "text": "Correct! Newton's First Law is also known as the Law of Inertia."
+                    },
+                    "incorrect": {
+                      "text": "The Law of Inertia is Newton's First Law, describing objects' tendency to maintain their state of motion."
+                    }
+                  }
+                },
+                {
+                  "id": { "value": "assess-newton-tossup-002" },
+                  "type": "choice",
+                  "title": "Newton's Second Law",
+                  "prompt": "According to this law, force equals mass times acceleration, expressed as F equals m a.",
+                  "choices": [
+                    { "id": "a", "text": "Newton's First Law" },
+                    { "id": "b", "text": "Newton's Second Law", "correct": true },
+                    { "id": "c", "text": "Newton's Third Law" },
+                    { "id": "d", "text": "Hooke's Law" }
+                  ],
+                  "feedback": {
+                    "correct": {
+                      "text": "Correct! F=ma is Newton's Second Law of Motion."
+                    },
+                    "incorrect": {
+                      "text": "F=ma is the mathematical expression of Newton's Second Law."
+                    }
+                  }
+                }
+              ],
+              "misconceptions": [
+                {
+                  "id": "misconception-falling-objects",
+                  "misconception": "Heavier objects fall faster than lighter objects",
+                  "triggerPhrases": ["heavier falls faster", "mass affects falling speed"],
+                  "correction": "In a vacuum, all objects fall at the same rate regardless of mass. Air resistance affects falling speed in real-world conditions."
+                },
+                {
+                  "id": "misconception-mass-weight",
+                  "misconception": "Mass and weight are the same thing",
+                  "triggerPhrases": ["mass is weight", "weight is mass"],
+                  "correction": "Mass is the amount of matter (kg), while weight is the gravitational force on that mass (N). Weight = mass times gravity."
+                }
+              ]
+            },
+            {
+              "id": { "value": "kb-physics-energy" },
+              "title": "Energy and Work",
+              "type": "segment",
+              "description": "Kinetic energy, potential energy, work-energy theorem, and conservation of energy",
+              "transcript": {
+                "segments": [
+                  {
+                    "id": "energy-overview",
+                    "type": "explanation",
+                    "content": "Energy exists in many forms. Kinetic energy (KE = 1/2 mv squared) is energy of motion. Potential energy is stored energy. The work-energy theorem states that work equals change in kinetic energy. Energy is conserved in isolated systems."
+                  },
+                  {
+                    "id": "energy-intro",
+                    "type": "lecture",
+                    "content": "Energy concepts appear frequently in competition. Know the formulas for kinetic and potential energy."
+                  }
+                ]
+              },
+              "glossaryTerms": [
+                {
+                  "term": "Kinetic Energy",
+                  "definition": "Energy of motion, calculated as KE = (1/2)mv squared",
+                  "spokenDefinition": "Kinetic energy equals one-half times mass times velocity squared"
+                },
+                {
+                  "term": "Potential Energy",
+                  "definition": "Stored energy due to position or configuration",
+                  "spokenDefinition": "Potential energy is energy stored due to an object's position"
+                },
+                {
+                  "term": "Work",
+                  "definition": "Transfer of energy when a force moves an object, W = Fd cos(theta)",
+                  "spokenDefinition": "Work equals force times displacement times the cosine of the angle between them"
+                }
+              ],
+              "assessments": [
+                {
+                  "id": { "value": "assess-energy-tossup-001" },
+                  "type": "choice",
+                  "title": "Kinetic Energy",
+                  "prompt": "This type of energy, calculated as one-half times mass times velocity squared, describes the energy an object has due to its motion.",
+                  "choices": [
+                    { "id": "a", "text": "Potential energy" },
+                    { "id": "b", "text": "Kinetic energy", "correct": true },
+                    { "id": "c", "text": "Thermal energy" },
+                    { "id": "d", "text": "Chemical energy" }
+                  ],
+                  "feedback": {
+                    "correct": {
+                      "text": "Correct! Kinetic energy = (1/2)mv squared is the energy of motion."
+                    },
+                    "incorrect": {
+                      "text": "KE = (1/2)mv squared is the formula for kinetic energy, the energy of motion."
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": { "value": "kb-physics-waves" },
+          "title": "Waves and Optics",
+          "type": "topic",
+          "description": "Wave properties, sound, light, and electromagnetic spectrum",
+          "transcript": {
+            "segments": [
+              {
+                "id": "waves-intro",
+                "type": "lecture",
+                "content": "Wave physics covers properties of mechanical and electromagnetic waves, including sound and light."
+              }
+            ]
+          },
+          "children": [
+            {
+              "id": { "value": "kb-physics-wave-properties" },
+              "title": "Wave Properties",
+              "type": "segment",
+              "description": "Wavelength, frequency, amplitude, and wave speed",
+              "transcript": {
+                "segments": [
+                  {
+                    "id": "wave-props-overview",
+                    "type": "explanation",
+                    "content": "Waves transfer energy without transferring matter. Key properties include wavelength (lambda), frequency (f), amplitude, and wave speed (v = f times lambda). Waves can be transverse or longitudinal."
+                  }
+                ]
+              },
+              "assessments": [
+                {
+                  "id": { "value": "assess-waves-tossup-001" },
+                  "type": "choice",
+                  "title": "Transverse Waves",
+                  "prompt": "This type of wave has oscillations perpendicular to the direction of energy transfer. Light and water waves are examples.",
+                  "choices": [
+                    { "id": "a", "text": "Longitudinal wave" },
+                    { "id": "b", "text": "Transverse wave", "correct": true },
+                    { "id": "c", "text": "Standing wave" },
+                    { "id": "d", "text": "Compression wave" }
+                  ],
+                  "feedback": {
+                    "correct": {
+                      "text": "Correct! Transverse waves oscillate perpendicular to energy transfer."
+                    },
+                    "incorrect": {
+                      "text": "Transverse waves have perpendicular oscillations. Light is a transverse wave."
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": { "value": "kb-physics-em-spectrum" },
+              "title": "Electromagnetic Spectrum",
+              "type": "segment",
+              "description": "Radio waves, microwaves, infrared, visible light, UV, X-rays, gamma rays",
+              "transcript": {
+                "segments": [
+                  {
+                    "id": "em-spectrum-overview",
+                    "type": "explanation",
+                    "content": "The electromagnetic spectrum spans from low-frequency radio waves to high-frequency gamma rays. In order of increasing frequency: radio, microwave, infrared, visible, ultraviolet, X-ray, gamma. All EM waves travel at the speed of light in a vacuum."
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": { "value": "kb-physics-scientists" },
+          "title": "Famous Physicists",
+          "type": "topic",
+          "description": "Key scientists and their contributions to physics",
+          "transcript": {
+            "segments": [
+              {
+                "id": "scientists-intro",
+                "type": "lecture",
+                "content": "Knowledge Bowl frequently asks about famous physicists. Know their key discoveries and contributions."
+              }
+            ]
+          },
+          "children": [
+            {
+              "id": { "value": "kb-physics-scientists-modern" },
+              "title": "Modern Physicists",
+              "type": "segment",
+              "description": "Einstein, Bohr, Heisenberg, Feynman, Hawking, and others",
+              "transcript": {
+                "segments": [
+                  {
+                    "id": "modern-physicists-overview",
+                    "type": "explanation",
+                    "content": "Key modern physicists include Albert Einstein (relativity, photoelectric effect), Niels Bohr (atomic model), Werner Heisenberg (uncertainty principle), Richard Feynman (QED), and Stephen Hawking (black holes, cosmology)."
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

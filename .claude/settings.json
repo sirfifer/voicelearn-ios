@@ -1,6 +1,10 @@
 {
   "permissions": {
     "additionalDirectories": [
+      "/Users/ramerman/dev/unamentis-android"
+    ],
+    "allow": [
+      "Bash(npm test:*)"
     ]
   },
   "hooks": {

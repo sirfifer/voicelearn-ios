@@ -12,6 +12,7 @@
 # - SwiftLint: brew install swiftlint
 # - SwiftFormat: brew install swiftformat
 # - Ruff: pip install ruff (or brew install ruff)
+# - pytest + coverage: pip install pytest pytest-cov pytest-asyncio
 # - Node.js/npm: For ESLint and Prettier in web client
 # - Gitleaks (optional): brew install gitleaks
 
@@ -67,6 +68,22 @@ if [ -f "$HOOKS_SOURCE/pre-push" ]; then
     echo -e "${GREEN}  Pre-push hook installed.${NC}"
 fi
 
+# Install prepare-commit-msg hook if it exists
+if [ -f "$HOOKS_SOURCE/prepare-commit-msg" ]; then
+    echo -e "${YELLOW}Installing prepare-commit-msg hook...${NC}"
+    cp "$HOOKS_SOURCE/prepare-commit-msg" "$HOOKS_TARGET/prepare-commit-msg"
+    chmod +x "$HOOKS_TARGET/prepare-commit-msg"
+    echo -e "${GREEN}  Prepare-commit-msg hook installed (auto-populates from Claude draft).${NC}"
+fi
+
+# Install post-commit hook if it exists
+if [ -f "$HOOKS_SOURCE/post-commit" ]; then
+    echo -e "${YELLOW}Installing post-commit hook...${NC}"
+    cp "$HOOKS_SOURCE/post-commit" "$HOOKS_TARGET/post-commit"
+    chmod +x "$HOOKS_TARGET/post-commit"
+    echo -e "${GREEN}  Post-commit hook installed (auto-clears Claude draft after commit).${NC}"
+fi
+
 echo ""
 echo -e "${BLUE}Checking tool availability...${NC}"
 
@@ -91,6 +108,7 @@ check_tool "swiftformat" "brew install swiftformat" || true
 echo ""
 echo "Python tools:"
 check_tool "ruff" "pip install ruff" || true
+check_tool "pytest" "pip install pytest pytest-cov pytest-asyncio" || true
 
 echo ""
 echo "JavaScript tools:"
@@ -114,13 +132,16 @@ echo -e "${BLUE}========================================${NC}"
 echo -e "${GREEN}Git hooks installed successfully!${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
-echo "The following checks will run automatically:"
+echo "The following hooks will run automatically:"
 echo "  - Pre-commit: Lint staged Swift, Python, and JS/TS files"
+echo "  - Pre-commit: Enforce 80% test coverage for server/management Python code"
 echo "  - Pre-commit: Check for secrets (if gitleaks is installed)"
+echo "  - Prepare-commit-msg: Pre-populate message from Claude's draft"
+echo "  - Post-commit: Clear Claude's draft after successful commit"
 echo ""
 echo "To bypass hooks temporarily (not recommended):"
 echo "  git commit --no-verify"
 echo ""
 echo "To uninstall hooks:"
-echo "  rm .git/hooks/pre-commit .git/hooks/pre-push"
+echo "  rm .git/hooks/pre-commit .git/hooks/pre-push .git/hooks/prepare-commit-msg .git/hooks/post-commit"
 echo ""
