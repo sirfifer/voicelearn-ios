@@ -188,6 +188,9 @@
 		TD02BF02A1B2C3D4E5F60002 /* TodoItemStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TD02FR02A1B2C3D4E5F60002 /* TodoItemStatusTests.swift */; };
 		TD03BF03A1B2C3D4E5F60003 /* TodoItemTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TD03FR03A1B2C3D4E5F60003 /* TodoItemTypeTests.swift */; };
 		TD04BF04A1B2C3D4E5F60004 /* TodoManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TD04FR04A1B2C3D4E5F60004 /* TodoManagerTests.swift */; };
+		4754C5EED93043E3A9E4554E /* FeatureFlagCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D23E706C58E5459CB4DDB423 /* FeatureFlagCache.swift */; };
+		FF643016724045A9B197F4BC /* FeatureFlagService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2E7E3DD56B4AE0B86846A0 /* FeatureFlagService.swift */; };
+		E64F53B60D5B452A8C13E77F /* FeatureFlagTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2560BACFE343C6ABBC0CE5 /* FeatureFlagTypes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -402,6 +405,9 @@
 		TD02FR02A1B2C3D4E5F60002 /* TodoItemStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemStatusTests.swift; sourceTree = "<group>"; };
 		TD03FR03A1B2C3D4E5F60003 /* TodoItemTypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemTypeTests.swift; sourceTree = "<group>"; };
 		TD04FR04A1B2C3D4E5F60004 /* TodoManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoManagerTests.swift; sourceTree = "<group>"; };
+		D23E706C58E5459CB4DDB423 /* FeatureFlagCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlagCache.swift; sourceTree = "<group>"; };
+		5B2E7E3DD56B4AE0B86846A0 /* FeatureFlagService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlagService.swift; sourceTree = "<group>"; };
+		4A2560BACFE343C6ABBC0CE5 /* FeatureFlagTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlagTypes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -523,6 +529,7 @@
 		26D4F0CD25DC0E9630C0BD28 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				C7C8EC5FF688409C904A3757 /* FeatureFlags */,
 				D1B0A8909510BCEAA999FBB2 /* Curriculum */,
 				832A891AAB702CD24CDFD5C8 /* Embeddings */,
 				51D78AD30F99C5BB666415CA /* LLM */,
@@ -1078,6 +1085,16 @@
 			path = "e5f6a7b8-c9d0-1234-ef56-789012345678";
 			sourceTree = "<group>";
 		};
+		C7C8EC5FF688409C904A3757 /* FeatureFlags */ = {
+			isa = PBXGroup;
+			children = (
+				D23E706C58E5459CB4DDB423 /* FeatureFlagCache.swift */,
+				5B2E7E3DD56B4AE0B86846A0 /* FeatureFlagService.swift */,
+				4A2560BACFE343C6ABBC0CE5 /* FeatureFlagTypes.swift */,
+			);
+			path = FeatureFlags;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1216,6 +1233,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4754C5EED93043E3A9E4554E /* FeatureFlagCache.swift in Sources */,
+				FF643016724045A9B197F4BC /* FeatureFlagService.swift in Sources */,
+				E64F53B60D5B452A8C13E77F /* FeatureFlagTypes.swift in Sources */,
 				05D30C780E95912853747429 /* APIKeyManager.swift in Sources */,
 				63DA72E27AD8F3C5AF92BEDF /* APIProviderDetailView.swift in Sources */,
 				B8EAF61109364E88FAB579FA /* AddTodoSheet.swift in Sources */,
