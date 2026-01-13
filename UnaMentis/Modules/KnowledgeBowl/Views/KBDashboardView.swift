@@ -10,7 +10,12 @@ import Logging
 /// Main dashboard view for Knowledge Bowl module
 struct KBDashboardView: View {
     @State private var selectedStudyMode: KBStudyMode?
+    @State private var activePracticeMode: KBStudyMode = .diagnostic
     @State private var showingDomainDetail: KBDomain?
+    @State private var showingPracticeSession = false
+    @State private var practiceQuestions: [KBQuestion] = []
+    @State private var pendingPracticeStart = false  // Track pending practice session launch
+    @StateObject private var questionService = KBQuestionService.shared
 
     private static let logger = Logger(label: "com.unamentis.kb.dashboard")
 
@@ -37,15 +42,45 @@ struct KBDashboardView: View {
         #endif
         .sheet(item: $selectedStudyMode) { mode in
             NavigationStack {
-                KBStudyModeView(mode: mode)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Close") {
-                                selectedStudyMode = nil
-                            }
-                        }
+                KBPracticeLauncherView(
+                    mode: mode,
+                    questionService: questionService,
+                    onStart: { questions in
+                        activePracticeMode = mode
+                        practiceQuestions = questions
+                        pendingPracticeStart = true
+                        selectedStudyMode = nil
+                    },
+                    onCancel: {
+                        selectedStudyMode = nil
                     }
+                )
             }
+        }
+        .onChange(of: selectedStudyMode) { oldValue, newValue in
+            // When sheet dismisses and we have a pending practice start
+            if oldValue != nil && newValue == nil && pendingPracticeStart {
+                pendingPracticeStart = false
+                // Delay slightly to ensure sheet animation completes
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showingPracticeSession = true
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showingPracticeSession) {
+            NavigationStack {
+                KBPracticeSessionView(
+                    mode: activePracticeMode,
+                    questions: practiceQuestions,
+                    onComplete: { summary in
+                        Self.logger.info("Practice completed: \(summary.correctAnswers)/\(summary.totalQuestions)")
+                        showingPracticeSession = false
+                    }
+                )
+            }
+        }
+        .task {
+            await questionService.loadQuestions()
         }
         .sheet(item: $showingDomainDetail) { domain in
             NavigationStack {
@@ -448,5 +483,350 @@ struct KBDomainDetailView: View {
 #Preview("Domain Detail") {
     NavigationStack {
         KBDomainDetailView(domain: .science)
+    }
+}
+
+// MARK: - Practice Launcher View
+
+struct KBPracticeLauncherView: View {
+    let mode: KBStudyMode
+    let questionService: KBQuestionService
+    let onStart: ([KBQuestion]) -> Void
+    let onCancel: () -> Void
+
+    @State private var isLoading = true
+    @State private var loadedQuestions: [KBQuestion] = []
+    @State private var errorMessage: String?
+
+    var body: some View {
+        VStack(spacing: 24) {
+            VStack(spacing: 16) {
+                Image(systemName: mode.iconName)
+                    .font(.system(size: 50))
+                    .foregroundStyle(mode.color)
+                Text(mode.rawValue)
+                    .font(.title.bold())
+                Text(mode.description)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.top, 32)
+
+            Spacer()
+
+            if isLoading {
+                VStack(spacing: 16) {
+                    ProgressView()
+                    Text("Preparing questions...")
+                        .foregroundStyle(.secondary)
+                }
+            } else if let error = errorMessage {
+                VStack(spacing: 16) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .foregroundStyle(.orange)
+                    Text(error)
+                        .foregroundStyle(.secondary)
+                    Button("Try Again") {
+                        Task { await loadQuestions() }
+                    }
+                    .buttonStyle(.bordered)
+                }
+            } else {
+                VStack(spacing: 16) {
+                    VStack(spacing: 8) {
+                        HStack {
+                            Text("Questions")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text("\(loadedQuestions.count)")
+                                .fontWeight(.medium)
+                        }
+                        if mode == .speed {
+                            HStack {
+                                Text("Time Limit")
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text("5 minutes")
+                                    .fontWeight(.medium)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color(.systemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal)
+            }
+
+            Spacer()
+
+            VStack(spacing: 12) {
+                Button {
+                    onStart(loadedQuestions)
+                } label: {
+                    Text("Start Practice")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(loadedQuestions.isEmpty ? Color.gray : mode.color)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .disabled(loadedQuestions.isEmpty || isLoading)
+
+                Button("Cancel", role: .cancel) { onCancel() }
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 32)
+        }
+        .navigationTitle("Start \(mode.rawValue)")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { onCancel() }
+            }
+        }
+        .task { await loadQuestions() }
+    }
+
+    private func loadQuestions() async {
+        isLoading = true
+        errorMessage = nil
+        if !questionService.isLoaded {
+            await questionService.loadQuestions()
+        }
+        let questions = questionService.questions(forMode: mode)
+        if questions.isEmpty {
+            errorMessage = "No questions available."
+        } else {
+            loadedQuestions = questions
+        }
+        isLoading = false
+    }
+}
+
+// MARK: - Practice Session View
+
+struct KBPracticeSessionView: View {
+    let mode: KBStudyMode
+    let questions: [KBQuestion]
+    let onComplete: (KBSessionSummary) -> Void
+
+    @StateObject private var engine = KBPracticeEngine()
+    @State private var userAnswer = ""
+    @State private var showingExitConfirmation = false
+    @FocusState private var isAnswerFocused: Bool
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 0) {
+            progressHeader
+            Divider()
+            switch engine.sessionState {
+            case .notStarted:
+                ProgressView("Starting...")
+            case .inProgress:
+                questionView
+            case .showingAnswer(let isCorrect):
+                answerFeedbackView(isCorrect: isCorrect)
+            case .completed:
+                completedView
+            }
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemBackground))
+        .navigationTitle(mode.rawValue)
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(engine.sessionState != .completed)
+        .toolbar {
+            if engine.sessionState != .completed {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Exit") { showingExitConfirmation = true }
+                }
+            }
+        }
+        .confirmationDialog("Exit Practice?", isPresented: $showingExitConfirmation) {
+            Button("Exit", role: .destructive) { dismiss() }
+            Button("Continue", role: .cancel) { }
+        }
+        .onAppear { engine.startSession(questions: questions, mode: mode) }
+    }
+
+    @ViewBuilder
+    private var progressHeader: some View {
+        HStack {
+            Text("\(engine.questionIndex + 1) of \(engine.totalQuestions)")
+                .font(.subheadline.bold())
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text("\(engine.results.filter { $0.isCorrect }.count) correct")
+                .font(.subheadline)
+                .foregroundStyle(.green)
+            if mode == .speed && engine.timeRemaining > 0 {
+                Spacer()
+                Text(formatTime(engine.timeRemaining))
+                    .font(.subheadline.bold())
+                    .foregroundStyle(engine.timeRemaining < 30 ? .red : .orange)
+            }
+        }
+        .padding()
+        .background(Color(.systemGroupedBackground))
+    }
+
+    @ViewBuilder
+    private var questionView: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                if let question = engine.currentQuestion {
+                    Text(question.questionText)
+                        .font(.title3)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
+                    HStack(spacing: 4) {
+                        ForEach(1...5, id: \.self) { i in
+                            Circle()
+                                .fill(i <= question.difficulty ? Color.orange : Color.gray.opacity(0.3))
+                                .frame(width: 8, height: 8)
+                        }
+                    }
+                }
+
+                VStack(spacing: 12) {
+                    TextField("Your answer...", text: $userAnswer)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($isAnswerFocused)
+                        .submitLabel(.done)
+                        .onSubmit { if !userAnswer.isEmpty { engine.submitAnswer(userAnswer); isAnswerFocused = false } }
+                        .padding(.horizontal)
+
+                    HStack(spacing: 16) {
+                        Button("Skip") { engine.skipQuestion() }
+                            .buttonStyle(.bordered)
+                        Button("Submit") { engine.submitAnswer(userAnswer); isAnswerFocused = false }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(userAnswer.isEmpty)
+                    }
+                }
+                .padding(.top)
+            }
+            .padding(.vertical, 32)
+        }
+        .onAppear { isAnswerFocused = true }
+    }
+
+    @ViewBuilder
+    private func answerFeedbackView(isCorrect: Bool) -> some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundStyle(isCorrect ? .green : .red)
+                Text(isCorrect ? "Correct!" : "Incorrect")
+                    .font(.title.bold())
+                    .foregroundStyle(isCorrect ? .green : .red)
+
+                if let question = engine.currentQuestion {
+                    VStack(spacing: 8) {
+                        Text("Correct Answer:")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text(question.answerText)
+                            .font(.headline)
+                    }
+                    .padding()
+                    .background(Color(.systemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    if !question.explanation.isEmpty {
+                        Text(question.explanation)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .padding()
+                            .background(Color.blue.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+
+                Button {
+                    userAnswer = ""
+                    engine.nextQuestion()
+                } label: {
+                    Text(engine.questionIndex + 1 >= engine.totalQuestions ? "See Results" : "Next Question")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(mode.color)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal)
+            }
+            .padding(.vertical, 32)
+        }
+    }
+
+    @ViewBuilder
+    private var completedView: some View {
+        let summary = engine.generateSummary()
+        ScrollView {
+            VStack(spacing: 24) {
+                Image(systemName: "trophy.fill")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.yellow)
+                Text("Session Complete!")
+                    .font(.title.bold())
+
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                    SummaryStatCard(title: "Accuracy", value: String(format: "%.0f%%", summary.accuracy * 100), color: summary.accuracy >= 0.7 ? .green : .orange)
+                    SummaryStatCard(title: "Correct", value: "\(summary.correctAnswers)/\(summary.totalQuestions)", color: .blue)
+                    SummaryStatCard(title: "Avg Time", value: String(format: "%.1fs", summary.averageResponseTime), color: .purple)
+                    SummaryStatCard(title: "Speed Target", value: String(format: "%.0f%%", summary.speedTargetRate * 100), color: .orange)
+                }
+                .padding(.horizontal)
+
+                Button {
+                    onComplete(summary)
+                    dismiss()
+                } label: {
+                    Text("Done")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(mode.color)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal)
+            }
+            .padding(.vertical, 32)
+        }
+    }
+
+    private func formatTime(_ seconds: TimeInterval) -> String {
+        String(format: "%d:%02d", Int(seconds) / 60, Int(seconds) % 60)
+    }
+}
+
+struct SummaryStatCard: View {
+    let title: String
+    let value: String
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(value)
+                .font(.title2.bold())
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(color.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

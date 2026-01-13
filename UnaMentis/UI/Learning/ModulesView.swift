@@ -399,8 +399,14 @@ struct ModuleDetailSheet: View {
                 }
                 .padding()
 
-                // Action button
-                if isDownloaded {
+                // Action button - show Start Practicing if downloaded OR in DEBUG mode
+                #if DEBUG
+                let canLaunch = true  // Allow launch without download in DEBUG
+                #else
+                let canLaunch = isDownloaded
+                #endif
+
+                if canLaunch {
                     Button {
                         onLaunch()
                         dismiss()
@@ -414,6 +420,14 @@ struct ModuleDetailSheet: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .padding(.horizontal)
+
+                    #if DEBUG
+                    if !isDownloaded {
+                        Text("DEBUG: Launching without download")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+                    #endif
                 } else {
                     Button {
                         Task {

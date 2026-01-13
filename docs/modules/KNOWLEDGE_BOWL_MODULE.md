@@ -12,6 +12,22 @@ The Knowledge Bowl Module is a specialized learning system designed to prepare s
 - Weakness identification with targeted remediation paths
 - Team coordination training for collaborative answering
 
+### Voice-First Requirement
+
+**CRITICAL**: As part of UnaMentis, this module MUST be voice-first while maintaining full multimodal support. This means:
+
+1. **Automatic Voice Output**: All questions are automatically read aloud via TTS when presented, mimicking a real competition moderator
+2. **Always-Listening Input**: Voice recognition is always active during practice sessions; users can answer verbally without any special interaction
+3. **Verbal Feedback**: Correct/incorrect feedback and explanations are spoken aloud
+4. **Simultaneous Multimodality**: Visual UI and voice work in parallel; users see AND hear questions, can type OR speak answers
+5. **No Toggle Required**: Voice is the default, not an opt-in feature
+
+**Competition Authenticity (Future Enhancement):**
+- Adjust TTS cadence and pacing to match real KB moderator delivery
+- Add appropriate dramatic pauses before revealing answers
+- Consider different vocal energy levels for different question difficulties
+- Potential for multiple "moderator voices" to match regional competition styles
+
 ## Table of Contents
 
 1. [Understanding Knowledge Bowl](#understanding-knowledge-bowl)
