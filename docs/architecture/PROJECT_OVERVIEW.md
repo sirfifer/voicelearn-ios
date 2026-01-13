@@ -497,6 +497,28 @@ Curriculum
 - **Accessibility:** Required alt text, audio descriptions for all visual content
 - **Equation format:** LaTeX notation with spoken description
 
+### AI Curriculum Generation
+
+A comprehensive prompt is available for generating UMCF-compliant curriculum using AI models (Claude, GPT-4, etc.).
+
+**Features:**
+- Complete UMCF v1.1.0 format compliance
+- Voice-optimized content with speaking notes and pronunciations
+- Teachback checkpoints for comprehension verification
+- Bloom's taxonomy-aligned learning objectives
+- Assessment generation with feedback
+- Misconception detection and remediation
+- Media placeholder support with accessibility
+
+**Usage:**
+1. Copy the prompt from `docs/UMCF_CURRICULUM_PROMPT.md`
+2. Add your curriculum specification (topic, audience, scope, depth)
+3. Submit to your AI model
+4. Review and validate the output JSON
+5. Save with `.umcf` extension
+
+See [UMCF_CURRICULUM_PROMPT.md](../UMCF_CURRICULUM_PROMPT.md) for the complete prompt and usage instructions.
+
 ---
 
 ## Curriculum Importers
@@ -539,6 +561,119 @@ The framework uses **filesystem-based plugin discovery** with explicit enable/di
 5. **Assessment Generation** - Question generation with SRL + LLM
 6. **Tutoring Enhancement** - Spoken text, misconceptions, glossary extraction
 7. **Knowledge Graph** - Concept extraction, Wikidata linking, prerequisites
+
+---
+
+## Specialized Learning Modules
+
+Beyond standard curriculum delivery, UnaMentis supports specialized learning modules for high-stakes scenarios that require more than content mastery.
+
+### Framework
+
+The Specialized Modules Framework addresses scenarios where success requires:
+
+```
+Success = Content Mastery + Performance Skills + Psychological Readiness + Strategic Execution
+```
+
+**When to Use Specialized Modules:**
+- High-stakes performance events (tests, competitions, certifications)
+- Time-pressured execution
+- Strategic decision-making requirements
+- Psychological factors (anxiety, focus under pressure)
+- Dynamic content (current events, annual updates)
+
+### Implemented Modules
+
+| Module | Target | Status | Documentation |
+|--------|--------|--------|---------------|
+| **SAT Preparation** | Digital SAT test-takers | Specification complete | `docs/modules/SAT_MODULE.md` |
+| **Knowledge Bowl** | Academic quiz bowl teams | Specification complete | `docs/modules/KNOWLEDGE_BOWL_MODULE.md` |
+
+### SAT Preparation Module
+
+Comprehensive adaptive learning for the Digital SAT (2024+ format):
+
+- **Adaptive Practice Engine** mimicking multi-stage adaptive testing (MST)
+- **Test-Taking Strategy Training** (pacing, guessing strategy, question triage)
+- **Timing and Pacing System** (95 seconds per math question targets)
+- **Performance Psychology** (anxiety management, confidence building)
+- **Score Prediction** with targeted improvement paths
+
+### Knowledge Bowl Module
+
+Multi-subject mastery for academic quiz bowl competitions:
+
+- **12+ Subject Domains** (Science, Math, Literature, History, Arts, Current Events)
+- **Speed-Based Recall Training** (sub-3-second response targets)
+- **Dynamic Content Pipeline** for yearly topic updates
+- **Competition Simulation** with buzzer mechanics
+- **Team Coordination Training** for collaborative answering
+
+### Future Module Candidates
+
+Modules under consideration for future development:
+
+| Category | Potential Modules |
+|----------|-------------------|
+| **Standardized Tests** | ACT, GRE, GMAT, LSAT, MCAT |
+| **Academic Competitions** | Science Olympiad, Math League, Debate |
+| **Professional Certifications** | Bar Exam, CPA, Medical Boards, IT Certs |
+| **Language Learning** | TOEFL, IELTS, DELE, JLPT |
+| **Admissions Prep** | College Essays, Interview Practice |
+
+See `docs/modules/SPECIALIZED_MODULES_FRAMEWORK.md` for the complete design methodology.
+
+---
+
+## App Store Compliance & Security
+
+### App Store Readiness
+
+UnaMentis maintains comprehensive App Store compliance documentation with current status: **CONDITIONALLY COMPLIANT**.
+
+**Compliance Highlights:**
+- ✅ Properly uses Keychain for sensitive API keys
+- ✅ All cloud APIs use HTTPS/WSS (secure transport)
+- ✅ Privacy-focused design with on-device ML options
+- ✅ No third-party analytics or tracking SDKs
+- ✅ No IDFA/advertising identifier usage
+- ✅ Minimal data collection
+- ✅ PrivacyInfo.xcprivacy manifest included
+- ✅ Remote logging hardened for release builds
+
+**Key Documentation:**
+| Document | Purpose |
+|----------|---------|
+| [APP_STORE_COMPLIANCE.md](../APP_STORE_COMPLIANCE.md) | Comprehensive compliance guide with checklists |
+| [SCALING_SECURITY_MULTITENANCY_ANALYSIS.md](../SCALING_SECURITY_MULTITENANCY_ANALYSIS.md) | Security and multi-tenant architecture analysis |
+
+### Security Architecture Analysis
+
+A comprehensive security assessment covering scaling from beta (10-50 users) through mass adoption (millions), with enterprise multi-tenancy considerations.
+
+**Current Assessment:**
+
+| Category | Current State | Production Readiness |
+|----------|---------------|---------------------|
+| Authentication | Basic | 🟡 Beta ready |
+| Multi-Tenancy | None | 🔴 Requires implementation |
+| Data Encryption | iOS Keychain | 🟡 Partial |
+| Network Security | HTTPS for cloud | 🟡 Partial |
+| Privacy Compliance | Export/deletion exists | 🟡 Partial |
+
+**Scaling Roadmap Phases:**
+1. **Beta (10-50 users):** Current architecture with security fixes
+2. **Early Adopters (50-1,000):** PostgreSQL, proper backend, rate limiting
+3. **Growth (1,000-100,000):** Multi-tenant, multi-region, Kubernetes
+4. **Scale (100,000+):** Enterprise dedicated tenancy, SOC 2 compliance
+
+**Privacy Architecture:**
+- **Tier 1 (Maximum Privacy):** On-device only (Apple Speech, AVSpeechSynthesizer, On-Device LLM)
+- **Tier 2 (High Privacy):** Self-hosted servers (Whisper, Piper, Ollama)
+- **Tier 3 (Standard Privacy):** Cloud with DPAs (OpenAI, Anthropic, Deepgram)
+
+See [SCALING_SECURITY_MULTITENANCY_ANALYSIS.md](../SCALING_SECURITY_MULTITENANCY_ANALYSIS.md) for the complete analysis.
 
 ---
 
@@ -746,12 +881,19 @@ See [CODE_QUALITY_INITIATIVE.md](../quality/CODE_QUALITY_INITIATIVE.md) for comp
 - **Voice cloning UI** (Chatterbox settings with file picker and audio recorder)
 - **Latency harness audio file loading** (full STT pipeline testing with real audio)
 - **LaTeX formula rendering** (SwiftMath integration with Unicode fallback)
+- **App Store compliance documentation** (PrivacyInfo.xcprivacy, privacy manifest, submission checklists)
+- **Scaling/security/multitenancy analysis** (comprehensive 4-phase roadmap)
+- **UMCF AI curriculum generation prompt** (v1.2.0, complete format compliance)
+- **Specialized modules framework** (high-stakes learning scenarios)
+- **SAT Preparation Module specification** (adaptive testing, strategy training)
+- **Knowledge Bowl Module specification** (multi-subject mastery, competition simulation)
 
 ### In Progress
 - Android client (separate repository)
 - Visual asset caching optimization
 - AI enrichment pipeline implementation
 - Fast.ai and Stanford SEE importers
+- App Store submission preparation
 
 ### Pending User Setup
 - API key configuration (OpenAI, Anthropic, Deepgram, ElevenLabs, AssemblyAI, Groq)
@@ -890,6 +1032,27 @@ See [CODE_QUALITY_INITIATIVE.md](../quality/CODE_QUALITY_INITIATIVE.md) for comp
 | [AI_SIMULATOR_TESTING.md](AI_SIMULATOR_TESTING.md) | AI-driven testing |
 | [VISUAL_ASSET_SUPPORT.md](VISUAL_ASSET_SUPPORT.md) | Curriculum media |
 
+### Compliance & Security
+| Document | Purpose |
+|----------|---------|
+| [APP_STORE_COMPLIANCE.md](../APP_STORE_COMPLIANCE.md) | App Store submission guide |
+| [SCALING_SECURITY_MULTITENANCY_ANALYSIS.md](../SCALING_SECURITY_MULTITENANCY_ANALYSIS.md) | Security & scaling roadmap |
+| [UMCF_CURRICULUM_PROMPT.md](../UMCF_CURRICULUM_PROMPT.md) | AI curriculum generation |
+
+### Specialized Modules
+| Document | Purpose |
+|----------|---------|
+| [SPECIALIZED_MODULES_FRAMEWORK.md](../modules/SPECIALIZED_MODULES_FRAMEWORK.md) | Module design methodology |
+| [SAT_MODULE.md](../modules/SAT_MODULE.md) | SAT Preparation Module |
+| [KNOWLEDGE_BOWL_MODULE.md](../modules/KNOWLEDGE_BOWL_MODULE.md) | Knowledge Bowl Module |
+
+### Future Explorations
+| Document | Purpose |
+|----------|---------|
+| [LEARNER_PROFILE_EXPLORATION.md](../explorations/LEARNER_PROFILE_EXPLORATION.md) | Voice-native learner profiling |
+| [MULTILINGUAL_VOICE_LEARNING_EXPLORATION.md](../explorations/MULTILINGUAL_VOICE_LEARNING_EXPLORATION.md) | Multi-language support |
+| [WATCH_APP_EXPLORATION.md](../explorations/WATCH_APP_EXPLORATION.md) | watchOS companion app |
+
 ---
 
 ## Roadmap
@@ -904,20 +1067,37 @@ See [CODE_QUALITY_INITIATIVE.md](../quality/CODE_QUALITY_INITIATIVE.md) for comp
 - AI enrichment pipeline (in progress)
 - Fast.ai and Stanford SEE importers (spec complete)
 
-### Phase 7: Cross-Platform Expansion (In Progress)
+### Phase 7: Cross-Platform & Specialized Modules (In Progress)
 - Android client development
 - Feature parity across iOS, Web, Android
 - Shared curriculum sync
+- SAT Preparation Module (specification complete)
+- Knowledge Bowl Module (specification complete)
 
-### Phase 8: Advanced Features (Planned)
+### Phase 8: App Store & Production Readiness (In Progress)
+- App Store compliance preparation (conditionally compliant)
+- Privacy manifest implementation (complete)
+- Security hardening per SCALING_SECURITY_MULTITENANCY_ANALYSIS
+- TestFlight preparation
+- 90-minute session stability validation
+
+### Phase 9: Advanced Features (Planned)
 - Knowledge graph construction
 - Interactive visual diagrams
 - Collaborative annotations
+- Additional specialized modules (ACT, GRE, professional certifications)
 
-### Phase 9: Production Hardening (Pending)
-- Performance optimization based on device testing
-- 90-minute session stability
-- TestFlight distribution
+### Phase 10: Enterprise & Scale (Future)
+- Multi-tenant architecture implementation
+- Authentication and authorization layer
+- Per-tenant encryption
+- SOC 2 Type II compliance
+- Enterprise dedicated infrastructure options
+
+### Explorations Under Consideration
+- **Learner Profile System:** Voice-native, evidence-based learner profiling
+- **Multilingual Support:** 27+ language support leveraging existing infrastructure
+- **Apple Watch App:** Wrist-based session control companion
 
 ---
 

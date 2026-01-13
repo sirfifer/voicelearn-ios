@@ -1,22 +1,37 @@
-# Navigation
+# UnaMentis Wiki
 
-**Overview**
+**Getting Started**
 * [[Home]]
 * [[Getting-Started]]
+* [[Dev-Environment]]
 
 **Development**
 * [[Development]]
-* [[Dev-Environment]]
+* [[iOS-Development]]
+* [[Server-Development]]
 * [[Testing]]
-
-**Tools**
-* [[Tools]]
-* [[CodeRabbit]]
-* [[GitHub-Actions]]
+* [[Contributing]]
 
 **Architecture**
 * [[Architecture]]
 * [[Voice-Pipeline]]
+* [[Specialized-Modules]]
+
+**Production**
+* [[App-Store-Compliance]]
+* [[Security-Scaling]]
+
+**Tools**
+* [[Tools]]
+* [[CodeRabbit]]
+* [[MCP-Servers]]
+* [[GitHub-Actions]]
 
 **Reference**
-* [[Contributing]]
+* [[API-Reference]]
+* [[Troubleshooting]]
+
+---
+
+[Repository](https://github.com/UnaMentis/unamentis) |
+[Issues](https://github.com/UnaMentis/unamentis/issues)
