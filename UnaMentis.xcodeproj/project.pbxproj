@@ -107,6 +107,7 @@
 		C56682611D5E4EF6510B3A9D /* AudioSegmentCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B1569096D98E31634299E1 /* AudioSegmentCache.swift */; };
 		979AE8F5878DBD378FADD22F /* GLMASRSTTService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913726F1DED7248C8A332F99 /* GLMASRSTTService.swift */; };
 		9FF33043A3535D20BB665608 /* CLAUDE.md in Resources */ = {isa = PBXBuildFile; fileRef = C106D83D776CAC24BE29F29E /* CLAUDE.md */; };
+		483BA569B1D74CB3A1C11A0A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1BCBA8B31CD04D46BD2DB77E /* PrivacyInfo.xcprivacy */; };
 		A0569F0FAEBFCCBEA2B1A1AA /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEFD16827DB21DF4C6196187 /* HelpView.swift */; };
 		A0698371DD250D62946947C2 /* FormulaRendererView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E0D7BCB5A6EA44B4A655E2 /* FormulaRendererView.swift */; };
 		A0B7F1F73D8A304D20840717 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70220748F3897D2FF6F683DC /* LLMService.swift */; };
@@ -372,6 +373,7 @@
 		C670B8ABA9BB2D3CB56B2DCA /* AppleSpeechSTTService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSpeechSTTService.swift; sourceTree = "<group>"; };
 		C7939543C761675CCC470CB6 /* DocumentProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentProcessor.swift; sourceTree = "<group>"; };
 		C8CD06EDCAA31E7B098CFE99 /* UnaMentis.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = UnaMentis.entitlements; sourceTree = "<group>"; };
+		1BCBA8B31CD04D46BD2DB77E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C9AD07E27AF281275DC11BE0 /* LLMTaskType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMTaskType.swift; sourceTree = "<group>"; };
 		CA6A16CA0F313B0BA5AF32CB /* CurriculumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurriculumView.swift; sourceTree = "<group>"; };
 		CA835A7A6B86E694088ADD48 /* AppShortcutsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcutsProvider.swift; sourceTree = "<group>"; };
@@ -767,6 +769,7 @@
 				01C496581684518021B58948 /* LaunchScreen.storyboard */,
 				69BCDC85F09A4EC5F3AFF8C8 /* Localizable.strings */,
 				C8CD06EDCAA31E7B098CFE99 /* UnaMentis.entitlements */,
+				1BCBA8B31CD04D46BD2DB77E /* PrivacyInfo.xcprivacy */,
 				C9E6C480A39CD30072D919FF /* UnaMentis.xcdatamodeld */,
 				F67D31AC52E12378D29C55C7 /* UnaMentisApp.swift */,
 			);
@@ -1205,6 +1208,7 @@
 				7A89F2AB2F32A1315FFED55D /* AGENTS.md in Resources */,
 				0C1D15E13981FB86E6CC009D /* Assets.xcassets in Resources */,
 				9FF33043A3535D20BB665608 /* CLAUDE.md in Resources */,
+				483BA569B1D74CB3A1C11A0A /* PrivacyInfo.xcprivacy in Resources */,
 				3EE6A10EB470F1654EA8EE1C /* LaunchScreen.storyboard in Resources */,
 				4B12FB0AF2279C8F7769DCC8 /* Localizable.strings in Resources */,
 				2211F59FFE4E0A1465945499 /* img-last-supper.jpg in Resources */,

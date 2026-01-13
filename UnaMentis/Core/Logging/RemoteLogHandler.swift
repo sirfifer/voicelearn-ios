@@ -227,12 +227,19 @@ public struct RemoteLogHandler: LogHandler {
 // MARK: - Remote Logging Configuration
 
 /// Configuration for remote logging
+///
+/// SECURITY NOTE: Remote logging is ONLY available in DEBUG builds to prevent
+/// accidental data leakage in production. All configuration methods are no-ops
+/// in release builds.
 public enum RemoteLogging {
 
     /// Configure remote logging with auto-discovery
     /// Attempts to find the logging server on the local network
     /// Default port is 8765 (log_server.py), endpoint is /log
+    ///
+    /// - Important: This is a no-op in release builds for security.
     public static func configure(serverIP: String? = nil, port: Int = 8765) {
+        #if DEBUG
         if let ip = serverIP, !ip.isEmpty {
             // Valid server IP provided - configure and enable
             RemoteLogHandler.defaultServerURL = URL(string: "http://\(ip):\(port)/log")!
@@ -249,15 +256,36 @@ public enum RemoteLogging {
             RemoteLogHandler.isEnabled = false
             #endif
         }
+        #endif
+        // No-op in release builds - remote logging is disabled for security
     }
 
     /// Disable remote logging
     public static func disable() {
+        #if DEBUG
         RemoteLogHandler.isEnabled = false
+        #endif
+        // No-op in release - already disabled
     }
 
     /// Enable remote logging
+    ///
+    /// - Important: This is a no-op in release builds for security.
+    /// Remote logging can only be enabled in DEBUG builds to prevent
+    /// accidental data leakage in production.
     public static func enable() {
+        #if DEBUG
         RemoteLogHandler.isEnabled = true
+        #endif
+        // No-op in release builds - remote logging is disabled for security
+    }
+
+    /// Check if remote logging is available (DEBUG builds only)
+    public static var isAvailable: Bool {
+        #if DEBUG
+        return true
+        #else
+        return false
+        #endif
     }
 }
