@@ -534,10 +534,10 @@ mod property_tests {
     fn uptime_formatting_consistency() {
         // Test various durations to ensure formatting is consistent
         let test_cases = [
-            (30i64, "s"),    // seconds format
-            (90, "m"),       // minutes format
-            (3700, "h"),     // hours format
-            (90000, "d"),    // days format
+            (30i64, "s"), // seconds format
+            (90, "m"),    // minutes format
+            (3700, "h"),  // hours format
+            (90000, "d"), // days format
         ];
 
         for (secs, expected_suffix) in test_cases {
@@ -553,14 +553,22 @@ mod property_tests {
                 tags: vec![],
                 auto_start: false,
                 env_vars: Default::default(),
-            }).unwrap();
+            })
+            .unwrap();
 
             instance.started_at = Some(started);
 
             let uptime_str = instance.uptime_string();
-            assert!(uptime_str.is_some(), "Uptime string should be Some when started_at is set");
-            assert!(uptime_str.unwrap().contains(expected_suffix),
-                "Uptime for {} secs should contain '{}'", secs, expected_suffix);
+            assert!(
+                uptime_str.is_some(),
+                "Uptime string should be Some when started_at is set"
+            );
+            assert!(
+                uptime_str.unwrap().contains(expected_suffix),
+                "Uptime for {} secs should contain '{}'",
+                secs,
+                expected_suffix
+            );
         }
     }
 }

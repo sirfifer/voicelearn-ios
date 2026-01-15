@@ -239,9 +239,7 @@ mod property_tests {
 
     /// Generate valid port ranges where min <= max
     fn port_range_strategy() -> impl Strategy<Value = (u16, u16)> {
-        (1024u16..=60000u16).prop_flat_map(|start| {
-            (Just(start), start..=65535u16)
-        })
+        (1024u16..=60000u16).prop_flat_map(|start| (Just(start), start..=65535u16))
     }
 
     /// Generate valid service identifiers

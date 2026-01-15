@@ -221,9 +221,10 @@ async fn start_instance(
     Path(id): Path<String>,
 ) -> Result<Json<serde_json::Value>, (StatusCode, String)> {
     let mut instances = state.instances.write().await;
-    let instance = instances
-        .get_mut(&id)
-        .ok_or((StatusCode::NOT_FOUND, format!("Instance '{}' not found", id)))?;
+    let instance = instances.get_mut(&id).ok_or((
+        StatusCode::NOT_FOUND,
+        format!("Instance '{}' not found", id),
+    ))?;
 
     // Check if already running
     if instance.status == ServiceStatus::Running {
@@ -276,9 +277,10 @@ async fn stop_instance(
     Path(id): Path<String>,
 ) -> Result<Json<serde_json::Value>, (StatusCode, String)> {
     let mut instances = state.instances.write().await;
-    let instance = instances
-        .get_mut(&id)
-        .ok_or((StatusCode::NOT_FOUND, format!("Instance '{}' not found", id)))?;
+    let instance = instances.get_mut(&id).ok_or((
+        StatusCode::NOT_FOUND,
+        format!("Instance '{}' not found", id),
+    ))?;
 
     // Check if already stopped
     if instance.status != ServiceStatus::Running {
@@ -343,9 +345,10 @@ async fn restart_instance(
 ) -> Result<Json<serde_json::Value>, (StatusCode, String)> {
     // Stop first
     let mut instances = state.instances.write().await;
-    let instance = instances
-        .get_mut(&id)
-        .ok_or((StatusCode::NOT_FOUND, format!("Instance '{}' not found", id)))?;
+    let instance = instances.get_mut(&id).ok_or((
+        StatusCode::NOT_FOUND,
+        format!("Instance '{}' not found", id),
+    ))?;
 
     // Get template
     let templates = state.templates.read().await;

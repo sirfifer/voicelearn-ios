@@ -380,9 +380,7 @@ mod property_tests {
 
     /// Generate valid port ranges
     fn port_range_strategy() -> impl Strategy<Value = (u16, u16)> {
-        (1024u16..=60000u16).prop_flat_map(|start| {
-            (Just(start), start..=65535u16)
-        })
+        (1024u16..=60000u16).prop_flat_map(|start| (Just(start), start..=65535u16))
     }
 
     /// Generate valid service identifiers (alphanumeric with dashes)
@@ -559,21 +557,20 @@ mod property_tests {
 
     /// Helper function to test path resolution without needing full ConfigManager
     fn resolve_path_test(path: &str) -> String {
-        path
-            .replace(
-                "${PROJECT_ROOT}",
-                &std::env::var("UNAMENTIS_ROOT").unwrap_or_else(|_| {
-                    dirs::home_dir()
-                        .unwrap_or_default()
-                        .join("dev/unamentis")
-                        .display()
-                        .to_string()
-                }),
-            )
-            .replace(
-                "~",
-                &dirs::home_dir().unwrap_or_default().display().to_string(),
-            )
+        path.replace(
+            "${PROJECT_ROOT}",
+            &std::env::var("UNAMENTIS_ROOT").unwrap_or_else(|_| {
+                dirs::home_dir()
+                    .unwrap_or_default()
+                    .join("dev/unamentis")
+                    .display()
+                    .to_string()
+            }),
+        )
+        .replace(
+            "~",
+            &dirs::home_dir().unwrap_or_default().display().to_string(),
+        )
     }
 
     // --- Property Tests: ConfigFile Structure ---
