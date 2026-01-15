@@ -42,8 +42,10 @@ supports_multiple = true
 display_name = "Log Server"
 description = "Centralized logging server"
 default_port = 8765
+port_range = [8765, 8765]
 start_command = "python3 {working_dir}/log_server/server.py --port {port}"
 health_endpoint = "http://localhost:{port}/health"
+health_timeout_ms = 5000
 category = "development"
 supports_multiple = false
 
@@ -54,8 +56,10 @@ default_port = 3063
 start_command = "docker compose -f {working_dir}/docker-compose.yml up -d"
 stop_command = "docker compose -f {working_dir}/docker-compose.yml down"
 is_docker = true
+health_endpoint = "http://localhost:{port}/health"
+health_timeout_ms = 15000
 category = "development"
-supports_multiple = true
+supports_multiple = false
 
 # =============================================================================
 # DEFAULT INSTANCES - Created on first startup
@@ -71,6 +75,7 @@ tags = ["core", "primary"]
 [instances.ollama-primary]
 template = "ollama"
 port = 11434
+working_dir = "${PROJECT_ROOT}"
 auto_start = false
 tags = ["llm"]
 

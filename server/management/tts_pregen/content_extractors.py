@@ -71,7 +71,7 @@ class KnowledgeBowlExtractor(ContentExtractor):
         items = []
 
         try:
-            with open(self.data_path, "r") as f:
+            with open(self.data_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except FileNotFoundError:
             logger.error(f"Knowledge Bowl data not found: {self.data_path}")
@@ -146,7 +146,7 @@ class KnowledgeBowlExtractor(ContentExtractor):
             Dict with domain counts, question counts, etc.
         """
         try:
-            with open(self.data_path, "r") as f:
+            with open(self.data_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
@@ -211,7 +211,7 @@ class CurriculumExtractor(ContentExtractor):
         items = []
 
         try:
-            with open(file_path, "r") as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             logger.warning(f"Could not read curriculum file {file_path}: {e}")

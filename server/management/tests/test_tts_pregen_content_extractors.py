@@ -66,7 +66,9 @@ class TestKnowledgeBowlExtractor:
         """Create temporary Knowledge Bowl file."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             json.dump(kb_data, f)
-            return f.name
+            path = f.name
+        yield path
+        os.unlink(path)
 
     def test_extract_all_content(self, kb_file):
         """Test extracting all content types."""
@@ -215,7 +217,9 @@ class TestCurriculumExtractor:
         """Create temporary curriculum file."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             json.dump(curriculum_data, f)
-            return f.name
+            path = f.name
+        yield path
+        os.unlink(path)
 
     def test_extract_from_file(self, curriculum_file):
         """Test extracting from curriculum file."""

@@ -16,6 +16,9 @@ from tts_pregen.models import (
     TTSProfile,
     TTSProfileSettings,
     TTSModuleProfile,
+    TTSComparisonSession,
+    TTSComparisonVariant,
+    TTSComparisonRating,
 )
 
 
@@ -884,12 +887,6 @@ class TestInitialization:
 # =============================================================================
 # Comparison Session API Tests
 # =============================================================================
-
-from tts_pregen.models import (
-    TTSComparisonSession,
-    TTSComparisonVariant,
-    TTSComparisonRating,
-)
 
 
 def create_mock_session(**kwargs) -> TTSComparisonSession:

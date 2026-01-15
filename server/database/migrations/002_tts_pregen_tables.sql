@@ -11,6 +11,9 @@
 --
 -- ============================================================================
 
+-- Ensure required extension is available for uuid_generate_v4()
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- ============================================================================
 -- TTS PROFILES (Reusable voice configurations)
 -- ============================================================================
@@ -263,6 +266,31 @@ LEFT JOIN tts_profiles p ON j.profile_id = p.id;
 
 COMMENT ON VIEW tts_profile_summaries IS 'Profile list with usage counts';
 COMMENT ON VIEW tts_job_summaries IS 'Job list with progress percentages';
+
+-- ============================================================================
+-- Trigger function for automatic updated_at
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Apply updated_at triggers to tables with updated_at columns
+CREATE TRIGGER update_tts_profiles_updated_at
+    BEFORE UPDATE ON tts_profiles
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_tts_pregen_jobs_updated_at
+    BEFORE UPDATE ON tts_pregen_jobs
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_tts_comparison_sessions_updated_at
+    BEFORE UPDATE ON tts_comparison_sessions
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================================
 -- Migration complete

@@ -48,9 +48,9 @@ if command -v cargo &> /dev/null; then
             FAILED=1
         fi
 
-        # Run clippy
+        # Run clippy (--all-targets ensures tests, examples, benchmarks are also linted)
         echo "   Running clippy..."
-        if cargo clippy -- -D warnings 2>&1; then
+        if cargo clippy --all-targets -- -D warnings 2>&1; then
             echo -e "   ${GREEN}Clippy passed${NC}"
         else
             echo -e "   ${RED}Clippy failed${NC}"
@@ -65,6 +65,7 @@ else
     echo -e "${YELLOW}WARNING: Rust/Cargo not installed${NC}"
     if [ "${SKIP_LINT_IF_UNAVAILABLE:-false}" != "true" ]; then
         echo "Install Rust with: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+        FAILED=1
     fi
 fi
 
@@ -72,7 +73,7 @@ fi
 echo ""
 echo "3. Ruff (Python)..."
 if command -v ruff &> /dev/null; then
-    if ruff check server/ --output-format=text 2>/dev/null; then
+    if ruff check server/ --output-format=text; then
         echo -e "${GREEN}Ruff passed${NC}"
     else
         echo -e "${YELLOW}Ruff found issues (non-blocking)${NC}"

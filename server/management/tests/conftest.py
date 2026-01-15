@@ -7,8 +7,11 @@ Configures Hypothesis profiles for different environments:
 - thorough: Comprehensive testing (500 examples)
 """
 
+import logging
 import os
 from hypothesis import settings, Verbosity, Phase
+
+logger = logging.getLogger(__name__)
 
 # Detect CI environment
 IS_CI = os.environ.get("CI") == "true" or os.environ.get("GITHUB_ACTIONS") == "true"
@@ -48,4 +51,4 @@ settings.register_profile(
 profile_name = os.environ.get("HYPOTHESIS_PROFILE", "ci" if IS_CI else "default")
 settings.load_profile(profile_name)
 
-print(f"Hypothesis profile: {profile_name}")
+logger.info(f"Hypothesis profile: {profile_name}")

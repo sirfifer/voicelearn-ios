@@ -24,7 +24,7 @@ UnaMentis implements a **5-phase Code Quality Initiative** that enables a small 
 | DORA metrics and observability | Implemented | Engineering health visibility |
 | AI-powered code review | Implemented | Every PR reviewed by CodeRabbit |
 | Mutation testing | Implemented | Weekly test quality validation |
-| Property-based testing | Implemented | 107 invariant tests (70 Python, 37 Rust) |
+| Property-based testing | Implemented | 107 property-based tests (70 Python, 37 Rust property tests) |
 | Chaos engineering | Implemented | Voice pipeline resilience testing |
 
 ### Philosophy
