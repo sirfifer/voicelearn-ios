@@ -111,6 +111,10 @@
 		KB0003A1B2C3D4E5F60003 /* KBQuestionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB0004A1B2C3D4E5F60004 /* KBQuestionService.swift */; };
 		KB0005A1B2C3D4E5F60005 /* KBAudioCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB0006A1B2C3D4E5F60006 /* KBAudioCache.swift */; };
 		KB0007A1B2C3D4E5F60007 /* KBVoiceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB0008A1B2C3D4E5F60008 /* KBVoiceCoordinator.swift */; };
+		KB0009A1B2C3D4E5F60009 /* KBQuestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB0010A1B2C3D4E5F60010 /* KBQuestion.swift */; };
+		KB0011A1B2C3D4E5F60011 /* KBPracticeSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB0012A1B2C3D4E5F60012 /* KBPracticeSessionView.swift */; };
+		KB0013A1B2C3D4E5F60013 /* KBPracticeLauncherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB0014A1B2C3D4E5F60014 /* KBPracticeLauncherView.swift */; };
+		KB0015A1B2C3D4E5F60015 /* KBPracticeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB0016A1B2C3D4E5F60016 /* KBPracticeEngine.swift */; };
 		8652341C92E028AF67C4BF51 /* UnaMentisWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A5060629D9897BD2FC0768 /* UnaMentisWatchApp.swift */; };
 		87493F4642F672CD73A03DAD /* IdleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11D96FBF2E03F7600EE74EED /* IdleView.swift */; };
 		89D988E2BB2A2C983E90C8B4 /* PersistenceControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7B8DEB4A2EDC95013DBE36 /* PersistenceControllerTests.swift */; };
@@ -381,6 +385,10 @@
 		KB0004A1B2C3D4E5F60004 /* KBQuestionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KBQuestionService.swift; path = UnaMentis/Modules/KnowledgeBowl/Services/KBQuestionService.swift; sourceTree = SOURCE_ROOT; };
 		KB0006A1B2C3D4E5F60006 /* KBAudioCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KBAudioCache.swift; path = UnaMentis/Modules/KnowledgeBowl/Services/KBAudioCache.swift; sourceTree = SOURCE_ROOT; };
 		KB0008A1B2C3D4E5F60008 /* KBVoiceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KBVoiceCoordinator.swift; path = UnaMentis/Modules/KnowledgeBowl/Services/KBVoiceCoordinator.swift; sourceTree = SOURCE_ROOT; };
+		KB0010A1B2C3D4E5F60010 /* KBQuestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KBQuestion.swift; path = UnaMentis/Modules/KnowledgeBowl/Models/KBQuestion.swift; sourceTree = SOURCE_ROOT; };
+		KB0012A1B2C3D4E5F60012 /* KBPracticeSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KBPracticeSessionView.swift; path = UnaMentis/Modules/KnowledgeBowl/Views/KBPracticeSessionView.swift; sourceTree = SOURCE_ROOT; };
+		KB0014A1B2C3D4E5F60014 /* KBPracticeLauncherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KBPracticeLauncherView.swift; path = UnaMentis/Modules/KnowledgeBowl/Views/KBPracticeLauncherView.swift; sourceTree = SOURCE_ROOT; };
+		KB0016A1B2C3D4E5F60016 /* KBPracticeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KBPracticeEngine.swift; path = UnaMentis/Modules/KnowledgeBowl/Engine/KBPracticeEngine.swift; sourceTree = SOURCE_ROOT; };
 		AEB55A7777AA7B176D7BB4A7 /* WatchConnectivityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityService.swift; sourceTree = "<group>"; };
 		AFC4A17E2DF38A82C06A6DB8 /* ToolCallProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolCallProcessor.swift; sourceTree = "<group>"; };
 		B01B5BA785A644DB9C77430F /* FOVContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FOVContextManager.swift; sourceTree = "<group>"; };
@@ -611,6 +619,10 @@
 				KB0004A1B2C3D4E5F60004 /* KBQuestionService.swift */,
 				KB0006A1B2C3D4E5F60006 /* KBAudioCache.swift */,
 				KB0008A1B2C3D4E5F60008 /* KBVoiceCoordinator.swift */,
+				KB0010A1B2C3D4E5F60010 /* KBQuestion.swift */,
+				KB0012A1B2C3D4E5F60012 /* KBPracticeSessionView.swift */,
+				KB0014A1B2C3D4E5F60014 /* KBPracticeLauncherView.swift */,
+				KB0016A1B2C3D4E5F60016 /* KBPracticeEngine.swift */,
 				24A64A0E887FB329F6A64301 /* ModuleService.swift */,
 				25A1476D837F75AF6F0AB83A /* VoiceCloningViews.swift */,
 			);
@@ -1403,6 +1415,10 @@
 				KB0003A1B2C3D4E5F60003 /* KBQuestionService.swift in Sources */,
 				KB0005A1B2C3D4E5F60005 /* KBAudioCache.swift in Sources */,
 				KB0007A1B2C3D4E5F60007 /* KBVoiceCoordinator.swift in Sources */,
+				KB0009A1B2C3D4E5F60009 /* KBQuestion.swift in Sources */,
+				KB0011A1B2C3D4E5F60011 /* KBPracticeSessionView.swift in Sources */,
+				KB0013A1B2C3D4E5F60013 /* KBPracticeLauncherView.swift in Sources */,
+				KB0015A1B2C3D4E5F60015 /* KBPracticeEngine.swift in Sources */,
 				0D4E480BAA53528AFA0D76E8 /* ModuleService.swift in Sources */,
 				E7594BC09975B6E80CB958CF /* VoiceCloningViews.swift in Sources */,
 			);
