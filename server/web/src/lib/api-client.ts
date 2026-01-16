@@ -1778,3 +1778,275 @@ export async function deleteFOVSession(
 
   return response.json();
 }
+
+// =============================================================================
+// TTS Profile Management APIs
+// =============================================================================
+
+import type { TTSProfile, CreateProfileData, UpdateProfileData } from '@/types';
+
+// Mock TTS profiles for demo mode
+const mockTTSProfiles: TTSProfile[] = [
+  {
+    id: 'mock-profile-1',
+    name: 'Knowledge Bowl Tutor',
+    description: 'Expressive voice optimized for quiz-style tutoring',
+    provider: 'chatterbox',
+    voice_id: 'default',
+    settings: {
+      speed: 1.0,
+      exaggeration: 0.7,
+      cfg_weight: 0.5,
+    },
+    tags: ['tutor', 'knowledge-bowl', 'expressive'],
+    use_case: 'tutoring',
+    is_active: true,
+    is_default: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'mock-profile-2',
+    name: 'Calm Narrator',
+    description: 'Smooth, neutral voice for explanations',
+    provider: 'vibevoice',
+    voice_id: 'nova',
+    settings: {
+      speed: 0.9,
+    },
+    tags: ['narrator', 'explanations'],
+    use_case: 'explanations',
+    is_active: true,
+    is_default: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
+
+/**
+ * List TTS profiles with optional filters
+ */
+export async function getTTSProfiles(params?: {
+  provider?: string;
+  tags?: string[];
+  use_case?: string;
+  is_active?: boolean;
+}): Promise<{ profiles: TTSProfile[]; total: number }> {
+  const queryParams = new URLSearchParams();
+  if (params?.provider) queryParams.set('provider', params.provider);
+  if (params?.tags?.length) queryParams.set('tags', params.tags.join(','));
+  if (params?.use_case) queryParams.set('use_case', params.use_case);
+  if (params?.is_active !== undefined) queryParams.set('is_active', String(params.is_active));
+
+  const query = queryParams.toString();
+  const endpoint = `/api/tts/profiles${query ? `?${query}` : ''}`;
+
+  return fetchWithFallback(endpoint, () => {
+    let filtered = [...mockTTSProfiles];
+
+    if (params?.provider) {
+      filtered = filtered.filter((p) => p.provider === params.provider);
+    }
+    if (params?.tags?.length) {
+      filtered = filtered.filter((p) => params.tags!.some((tag) => p.tags?.includes(tag)));
+    }
+    if (params?.use_case) {
+      filtered = filtered.filter((p) => p.use_case === params.use_case);
+    }
+    if (params?.is_active !== undefined) {
+      filtered = filtered.filter((p) => p.is_active === params.is_active);
+    }
+
+    return { profiles: filtered, total: filtered.length };
+  });
+}
+
+/**
+ * Get a single TTS profile by ID
+ */
+export async function getTTSProfile(profileId: string): Promise<TTSProfile | null> {
+  return fetchWithFallback(`/api/tts/profiles/${profileId}`, () => {
+    return mockTTSProfiles.find((p) => p.id === profileId) || null;
+  });
+}
+
+/**
+ * Create a new TTS profile
+ */
+export async function createTTSProfile(
+  data: CreateProfileData
+): Promise<{ profile: TTSProfile; error?: string }> {
+  if (USE_MOCK) {
+    const newProfile: TTSProfile = {
+      id: `mock-${Date.now()}`,
+      name: data.name,
+      description: data.description,
+      provider: data.provider,
+      voice_id: data.voice_id,
+      settings: {
+        speed: data.settings?.speed ?? 1.0,
+        exaggeration: data.settings?.exaggeration,
+        cfg_weight: data.settings?.cfg_weight,
+        language: data.settings?.language,
+        extra: data.settings?.extra,
+      },
+      tags: data.tags || [],
+      use_case: data.use_case,
+      is_active: true,
+      is_default: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    mockTTSProfiles.push(newProfile);
+    return { profile: newProfile };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/profiles`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Update an existing TTS profile
+ */
+export async function updateTTSProfile(
+  profileId: string,
+  data: UpdateProfileData
+): Promise<{ profile: TTSProfile; error?: string }> {
+  if (USE_MOCK) {
+    const index = mockTTSProfiles.findIndex((p) => p.id === profileId);
+    if (index === -1) {
+      throw new Error('Profile not found');
+    }
+    const existingSettings = mockTTSProfiles[index].settings;
+    const updated: TTSProfile = {
+      ...mockTTSProfiles[index],
+      ...data,
+      settings: data.settings
+        ? {
+            speed: data.settings.speed ?? existingSettings.speed,
+            exaggeration: data.settings.exaggeration ?? existingSettings.exaggeration,
+            cfg_weight: data.settings.cfg_weight ?? existingSettings.cfg_weight,
+            language: data.settings.language ?? existingSettings.language,
+            extra: data.settings.extra ?? existingSettings.extra,
+          }
+        : existingSettings,
+      updated_at: new Date().toISOString(),
+    };
+    mockTTSProfiles[index] = updated;
+    return { profile: updated };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/profiles/${profileId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Delete a TTS profile (soft delete)
+ */
+export async function deleteTTSProfile(
+  profileId: string,
+  hard?: boolean
+): Promise<{ success: boolean; error?: string }> {
+  if (USE_MOCK) {
+    const index = mockTTSProfiles.findIndex((p) => p.id === profileId);
+    if (index === -1) {
+      return { success: false, error: 'Profile not found' };
+    }
+    if (hard) {
+      mockTTSProfiles.splice(index, 1);
+    } else {
+      mockTTSProfiles[index].is_active = false;
+    }
+    return { success: true };
+  }
+
+  const endpoint = hard
+    ? `${BACKEND_URL}/api/tts/profiles/${profileId}?hard=true`
+    : `${BACKEND_URL}/api/tts/profiles/${profileId}`;
+
+  const response = await fetch(endpoint, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    return { success: false, error: error.error || `HTTP ${response.status}` };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Generate sample audio for a TTS profile
+ */
+export async function generateProfileSample(
+  profileId: string,
+  text?: string
+): Promise<{ audio_url: string; duration_seconds: number; error?: string }> {
+  if (USE_MOCK) {
+    // Return a mock audio URL
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return {
+      audio_url: '/api/tts/profiles/mock/sample.wav',
+      duration_seconds: 2.5,
+    };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/profiles/${profileId}/preview`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Set a profile as the default
+ */
+export async function setDefaultTTSProfile(
+  profileId: string
+): Promise<{ success: boolean; error?: string }> {
+  if (USE_MOCK) {
+    mockTTSProfiles.forEach((p) => {
+      p.is_default = p.id === profileId;
+    });
+    return { success: true };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/profiles/${profileId}/set-default`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    return { success: false, error: error.error || `HTTP ${response.status}` };
+  }
+
+  return { success: true };
+}

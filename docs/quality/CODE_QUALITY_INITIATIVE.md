@@ -24,6 +24,7 @@ UnaMentis implements a **5-phase Code Quality Initiative** that enables a small 
 | DORA metrics and observability | Implemented | Engineering health visibility |
 | AI-powered code review | Implemented | Every PR reviewed by CodeRabbit |
 | Mutation testing | Implemented | Weekly test quality validation |
+| Property-based testing | Implemented | 107 property-based tests (70 Python, 37 Rust property tests) |
 | Chaos engineering | Implemented | Voice pipeline resilience testing |
 
 ### Philosophy
@@ -360,6 +361,48 @@ schedule:
 - Mutation score target: >70%
 - Results uploaded as artifacts (30-day retention)
 - Trend analysis over time
+
+#### Property-Based Testing (Implemented)
+
+Property testing verifies that invariants hold across randomly generated inputs, catching edge cases that hand-written examples miss:
+
+**Frameworks:**
+| Platform | Tool | Tests |
+|----------|------|-------|
+| Python | Hypothesis | 70 property tests |
+| Rust | proptest | 37 property tests |
+
+**Test Categories:**
+- **TTS Cache**: Hash determinism, TTL expiration, stats bounds, stateful testing
+- **FOV Context**: Budget sum invariants, tier ordering, buffer rendering
+- **TTS Pre-generation**: Job progress, status state machine, text hashing, serialization
+- **Config**: Port validation, TOML roundtrip, path resolution idempotency
+- **Template**: Port allocation, command substitution, JSON roundtrip
+- **Instance**: Tag matching, validation, uptime calculations
+
+**CI Integration:**
+```yaml
+# From .github/workflows/server.yml
+property-tests:
+  name: Property Tests (Hypothesis)
+  runs-on: ubuntu-latest
+  steps:
+    - name: Run Property Tests
+      run: pytest tests/property/ -v --hypothesis-show-statistics
+      env:
+        HYPOTHESIS_PROFILE: ci
+```
+
+**Hypothesis Profiles:**
+- `ci`: 50 examples (fast CI runs)
+- `default`: 100 examples (local development)
+- `thorough`: 500 examples (comprehensive testing)
+
+**Relationship to Mutation Testing:**
+- Mutation testing reveals: "This code isn't tested well"
+- Property testing provides: "Test all cases of this invariant"
+
+When mutation testing shows survived mutants in code with clear invariants, property tests are the ideal fix.
 
 #### Chaos Engineering (Implemented)
 

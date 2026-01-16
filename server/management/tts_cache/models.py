@@ -148,9 +148,13 @@ class TTSCacheEntry:
 
     @property
     def is_expired(self) -> bool:
-        """Check if entry has exceeded its TTL."""
+        """Check if entry has exceeded its TTL.
+
+        Note: Uses >= for boundary condition so entries exactly at their TTL
+        are considered expired (inclusive boundary).
+        """
         expiry = self.created_at + timedelta(seconds=self.ttl_seconds)
-        return datetime.now() > expiry
+        return datetime.now() >= expiry
 
     @property
     def age_seconds(self) -> float:

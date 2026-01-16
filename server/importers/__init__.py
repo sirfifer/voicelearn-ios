@@ -12,12 +12,12 @@ Architecture:
 """
 
 from .core.models import (
+    CourseCatalogEntry,
+    CourseDetail,
+    CurriculumSource,
     ImportConfig,
     ImportProgress,
     ImportResult,
-    CurriculumSource,
-    CourseCatalogEntry,
-    CourseDetail,
 )
 from .core.orchestrator import ImportOrchestrator
 from .core.registry import SourceRegistry

@@ -10,12 +10,13 @@ This module provides comprehensive analysis of curriculum content to identify:
 - Incomplete metadata
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import time
-import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import aiohttp
 
@@ -66,7 +67,7 @@ class CurriculumAnalyzer:
         self._issue_counter += 1
         return f"issue-{self._issue_counter:04d}"
 
-    async def analyze(self, curriculum: Dict[str, Any]) -> CurriculumAnalysis:
+    async def analyze(self, curriculum: dict[str, Any]) -> CurriculumAnalysis:
         """
         Run full analysis on a curriculum.
 
@@ -85,7 +86,7 @@ class CurriculumAnalyzer:
         logger.info(f"Starting analysis of curriculum: {curriculum_title}")
 
         # Run all checks
-        issues: List[AnalysisIssue] = []
+        issues: list[AnalysisIssue] = []
 
         # Image checks (async for HTTP requests)
         image_issues = await self.check_images(curriculum)
@@ -127,7 +128,7 @@ class CurriculumAnalyzer:
             stats=stats,
         )
 
-    def _calculate_stats(self, issues: List[AnalysisIssue]) -> AnalysisStats:
+    def _calculate_stats(self, issues: list[AnalysisIssue]) -> AnalysisStats:
         """Calculate summary statistics from issues list."""
         stats = AnalysisStats()
         stats.total_issues = len(issues)
@@ -156,7 +157,7 @@ class CurriculumAnalyzer:
     # Image Validation
     # =========================================================================
 
-    async def check_images(self, curriculum: Dict[str, Any]) -> List[AnalysisIssue]:
+    async def check_images(self, curriculum: dict[str, Any]) -> list[AnalysisIssue]:
         """
         Validate image URLs with HEAD requests.
 
@@ -175,7 +176,7 @@ class CurriculumAnalyzer:
         # Check images concurrently with rate limiting
         semaphore = asyncio.Semaphore(10)  # Max 10 concurrent requests
 
-        async def check_single_image(image_info: Tuple[str, Dict[str, Any]]) -> Optional[AnalysisIssue]:
+        async def check_single_image(image_info: tuple[str, dict[str, Any]]) -> AnalysisIssue | None:
             location, asset = image_info
             async with semaphore:
                 return await self._validate_image(location, asset)
@@ -194,8 +195,8 @@ class CurriculumAnalyzer:
     async def _validate_image(
         self,
         location: str,
-        asset: Dict[str, Any]
-    ) -> Optional[AnalysisIssue]:
+        asset: dict[str, Any],
+    ) -> AnalysisIssue | None:
         """Validate a single image asset."""
 
         # Check for placeholder flag
@@ -280,7 +281,7 @@ class CurriculumAnalyzer:
 
         return None
 
-    def _find_all_images(self, curriculum: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
+    def _find_all_images(self, curriculum: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
         """Find all image assets in the curriculum."""
         images = []
 
@@ -315,7 +316,7 @@ class CurriculumAnalyzer:
     # Chunking Analysis
     # =========================================================================
 
-    def check_chunking(self, curriculum: Dict[str, Any]) -> List[AnalysisIssue]:
+    def check_chunking(self, curriculum: dict[str, Any]) -> list[AnalysisIssue]:
         """
         Find segments with inappropriate length.
 
@@ -371,7 +372,7 @@ class CurriculumAnalyzer:
 
         return issues
 
-    def _find_all_segments(self, curriculum: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
+    def _find_all_segments(self, curriculum: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
         """Find all transcript segments in the curriculum."""
         segments = []
 
@@ -400,7 +401,7 @@ class CurriculumAnalyzer:
     # Learning Objectives Check
     # =========================================================================
 
-    def check_objectives(self, curriculum: Dict[str, Any]) -> List[AnalysisIssue]:
+    def check_objectives(self, curriculum: dict[str, Any]) -> list[AnalysisIssue]:
         """
         Find topics missing learning objectives.
         """
@@ -452,7 +453,7 @@ class CurriculumAnalyzer:
     # Checkpoints Check
     # =========================================================================
 
-    def check_checkpoints(self, curriculum: Dict[str, Any]) -> List[AnalysisIssue]:
+    def check_checkpoints(self, curriculum: dict[str, Any]) -> list[AnalysisIssue]:
         """
         Find topics missing comprehension checkpoints.
         """
@@ -499,7 +500,7 @@ class CurriculumAnalyzer:
     # Alternative Explanations Check
     # =========================================================================
 
-    def check_alternatives(self, curriculum: Dict[str, Any]) -> List[AnalysisIssue]:
+    def check_alternatives(self, curriculum: dict[str, Any]) -> list[AnalysisIssue]:
         """
         Find segments missing alternative explanations.
         """
@@ -537,7 +538,7 @@ class CurriculumAnalyzer:
     # Metadata Check
     # =========================================================================
 
-    def check_metadata(self, curriculum: Dict[str, Any]) -> List[AnalysisIssue]:
+    def check_metadata(self, curriculum: dict[str, Any]) -> list[AnalysisIssue]:
         """
         Find missing or invalid metadata.
         """
@@ -588,7 +589,7 @@ class CurriculumAnalyzer:
     # Helper Methods
     # =========================================================================
 
-    def _find_all_topics(self, curriculum: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
+    def _find_all_topics(self, curriculum: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
         """Find all topic nodes in the curriculum."""
         topics = []
 

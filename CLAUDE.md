@@ -25,6 +25,7 @@ This repository contains multiple components, each with its own CLAUDE.md:
 |-----------|----------|---------|
 | iOS App | `UnaMentis/` | Swift/SwiftUI voice tutoring client |
 | Server | `server/` | Backend infrastructure |
+| **USM Core** | `server/usm-core/` | Rust cross-platform service manager (port 8767) |
 | Management API | `server/management/` | Python/aiohttp backend API (port 8766) |
 | UnaMentis Server | `server/web/` | Next.js/React web interface (port 3000) |
 | Importers | `server/importers/` | Curriculum import framework |
@@ -115,6 +116,15 @@ python -m latency_harness.cli --suite quick_validation --no-mock  # Real provide
 
 # Hook audit (check for bypasses)
 ./scripts/hook-audit.sh
+
+# Rust (USM Core)
+cd server/usm-core
+cargo build                      # Debug build
+cargo build --release            # Release build (optimized)
+cargo test                       # Run all tests
+cargo clippy -- -D warnings      # Lint with clippy
+cargo fmt                        # Format code
+cargo fmt --check                # Check formatting without modifying
 ```
 
 ### Unified Test Runner

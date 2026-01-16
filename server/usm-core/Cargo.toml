@@ -1,0 +1,61 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/usm-core",
+    "crates/usm-ffi",
+    "crates/usm-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+authors = ["UnaMentis Team"]
+license = "MIT"
+repository = "https://github.com/unamentis/unamentis"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+
+# HTTP/WebSocket server
+axum = { version = "0.7", features = ["ws"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Process monitoring
+sysinfo = "0.30"
+
+# File watching
+notify = "6.1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# CLI
+clap = { version = "4.4", features = ["derive"] }
+
+# FFI
+libc = "0.2"
+
+# Testing
+tokio-test = "0.4"
+tempfile = "3.10"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

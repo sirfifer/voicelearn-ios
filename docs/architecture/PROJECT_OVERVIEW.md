@@ -48,6 +48,7 @@ unamentis/
 ├── UnaMentis/                 # iOS App (Swift 6.0/SwiftUI)
 ├── UnaMentisTests/            # iOS Test Suite (126+ tests)
 ├── server/                    # Backend Infrastructure
+│   ├── usm-core/              # Cross-Platform Service Manager (Rust)
 │   ├── management/            # Management API (Python/aiohttp, port 8766)
 │   ├── web/                   # Operations Console (Next.js/React, port 3000)
 │   ├── web-client/            # Web Client (Next.js, voice tutoring for browsers)
@@ -65,6 +66,7 @@ unamentis/
 |-----------|----------|------------|---------|
 | iOS App | `UnaMentis/` | Swift 6.0, SwiftUI | Voice tutoring client (primary) |
 | iOS Tests | `UnaMentisTests/` | XCTest | 126+ unit, 16+ integration tests |
+| **USM Core** | `server/usm-core/` | Rust, Tokio, Axum | Cross-platform service manager |
 | Web Client | `server/web-client/` | Next.js 15+, React, TypeScript | Voice tutoring for browsers |
 | Management API | `server/management/` | Python, aiohttp | Backend API (port 8766) |
 | Operations Console | `server/web/` | Next.js 16.1, React 19 | System/content management (port 3000) |
@@ -320,6 +322,48 @@ A switchboard system for routing LLM calls to any endpoint:
 ---
 
 ## Server Infrastructure
+
+### USM Core (Port 8767)
+
+**Purpose:** Cross-platform service manager for development infrastructure
+
+**Tech Stack:** Rust, Tokio (async runtime), Axum (HTTP/WebSocket), sysinfo (metrics)
+
+**Features:**
+- Template-based service definitions with variable substitution
+- Multiple instances per template (different ports, configs, versions)
+- Real-time process monitoring (CPU, memory, status)
+- HTTP REST API for service control
+- WebSocket for real-time UI updates (<50ms latency)
+- C FFI bindings for Swift/Python integration
+- Platform-specific backends (macOS libproc, Linux procfs)
+- TOML configuration with hot-reload
+
+**Architecture:**
+```
+USM Core (Rust Library)
+├── Service Registry (Templates + Instances)
+├── Process Monitor (Platform-specific)
+├── HTTP/WebSocket Server (Axum)
+├── Event Bus (Pub/Sub)
+└── Metrics Collector
+         │
+         ├── macOS Swift App (C FFI)
+         ├── Linux TUI/GTK (C FFI)
+         └── Web Dashboard (REST/WebSocket)
+```
+
+**API Endpoints:**
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/templates` | GET/POST | Template management |
+| `/api/instances` | GET/POST | Instance management |
+| `/api/instances/{id}/start` | POST | Start instance |
+| `/api/instances/{id}/stop` | POST | Stop instance |
+| `/api/metrics` | GET | System metrics |
+| `/ws` | WebSocket | Real-time events |
+
+See [USM Core README](../../server/usm-core/README.md) for detailed documentation.
 
 ### Management API (Port 8766)
 
@@ -752,6 +796,8 @@ UnaMentis implements a comprehensive **5-phase Code Quality Initiative** that en
 | Latency P99 | 1000ms | CI warns at +10%, fails at +20% |
 | SwiftLint | Zero violations (strict) | Pre-commit hook |
 | Ruff (Python) | Zero violations | Pre-commit hook |
+| Clippy (Rust) | Zero warnings | CI fails on warnings |
+| Rustfmt (Rust) | Zero formatting issues | Pre-commit hook + CI |
 | ESLint/Prettier | Zero violations | Pre-commit hook |
 | Secrets Detection | Zero findings | Pre-commit + CI |
 | Security Vulnerabilities | Zero critical/high | Security workflow |
@@ -769,6 +815,7 @@ UnaMentis implements a comprehensive **5-phase Code Quality Initiative** that en
 | DORA Metrics | Apache DevLake | Engineering health |
 | Feature Flags | Unleash | Safe rollouts |
 | Mutation Testing | mutmut, Stryker, Muter | Test quality validation |
+| Property Testing | Hypothesis, proptest | Invariant verification (70 Python, 37 Rust tests) |
 | Chaos Engineering | Custom runbook | Voice pipeline resilience |
 
 ### GitHub Actions Workflows
@@ -776,6 +823,7 @@ UnaMentis implements a comprehensive **5-phase Code Quality Initiative** that en
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | iOS CI | Push/PR | Build, lint, test, coverage |
+| Rust CI | Push/PR | Clippy, rustfmt, cargo test |
 | Server CI | Push/PR | Python linting, tests, coverage |
 | Web Client CI | Push/PR | Lint, typecheck, build, coverage |
 | Nightly E2E | Daily 2am | Full E2E + latency tests |
@@ -784,6 +832,7 @@ UnaMentis implements a comprehensive **5-phase Code Quality Initiative** that en
 | Quality Metrics | Daily | CI/PR/bug metrics |
 | Feature Flags | Weekly | Stale flag audit |
 | Mutation Testing | Weekly (Sunday 4am) | Test quality validation |
+| Property Tests | Push/PR (server) | Invariant verification |
 
 ### Feature Flag System
 
@@ -887,6 +936,7 @@ See [CODE_QUALITY_INITIATIVE.md](../quality/CODE_QUALITY_INITIATIVE.md) for comp
 - **Specialized modules framework** (high-stakes learning scenarios)
 - **SAT Preparation Module specification** (adaptive testing, strategy training)
 - **Knowledge Bowl Module specification** (multi-subject mastery, competition simulation)
+- **USM Core** (Rust cross-platform service manager, HTTP/WebSocket API, C FFI, 19 tests)
 
 ### In Progress
 - Android client (separate repository)
@@ -956,6 +1006,17 @@ See [CODE_QUALITY_INITIATIVE.md](../quality/CODE_QUALITY_INITIATIVE.md) for comp
 | Styling | Tailwind CSS 4 |
 | Icons | Lucide React |
 
+### USM Core (Service Manager)
+| Layer | Technology |
+|-------|-----------|
+| Language | Rust (2021 edition) |
+| Async Runtime | Tokio |
+| HTTP/WebSocket | Axum |
+| Process Monitoring | sysinfo, libproc (macOS), procfs (Linux) |
+| Configuration | TOML (serde) |
+| FFI | C bindings for Swift/Python |
+| Testing | cargo test (19 tests) |
+
 ### Management API
 | Layer | Technology |
 |-------|-----------|
@@ -993,6 +1054,11 @@ See [CODE_QUALITY_INITIATIVE.md](../quality/CODE_QUALITY_INITIATIVE.md) for comp
 | `server/management/fov_context/session.py` | UserSession, PlaybackState, SessionManager |
 | `server/importers/plugins/sources/mit_ocw.py` | MIT OCW course handler |
 | `server/web/src/components/curriculum/` | Curriculum Studio components |
+| `server/usm-core/crates/usm-core/src/lib.rs` | USM Core public API |
+| `server/usm-core/crates/usm-core/src/service/` | Service template and instance management |
+| `server/usm-core/crates/usm-core/src/monitor/` | Platform-specific process monitoring |
+| `server/usm-core/crates/usm-ffi/src/lib.rs` | C FFI bindings for Swift |
+| `server/usm-core/config/services.toml` | Service definitions |
 | `server/web-client/src/app/` | Web client application |
 
 ---
@@ -1126,10 +1192,11 @@ A separate commercial layer may offer:
 |-----------|----------|-------|---------|
 | iOS App | Swift | 80+ | Voice tutoring client (primary) |
 | iOS Tests | Swift | 26 | Unit & integration tests |
+| **USM Core** | Rust | 22 | Cross-platform service manager |
 | Web Client | TypeScript/React | 50+ | Voice tutoring for browsers |
 | Management API | Python | 10+ | Backend API |
 | Operations Console | TypeScript/React | 67 | System/content management |
 | Importers | Python | 25+ | Curriculum ingestion |
 | Curriculum Spec | Markdown/JSON | 19 | Format specification |
 | Documentation | Markdown | 40+ | Comprehensive guides |
-| **TOTAL** | Mixed | 317+ | Full system |
+| **TOTAL** | Mixed | 340+ | Full system |

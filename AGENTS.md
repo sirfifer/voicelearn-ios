@@ -552,6 +552,31 @@ python -m latency_harness.cli --suite quick_validation --mock
 
 These are NOT mocks. They create real Core Data entities in an in-memory store.
 
+### Property-Based Testing
+
+Property testing complements the "real over mock" philosophy by generating random inputs to verify invariants. It catches edge cases that hand-written examples miss.
+
+**Frameworks:**
+- **Python**: Hypothesis (`server/management/tests/property/`)
+- **Rust**: proptest (`server/usm-core/`)
+
+**When to write property tests:**
+- Mathematical invariants (bounds, sums, ordering)
+- Round-trip operations (serialize/deserialize)
+- Idempotent operations (repeated calls have same result)
+- Edge cases hard to enumerate
+
+**Running property tests:**
+```bash
+# Python
+cd server/management && pytest tests/property/ -v --hypothesis-show-statistics
+
+# Rust
+cd server/usm-core && cargo test config::property_tests
+```
+
+Property tests verify that invariants hold for all generated inputs, complementing example-based tests that verify specific scenarios.
+
 ---
 
 ## MANDATORY: Documentation Maintenance

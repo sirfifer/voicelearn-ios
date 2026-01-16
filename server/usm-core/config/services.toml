@@ -1,0 +1,94 @@
+# USM Core Configuration File
+# This file defines service templates and instances for the UnaMentis server stack
+
+# =============================================================================
+# SERVICE TEMPLATES - Blueprints for spawning instances
+# =============================================================================
+
+[templates.management-api]
+display_name = "Management API"
+description = "Python backend API server for UnaMentis"
+default_port = 8766
+port_range = [8766, 8799]
+start_command = "python3 {working_dir}/management/server.py --port {port}"
+health_endpoint = "http://localhost:{port}/health"
+health_timeout_ms = 5000
+category = "core"
+supports_multiple = true
+
+[templates.ollama]
+display_name = "Ollama LLM Server"
+description = "Local LLM inference server"
+default_port = 11434
+port_range = [11434, 11450]
+start_command = "OLLAMA_HOST=0.0.0.0:{port} ollama serve"
+health_endpoint = "http://localhost:{port}/api/tags"
+health_timeout_ms = 10000
+category = "core"
+supports_multiple = true
+
+[templates.web-server]
+display_name = "Next.js Web Server"
+description = "UnaMentis web frontend"
+default_port = 3000
+port_range = [3000, 3099]
+start_command = "cd {working_dir} && PORT={port} pnpm start"
+health_endpoint = "http://localhost:{port}/api/health"
+health_timeout_ms = 5000
+category = "core"
+supports_multiple = true
+
+[templates.log-server]
+display_name = "Log Server"
+description = "Centralized logging server"
+default_port = 8765
+port_range = [8765, 8765]
+start_command = "python3 {working_dir}/log_server/server.py --port {port}"
+health_endpoint = "http://localhost:{port}/health"
+health_timeout_ms = 5000
+category = "development"
+supports_multiple = false
+
+[templates.feature-flags]
+display_name = "Feature Flags (Unleash)"
+description = "Feature flag management via Docker Compose"
+default_port = 3063
+start_command = "docker compose -f {working_dir}/docker-compose.yml up -d"
+stop_command = "docker compose -f {working_dir}/docker-compose.yml down"
+is_docker = true
+health_endpoint = "http://localhost:{port}/health"
+health_timeout_ms = 15000
+category = "development"
+supports_multiple = false
+
+# =============================================================================
+# DEFAULT INSTANCES - Created on first startup
+# =============================================================================
+
+[instances.management-api-primary]
+template = "management-api"
+port = 8766
+working_dir = "${PROJECT_ROOT}/server"
+auto_start = true
+tags = ["core", "primary"]
+
+[instances.ollama-primary]
+template = "ollama"
+port = 11434
+working_dir = "${PROJECT_ROOT}"
+auto_start = false
+tags = ["llm"]
+
+[instances.web-server-primary]
+template = "web-server"
+port = 3000
+working_dir = "${PROJECT_ROOT}/server/web"
+auto_start = false
+tags = ["core", "web"]
+
+[instances.log-server]
+template = "log-server"
+port = 8765
+working_dir = "${PROJECT_ROOT}/server"
+auto_start = true
+tags = ["development", "logging"]
