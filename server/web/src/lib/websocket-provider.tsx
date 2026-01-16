@@ -144,7 +144,8 @@ export function WebSocketProvider({
               try {
                 handler(message.data);
               } catch (err) {
-                console.error(`[WebSocket] Handler error for ${message.type}:`, err);
+                // Use format string with substitution to prevent tainted format string issues
+                console.error('[WebSocket] Handler error for %s:', String(message.type), err);
               }
             });
           }

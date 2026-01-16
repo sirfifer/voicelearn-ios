@@ -5,6 +5,7 @@ description = "UnaMentis Management Server"
 requires-python = ">=3.9"
 dependencies = [
     "aiohttp>=3.9.0",
+    "asyncpg>=0.29.0",
     "bcrypt>=4.0",
     "PyJWT>=2.8.0",
 ]
@@ -14,6 +15,7 @@ dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
     "pytest-aiohttp>=1.0",
+    "hypothesis>=6.100.0",
     "pytest-cov>=4.0",
     "ruff>=0.1.0",
     "bandit>=1.7.0",

@@ -1,0 +1,26 @@
+# Rust formatting configuration for USM Core
+# See: https://rust-lang.github.io/rustfmt/
+# Only stable options are used to ensure CI compatibility
+
+# Use Rust 2021 edition
+edition = "2021"
+
+# Maximum line width
+max_width = 100
+
+# Use spaces, not tabs
+hard_tabs = false
+tab_spaces = 4
+
+# Import ordering
+reorder_imports = true
+
+# Formatting style
+use_small_heuristics = "Default"
+newline_style = "Unix"
+
+# Match arms
+match_block_trailing_comma = true
+
+# Use field init shorthand
+use_field_init_shorthand = true

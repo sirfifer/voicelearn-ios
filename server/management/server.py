@@ -60,6 +60,9 @@ from tts_cache import TTSCache, TTSResourcePool, CurriculumPrefetcher
 from tts_cache.kb_audio import KBAudioManager
 from tts_api import register_tts_routes
 
+# Import TTS pre-generation system
+from tts_pregen_api import register_tts_pregen_routes
+
 # Import session-cache integration
 from session_cache_integration import SessionCacheIntegration
 
@@ -130,6 +133,177 @@ try:
     _unleash_available = True
 except ImportError:
     logger.warning("UnleashClient not installed. Install with: pip install UnleashClient")
+
+
+def validate_path_in_directory(file_path: Path, base_directory: Path) -> Path:
+    """Validate that a file path is within the expected directory.
+
+    This prevents path traversal attacks where attackers use '../' sequences
+    to access files outside the intended directory.
+
+    Uses CodeQL-recognized patterns (os.path.realpath + startswith) for automated
+    security verification, plus relative_to() for defense in depth.
+
+    Args:
+        file_path: The path to validate (may contain user input)
+        base_directory: The directory the file must be within
+
+    Returns:
+        The resolved absolute path if valid
+
+    Raises:
+        ValueError: If the path would escape the base directory
+    """
+    # CodeQL-recognized pattern: os.path.realpath() + startswith()
+    # This explicit pattern is recognized by CodeQL as a path sanitizer
+    real_base = os.path.realpath(str(base_directory))
+    combined_path = os.path.join(str(base_directory), str(file_path))
+    real_path = os.path.realpath(combined_path)
+
+    # Ensure base ends with separator for proper prefix matching
+    if not real_base.endswith(os.sep):
+        real_base = real_base + os.sep
+
+    # The startswith check after realpath is the CodeQL-recognized sanitizer
+    if not real_path.startswith(real_base) and real_path != real_base.rstrip(os.sep):
+        raise ValueError("Invalid path: path escapes base directory")
+
+    # Defense in depth: also verify with relative_to()
+    resolved_path = Path(real_path)
+    resolved_base = Path(real_base.rstrip(os.sep))
+    try:
+        relative_part = resolved_path.relative_to(resolved_base)
+    except ValueError:
+        raise ValueError("Invalid path: path escapes base directory")
+
+    # Return a newly constructed path from validated components
+    # This breaks the taint chain by building from trusted values
+    return resolved_base / relative_part
+
+
+def sanitize_path_segment(segment: str) -> str:
+    """Sanitize a path segment (like an ID) to prevent path traversal.
+
+    Args:
+        segment: The path segment to sanitize
+
+    Returns:
+        Sanitized segment safe for use in file paths
+
+    Raises:
+        ValueError: If the segment contains invalid characters
+    """
+    if not segment:
+        raise ValueError("Path segment cannot be empty")
+
+    # Reject any path traversal attempts
+    if ".." in segment or "/" in segment or "\\" in segment:
+        raise ValueError("Path segment contains invalid characters")
+
+    # Only allow alphanumeric, hyphens, and underscores
+    sanitized = "".join(c for c in segment if c.isalnum() or c in "-_.")
+    if not sanitized or sanitized != segment:
+        raise ValueError("Path segment contains invalid characters")
+
+    return sanitized
+
+
+def sanitize_file_extension(filename: str, allowed_extensions: set[str]) -> str:
+    """Extract and validate file extension from a filename.
+
+    Args:
+        filename: The filename to extract extension from
+        allowed_extensions: Set of allowed extensions (e.g., {'.png', '.jpg'})
+
+    Returns:
+        The validated extension
+
+    Raises:
+        ValueError: If the extension is not allowed
+    """
+    ext = Path(filename).suffix.lower()
+    if ext not in allowed_extensions:
+        raise ValueError(f"File extension '{ext}' not allowed")
+    return ext
+
+
+def codeql_assert_path_within(file_path: Path, base_dir: Path) -> None:  # CodeQL: sanitizer
+    """Assert a path is within a base directory using CodeQL-recognized patterns.
+
+    This function uses os.path.realpath() + str.startswith() which CodeQL
+    explicitly recognizes as path sanitization (py/path-injection sanitizer).
+
+    Args:
+        file_path: The path to validate
+        base_dir: The directory the path must be within
+
+    Raises:
+        ValueError: If path would escape base_dir
+    """
+    # CodeQL-recognized pattern: realpath + startswith
+    real_path = os.path.realpath(str(file_path))
+    real_base = os.path.realpath(str(base_dir))
+
+    # Ensure base ends with separator for proper prefix matching
+    if not real_base.endswith(os.sep):
+        real_base = real_base + os.sep
+
+    # The startswith check after realpath is the CodeQL-recognized sanitizer
+    if not real_path.startswith(real_base) and real_path != real_base.rstrip(os.sep):
+        raise ValueError("Path escapes allowed directory")
+
+
+def sanitize_and_validate_path(file_path: Path, base_dir: Path) -> Path:
+    """Validate a path is within a base directory and return the validated path.
+
+    This function uses os.path.realpath() + str.startswith() which CodeQL
+    explicitly recognizes as path sanitization (py/path-injection sanitizer).
+    Returns the validated path so CodeQL can track that the return value is safe.
+
+    Args:
+        file_path: The path to validate
+        base_dir: The directory the path must be within
+
+    Returns:
+        The validated path (same as input if valid)
+
+    Raises:
+        ValueError: If path would escape base_dir
+    """
+    # CodeQL-recognized pattern: realpath + startswith
+    real_path = os.path.realpath(str(file_path))
+    real_base = os.path.realpath(str(base_dir))
+
+    # Ensure base ends with separator for proper prefix matching
+    if not real_base.endswith(os.sep):
+        real_base = real_base + os.sep
+
+    # The startswith check after realpath is the CodeQL-recognized sanitizer
+    if not real_path.startswith(real_base) and real_path != real_base.rstrip(os.sep):
+        raise ValueError("Path escapes allowed directory")
+
+    # Return the path constructed from the validated real_path
+    return Path(real_path)
+
+
+def safe_error_response(error: Exception, context: str = "operation") -> web.Response:
+    """Create a safe error response that doesn't expose internal details.
+
+    Args:
+        error: The exception that occurred
+        context: A brief description of the operation that failed
+
+    Returns:
+        A JSON response with a generic error message
+    """
+    # Log the actual error for debugging
+    logger.error(f"Error during {context}: {error}")
+
+    # Return a generic message to avoid leaking internal details
+    return web.json_response(
+        {"error": f"An error occurred during {context}. Please try again."},
+        status=500
+    )
 
 
 def is_flag_enabled(flag_name: str, default: bool = False) -> bool:
@@ -2534,7 +2708,9 @@ async def handle_stream_topic_audio(request: web.Request) -> web.StreamResponse:
 
             except Exception as e:
                 logger.error(f"    TTS request failed: {e}")
-                await response.write(f"ERR:{str(e)}\n".encode('utf-8'))
+                # Sanitize error to avoid exposing stack traces/internals
+                error_type = type(e).__name__
+                await response.write(f"ERR:{error_type}\n".encode('utf-8'))
 
         # Send end marker
         await response.write(b"END\n")
@@ -2754,14 +2930,21 @@ async def handle_unarchive_curriculum(request: web.Request) -> web.Response:
         file_name = request.match_info.get("file_name")
 
         archived_dir = PROJECT_ROOT / "curriculum" / "archived"
-        archived_path = archived_dir / file_name
 
+        # Validate path to prevent path traversal attacks
+        try:
+            archived_path = validate_path_in_directory(Path(file_name), archived_dir)
+        except ValueError:
+            return web.json_response({"error": "Invalid file name"}, status=400)
+
+        # archived_path was validated by validate_path_in_directory above
         if not archived_path.exists():
             return web.json_response({"error": "Archived curriculum not found"}, status=404)
 
         # Move back to active directory
+        # Use validated filename from archived_path, not original user input
         active_dir = PROJECT_ROOT / "curriculum" / "examples" / "realistic"
-        active_path = active_dir / file_name
+        active_path = active_dir / archived_path.name
 
         # Handle name conflicts
         counter = 1
@@ -2770,6 +2953,7 @@ async def handle_unarchive_curriculum(request: web.Request) -> web.Response:
             counter += 1
 
         import shutil
+        # Path validated above via validate_path_in_directory
         shutil.move(str(archived_path), str(active_path))
         logger.info(f"Unarchived curriculum: {archived_path} -> {active_path}")
 
@@ -2811,12 +2995,21 @@ async def handle_delete_archived_curriculum(request: web.Request) -> web.Respons
         confirm = request.query.get("confirm", "false").lower() == "true"
 
         archived_dir = PROJECT_ROOT / "curriculum" / "archived"
-        archived_path = archived_dir / file_name
 
+        # Validate path to prevent path traversal attacks
+        try:
+            archived_path = validate_path_in_directory(Path(file_name), archived_dir)
+        except ValueError:
+            return web.json_response({"error": "Invalid file name"}, status=400)
+
+        # archived_path was validated by validate_path_in_directory above
         if not archived_path.exists():
             return web.json_response({"error": "Archived curriculum not found"}, status=404)
 
-        # Read info for response
+        # CodeQL-recognized validation before file access
+        codeql_assert_path_within(archived_path, archived_dir)
+
+        # Read info for response (path validated above)
         with open(archived_path, 'r', encoding='utf-8') as f:
             umcf = json.load(f)
         curriculum_id = umcf.get("id", {}).get("value", archived_path.stem)
@@ -2833,7 +3026,7 @@ async def handle_delete_archived_curriculum(request: web.Request) -> web.Respons
                 }
             })
 
-        # Delete the file
+        # Delete the file (path validated above)
         archived_path.unlink()
         logger.info(f"Permanently deleted archived curriculum: {archived_path}")
 
@@ -2860,13 +3053,18 @@ async def handle_save_curriculum(request: web.Request) -> web.Response:
 
         # Determine file path
         if curriculum_id in state.curriculums:
+            # Trusted internal path from loaded curriculum state
             file_path = Path(state.curriculums[curriculum_id].file_path)
         else:
-            # New curriculum - create filename from title
+            # New curriculum: filename sanitized to alphanumeric, hyphen, underscore only
             safe_name = "".join(c if c.isalnum() or c in "-_" else "-" for c in data["title"].lower())
             file_path = PROJECT_ROOT / "curriculum" / "examples" / "realistic" / f"{safe_name}.umcf"
 
-        # Write the file
+        # CodeQL-recognized validation before file write
+        curriculum_base = PROJECT_ROOT / "curriculum"
+        codeql_assert_path_within(file_path, curriculum_base)
+
+        # Write the file (path is either trusted or sanitized above)
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
 
@@ -2944,24 +3142,24 @@ async def handle_import_curriculum(request: web.Request) -> web.Response:
         title = metadata.get("title", "Imported Curriculum")
         curriculum_id = umcf_data.get("id", {}).get("value", "")
 
-        # Create safe filename
+        # Create safe filename (sanitized to alphanumeric, hyphen, underscore only)
         safe_name = "".join(c if c.isalnum() or c in "-_" else "-" for c in title.lower())
         if not safe_name:
             safe_name = f"imported-{int(time.time())}"
 
-        # Determine destination path
+        # Determine destination path (safe_name is sanitized)
         curriculum_dir = PROJECT_ROOT / "curriculum" / "examples" / "realistic"
         curriculum_dir.mkdir(parents=True, exist_ok=True)
 
         file_path = curriculum_dir / f"{safe_name}.umcf"
 
-        # Handle duplicate filenames
+        # Handle duplicate filenames (safe_name sanitized above)
         counter = 1
         while file_path.exists():
             file_path = curriculum_dir / f"{safe_name}-{counter}.umcf"
             counter += 1
 
-        # Write the file
+        # Write the file (path uses sanitized safe_name)
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(umcf_data, f, indent=2, ensure_ascii=False)
 
@@ -2988,10 +3186,7 @@ async def handle_import_curriculum(request: web.Request) -> web.Response:
     except asyncio.TimeoutError:
         return web.json_response({"error": "Timeout fetching URL"}, status=408)
     except Exception as e:
-        logger.error(f"Error importing curriculum: {e}")
-        import traceback
-        traceback.print_exc()
-        return web.json_response({"error": str(e)}, status=500)
+        return safe_error_response(e, "curriculum import")
 
 
 # =============================================================================
@@ -3035,16 +3230,31 @@ async def handle_upload_visual_asset(request: web.Request) -> web.Response:
         if not metadata.get("alt"):
             return web.json_response({"error": "Alt text is required for accessibility"}, status=400)
 
-        # Create assets directory if needed
-        assets_dir = PROJECT_ROOT / "curriculum" / "assets" / curriculum_id / topic_id
+        # Validate path segments to prevent path traversal attacks
+        allowed_image_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.bmp'}
+        try:
+            safe_curriculum_id = sanitize_path_segment(curriculum_id)
+            safe_topic_id = sanitize_path_segment(topic_id)
+            ext = sanitize_file_extension(file_name, allowed_image_extensions)
+        except ValueError as e:
+            return web.json_response({"error": str(e)}, status=400)
+
+        # Create assets directory if needed (IDs sanitized above)
+        assets_base = PROJECT_ROOT / "curriculum" / "assets"
+        assets_dir = assets_base / safe_curriculum_id / safe_topic_id
+
+        # CodeQL-recognized validation: use returned sanitized path
+        assets_dir = sanitize_and_validate_path(assets_dir, assets_base)
         assets_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate unique asset ID
         asset_id = f"img-{int(time.time() * 1000)}"
-        ext = Path(file_name).suffix or ".png"
         local_path = assets_dir / f"{asset_id}{ext}"
 
-        # Save the file
+        # CodeQL-recognized validation: use returned sanitized path
+        local_path = sanitize_and_validate_path(local_path, assets_base)
+
+        # Save the file (path uses sanitized segments)
         with open(local_path, "wb") as f:
             f.write(file_data)
 
@@ -3110,10 +3320,7 @@ async def handle_upload_visual_asset(request: web.Request) -> web.Response:
         })
 
     except Exception as e:
-        logger.error(f"Error uploading visual asset: {e}")
-        import traceback
-        traceback.print_exc()
-        return web.json_response({"error": str(e)}, status=500)
+        return safe_error_response(e, "visual asset upload")
 
 
 async def handle_delete_visual_asset(request: web.Request) -> web.Response:
@@ -3249,6 +3456,15 @@ async def download_and_save_asset(
     """
     global _last_download_time
 
+    # Sanitize path segments to prevent path traversal
+    try:
+        safe_curriculum_id = sanitize_path_segment(curriculum_id)
+        safe_topic_id = sanitize_path_segment(topic_id)
+        safe_asset_id = sanitize_path_segment(asset_id)
+    except ValueError as e:
+        logger.error(f"Invalid path segment in download_and_save_asset: {e}")
+        return None
+
     async with _download_lock:
         # Enforce rate limiting
         now = time.time()
@@ -3265,11 +3481,18 @@ async def download_and_save_asset(
         if not ext or ext not in [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"]:
             ext = ".jpg"  # Default to jpg
 
-        # Create assets directory
-        assets_dir = PROJECT_ROOT / "curriculum" / "assets" / curriculum_id / topic_id
+        # Create assets directory (using sanitized path segments)
+        assets_base = PROJECT_ROOT / "curriculum" / "assets"
+        assets_dir = assets_base / safe_curriculum_id / safe_topic_id
+
+        # CodeQL-recognized validation: use returned sanitized path
+        assets_dir = sanitize_and_validate_path(assets_dir, assets_base)
         assets_dir.mkdir(parents=True, exist_ok=True)
 
-        local_path = assets_dir / f"{asset_id}{ext}"
+        local_path = assets_dir / f"{safe_asset_id}{ext}"
+
+        # CodeQL-recognized validation: use returned sanitized path
+        local_path = sanitize_and_validate_path(local_path, assets_base)
 
         # Skip if already downloaded
         if local_path.exists():
@@ -3291,7 +3514,7 @@ async def download_and_save_asset(
                     if not content_type.startswith("image/"):
                         logger.warning(f"Non-image content type for {url}: {content_type}")
 
-                    # Save to disk
+                    # Save to disk (path already validated above)
                     with open(local_path, "wb") as f:
                         f.write(content)
 
@@ -3413,10 +3636,7 @@ async def handle_preload_curriculum_assets(request: web.Request) -> web.Response
         })
 
     except Exception as e:
-        logger.error(f"Error preloading curriculum assets: {e}")
-        import traceback
-        traceback.print_exc()
-        return web.json_response({"error": str(e)}, status=500)
+        return safe_error_response(e, "curriculum asset preload")
 
 
 async def handle_get_curriculum_with_assets(request: web.Request) -> web.Response:
@@ -3514,10 +3734,7 @@ async def handle_get_curriculum_with_assets(request: web.Request) -> web.Respons
         return web.json_response(umcf)
 
     except Exception as e:
-        logger.error(f"Error getting curriculum with assets: {e}")
-        import traceback
-        traceback.print_exc()
-        return web.json_response({"error": str(e)}, status=500)
+        return safe_error_response(e, "curriculum asset retrieval")
 
 
 # =============================================================================
@@ -4439,6 +4656,9 @@ def create_app() -> web.Application:
 
     # Training Modules System (server-driven module discovery and download)
     register_modules_routes(app)
+
+    # TTS Pre-Generation System (Profiles, Batch Jobs, Comparison)
+    register_tts_pregen_routes(app)
 
     # Authentication System
     # Note: Auth requires a database pool. For now, we set up the routes but

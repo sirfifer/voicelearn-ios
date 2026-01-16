@@ -1,5 +1,8 @@
 // UnaMentis Management Console Types
 
+// Re-export TTS Pre-Generation types
+export * from './tts-pregen';
+
 export interface LogEntry {
   id: string;
   timestamp: string;

@@ -25,6 +25,7 @@ This repository contains multiple components, each with its own CLAUDE.md:
 |-----------|----------|---------|
 | iOS App | `UnaMentis/` | Swift/SwiftUI voice tutoring client |
 | Server | `server/` | Backend infrastructure |
+| **USM Core** | `server/usm-core/` | Rust cross-platform service manager (port 8767) |
 | Management API | `server/management/` | Python/aiohttp backend API (port 8766) |
 | UnaMentis Server | `server/web/` | Next.js/React web interface (port 3000) |
 | Importers | `server/importers/` | Curriculum import framework |
@@ -115,6 +116,15 @@ python -m latency_harness.cli --suite quick_validation --no-mock  # Real provide
 
 # Hook audit (check for bypasses)
 ./scripts/hook-audit.sh
+
+# Rust (USM Core)
+cd server/usm-core
+cargo build                      # Debug build
+cargo build --release            # Release build (optimized)
+cargo test                       # Run all tests
+cargo clippy -- -D warnings      # Lint with clippy
+cargo fmt                        # Format code
+cargo fmt --check                # Check formatting without modifying
 ```
 
 ### Unified Test Runner
@@ -172,6 +182,53 @@ Before marking any work "complete", run:
 **RIGHT:** Write code, run `/validate`, verify PASS, THEN tell user "implementation is complete"
 
 See `.claude/skills/validate/SKILL.md` for the complete validation workflow.
+
+## MANDATORY: Tool Trust Doctrine
+
+**All findings from security and quality tools are presumed legitimate until proven otherwise through rigorous analysis.**
+
+### The Principle
+
+When CodeQL, SwiftLint, Ruff, Clippy, ESLint, or any established tool flags an issue:
+
+1. **Assume it's real** (not "might be real", assume it IS real)
+2. **Investigate deeply** (full data flow analysis, not cursory review)
+3. **Fix the code** (the default outcome)
+4. **Adapt patterns** (if tools don't understand our code, our code should change)
+
+### What You Must NEVER Do
+
+- Create custom configs to suppress tool findings as a first response
+- Dismiss findings as "false positives" without exhaustive proof
+- Work around tools instead of fixing the underlying code
+- Assume your code is correct and the tool is wrong
+
+### Process for Tool Findings
+
+```
+Tool flags an issue
+        ↓
+Assume it's legitimate (DEFAULT)
+        ↓
+Deep investigation
+        ↓
+    ┌───┴───┐
+    ↓       ↓
+Real issue? → Fix the code, adapt patterns
+    ↓
+Proven false positive? → Document WHY in detail
+                       → Consider if pattern should change anyway
+                       → Only then suppress (with audit trail)
+```
+
+### Proving a False Positive Requires
+
+1. Full data flow trace showing why the concern doesn't apply
+2. Edge case analysis (what if code is refactored? copied?)
+3. Written documentation in PR or commit
+4. Answer: Could this be written in a tool-recognized way?
+
+See `docs/quality/TOOL_TRUST_DOCTRINE.md` and the "Tool Trust Doctrine" section in `AGENTS.md` for full documentation and case studies.
 
 ## Key Technical Requirements
 

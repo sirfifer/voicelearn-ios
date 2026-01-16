@@ -431,6 +431,94 @@ xcodebuild test -project UnaMentis.xcodeproj -scheme UnaMentis \
   -only-testing:UnaMentisTests/VoiceSessionIntegrationTests
 ```
 
+## Property-Based Testing
+
+Property-based testing complements example-based tests by verifying that invariants hold across randomly generated inputs. This catches edge cases that hand-written examples miss.
+
+### Frameworks
+
+| Language | Framework | Location |
+|----------|-----------|----------|
+| Python | Hypothesis | `server/management/tests/property/` |
+| Rust | proptest | `server/usm-core/crates/usm-core/src/config/mod.rs` |
+
+### Python Property Tests (Hypothesis)
+
+**Test Coverage (70 tests):**
+- **TTS Cache**: Hash determinism, dict roundtrip, TTL expiration, stats bounds, stateful testing
+- **FOV Context**: Model tier classification, budget sum invariants, tier ordering, buffer rendering
+- **TTS Pre-generation**: Job progress invariants, status state machine, text hashing, serialization roundtrips
+
+**Running Property Tests:**
+```bash
+# Run all property tests
+cd server/management
+python -m pytest tests/property/ -v --hypothesis-show-statistics
+
+# With specific profile
+HYPOTHESIS_PROFILE=thorough pytest tests/property/
+```
+
+**Hypothesis Profiles:**
+- `default`: 100 examples (local development)
+- `ci`: 50 examples (faster CI runs)
+- `thorough`: 500 examples (comprehensive testing)
+- `debug`: 10 examples (quick debugging)
+
+**Example Property Test:**
+```python
+from hypothesis import given, strategies as st
+
+@given(st.integers(), st.integers())
+def test_addition_is_commutative(a, b):
+    """Property: a + b == b + a for all integers."""
+    assert a + b == b + a
+```
+
+### Rust Property Tests (proptest)
+
+**Test Coverage (37 property tests, 49 total with unit):**
+- **Config**: Port validation, TOML roundtrip, path resolution idempotency (12 tests)
+- **Template**: Port validation, allocation, command substitution, JSON roundtrip (10 tests)
+- **Instance**: Tag matching, validation, serialization, uptime (15 tests)
+
+**Running Property Tests:**
+```bash
+cd server/usm-core
+cargo test config::property_tests
+
+# Run all tests (includes property tests)
+cargo test
+```
+
+**Example Property Test:**
+```rust
+use proptest::prelude::*;
+
+proptest! {
+    #[test]
+    fn path_resolution_idempotent(path in "[a-zA-Z0-9/_.-]{1,100}") {
+        let resolved1 = resolve_path(&path);
+        let resolved2 = resolve_path(&resolved1);
+        prop_assert_eq!(resolved1, resolved2);
+    }
+}
+```
+
+### CI Integration
+
+Property tests run automatically in CI via the "Property Tests (Hypothesis)" job in `.github/workflows/server.yml`. Results are included in the workflow summary.
+
+### When to Write Property Tests
+
+Write property tests when:
+1. **Mathematical invariants exist**: Bounds, ordering, sums
+2. **Round-trip operations**: Serialization, parsing
+3. **Idempotency matters**: Repeated operations should have same result
+4. **Edge cases are hard to enumerate**: String handling, numeric boundaries
+
+Property tests complement (don't replace) example-based tests. Use both.
+
 ## Troubleshooting
 
 ### Issue: Tests timeout

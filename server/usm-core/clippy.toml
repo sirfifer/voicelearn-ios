@@ -1,0 +1,23 @@
+# Clippy linting configuration for USM Core
+# See: https://doc.rust-lang.org/clippy/configuration.html
+
+# Cognitive complexity threshold for functions
+cognitive-complexity-threshold = 25
+
+# Maximum number of lines in a function body
+too-many-lines-threshold = 100
+
+# Maximum number of arguments a function can take
+too-many-arguments-threshold = 7
+
+# MSRV (Minimum Supported Rust Version)
+msrv = "1.75"
+
+# Allow certain patterns
+avoid-breaking-exported-api = true
+
+# Type complexity threshold
+type-complexity-threshold = 250
+
+# Allowed wildcard imports
+allowed-wildcard-imports = ["super::*"]

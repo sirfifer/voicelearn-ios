@@ -233,6 +233,69 @@ If you tell the user "implementation is complete" when tests are failing, you ha
 - **Localizable strings for all user-facing text** (per iOS Style Guide)
 - **iPad adaptive layouts using size class detection** (per iOS Style Guide)
 
+---
+
+## MANDATORY: Tool Trust Doctrine
+
+**All findings from established security and quality tools are presumed legitimate until proven otherwise through rigorous analysis.**
+
+### The Principle
+
+Security and quality tools like CodeQL, SwiftLint, Ruff, Clippy, and ESLint represent the collective expertise of security researchers, the lessons of countless vulnerabilities, and patterns refined over years. When they flag something, assume they are RIGHT.
+
+### Covered Tools
+
+| Tool | Domain | Trust Level |
+|------|--------|-------------|
+| CodeQL | Security vulnerabilities | HIGH |
+| SwiftLint | Swift code quality | HIGH |
+| Ruff/Pylint | Python code quality | HIGH |
+| Clippy | Rust code quality | HIGH |
+| ESLint | JavaScript/TypeScript quality | HIGH |
+
+### Process for Handling Tool Findings
+
+```
+Tool flags an issue
+        ↓
+Assume it's legitimate (DEFAULT)
+        ↓
+Deep investigation (not cursory review)
+        ↓
+    ┌───┴───┐
+    ↓       ↓
+Real issue? → Fix the code, adapt patterns
+    ↓
+Proven false positive? → Document WHY in detail
+                       → Consider if pattern should change anyway
+                       → Only then suppress (with audit trail)
+```
+
+### What "Proven False Positive" Requires
+
+To dismiss a finding, you MUST prove ALL of the following:
+1. **Trace the full data flow** showing why the tool's concern doesn't apply
+2. **Consider edge cases** (what if code is refactored or copied?)
+3. **Document the analysis** in writing (PR comment, commit message)
+4. **Question the pattern** (could it be written in a tool-recognized way?)
+
+### Anti-Patterns (DO NOT DO THESE)
+
+| Wrong Approach | Why It's Wrong |
+|----------------|----------------|
+| "The tool doesn't understand our function" | Maybe the function pattern is the problem |
+| "Create a custom config to suppress" | Blanket suppression hides future real issues |
+| "Mark as false positive and move on" | Skips the learning opportunity |
+| "Our code is correct, the tool is wrong" | Arrogance that leads to vulnerabilities |
+
+### Case Study: CodeQL Path Injection (January 2025)
+
+CodeQL flagged 13 path injection alerts. Initial response was to create a custom config to suppress them. After proper investigation:
+- **1 alert was a genuine code pattern issue** (using original input after validation)
+- **12 alerts were "false positives"** but highlighted code that could be written better
+
+The lesson: Even "false positives" often indicate code that should be improved. Trust the tools.
+
 ### MANDATORY: Log Server Must Always Be Running
 
 **The remote log server MUST be running whenever:**
@@ -551,6 +614,31 @@ python -m latency_harness.cli --suite quick_validation --mock
 - `createProgress(in:for:timeSpent:quizScores:)` - Creates test progress records
 
 These are NOT mocks. They create real Core Data entities in an in-memory store.
+
+### Property-Based Testing
+
+Property testing complements the "real over mock" philosophy by generating random inputs to verify invariants. It catches edge cases that hand-written examples miss.
+
+**Frameworks:**
+- **Python**: Hypothesis (`server/management/tests/property/`)
+- **Rust**: proptest (`server/usm-core/`)
+
+**When to write property tests:**
+- Mathematical invariants (bounds, sums, ordering)
+- Round-trip operations (serialize/deserialize)
+- Idempotent operations (repeated calls have same result)
+- Edge cases hard to enumerate
+
+**Running property tests:**
+```bash
+# Python
+cd server/management && pytest tests/property/ -v --hypothesis-show-statistics
+
+# Rust
+cd server/usm-core && cargo test config::property_tests
+```
+
+Property tests verify that invariants hold for all generated inputs, complementing example-based tests that verify specific scenarios.
 
 ---
 

@@ -40,6 +40,7 @@ import { LatencyHarnessPanel } from './latency-harness-panel';
 import { FOVContextPanel } from './fov-context-panel';
 import { ReprocessPanel } from './reprocess-panel';
 import { ModulesPanel } from './modules-panel';
+import { ProfilesPanel } from '@/components/tts-pregen';
 import type { DashboardStats } from '@/types';
 import { getStats } from '@/lib/api-client';
 import { formatDuration } from '@/lib/utils';
@@ -67,6 +68,7 @@ const CONTENT_TABS = [
   'plugins',
   'imports',
   'reprocess',
+  'tts-profiles',
 ] as const;
 const ALL_TABS = [...OPS_TABS, ...CONTENT_TABS] as const;
 
@@ -309,6 +311,13 @@ export function Dashboard() {
           {activeTab === 'reprocess' && (
             <div className="animate-in fade-in duration-300">
               <ReprocessPanel />
+            </div>
+          )}
+
+          {/* TTS Profiles Tab */}
+          {activeTab === 'tts-profiles' && (
+            <div className="animate-in fade-in duration-300">
+              <ProfilesPanel />
             </div>
           )}
         </div>
