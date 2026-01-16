@@ -44,7 +44,7 @@ final class KBStatsManager: ObservableObject {
     // MARK: - Private
 
     private static let logger = Logger(label: "com.unamentis.kb.stats")
-    private let defaults = UserDefaults.standard
+    private let defaults: UserDefaults
 
     private enum Keys {
         static let totalQuestions = "kb_total_questions"
@@ -55,7 +55,7 @@ final class KBStatsManager: ObservableObject {
     }
 
     /// Normalize a domain ID for consistent storage and lookup
-    private func normalizeDomainId(_ domainId: String) -> String {
+    func normalizeDomainId(_ domainId: String) -> String {
         domainId.lowercased()
             .replacingOccurrences(of: " ", with: "-")
             .replacingOccurrences(of: "&", with: "")
@@ -63,7 +63,13 @@ final class KBStatsManager: ObservableObject {
     }
 
     private init() {
+        self.defaults = UserDefaults.standard
         loadStats()
+    }
+
+    /// Testing initializer with injectable UserDefaults
+    init(defaults: UserDefaults) {
+        self.defaults = defaults
     }
 
     // MARK: - Public Methods

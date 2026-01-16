@@ -13,6 +13,11 @@
 		"'TD02BF02A1B2C3D4E5F60002'" = {isa = PBXBuildFile; fileRef = TD02FR02A1B2C3D4E5F60002; };
 		"'TD03BF03A1B2C3D4E5F60003'" = {isa = PBXBuildFile; fileRef = TD03FR03A1B2C3D4E5F60003; };
 		"'TD04BF04A1B2C3D4E5F60004'" = {isa = PBXBuildFile; fileRef = TD04FR04A1B2C3D4E5F60004; };
+		"'KB01BF01A1B2C3D4E5F60001'" = {isa = PBXBuildFile; fileRef = KB01FR01A1B2C3D4E5F60001; };
+		"'KB02BF02A1B2C3D4E5F60002'" = {isa = PBXBuildFile; fileRef = KB02FR02A1B2C3D4E5F60002; };
+		"'KB03BF03A1B2C3D4E5F60003'" = {isa = PBXBuildFile; fileRef = KB03FR03A1B2C3D4E5F60003; };
+		"'KB04BF04A1B2C3D4E5F60004'" = {isa = PBXBuildFile; fileRef = KB04FR04A1B2C3D4E5F60004; };
+		"'MP01BF01A1B2C3D4E5F60001'" = {isa = PBXBuildFile; fileRef = MP01FR01A1B2C3D4E5F60001; };
 		01ABAF0927B8FB3C82CB7555 /* CurriculumEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C44C207CAFA73C1D526B473B /* CurriculumEngine.swift */; };
 		01ADC64CC30CB163B14CA62C /* StartLessonIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C84608D516291A60F987D9B /* StartLessonIntent.swift */; };
 		02D04453683695A6354A69CF /* LMAPIProviderInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA2D0F2C7B340A0F71796A7 /* LMAPIProviderInfo.swift */; };
@@ -248,6 +253,11 @@
 		"'TD02FR02A1B2C3D4E5F60002'" = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemStatusTests.swift; sourceTree = "<group>"; };
 		"'TD03FR03A1B2C3D4E5F60003'" = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemTypeTests.swift; sourceTree = "<group>"; };
 		"'TD04FR04A1B2C3D4E5F60004'" = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoManagerTests.swift; sourceTree = "<group>"; };
+		"'KB01FR01A1B2C3D4E5F60001'" = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBQuestionTests.swift; sourceTree = "<group>"; };
+		"'KB02FR02A1B2C3D4E5F60002'" = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBStatsManagerTests.swift; sourceTree = "<group>"; };
+		"'KB03FR03A1B2C3D4E5F60003'" = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBPracticeEngineTests.swift; sourceTree = "<group>"; };
+		"'KB04FR04A1B2C3D4E5F60004'" = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeBowlModuleTests.swift; sourceTree = "<group>"; };
+		"'MP01FR01A1B2C3D4E5F60001'" = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleProtocolTests.swift; sourceTree = "<group>"; };
 		0036EFE850AA592D96BD5AAE /* TopicEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicEntity.swift; sourceTree = "<group>"; };
 		0122D12D71D21E39864BD351 /* RemoteLogHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteLogHandler.swift; sourceTree = "<group>"; };
 		01C496581684518021B58948 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -467,6 +477,25 @@
 				TD04FR04A1B2C3D4E5F60004,
 			);
 			path = Todo;
+			sourceTree = "<group>";
+		};
+		"'KB00GP00A1B2C3D4E5F60000'" = {
+			isa = PBXGroup;
+			children = (
+				KB01FR01A1B2C3D4E5F60001,
+				KB02FR02A1B2C3D4E5F60002,
+				KB03FR03A1B2C3D4E5F60003,
+				KB04FR04A1B2C3D4E5F60004,
+			);
+			path = KnowledgeBowl;
+			sourceTree = "<group>";
+		};
+		"'MP00GP00A1B2C3D4E5F60000'" = {
+			isa = PBXGroup;
+			children = (
+				MP01FR01A1B2C3D4E5F60001,
+			);
+			path = Modules;
 			sourceTree = "<group>";
 		};
 		02E786E3EAE24BBCB1C0FE23 /* Intents */ = {
@@ -721,6 +750,8 @@
 			isa = PBXGroup;
 			children = (
 				02E786E3EAE24BBCB1C0FE23 /* Intents */,
+				KB00GP00A1B2C3D4E5F60000,
+				MP00GP00A1B2C3D4E5F60000,
 				F9618B2299E85D5C1DEE2259 /* Routing */,
 				39FC8779AE057ACCA9B0773D /* Services */,
 				TD00GP00A1B2C3D4E5F60000,
@@ -1481,6 +1512,11 @@
 				TD02BF02A1B2C3D4E5F60002,
 				TD03BF03A1B2C3D4E5F60003,
 				TD04BF04A1B2C3D4E5F60004,
+				KB01BF01A1B2C3D4E5F60001,
+				KB02BF02A1B2C3D4E5F60002,
+				KB03BF03A1B2C3D4E5F60003,
+				KB04BF04A1B2C3D4E5F60004,
+				MP01BF01A1B2C3D4E5F60001,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
