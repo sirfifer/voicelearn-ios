@@ -6,23 +6,27 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8B90D1482DEDD44A00FBD189 /* USMFFIFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 8B90D1472DEDD44A00FBD189 /* USMFFIFeature */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		8BC265752DEDD3F500F279A4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8BC265542DEDD3F400F279A4 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 8BC2655B2DEDD3F400F279A4;
-			remoteInfo = USM;
+			remoteInfo = USMFFI;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		8BC2655C2DEDD3F400F279A4 /* USM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = USM.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8BC265742DEDD3F500F279A4 /* USM.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = USM.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BC2655C2DEDD3F400F279A4 /* USMFFI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = USMFFI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BC265742DEDD3F500F279A4 /* USMFFI.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = USMFFI.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		8BD71C1E2DEE424400CEDD92 /* Exceptions for "Config" folder in "USM" target */ = {
+		8BD71C1E2DEE424400CEDD92 /* Exceptions for "Config" folder in "USMFFI" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Debug.xcconfig,
@@ -30,7 +34,7 @@
 				Shared.xcconfig,
 				Tests.xcconfig,
 			);
-			target = 8BC2655B2DEDD3F400F279A4 /* USM */;
+			target = 8BC2655B2DEDD3F400F279A4 /* USMFFI */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -38,19 +42,19 @@
 		8B90D1BC2DEE373300FBD189 /* Config */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				8BD71C1E2DEE424400CEDD92 /* Exceptions for "Config" folder in "USM" target */,
+				8BD71C1E2DEE424400CEDD92 /* Exceptions for "Config" folder in "USMFFI" target */,
 			);
 			path = Config;
 			sourceTree = "<group>";
 		};
-		8BC2655E2DEDD3F400F279A4 /* USM */ = {
+		8BC2655E2DEDD3F400F279A4 /* USMFFI */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = USM;
+			path = USMFFI;
 			sourceTree = "<group>";
 		};
-		8BC265772DEDD3F500F279A4 /* USMUITests */ = {
+		8BC265772DEDD3F500F279A4 /* USMFFIUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = USMUITests;
+			path = USMFFIUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -60,6 +64,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B90D1482DEDD44A00FBD189 /* USMFFIFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,8 +89,8 @@
 			isa = PBXGroup;
 			children = (
 				8B90D1BC2DEE373300FBD189 /* Config */,
-				8BC2655E2DEDD3F400F279A4 /* USM */,
-				8BC265772DEDD3F500F279A4 /* USMUITests */,
+				8BC2655E2DEDD3F400F279A4 /* USMFFI */,
+				8BC265772DEDD3F500F279A4 /* USMFFIUITests */,
 				8B90D1462DEDD44A00FBD189 /* Frameworks */,
 				8BC2655D2DEDD3F400F279A4 /* Products */,
 			);
@@ -94,8 +99,8 @@
 		8BC2655D2DEDD3F400F279A4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8BC2655C2DEDD3F400F279A4 /* USM.app */,
-				8BC265742DEDD3F500F279A4 /* USM.xctest */,
+				8BC2655C2DEDD3F400F279A4 /* USMFFI.app */,
+				8BC265742DEDD3F500F279A4 /* USMFFI.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -103,9 +108,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8BC2655B2DEDD3F400F279A4 /* USM */ = {
+		8BC2655B2DEDD3F400F279A4 /* USMFFI */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8BC2657E2DEDD3F500F279A4 /* Build configuration list for PBXNativeTarget "USM" */;
+			buildConfigurationList = 8BC2657E2DEDD3F500F279A4 /* Build configuration list for PBXNativeTarget "USMFFI" */;
 			buildPhases = (
 				8BC265582DEDD3F400F279A4 /* Sources */,
 				8BC265592DEDD3F400F279A4 /* Frameworks */,
@@ -117,18 +122,19 @@
 			);
 			fileSystemSynchronizedGroups = (
 				8B90D1BC2DEE373300FBD189 /* Config */,
-				8BC2655E2DEDD3F400F279A4 /* USM */,
+				8BC2655E2DEDD3F400F279A4 /* USMFFI */,
 			);
-			name = USM;
+			name = USMFFI;
 			packageProductDependencies = (
+				8B90D1472DEDD44A00FBD189 /* USMFFIFeature */,
 			);
-			productName = USM;
-			productReference = 8BC2655C2DEDD3F400F279A4 /* USM.app */;
+			productName = USMFFI;
+			productReference = 8BC2655C2DEDD3F400F279A4 /* USMFFI.app */;
 			productType = "com.apple.product-type.application";
 		};
-		8BC265732DEDD3F500F279A4 /* USMUITests */ = {
+		8BC265732DEDD3F500F279A4 /* USMFFIUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8BC265842DEDD3F500F279A4 /* Build configuration list for PBXNativeTarget "USMUITests" */;
+			buildConfigurationList = 8BC265842DEDD3F500F279A4 /* Build configuration list for PBXNativeTarget "USMFFIUITests" */;
 			buildPhases = (
 				8BC265702DEDD3F500F279A4 /* Sources */,
 				8BC265712DEDD3F500F279A4 /* Frameworks */,
@@ -140,13 +146,13 @@
 				8BC265762DEDD3F500F279A4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				8BC265772DEDD3F500F279A4 /* USMUITests */,
+				8BC265772DEDD3F500F279A4 /* USMFFIUITests */,
 			);
-			name = USMUITests;
+			name = USMFFIUITests;
 			packageProductDependencies = (
 			);
-			productName = USMUITests;
-			productReference = 8BC265742DEDD3F500F279A4 /* USM.xctest */;
+			productName = USMFFIUITests;
+			productReference = 8BC265742DEDD3F500F279A4 /* USMFFI.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -169,7 +175,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 8BC265572DEDD3F400F279A4 /* Build configuration list for PBXProject "USM" */;
+			buildConfigurationList = 8BC265572DEDD3F400F279A4 /* Build configuration list for PBXProject "USMFFI" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -183,8 +189,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8BC2655B2DEDD3F400F279A4 /* USM */,
-				8BC265732DEDD3F500F279A4 /* USMUITests */,
+				8BC2655B2DEDD3F400F279A4 /* USMFFI */,
+				8BC265732DEDD3F500F279A4 /* USMFFIUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -226,7 +232,7 @@
 /* Begin PBXTargetDependency section */
 		8BC265762DEDD3F500F279A4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 8BC2655B2DEDD3F400F279A4 /* USM */;
+			target = 8BC2655B2DEDD3F400F279A4 /* USMFFI */;
 			targetProxy = 8BC265752DEDD3F500F279A4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -235,14 +241,14 @@
 		8BC2657C2DEDD3F500F279A4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
 		8BC2657D2DEDD3F500F279A4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
@@ -252,8 +258,7 @@
 			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_DISPLAY_NAME)";
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -263,8 +268,7 @@
 			baseConfigurationReferenceRelativePath = Release.xcconfig;
 			buildSettings = {
 				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_DISPLAY_NAME)";
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
@@ -273,7 +277,7 @@
 			baseConfigurationReferenceAnchor = 8B90D1BC2DEE373300FBD189 /* Config */;
 			baseConfigurationReferenceRelativePath = Tests.xcconfig;
 			buildSettings = {
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -282,14 +286,14 @@
 			baseConfigurationReferenceAnchor = 8B90D1BC2DEE373300FBD189 /* Config */;
 			baseConfigurationReferenceRelativePath = Tests.xcconfig;
 			buildSettings = {
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8BC265572DEDD3F400F279A4 /* Build configuration list for PBXProject "USM" */ = {
+		8BC265572DEDD3F400F279A4 /* Build configuration list for PBXProject "USMFFI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8BC2657C2DEDD3F500F279A4 /* Debug */,
@@ -298,7 +302,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8BC2657E2DEDD3F500F279A4 /* Build configuration list for PBXNativeTarget "USM" */ = {
+		8BC2657E2DEDD3F500F279A4 /* Build configuration list for PBXNativeTarget "USMFFI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8BC2657F2DEDD3F500F279A4 /* Debug */,
@@ -307,7 +311,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8BC265842DEDD3F500F279A4 /* Build configuration list for PBXNativeTarget "USMUITests" */ = {
+		8BC265842DEDD3F500F279A4 /* Build configuration list for PBXNativeTarget "USMFFIUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8BC265852DEDD3F500F279A4 /* Debug */,
@@ -317,6 +321,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8B90D1472DEDD44A00FBD189 /* USMFFIFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = USMFFIFeature;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8BC265542DEDD3F400F279A4 /* Project object */;
 }

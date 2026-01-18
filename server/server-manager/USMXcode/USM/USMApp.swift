@@ -846,7 +846,7 @@ struct USMApp: App {
 
         Settings {
             VStack(alignment: .leading, spacing: 12) {
-                Text("UnaMentis Server Manager")
+                Text("USM non FFI")
                     .font(.headline)
 
                 Divider()
@@ -901,7 +901,7 @@ struct PopoverContent: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
-                Text("UnaMentis Server Manager")
+                Text("USM non FFI")
                     .font(.headline)
                 Spacer()
                 Button(action: { serviceManager.updateStatuses() }) {

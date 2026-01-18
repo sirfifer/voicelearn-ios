@@ -192,7 +192,7 @@ tags = ["llm"]
 
 ## HTTP API
 
-The USM Core server runs on port 8767 by default.
+The USM Core server runs on port 8787 by default (8767 is reserved for the legacy Swift USM app).
 
 ### Templates
 
@@ -222,7 +222,7 @@ The USM Core server runs on port 8767 by default.
 
 ### WebSocket
 
-Connect to `ws://localhost:8767/ws` for real-time events:
+Connect to `ws://localhost:8787/ws` for real-time events:
 
 ```json
 {"type": "status_changed", "instance_id": "mgmt-api-v1", "status": "running", "pid": 12345}
@@ -234,7 +234,7 @@ Connect to `ws://localhost:8767/ws` for real-time events:
 
 ```bash
 # Start the HTTP/WebSocket server
-usm server --port 8767
+usm server --port 8787
 
 # List templates
 usm templates
@@ -348,7 +348,7 @@ cargo tarpaulin --out Html
 
 ### Current Test Coverage
 
-- 31 tests across core functionality (19 unit + 12 property-based)
+- 49 tests across core functionality (unit + property-based)
 - Template registry CRUD
 - Instance lifecycle management
 - Event bus pub/sub
@@ -393,7 +393,7 @@ USM Core is designed to replace the Swift-based subprocess monitoring in the USM
 
 - **Rust Core**: Fully functional with HTTP API and CLI
 - **Swift App**: Works independently (not yet using Rust backend)
-- **Integration**: Can communicate via HTTP API (port 8767)
+- **Integration**: Can communicate via HTTP API (port 8787)
 
 ### Integration Roadmap
 

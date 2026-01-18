@@ -152,6 +152,61 @@ ENFORCE_COVERAGE=true|false     # Default: true in CI, false locally
 
 The USM menu bar app must be running. See `.claude/skills/service/SKILL.md` for full documentation.
 
+## MANDATORY: Graceful Application Termination
+
+**Always use graceful quit commands to stop applications. Never use kill as a first resort.**
+
+**IMPORTANT: UnaMentis/USM services MUST be controlled via the `/service` USM API only. The commands below apply to non-USM applications only. Never use pkill, killall, or kill on USM-managed services.**
+
+This is a universal principle across all operating systems. Graceful termination allows applications to:
+- Save state and user data
+- Clean up resources properly
+- Close file handles and network connections
+- Avoid data corruption
+
+### macOS
+
+**Note:** These commands are for non-USM applications only. For USM-managed services, use `/service stop <service-name>`.
+
+```bash
+# CORRECT: Graceful quit via AppleScript
+osascript -e 'tell application "AppName" to quit'
+
+# CORRECT: Graceful termination signal (non-USM apps only)
+pkill -TERM ProcessName
+
+# LAST RESORT ONLY: Forceful kill (non-USM apps only)
+killall ProcessName        # Sends SIGTERM by default
+kill -9 PID               # SIGKILL - cannot be caught, use only when app is unresponsive
+```
+
+### Linux
+
+**Note:** These commands are for non-USM applications only. For USM-managed services, use `/service stop <service-name>`.
+
+```bash
+# CORRECT: Graceful termination (non-USM apps only)
+kill PID                  # Sends SIGTERM
+pkill ProcessName         # Sends SIGTERM
+
+# LAST RESORT ONLY: Forceful kill (non-USM apps only)
+kill -9 PID              # SIGKILL
+pkill -9 ProcessName     # SIGKILL
+```
+
+### Windows
+
+```powershell
+# CORRECT: Graceful termination
+Stop-Process -Name "ProcessName"
+
+# LAST RESORT ONLY: Forceful kill
+Stop-Process -Name "ProcessName" -Force
+taskkill /F /IM "ProcessName.exe"
+```
+
+**Rule: Attempt graceful quit first. Only escalate to forceful termination if the application is unresponsive.**
+
 ## MANDATORY: Log Server for Debugging
 
 **The log server MUST be running for debugging.** Use the `/debug-logs` skill for structured debugging:

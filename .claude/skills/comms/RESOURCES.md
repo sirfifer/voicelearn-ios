@@ -31,6 +31,7 @@
 | Android | 694f024a7914093d329e766b | android, droid |
 | Curriculum | 694f025278144d1fdf331495 | curriculum, content, learning |
 | Full System | 695acb434de18ea96a01aef3 | system, full, integration |
+| Modules | 696465a371c2f1481ad60ef5 | modules, module |
 
 ### Org-Business Work (Business/Org Board)
 **Board ID:** `694f00ffe19f2a037658cf48`
@@ -66,5 +67,6 @@
 | ios | tech-ios | Tech Work | IOS App |
 | android | tech-android | Tech Work | Android |
 | server | tech-server | Tech Work | Server |
+| modules | - | Tech Work | Modules |
 | website | - | Org-Business Work | Website |
 | monetize | org-monitize | Org-Business Work | Monitization |

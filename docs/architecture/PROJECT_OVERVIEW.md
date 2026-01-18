@@ -48,7 +48,10 @@ unamentis/
 ├── UnaMentis/                 # iOS App (Swift 6.0/SwiftUI)
 ├── UnaMentisTests/            # iOS Test Suite (126+ tests)
 ├── server/                    # Backend Infrastructure
-│   ├── usm-core/              # Cross-Platform Service Manager (Rust)
+│   ├── usm-core/              # Cross-Platform Service Manager (Rust, port 8787)
+│   ├── server-manager/        # Menu bar apps for service management
+│   │   ├── USMXcode/          # Original USM app (Swift, port 8767)
+│   │   └── USMXcode-FFI/      # USM-FFI app (Swift, uses USM Core)
 │   ├── management/            # Management API (Python/aiohttp, port 8766)
 │   ├── web/                   # Operations Console (Next.js/React, port 3000)
 │   ├── web-client/            # Web Client (Next.js, voice tutoring for browsers)
@@ -66,7 +69,8 @@ unamentis/
 |-----------|----------|------------|---------|
 | iOS App | `UnaMentis/` | Swift 6.0, SwiftUI | Voice tutoring client (primary) |
 | iOS Tests | `UnaMentisTests/` | XCTest | 126+ unit, 16+ integration tests |
-| **USM Core** | `server/usm-core/` | Rust, Tokio, Axum | Cross-platform service manager |
+| **USM Core** | `server/usm-core/` | Rust, Tokio, Axum | Cross-platform service manager (port 8787) |
+| **USM-FFI** | `server/server-manager/USMXcode-FFI/` | Swift 6.0, SwiftUI | macOS menu bar app (uses USM Core) |
 | Web Client | `server/web-client/` | Next.js 15+, React, TypeScript | Voice tutoring for browsers |
 | Management API | `server/management/` | Python, aiohttp | Backend API (port 8766) |
 | Operations Console | `server/web/` | Next.js 16.1, React 19 | System/content management (port 3000) |
@@ -323,7 +327,7 @@ A switchboard system for routing LLM calls to any endpoint:
 
 ## Server Infrastructure
 
-### USM Core (Port 8767)
+### USM Core (Port 8787)
 
 **Purpose:** Cross-platform service manager for development infrastructure
 
@@ -348,10 +352,46 @@ USM Core (Rust Library)
 ├── Event Bus (Pub/Sub)
 └── Metrics Collector
          │
-         ├── macOS Swift App (C FFI)
+         ├── macOS Swift App (USM-FFI, REST/WebSocket)
          ├── Linux TUI/GTK (C FFI)
          └── Web Dashboard (REST/WebSocket)
 ```
+
+### USM-FFI macOS App
+
+**Purpose:** Menu bar app for macOS that connects to USM Core for real-time service management
+
+**Tech Stack:** Swift 6.0, SwiftUI, URLSession (HTTP), URLSessionWebSocketTask (WebSocket)
+
+**Features:**
+- Real-time service status updates via WebSocket (not polling)
+- Start/stop/restart services via USM Core HTTP API
+- Live CPU and memory metrics per service
+- Dev Mode toggle for development-only services
+- Runs alongside original USM app (different bundle IDs)
+
+**Bundle ID:** `com.unamentis.server-manager-ffi`
+
+**Architecture:**
+```
+USM-FFI App (Swift/SwiftUI)
+├── USMCoreManager (HTTP API client)
+├── WebSocketClient (real-time events)
+├── Service Models (ServiceInfo, ServiceEvent)
+└── Menu Bar UI (PopoverContent, ServiceRow)
+         │
+         └── Connects to USM Core (port 8787)
+```
+
+**Comparison with Original USM:**
+| Feature | USM (Original) | USM-FFI |
+|---------|---------------|---------|
+| Backend | Self-contained Swift | USM Core (Rust) |
+| Updates | 5-second polling | WebSocket real-time |
+| Port | 8767 | 8787 (USM Core) |
+| Bundle ID | `com.unamentis.server-manager2` | `com.unamentis.server-manager-ffi` |
+
+See [USM-FFI README](../../server/server-manager/USMXcode-FFI/README.md) for detailed documentation.
 
 **API Endpoints:**
 | Endpoint | Method | Purpose |
@@ -936,7 +976,8 @@ See [CODE_QUALITY_INITIATIVE.md](../quality/CODE_QUALITY_INITIATIVE.md) for comp
 - **Specialized modules framework** (high-stakes learning scenarios)
 - **SAT Preparation Module specification** (adaptive testing, strategy training)
 - **Knowledge Bowl Module specification** (multi-subject mastery, competition simulation)
-- **USM Core** (Rust cross-platform service manager, HTTP/WebSocket API, C FFI, 19 tests)
+- **USM Core** (Rust cross-platform service manager, HTTP/WebSocket API, C FFI, 47 tests)
+- **USM-FFI** macOS menu bar app (Swift, real-time WebSocket, 16 tests)
 
 ### In Progress
 - Android client (separate repository)
@@ -1015,7 +1056,7 @@ See [CODE_QUALITY_INITIATIVE.md](../quality/CODE_QUALITY_INITIATIVE.md) for comp
 | Process Monitoring | sysinfo, libproc (macOS), procfs (Linux) |
 | Configuration | TOML (serde) |
 | FFI | C bindings for Swift/Python |
-| Testing | cargo test (19 tests) |
+| Testing | cargo test (47 tests) |
 
 ### Management API
 | Layer | Technology |
@@ -1193,10 +1234,11 @@ A separate commercial layer may offer:
 | iOS App | Swift | 80+ | Voice tutoring client (primary) |
 | iOS Tests | Swift | 26 | Unit & integration tests |
 | **USM Core** | Rust | 22 | Cross-platform service manager |
+| **USM-FFI** | Swift | 15+ | macOS menu bar app |
 | Web Client | TypeScript/React | 50+ | Voice tutoring for browsers |
 | Management API | Python | 10+ | Backend API |
 | Operations Console | TypeScript/React | 67 | System/content management |
 | Importers | Python | 25+ | Curriculum ingestion |
 | Curriculum Spec | Markdown/JSON | 19 | Format specification |
 | Documentation | Markdown | 40+ | Comprehensive guides |
-| **TOTAL** | Mixed | 340+ | Full system |
+| **TOTAL** | Mixed | 355+ | Full system |

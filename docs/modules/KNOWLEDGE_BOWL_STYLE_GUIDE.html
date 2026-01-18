@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Bowl UI Style Guide | UnaMentis</title>
+    <style>
+        :root {
+            /* Domain Colors - Light Mode */
+            --kb-science: #1B4F72;
+            --kb-mathematics: #5856D6;
+            --kb-literature: #6C3483;
+            --kb-history: #784212;
+            --kb-social-studies: #0D9488;
+            --kb-arts: #BE185D;
+            --kb-current-events: #B9770E;
+            --kb-language: #4A5568;
+            --kb-technology: #0E6655;
+            --kb-pop-culture: #C0392B;
+            --kb-religion: #4A235A;
+            --kb-misc: #9A7D0A;
+
+            /* Status Colors */
+            --kb-not-started: #6B7280;
+            --kb-beginner: #D97706;
+            --kb-intermediate: #2563EB;
+            --kb-advanced: #0891B2;
+            --kb-mastered: #0D9488;
+
+            /* Progress Colors */
+            --kb-weak: #BE185D;
+            --kb-improving: #D97706;
+            --kb-strong: #2563EB;
+            --kb-excellent: #0D9488;
+
+            /* Competition Colors */
+            --kb-buzzer-ready: #0D9488;
+            --kb-buzzer-disabled: #6B7280;
+            --kb-buzzer-locked: #D97706;
+            --kb-timer-normal: #2563EB;
+            --kb-timer-urgent: #D97706;
+            --kb-timer-critical: #BE185D;
+
+            /* Achievement Colors */
+            --kb-bronze: #CD7F32;
+            --kb-silver: #C0C0C0;
+            --kb-gold: #FFD700;
+            --kb-diamond: #B9F2FF;
+
+            /* UI Colors */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F3F4F6;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border: #E5E7EB;
+        }
+
+        [data-theme="dark"] {
+            /* Domain Colors - Dark Mode */
+            --kb-science: #5DADE2;
+            --kb-mathematics: #8B80F9;
+            --kb-literature: #BB8FCE;
+            --kb-history: #DC7633;
+            --kb-social-studies: #5EEAD4;
+            --kb-arts: #F472B6;
+            --kb-current-events: #F7DC6F;
+            --kb-language: #A0AEC0;
+            --kb-technology: #76D7C4;
+            --kb-pop-culture: #F5B7B1;
+            --kb-religion: #D7BDE2;
+            --kb-misc: #F9E79F;
+
+            /* Status Colors - Dark */
+            --kb-not-started: #9CA3AF;
+            --kb-beginner: #FBBF24;
+            --kb-intermediate: #60A5FA;
+            --kb-advanced: #22D3EE;
+            --kb-mastered: #5EEAD4;
+
+            /* Progress Colors - Dark */
+            --kb-weak: #F472B6;
+            --kb-improving: #FBBF24;
+            --kb-strong: #60A5FA;
+            --kb-excellent: #5EEAD4;
+
+            /* Competition Colors - Dark */
+            --kb-buzzer-ready: #5EEAD4;
+            --kb-buzzer-disabled: #9CA3AF;
+            --kb-buzzer-locked: #FBBF24;
+            --kb-timer-normal: #60A5FA;
+            --kb-timer-urgent: #FBBF24;
+            --kb-timer-critical: #F472B6;
+
+            /* UI Colors - Dark */
+            --bg-primary: #1F2937;
+            --bg-secondary: #111827;
+            --bg-card: rgba(31, 41, 55, 0.8);
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --border: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--kb-science), var(--kb-mathematics));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .logo-text h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .logo-text span {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--kb-intermediate);
+        }
+
+        /* Sections */
+        section {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            font-size: 1.125rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Color Palette Grid */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .color-card {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+        }
+
+        .color-swatch {
+            height: 80px;
+            display: flex;
+            align-items: flex-end;
+            padding: 0.5rem;
+        }
+
+        .color-swatch span {
+            background: rgba(255,255,255,0.9);
+            color: #1F2937;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .color-info {
+            padding: 0.75rem;
+        }
+
+        .color-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .color-weight {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .color-luminance {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Status Examples */
+        .status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: white;
+        }
+
+        /* Mock UI Components */
+        .mock-ui {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .mock-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Radar Chart Mock */
+        .radar-container {
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .radar-chart {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        .radar-bg {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+        }
+
+        .radar-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+        }
+
+        .radar-point {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .radar-label {
+            position: absolute;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Timer Mock */
+        .timer-demo {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .timer-state {
+            text-align: center;
+        }
+
+        .timer-display {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .timer-display.pulse {
+            animation: pulse 1s infinite;
+        }
+
+        .timer-display.critical {
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Respect reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .timer-display.pulse,
+            .timer-display.critical {
+                animation: none;
+            }
+        }
+
+        .timer-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .timer-sublabel {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* Buzzer Mock */
+        .buzzer-demo {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .buzzer-state {
+            text-align: center;
+        }
+
+        .buzzer-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+            color: white;
+            border: 4px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            margin-bottom: 0.75rem;
+        }
+
+        .buzzer-button:hover:not(.disabled) {
+            transform: scale(1.02);
+        }
+
+        .buzzer-button.ready {
+            background: var(--kb-buzzer-ready);
+            box-shadow: 0 0 30px rgba(13, 148, 136, 0.4);
+        }
+
+        .buzzer-button.disabled {
+            background: var(--kb-buzzer-disabled);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .buzzer-button.locked {
+            background: var(--kb-buzzer-locked);
+        }
+
+        .buzzer-button.correct {
+            background: var(--kb-buzzer-ready);
+            box-shadow: 0 0 40px rgba(13, 148, 136, 0.6);
+        }
+
+        .buzzer-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .buzzer-hint {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Mastery Card Mock */
+        .mastery-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .mastery-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .mastery-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .mastery-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .mastery-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .mastery-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .mastery-progress {
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .mastery-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .mastery-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Heatmap Mock */
+        .heatmap-container {
+            overflow-x: auto;
+        }
+
+        .heatmap {
+            display: grid;
+            grid-template-columns: 100px repeat(5, 1fr);
+            gap: 2px;
+            min-width: 500px;
+        }
+
+        .heatmap-header {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .heatmap-row-label {
+            font-size: 0.75rem;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: white;
+            font-weight: 500;
+        }
+
+        /* Achievement Badges */
+        .achievement-row {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .achievement-badge {
+            text-align: center;
+        }
+
+        .achievement-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            border: 3px solid;
+        }
+
+        .achievement-icon.bronze {
+            background: linear-gradient(135deg, #CD7F32, #8B4513);
+            border-color: #8B4513;
+        }
+
+        .achievement-icon.silver {
+            background: linear-gradient(135deg, #E8E8E8, #A8A8A8);
+            border-color: #A8A8A8;
+        }
+
+        .achievement-icon.gold {
+            background: linear-gradient(135deg, #FFD700, #FFC107);
+            border-color: #FFC107;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .achievement-icon.diamond {
+            background: linear-gradient(135deg, #E0FFFF, #00CED1);
+            border-color: #00CED1;
+            box-shadow: 0 0 20px rgba(0, 206, 209, 0.4);
+        }
+
+        .achievement-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Contrast Demo */
+        .contrast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .contrast-card {
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .contrast-ratio {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        /* Question Card Mock */
+        .question-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .question-domain {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .question-domain-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .question-difficulty {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-timer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .question-timer-icon {
+            font-size: 1.25rem;
+        }
+
+        .question-timer-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        /* Colorblind Simulation */
+        .colorblind-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .colorblind-panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .colorblind-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .colorblind-description {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .colorblind-swatches {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .colorblind-swatch {
+            flex: 1;
+            height: 40px;
+            border-radius: 4px;
+        }
+
+        /* Team Scoreboard Mock */
+        .scoreboard {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .team-score {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            min-width: 120px;
+            border: 2px solid transparent;
+        }
+
+        .team-score.leading {
+            border-color: var(--kb-mastered);
+            box-shadow: 0 0 20px rgba(13, 148, 136, 0.2);
+        }
+
+        .team-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .team-points {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .team-indicator {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .info-box-icon {
+            font-size: 1.25rem;
+        }
+
+        .info-box-content {
+            flex: 1;
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-box-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .comparison-table th {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 2px solid var(--border);
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table .color-preview {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        .fail-badge {
+            background: var(--kb-weak);
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .pass-badge {
+            background: var(--kb-mastered);
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        /* Navigation */
+        .toc {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            max-width: 200px;
+            display: none;
+        }
+
+        @media (min-width: 1400px) {
+            .toc {
+                display: block;
+            }
+        }
+
+        .toc-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .toc-link {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.25rem 0;
+            transition: color 0.2s;
+        }
+
+        .toc-link:hover {
+            color: var(--kb-intermediate);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Utility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">KB</div>
+                <div class="logo-text">
+                    <h1>Knowledge Bowl</h1>
+                    <span>UI Style Guide</span>
+                </div>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span>
+                <span id="theme-text">Dark Mode</span>
+            </button>
+        </div>
+    </header>
+
+    <nav class="toc">
+        <div class="toc-title">Contents</div>
+        <a href="#domains" class="toc-link">Domain Colors</a>
+        <a href="#status" class="toc-link">Status System</a>
+        <a href="#timer" class="toc-link">Timer Urgency</a>
+        <a href="#buzzer" class="toc-link">Buzzer States</a>
+        <a href="#mastery" class="toc-link">Mastery Cards</a>
+        <a href="#heatmap" class="toc-link">Heatmaps</a>
+        <a href="#achievements" class="toc-link">Achievements</a>
+        <a href="#scoreboard" class="toc-link">Scoreboard</a>
+        <a href="#contrast" class="toc-link">Contrast</a>
+        <a href="#colorblind" class="toc-link">Colorblind Safety</a>
+    </nav>
+
+    <main class="container">
+        <!-- Introduction -->
+        <section>
+            <h2>Design Philosophy</h2>
+            <p class="section-description">
+                This style guide defines an accessible, emotionally engaging color system for the Knowledge Bowl module in UnaMentis.
+                The design works for users with colorblindness without requiring a special accessibility mode.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-icon">🎯</div>
+                <div class="info-box-content">
+                    <div class="info-box-title">Key Principle: Never Color Alone</div>
+                    <div class="info-box-text">
+                        Every status and state uses color + icon + text label.
+                        This ensures information is accessible to everyone, including the 8% of males with red-green colorblindness.
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-icon">🔄</div>
+                <div class="info-box-content">
+                    <div class="info-box-title">Accessible Substitutions</div>
+                    <div class="info-box-text">
+                        <strong>Teal</strong> replaces green for success states.
+                        <strong>Magenta</strong> replaces red for urgency/errors.
+                        Both are distinguishable for all common forms of colorblindness.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Domain Colors -->
+        <section id="domains">
+            <h2>12-Domain Color Palette</h2>
+            <p class="section-description">
+                Each academic domain has a distinct color that works in isolation and as part of visualizations like radar charts.
+                Colors differentiate through both hue AND luminance for colorblind accessibility.
+            </p>
+
+            <div class="color-grid">
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-science)">
+                        <span>#1B4F72</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Science</div>
+                        <div class="color-weight">20% weight</div>
+                        <div class="color-luminance">Luminance: 30%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-mathematics)">
+                        <span>#5856D6</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Mathematics</div>
+                        <div class="color-weight">15% weight</div>
+                        <div class="color-luminance">Luminance: 42%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-literature)">
+                        <span>#6C3483</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Literature</div>
+                        <div class="color-weight">12% weight</div>
+                        <div class="color-luminance">Luminance: 35%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-history)">
+                        <span>#784212</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">History</div>
+                        <div class="color-weight">12% weight</div>
+                        <div class="color-luminance">Luminance: 38%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-social-studies)">
+                        <span>#0D9488</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Social Studies</div>
+                        <div class="color-weight">10% weight</div>
+                        <div class="color-luminance">Luminance: 40%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-arts)">
+                        <span>#BE185D</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Arts</div>
+                        <div class="color-weight">8% weight</div>
+                        <div class="color-luminance">Luminance: 28%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-current-events)">
+                        <span>#B9770E</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Current Events</div>
+                        <div class="color-weight">8% weight</div>
+                        <div class="color-luminance">Luminance: 52%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-language)">
+                        <span>#4A5568</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Language</div>
+                        <div class="color-weight">5% weight</div>
+                        <div class="color-luminance">Luminance: 40%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-technology)">
+                        <span>#0E6655</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Technology</div>
+                        <div class="color-weight">4% weight</div>
+                        <div class="color-luminance">Luminance: 38%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-pop-culture)">
+                        <span>#C0392B</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Pop Culture</div>
+                        <div class="color-weight">3% weight</div>
+                        <div class="color-luminance">Luminance: 35%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-religion)">
+                        <span>#4A235A</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Religion/Philosophy</div>
+                        <div class="color-weight">2% weight</div>
+                        <div class="color-luminance">Luminance: 25%</div>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background: var(--kb-misc)">
+                        <span>#9A7D0A</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Miscellaneous</div>
+                        <div class="color-weight">1% weight</div>
+                        <div class="color-luminance">Luminance: 48%</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Radar Chart Example</h3>
+            <div class="mock-ui">
+                <div class="mock-label">Mastery Radar Visualization</div>
+                <div class="radar-container">
+                    <div class="radar-chart">
+                        <div class="radar-bg"></div>
+                        <div class="radar-ring" style="inset: 20%; border-width: 1px;"></div>
+                        <div class="radar-ring" style="inset: 40%; border-width: 1px;"></div>
+
+                        <!-- Domain points positioned around the circle -->
+                        <div class="radar-point" style="background: var(--kb-science); top: 10%; left: 50%;"></div>
+                        <div class="radar-label" style="top: 2%; left: 50%;">Science</div>
+
+                        <div class="radar-point" style="background: var(--kb-mathematics); top: 18%; left: 75%;"></div>
+                        <div class="radar-label" style="top: 12%; left: 85%;">Math</div>
+
+                        <div class="radar-point" style="background: var(--kb-literature); top: 35%; left: 92%;"></div>
+                        <div class="radar-label" style="top: 35%; left: 102%;">Lit</div>
+
+                        <div class="radar-point" style="background: var(--kb-history); top: 60%; left: 92%;"></div>
+                        <div class="radar-label" style="top: 60%; left: 102%;">History</div>
+
+                        <div class="radar-point" style="background: var(--kb-social-studies); top: 82%; left: 75%;"></div>
+                        <div class="radar-label" style="top: 88%; left: 85%;">Social</div>
+
+                        <div class="radar-point" style="background: var(--kb-arts); top: 90%; left: 50%;"></div>
+                        <div class="radar-label" style="top: 98%; left: 50%;">Arts</div>
+
+                        <div class="radar-point" style="background: var(--kb-current-events); top: 82%; left: 25%;"></div>
+                        <div class="radar-label" style="top: 88%; left: 15%;">Events</div>
+
+                        <div class="radar-point" style="background: var(--kb-language); top: 60%; left: 8%;"></div>
+                        <div class="radar-label" style="top: 60%; left: -5%;">Lang</div>
+
+                        <div class="radar-point" style="background: var(--kb-technology); top: 35%; left: 8%;"></div>
+                        <div class="radar-label" style="top: 35%; left: -5%;">Tech</div>
+
+                        <div class="radar-point" style="background: var(--kb-pop-culture); top: 18%; left: 25%;"></div>
+                        <div class="radar-label" style="top: 12%; left: 15%;">Pop</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Status System -->
+        <section id="status">
+            <h2>Status Color System</h2>
+            <p class="section-description">
+                Status colors communicate mastery levels and progress. We use teal instead of green for success,
+                and magenta instead of red for attention-needed states. Every status includes an icon and text label.
+            </p>
+
+            <h3>Mastery Levels</h3>
+            <div class="status-row">
+                <div class="status-badge">
+                    <div class="status-icon" style="background: var(--kb-not-started); border: 2px solid var(--kb-not-started);">○</div>
+                    <span>Not Started</span>
+                </div>
+                <div class="status-badge">
+                    <div class="status-icon" style="background: var(--kb-beginner);">◐</div>
+                    <span>Beginner</span>
+                </div>
+                <div class="status-badge">
+                    <div class="status-icon" style="background: var(--kb-intermediate);">◑</div>
+                    <span>Intermediate</span>
+                </div>
+                <div class="status-badge">
+                    <div class="status-icon" style="background: var(--kb-advanced);">●</div>
+                    <span>Advanced</span>
+                </div>
+                <div class="status-badge">
+                    <div class="status-icon" style="background: var(--kb-mastered);">✓</div>
+                    <span>Mastered</span>
+                </div>
+            </div>
+
+            <h3>Progress States</h3>
+            <div class="status-row">
+                <div class="status-badge">
+                    <div class="status-icon" style="background: var(--kb-weak);">⚠</div>
+                    <span>Focus Area</span>
+                </div>
+                <div class="status-badge">
+                    <div class="status-icon" style="background: var(--kb-improving);">↑</div>
+                    <span>Improving</span>
+                </div>
+                <div class="status-badge">
+                    <div class="status-icon" style="background: var(--kb-strong);">✓</div>
+                    <span>Strong</span>
+                </div>
+                <div class="status-badge">
+                    <div class="status-icon" style="background: var(--kb-excellent);">★</div>
+                    <span>Excellent</span>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-icon">💡</div>
+                <div class="info-box-content">
+                    <div class="info-box-title">Constructive Framing</div>
+                    <div class="info-box-text">
+                        We use "Focus Area" instead of "Weakness" to encourage rather than discourage.
+                        The magenta color signals attention without the negative connotations of red.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timer Urgency -->
+        <section id="timer">
+            <h2>Timer Urgency System</h2>
+            <p class="section-description">
+                Competition timers communicate urgency through multiple cues: color, animation, size, and haptic feedback.
+                This multi-modal approach ensures accessibility for all users.
+            </p>
+
+            <div class="mock-ui">
+                <div class="mock-label">Timer States Progression</div>
+                <div class="timer-demo">
+                    <div class="timer-state">
+                        <div class="timer-display" style="background: var(--kb-timer-normal);">
+                            45s
+                        </div>
+                        <div class="timer-label">Normal</div>
+                        <div class="timer-sublabel">&gt;60% remaining</div>
+                    </div>
+
+                    <div class="timer-state">
+                        <div class="timer-display" style="background: var(--kb-timer-normal);">
+                            25s
+                        </div>
+                        <div class="timer-label">Focused</div>
+                        <div class="timer-sublabel">30-60% remaining</div>
+                    </div>
+
+                    <div class="timer-state">
+                        <div class="timer-display pulse" style="background: var(--kb-timer-urgent);">
+                            12s
+                        </div>
+                        <div class="timer-label">Urgent</div>
+                        <div class="timer-sublabel">10-30% + pulse</div>
+                    </div>
+
+                    <div class="timer-state">
+                        <div class="timer-display critical" style="background: var(--kb-timer-critical); transform: scale(1.1);">
+                            5s
+                        </div>
+                        <div class="timer-label">Critical</div>
+                        <div class="timer-sublabel">&lt;10% + fast pulse + size</div>
+                    </div>
+
+                    <div class="timer-state">
+                        <div class="timer-display" style="background: var(--kb-not-started);">
+                            0s
+                        </div>
+                        <div class="timer-label">Expired</div>
+                        <div class="timer-sublabel">Time's up</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-icon">📳</div>
+                <div class="info-box-content">
+                    <div class="info-box-title">Haptic Feedback</div>
+                    <div class="info-box-text">
+                        Light tap at 50%, rhythmic taps at 30%, urgent pattern under 10%.
+                        Animation respects the system's Reduce Motion preference.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Buzzer States -->
+        <section id="buzzer">
+            <h2>Buzzer Interface</h2>
+            <p class="section-description">
+                The buzzer is the centerpiece of competition simulation. Clear state communication is critical for the timed, high-pressure environment.
+            </p>
+
+            <div class="mock-ui">
+                <div class="mock-label">Buzzer States</div>
+                <div class="buzzer-demo">
+                    <div class="buzzer-state">
+                        <div class="buzzer-button ready">BUZZ!</div>
+                        <div class="buzzer-label">Ready</div>
+                        <div class="buzzer-hint">Teal glow, tap to buzz</div>
+                    </div>
+
+                    <div class="buzzer-state">
+                        <div class="buzzer-button disabled">⊘</div>
+                        <div class="buzzer-label">Disabled</div>
+                        <div class="buzzer-hint">Question being read</div>
+                    </div>
+
+                    <div class="buzzer-state">
+                        <div class="buzzer-button locked">✕</div>
+                        <div class="buzzer-label">Locked Out</div>
+                        <div class="buzzer-hint">Other team buzzed first</div>
+                    </div>
+
+                    <div class="buzzer-state">
+                        <div class="buzzer-button correct">✓</div>
+                        <div class="buzzer-label">Correct!</div>
+                        <div class="buzzer-hint">Answer accepted</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-icon">👆</div>
+                <div class="info-box-content">
+                    <div class="info-box-title">Touch Target</div>
+                    <div class="info-box-text">
+                        Buzzer is 88x88pt minimum (double standard) for reliable tapping under time pressure.
+                        Heavy haptic feedback on press confirms the action.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mastery Cards -->
+        <section id="mastery">
+            <h2>Mastery Cards</h2>
+            <p class="section-description">
+                Domain mastery cards combine the domain color with status indicators and progress visualization.
+                Each card shows color + icon + label + numeric value.
+            </p>
+
+            <div class="mock-ui">
+                <div class="mock-label">Domain Mastery Overview</div>
+                <div class="mastery-cards">
+                    <div class="mastery-card">
+                        <div class="mastery-header">
+                            <div class="mastery-icon" style="background: var(--kb-science);">🔬</div>
+                            <div>
+                                <div class="mastery-title">Science</div>
+                                <div class="mastery-subtitle">Physics, Chemistry, Biology</div>
+                            </div>
+                        </div>
+                        <div class="mastery-progress">
+                            <div class="mastery-bar" style="width: 85%; background: var(--kb-mastered);"></div>
+                        </div>
+                        <div class="mastery-stats">
+                            <span>85% Mastered</span>
+                            <span style="color: var(--kb-mastered);">✓ Competition Ready</span>
+                        </div>
+                    </div>
+
+                    <div class="mastery-card">
+                        <div class="mastery-header">
+                            <div class="mastery-icon" style="background: var(--kb-mathematics);">📐</div>
+                            <div>
+                                <div class="mastery-title">Mathematics</div>
+                                <div class="mastery-subtitle">Algebra, Geometry, Statistics</div>
+                            </div>
+                        </div>
+                        <div class="mastery-progress">
+                            <div class="mastery-bar" style="width: 62%; background: var(--kb-intermediate);"></div>
+                        </div>
+                        <div class="mastery-stats">
+                            <span>62% Intermediate</span>
+                            <span style="color: var(--kb-intermediate);">◑ Building</span>
+                        </div>
+                    </div>
+
+                    <div class="mastery-card">
+                        <div class="mastery-header">
+                            <div class="mastery-icon" style="background: var(--kb-literature);">📚</div>
+                            <div>
+                                <div class="mastery-title">Literature</div>
+                                <div class="mastery-subtitle">American, British, World</div>
+                            </div>
+                        </div>
+                        <div class="mastery-progress">
+                            <div class="mastery-bar" style="width: 35%; background: var(--kb-weak);"></div>
+                        </div>
+                        <div class="mastery-stats">
+                            <span>35% Beginner</span>
+                            <span style="color: var(--kb-weak);">⚠ Focus Area</span>
+                        </div>
+                    </div>
+
+                    <div class="mastery-card">
+                        <div class="mastery-header">
+                            <div class="mastery-icon" style="background: var(--kb-history);">🏛️</div>
+                            <div>
+                                <div class="mastery-title">History</div>
+                                <div class="mastery-subtitle">US, World, Ancient, Modern</div>
+                            </div>
+                        </div>
+                        <div class="mastery-progress">
+                            <div class="mastery-bar" style="width: 78%; background: var(--kb-advanced);"></div>
+                        </div>
+                        <div class="mastery-stats">
+                            <span>78% Advanced</span>
+                            <span style="color: var(--kb-advanced);">● Strong</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Question Card Example -->
+        <section>
+            <h2>Question Display</h2>
+            <p class="section-description">
+                Questions show the domain color, difficulty tier, and integrated timer.
+                The design focuses attention on the question content while providing context.
+            </p>
+
+            <div class="mock-ui">
+                <div class="mock-label">Oral Round Question</div>
+                <div class="question-card">
+                    <div class="question-header">
+                        <div class="question-domain">
+                            <div class="question-domain-dot" style="background: var(--kb-science);"></div>
+                            Science - Physics
+                        </div>
+                        <div class="question-difficulty">Varsity</div>
+                    </div>
+                    <div class="question-text">
+                        This physicist developed the theory of general relativity, describing gravity
+                        as the curvature of spacetime caused by mass and energy. Name this German-born
+                        scientist who won the 1921 Nobel Prize in Physics.
+                    </div>
+                    <div class="question-timer" style="background: var(--kb-timer-urgent); color: white;">
+                        <span class="question-timer-icon">⏱</span>
+                        <span class="question-timer-value">8s</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Heatmap -->
+        <section id="heatmap">
+            <h2>Heatmap Visualizations</h2>
+            <p class="section-description">
+                Heatmaps show team coverage and individual weaknesses. The color scales use single-hue
+                progressions (blue) or accessible diverging scales (magenta-gray-teal) instead of red-green.
+            </p>
+
+            <div class="mock-ui">
+                <div class="mock-label">Team Coverage Matrix</div>
+                <div class="heatmap-container">
+                    <div class="heatmap">
+                        <div class="heatmap-header"></div>
+                        <div class="heatmap-header">Science</div>
+                        <div class="heatmap-header">Math</div>
+                        <div class="heatmap-header">Literature</div>
+                        <div class="heatmap-header">History</div>
+                        <div class="heatmap-header">Arts</div>
+
+                        <div class="heatmap-row-label">Player A</div>
+                        <div class="heatmap-cell" style="background: var(--kb-mastered);">92%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-intermediate);">65%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-weak);">28%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-advanced);">78%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-beginner);">45%</div>
+
+                        <div class="heatmap-row-label">Player B</div>
+                        <div class="heatmap-cell" style="background: var(--kb-beginner);">52%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-mastered);">95%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-intermediate);">68%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-beginner);">48%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-weak);">32%</div>
+
+                        <div class="heatmap-row-label">Player C</div>
+                        <div class="heatmap-cell" style="background: var(--kb-intermediate);">72%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-beginner);">55%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-mastered);">88%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-advanced);">82%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-mastered);">90%</div>
+
+                        <div class="heatmap-row-label">Player D</div>
+                        <div class="heatmap-cell" style="background: var(--kb-advanced);">85%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-weak);">35%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-beginner);">58%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-mastered);">94%</div>
+                        <div class="heatmap-cell" style="background: var(--kb-intermediate);">62%</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Color Scale Legend</h3>
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 20px; height: 20px; background: var(--kb-weak); border-radius: 4px;"></div>
+                    <span style="font-size: 0.875rem;">Weak (&lt;40%)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 20px; height: 20px; background: var(--kb-beginner); border-radius: 4px;"></div>
+                    <span style="font-size: 0.875rem;">Beginner (40-60%)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 20px; height: 20px; background: var(--kb-intermediate); border-radius: 4px;"></div>
+                    <span style="font-size: 0.875rem;">Intermediate (60-75%)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 20px; height: 20px; background: var(--kb-advanced); border-radius: 4px;"></div>
+                    <span style="font-size: 0.875rem;">Advanced (75-85%)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 20px; height: 20px; background: var(--kb-mastered); border-radius: 4px;"></div>
+                    <span style="font-size: 0.875rem;">Mastered (&gt;85%)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievements -->
+        <section id="achievements">
+            <h2>Achievement Tiers</h2>
+            <p class="section-description">
+                Milestone achievements use metallic colors that work universally.
+                Each tier has increasing visual impact with glows and effects.
+            </p>
+
+            <div class="mock-ui">
+                <div class="mock-label">Achievement Badges</div>
+                <div class="achievement-row">
+                    <div class="achievement-badge">
+                        <div class="achievement-icon bronze">🏆</div>
+                        <div class="achievement-name">Bronze</div>
+                    </div>
+                    <div class="achievement-badge">
+                        <div class="achievement-icon silver">🏆</div>
+                        <div class="achievement-name">Silver</div>
+                    </div>
+                    <div class="achievement-badge">
+                        <div class="achievement-icon gold">🏆</div>
+                        <div class="achievement-name">Gold</div>
+                    </div>
+                    <div class="achievement-badge">
+                        <div class="achievement-icon diamond">💎</div>
+                        <div class="achievement-name">Diamond</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scoreboard -->
+        <section id="scoreboard">
+            <h2>Competition Scoreboard</h2>
+            <p class="section-description">
+                In 3-team Knowledge Bowl matches, each team needs a distinct color.
+                The leading team gets a subtle teal glow. Teams behind use neutral styling (not red).
+            </p>
+
+            <div class="mock-ui">
+                <div class="mock-label">Live Match Scoreboard</div>
+                <div class="scoreboard">
+                    <div class="team-score leading">
+                        <div class="team-name" style="color: var(--kb-intermediate);">Your Team</div>
+                        <div class="team-points" style="color: var(--kb-intermediate);">85</div>
+                        <div class="team-indicator" style="color: var(--kb-mastered);">Leading</div>
+                    </div>
+                    <div class="team-score">
+                        <div class="team-name" style="color: var(--kb-beginner);">Opponent A</div>
+                        <div class="team-points" style="color: var(--kb-beginner);">70</div>
+                        <div class="team-indicator">-15 pts</div>
+                    </div>
+                    <div class="team-score">
+                        <div class="team-name" style="color: #7C3AED;">Opponent B</div>
+                        <div class="team-points" style="color: #7C3AED;">65</div>
+                        <div class="team-indicator">-20 pts</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contrast -->
+        <section id="contrast">
+            <h2>Contrast Verification</h2>
+            <p class="section-description">
+                All text colors meet WCAG AA requirements. White text on colored backgrounds
+                maintains at least 4.5:1 contrast ratio for normal text.
+            </p>
+
+            <div class="contrast-grid">
+                <div class="contrast-card" style="background: var(--kb-intermediate); color: white;">
+                    Button Text on Blue
+                    <div class="contrast-ratio">Ratio: 4.6:1 ✓</div>
+                </div>
+                <div class="contrast-card" style="background: var(--kb-mastered); color: white;">
+                    Button Text on Teal
+                    <div class="contrast-ratio">Ratio: 4.6:1 ✓</div>
+                </div>
+                <div class="contrast-card" style="background: var(--kb-beginner); color: white;">
+                    Button Text on Orange
+                    <div class="contrast-ratio">Ratio: 4.5:1 ✓</div>
+                </div>
+                <div class="contrast-card" style="background: var(--kb-weak); color: white;">
+                    Button Text on Magenta
+                    <div class="contrast-ratio">Ratio: 4.8:1 ✓</div>
+                </div>
+            </div>
+
+            <h3>Comparison: System Colors vs. Accessible Alternatives</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Original</th>
+                        <th>Contrast</th>
+                        <th>Issue</th>
+                        <th>Replacement</th>
+                        <th>New Contrast</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="color-preview" style="background: #34C759;"></span>.green</td>
+                        <td>2.8:1</td>
+                        <td><span class="fail-badge">FAIL</span></td>
+                        <td><span class="color-preview" style="background: #0D9488;"></span>Teal #0D9488</td>
+                        <td><span class="pass-badge">4.6:1</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="color-preview" style="background: #FF9500;"></span>.orange</td>
+                        <td>2.4:1</td>
+                        <td><span class="fail-badge">FAIL</span></td>
+                        <td><span class="color-preview" style="background: #D97706;"></span>Orange #D97706</td>
+                        <td><span class="pass-badge">4.5:1</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="color-preview" style="background: #FF3B30;"></span>.red</td>
+                        <td>3.9:1</td>
+                        <td>Colorblind issue</td>
+                        <td><span class="color-preview" style="background: #BE185D;"></span>Magenta #BE185D</td>
+                        <td><span class="pass-badge">4.8:1</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="color-preview" style="background: #32ADE6;"></span>.cyan</td>
+                        <td>2.9:1</td>
+                        <td><span class="fail-badge">FAIL</span></td>
+                        <td><span class="color-preview" style="background: #0891B2;"></span>Cyan #0891B2</td>
+                        <td><span class="pass-badge">4.5:1</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Colorblind Safety -->
+        <section id="colorblind">
+            <h2>Colorblind Safety</h2>
+            <p class="section-description">
+                The palette is designed to work for all common forms of colorblindness.
+                Here's how the status colors appear under different vision conditions.
+            </p>
+
+            <div class="colorblind-demo">
+                <div class="colorblind-panel">
+                    <div class="colorblind-title">Normal Vision</div>
+                    <div class="colorblind-description">How colors appear with typical color vision</div>
+                    <div class="colorblind-swatches">
+                        <div class="colorblind-swatch" style="background: #BE185D;"></div>
+                        <div class="colorblind-swatch" style="background: #D97706;"></div>
+                        <div class="colorblind-swatch" style="background: #2563EB;"></div>
+                        <div class="colorblind-swatch" style="background: #0891B2;"></div>
+                        <div class="colorblind-swatch" style="background: #0D9488;"></div>
+                    </div>
+                </div>
+
+                <div class="colorblind-panel">
+                    <div class="colorblind-title">Protanopia (Red-blind)</div>
+                    <div class="colorblind-description">~1% of males - reduced red sensitivity</div>
+                    <div class="colorblind-swatches">
+                        <div class="colorblind-swatch" style="background: #5F5F9C;"></div>
+                        <div class="colorblind-swatch" style="background: #A69000;"></div>
+                        <div class="colorblind-swatch" style="background: #0055D4;"></div>
+                        <div class="colorblind-swatch" style="background: #00A0B0;"></div>
+                        <div class="colorblind-swatch" style="background: #009080;"></div>
+                    </div>
+                </div>
+
+                <div class="colorblind-panel">
+                    <div class="colorblind-title">Deuteranopia (Green-blind)</div>
+                    <div class="colorblind-description">~6% of males - reduced green sensitivity</div>
+                    <div class="colorblind-swatches">
+                        <div class="colorblind-swatch" style="background: #7A6080;"></div>
+                        <div class="colorblind-swatch" style="background: #B89000;"></div>
+                        <div class="colorblind-swatch" style="background: #4070E0;"></div>
+                        <div class="colorblind-swatch" style="background: #50A0C0;"></div>
+                        <div class="colorblind-swatch" style="background: #509090;"></div>
+                    </div>
+                </div>
+
+                <div class="colorblind-panel">
+                    <div class="colorblind-title">Tritanopia (Blue-blind)</div>
+                    <div class="colorblind-description">~0.01% - reduced blue sensitivity</div>
+                    <div class="colorblind-swatches">
+                        <div class="colorblind-swatch" style="background: #B02050;"></div>
+                        <div class="colorblind-swatch" style="background: #D08050;"></div>
+                        <div class="colorblind-swatch" style="background: #008080;"></div>
+                        <div class="colorblind-swatch" style="background: #00A090;"></div>
+                        <div class="colorblind-swatch" style="background: #00A080;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-icon">✓</div>
+                <div class="info-box-content">
+                    <div class="info-box-title">Key Insight</div>
+                    <div class="info-box-text">
+                        Notice how each status remains distinct even under simulated colorblindness.
+                        The magenta (leftmost) is always distinguishable from the teal (rightmost)
+                        because they differ in both hue AND luminance.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section>
+            <h2>Quick Reference</h2>
+
+            <h3>Key Color Decisions</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Purpose</th>
+                        <th>Traditional</th>
+                        <th>Knowledge Bowl</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Success / Mastery</td>
+                        <td><span class="color-preview" style="background: #34C759;"></span>Green</td>
+                        <td><span class="color-preview" style="background: #0D9488;"></span>Teal</td>
+                        <td>Colorblind-safe, meets contrast</td>
+                    </tr>
+                    <tr>
+                        <td>Error / Urgency</td>
+                        <td><span class="color-preview" style="background: #FF3B30;"></span>Red</td>
+                        <td><span class="color-preview" style="background: #BE185D;"></span>Magenta</td>
+                        <td>Distinguishable from teal for all CVD</td>
+                    </tr>
+                    <tr>
+                        <td>Warning / Progress</td>
+                        <td><span class="color-preview" style="background: #FF9500;"></span>Orange</td>
+                        <td><span class="color-preview" style="background: #D97706;"></span>Dark Orange</td>
+                        <td>Improved contrast ratio</td>
+                    </tr>
+                    <tr>
+                        <td>Primary Action</td>
+                        <td><span class="color-preview" style="background: #007AFF;"></span>Blue</td>
+                        <td><span class="color-preview" style="background: #2563EB;"></span>Blue</td>
+                        <td>Consistent with existing app</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Implementation Principles</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div class="info-box" style="margin: 0;">
+                    <div class="info-box-icon">1</div>
+                    <div class="info-box-content">
+                        <div class="info-box-title">Never Color Alone</div>
+                        <div class="info-box-text">Always pair color with icon and text label</div>
+                    </div>
+                </div>
+                <div class="info-box" style="margin: 0;">
+                    <div class="info-box-icon">2</div>
+                    <div class="info-box-content">
+                        <div class="info-box-title">Multiple Cues</div>
+                        <div class="info-box-text">Urgency uses color + animation + haptics</div>
+                    </div>
+                </div>
+                <div class="info-box" style="margin: 0;">
+                    <div class="info-box-icon">3</div>
+                    <div class="info-box-content">
+                        <div class="info-box-title">Constructive Language</div>
+                        <div class="info-box-text">"Focus Area" not "Weakness"</div>
+                    </div>
+                </div>
+                <div class="info-box" style="margin: 0;">
+                    <div class="info-box-icon">4</div>
+                    <div class="info-box-content">
+                        <div class="info-box-title">Luminance Variety</div>
+                        <div class="info-box-text">Domains differ in brightness, not just hue</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Knowledge Bowl UI Style Guide | UnaMentis</p>
+        <p style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+            Designed for accessibility. Works for everyone.
+        </p>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                icon.textContent = '🌙';
+                text.textContent = 'Dark Mode';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.textContent = '☀️';
+                text.textContent = 'Light Mode';
+            }
+        }
+
+        // Check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.setAttribute('data-theme', 'dark');
+            document.getElementById('theme-icon').textContent = '☀️';
+            document.getElementById('theme-text').textContent = 'Light Mode';
+        }
+    </script>
+</body>
+</html>

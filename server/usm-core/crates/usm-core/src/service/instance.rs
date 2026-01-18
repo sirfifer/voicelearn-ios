@@ -115,17 +115,17 @@ pub struct ServiceInstance {
     #[serde(default)]
     pub env_vars: HashMap<String, String>,
 
-    // === Runtime state (not persisted) ===
+    // === Runtime state (serialized for API, not persisted to disk) ===
     /// Current status
-    #[serde(default, skip_serializing)]
+    #[serde(default, skip_deserializing)]
     pub status: ServiceStatus,
 
     /// Process ID if running
-    #[serde(default, skip_serializing)]
+    #[serde(default, skip_deserializing)]
     pub pid: Option<u32>,
 
     /// When the service was started
-    #[serde(default, skip_serializing)]
+    #[serde(default, skip_deserializing)]
     pub started_at: Option<DateTime<Utc>>,
 
     // === Metadata (persisted) ===
