@@ -107,6 +107,21 @@ if [ -n "$PYTHON_FILES" ]; then
 fi
 
 # =============================================================================
+# Python Security Scan (Bandit)
+# =============================================================================
+# Bandit catches security issues like command injection, hardcoded passwords,
+# unsafe pickle use, etc. Note: Path injection is caught by CodeQL in CI.
+if [ -n "$PYTHON_FILES" ]; then
+    if command -v bandit &> /dev/null; then
+        echo -e "\n${YELLOW}Running Python security scan (Bandit)...${NC}"
+        echo "$PYTHON_FILES" | xargs bandit -q -ll 2>/dev/null || {
+            echo -e "${RED}Bandit found security issues. Please fix them before committing.${NC}"
+            FAILED=1
+        }
+    fi
+fi
+
+# =============================================================================
 # Python Coverage Check (Management Server)
 # =============================================================================
 MANAGEMENT_PYTHON_FILES=$(echo "$STAGED_FILES" | grep -E '^server/management/.*\.py$' || true)
@@ -142,6 +157,37 @@ if [ -n "$MANAGEMENT_NON_TEST_FILES" ]; then
         cd - > /dev/null
     else
         echo -e "${YELLOW}pytest not found, skipping coverage check.${NC}"
+    fi
+fi
+
+# =============================================================================
+# iOS/Swift Coverage Check
+# =============================================================================
+IOS_SWIFT_FILES=$(echo "$STAGED_FILES" | grep -E '^UnaMentis/.*\.swift$' || true)
+# Exclude test files and UI-only files from triggering coverage check
+IOS_NON_TEST_FILES=$(echo "$IOS_SWIFT_FILES" | grep -v 'Tests/' | grep -v '/Views/' || true)
+
+if [ -n "$IOS_NON_TEST_FILES" ]; then
+    echo -e "\n${YELLOW}Checking iOS test coverage...${NC}"
+
+    # Check if xcodebuild is available
+    if command -v xcodebuild &> /dev/null; then
+        # Check if test-ci.sh exists and run quick unit tests with coverage enforcement
+        if [ -f "scripts/test-ci.sh" ]; then
+            echo "Running iOS unit tests with coverage enforcement (80% minimum)..."
+            # Run tests with coverage enforcement enabled
+            if ! ENFORCE_COVERAGE=true TEST_TYPE=unit ./scripts/test-ci.sh 2>&1 | tail -20; then
+                echo -e "${RED}iOS coverage check failed! Coverage must be at least 80%.${NC}"
+                echo -e "${YELLOW}Run './scripts/test-quick.sh' to see full test output.${NC}"
+                FAILED=1
+            else
+                echo -e "${GREEN}iOS coverage check passed (80%+ achieved).${NC}"
+            fi
+        else
+            echo -e "${YELLOW}test-ci.sh not found, skipping iOS coverage check.${NC}"
+        fi
+    else
+        echo -e "${YELLOW}xcodebuild not found, skipping iOS coverage check.${NC}"
     fi
 fi
 

@@ -352,11 +352,15 @@ class TTSProfileManager:
                 priority=Priority.SCHEDULED,
             )
 
-            # Save to file
+            # Save to file (in thread to avoid blocking event loop)
             sample_filename = f"{profile.id}.wav"
             sample_path = PROFILE_SAMPLES_DIR / sample_filename
-            with open(sample_path, "wb") as f:
-                f.write(audio_data)
+
+            def _write_sample(path: Path, data: bytes) -> None:
+                with open(path, "wb") as f:
+                    f.write(data)
+
+            await asyncio.to_thread(_write_sample, sample_path, audio_data)
 
             # Update profile with sample path
             profile.sample_audio_path = str(sample_path)

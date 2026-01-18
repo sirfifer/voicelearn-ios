@@ -1,0 +1,1200 @@
+openapi: 3.0.3
+info:
+  title: UnaMentis Server API
+  description: |
+    REST API for the UnaMentis voice tutoring platform.
+
+    ## Overview
+    The UnaMentis Management API provides endpoints for:
+    - User authentication and device management
+    - Curriculum management and import
+    - Voice session (FOV context) management
+    - Text-to-speech generation and caching
+    - Media generation (diagrams, formulas, maps)
+    - System monitoring and metrics
+
+    ## Authentication
+    Most endpoints require authentication via Bearer token.
+    Obtain tokens via `/api/auth/login` and refresh via `/api/auth/refresh`.
+
+    ## Base URL
+    - Management API: `http://localhost:8766`
+    - USM Core: `http://localhost:8767`
+    - Web Interface: `http://localhost:3000`
+  version: 1.0.0
+  contact:
+    name: UnaMentis Support
+    url: https://unamentis.com
+  license:
+    name: Proprietary
+    url: https://unamentis.com/license
+
+servers:
+  - url: http://localhost:8766
+    description: Local development server
+  - url: https://api.unamentis.com
+    description: Production server (future)
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Curricula
+    description: Curriculum content management
+  - name: Sessions
+    description: Learning session (FOV context) management
+  - name: TTS
+    description: Text-to-speech generation and caching
+  - name: Import
+    description: Content import from external sources
+  - name: Media
+    description: Diagram, formula, and map generation
+  - name: System
+    description: System health and monitoring
+  - name: WebSocket
+    description: Real-time communication
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token obtained from /api/auth/login
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Machine-readable error code
+        details:
+          type: object
+          description: Additional error details
+      required:
+        - error
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AuthTokens:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT access token (1 hour validity)
+        refresh_token:
+          type: string
+          description: Refresh token (30 days validity)
+        token_type:
+          type: string
+          enum: [Bearer]
+        expires_in:
+          type: integer
+          description: Access token lifetime in seconds
+
+    Curriculum:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        topic_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Topic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        order:
+          type: integer
+        curriculum_id:
+          type: string
+          format: uuid
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        curriculum_id:
+          type: string
+          format: uuid
+        topic_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [created, active, paused, ended]
+        created_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+
+    ConversationTurn:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    TTSRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Text to synthesize
+        voice:
+          type: string
+          description: Voice identifier
+        speed:
+          type: number
+          minimum: 0.5
+          maximum: 2.0
+          default: 1.0
+        format:
+          type: string
+          enum: [mp3, wav, ogg]
+          default: mp3
+      required:
+        - text
+
+    TTSProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        provider:
+          type: string
+        voice_id:
+          type: string
+        settings:
+          type: object
+        is_default:
+          type: boolean
+
+    ImportJob:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        source:
+          type: string
+        status:
+          type: string
+          enum: [pending, running, completed, failed, cancelled]
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+        error:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    MediaCapabilities:
+      type: object
+      properties:
+        diagrams:
+          type: array
+          items:
+            type: string
+        formulas:
+          type: boolean
+        maps:
+          type: boolean
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        version:
+          type: string
+        uptime:
+          type: integer
+        services:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+              latency_ms:
+                type: number
+
+    SystemMetrics:
+      type: object
+      properties:
+        cpu_percent:
+          type: number
+        memory_percent:
+          type: number
+        disk_percent:
+          type: number
+        active_sessions:
+          type: integer
+        requests_per_minute:
+          type: number
+
+paths:
+  # Authentication
+  /api/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                name:
+                  type: string
+              required: [email, password]
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - $ref: '#/components/schemas/AuthTokens'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Email already registered
+
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                device_name:
+                  type: string
+              required: [email, password]
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '401':
+          description: Invalid credentials
+
+  /api/auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+              required: [refresh_token]
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '401':
+          description: Invalid or expired refresh token
+
+  /api/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout and revoke token
+      responses:
+        '200':
+          description: Logged out successfully
+        '401':
+          description: Not authenticated
+
+  /api/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user profile
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    patch:
+      tags: [Authentication]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /api/auth/password:
+    post:
+      tags: [Authentication]
+      summary: Change password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password:
+                  type: string
+                new_password:
+                  type: string
+                  minLength: 8
+              required: [current_password, new_password]
+      responses:
+        '200':
+          description: Password changed
+        '401':
+          description: Current password incorrect
+
+  /api/auth/devices:
+    get:
+      tags: [Authentication]
+      summary: List registered devices
+      responses:
+        '200':
+          description: List of devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    last_used:
+                      type: string
+                      format: date-time
+                    is_current:
+                      type: boolean
+
+  /api/auth/devices/{device_id}:
+    delete:
+      tags: [Authentication]
+      summary: Remove device
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Device removed
+        '404':
+          description: Device not found
+
+  /api/auth/sessions:
+    get:
+      tags: [Authentication]
+      summary: List active sessions
+      responses:
+        '200':
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    device_name:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    last_used:
+                      type: string
+                      format: date-time
+
+  /api/auth/sessions/{session_id}:
+    delete:
+      tags: [Authentication]
+      summary: Terminate session
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session terminated
+        '404':
+          description: Session not found
+
+  # Curricula
+  /api/curricula:
+    get:
+      tags: [Curricula]
+      summary: List curricula
+      parameters:
+        - name: archived
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: List of curricula
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Curriculum'
+    post:
+      tags: [Curricula]
+      summary: Import curriculum
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Curriculum imported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Curriculum'
+
+  /api/curricula/{curriculum_id}:
+    get:
+      tags: [Curricula]
+      summary: Get curriculum details
+      parameters:
+        - name: curriculum_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Curriculum details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Curriculum'
+        '404':
+          description: Curriculum not found
+    delete:
+      tags: [Curricula]
+      summary: Delete curriculum
+      parameters:
+        - name: curriculum_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Curriculum deleted
+        '404':
+          description: Curriculum not found
+
+  /api/curricula/{curriculum_id}/full:
+    get:
+      tags: [Curricula]
+      summary: Get full curriculum with all content
+      parameters:
+        - name: curriculum_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full curriculum
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Curriculum'
+                  - type: object
+                    properties:
+                      topics:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Topic'
+
+  /api/curricula/{curriculum_id}/archive:
+    post:
+      tags: [Curricula]
+      summary: Archive curriculum
+      parameters:
+        - name: curriculum_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Curriculum archived
+
+  # Sessions
+  /api/sessions:
+    get:
+      tags: [Sessions]
+      summary: List sessions
+      parameters:
+        - name: curriculum_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, paused, ended]
+      responses:
+        '200':
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+    post:
+      tags: [Sessions]
+      summary: Create new session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                curriculum_id:
+                  type: string
+                topic_id:
+                  type: string
+              required: [curriculum_id, topic_id]
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+
+  /api/sessions/{session_id}:
+    get:
+      tags: [Sessions]
+      summary: Get session details
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+    delete:
+      tags: [Sessions]
+      summary: Delete session
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session deleted
+
+  /api/sessions/{session_id}/start:
+    post:
+      tags: [Sessions]
+      summary: Start session
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session started
+
+  /api/sessions/{session_id}/pause:
+    post:
+      tags: [Sessions]
+      summary: Pause session
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session paused
+
+  /api/sessions/{session_id}/resume:
+    post:
+      tags: [Sessions]
+      summary: Resume session
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session resumed
+
+  /api/sessions/{session_id}/end:
+    post:
+      tags: [Sessions]
+      summary: End session
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session ended
+
+  /api/sessions/{session_id}/turns:
+    post:
+      tags: [Sessions]
+      summary: Add conversation turn
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum: [user, assistant]
+                content:
+                  type: string
+              required: [role, content]
+      responses:
+        '201':
+          description: Turn added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationTurn'
+
+  /api/sessions/{session_id}/context:
+    get:
+      tags: [Sessions]
+      summary: Get FOV context
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: FOV context
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # TTS
+  /api/tts:
+    post:
+      tags: [TTS]
+      summary: Generate TTS audio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTSRequest'
+      responses:
+        '200':
+          description: Audio generated
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+
+  /api/tts/cache/stats:
+    get:
+      tags: [TTS]
+      summary: Get cache statistics
+      responses:
+        '200':
+          description: Cache stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entries:
+                    type: integer
+                  size_bytes:
+                    type: integer
+                  hit_rate:
+                    type: number
+
+  /api/tts/profiles:
+    get:
+      tags: [TTS]
+      summary: List TTS profiles
+      responses:
+        '200':
+          description: List of profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TTSProfile'
+    post:
+      tags: [TTS]
+      summary: Create TTS profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTSProfile'
+      responses:
+        '201':
+          description: Profile created
+
+  # Import
+  /api/import/sources:
+    get:
+      tags: [Import]
+      summary: Get available import sources
+      responses:
+        '200':
+          description: List of sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    enabled:
+                      type: boolean
+
+  /api/import/jobs:
+    get:
+      tags: [Import]
+      summary: List import jobs
+      responses:
+        '200':
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImportJob'
+    post:
+      tags: [Import]
+      summary: Start import job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                source:
+                  type: string
+                course_id:
+                  type: string
+              required: [source, course_id]
+      responses:
+        '201':
+          description: Job started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportJob'
+
+  /api/import/jobs/{job_id}:
+    get:
+      tags: [Import]
+      summary: Get job status
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportJob'
+    delete:
+      tags: [Import]
+      summary: Cancel job
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job cancelled
+
+  # Media
+  /api/media/capabilities:
+    get:
+      tags: [Media]
+      summary: Get media generation capabilities
+      responses:
+        '200':
+          description: Capabilities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaCapabilities'
+
+  /api/media/diagrams/render:
+    post:
+      tags: [Media]
+      summary: Render diagram
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [mermaid, graphviz, plantuml]
+                source:
+                  type: string
+                format:
+                  type: string
+                  enum: [svg, png]
+                  default: svg
+              required: [type, source]
+      responses:
+        '200':
+          description: Rendered diagram
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+            image/png:
+              schema:
+                type: string
+                format: binary
+
+  /api/media/formulas/render:
+    post:
+      tags: [Media]
+      summary: Render LaTeX formula
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                latex:
+                  type: string
+                format:
+                  type: string
+                  enum: [svg, png]
+                  default: svg
+              required: [latex]
+      responses:
+        '200':
+          description: Rendered formula
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+
+  /api/media/maps/render:
+    post:
+      tags: [Media]
+      summary: Render map
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                center:
+                  type: object
+                  properties:
+                    lat:
+                      type: number
+                    lng:
+                      type: number
+                zoom:
+                  type: integer
+                  minimum: 1
+                  maximum: 20
+                markers:
+                  type: array
+                  items:
+                    type: object
+                style:
+                  type: string
+              required: [center, zoom]
+      responses:
+        '200':
+          description: Map image
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+
+  # System
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /api/system/metrics:
+    get:
+      tags: [System]
+      summary: Get system metrics
+      responses:
+        '200':
+          description: System metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemMetrics'
+
+  /api/services:
+    get:
+      tags: [System]
+      summary: List services
+      responses:
+        '200':
+          description: List of services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    status:
+                      type: string
+                      enum: [running, stopped, error]
+                    port:
+                      type: integer
+
+  /api/services/{service_id}/restart:
+    post:
+      tags: [System]
+      summary: Restart service
+      parameters:
+        - name: service_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service restarted
+
+  # WebSocket
+  /ws:
+    get:
+      tags: [WebSocket]
+      summary: WebSocket connection for real-time updates
+      description: |
+        WebSocket endpoint for real-time communication.
+
+        ## Message Types
+        - `log`: Real-time log messages
+        - `metric`: System metrics updates
+        - `session`: Session state changes
+        - `tts_progress`: TTS generation progress
+
+        ## Authentication
+        Include access token as query parameter: `/ws?token=<access_token>`
+      responses:
+        '101':
+          description: WebSocket upgrade
+
+  /ws/audio:
+    get:
+      tags: [WebSocket]
+      summary: Audio streaming WebSocket
+      description: |
+        WebSocket endpoint for real-time audio streaming.
+
+        ## Protocol
+        - Binary frames for audio data
+        - JSON frames for control messages
+
+        ## Control Messages
+        - `start`: Begin audio stream
+        - `stop`: End audio stream
+        - `config`: Configure audio settings
+      responses:
+        '101':
+          description: WebSocket upgrade

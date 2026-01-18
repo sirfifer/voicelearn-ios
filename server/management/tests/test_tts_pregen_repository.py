@@ -817,32 +817,36 @@ class TestRatingOperations:
 
     @pytest.mark.asyncio
     async def test_create_rating_new(self, repository, mock_connection):
-        """Test creating a new rating."""
-        mock_connection.fetchrow.return_value = None  # No existing rating
-
+        """Test creating a new rating via UPSERT."""
         rating = TTSComparisonRating.create(uuid4(), rating=4, notes="Good")
+        # UPSERT always returns the id (new or existing)
+        mock_connection.fetchrow.return_value = {"id": rating.id}
+
         result = await repository.create_or_update_rating(rating)
 
         assert result == rating
-        # Should have called INSERT
-        calls = mock_connection.execute.call_args_list
+        # Should have called fetchrow with UPSERT query
+        calls = mock_connection.fetchrow.call_args_list
         assert len(calls) == 1
         assert "INSERT INTO tts_comparison_ratings" in calls[0][0][0]
+        assert "ON CONFLICT" in calls[0][0][0]
 
     @pytest.mark.asyncio
     async def test_update_existing_rating(self, repository, mock_connection):
-        """Test updating an existing rating."""
+        """Test updating an existing rating via UPSERT."""
         existing_id = uuid4()
+        # UPSERT returns the id (which may differ if conflict occurred)
         mock_connection.fetchrow.return_value = {"id": existing_id}
 
         rating = TTSComparisonRating.create(uuid4(), rating=5, notes="Excellent")
         result = await repository.create_or_update_rating(rating)
 
         assert result.id == existing_id
-        # Should have called UPDATE
-        calls = mock_connection.execute.call_args_list
+        # Should have called fetchrow with UPSERT query
+        calls = mock_connection.fetchrow.call_args_list
         assert len(calls) == 1
-        assert "UPDATE tts_comparison_ratings" in calls[0][0][0]
+        assert "INSERT INTO tts_comparison_ratings" in calls[0][0][0]
+        assert "ON CONFLICT" in calls[0][0][0]
 
     @pytest.mark.asyncio
     async def test_get_variant_rating_found(self, repository, mock_connection, sample_rating_row):

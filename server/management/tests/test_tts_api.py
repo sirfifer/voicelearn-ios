@@ -333,7 +333,7 @@ class TestHandleTtsRequest:
         response = await tts_api.handle_tts_request(request)
 
         assert response.status == 503
-        assert b"Generation failed" in response.body
+        assert b"TTS generation failed" in response.body
 
     @pytest.mark.asyncio
     async def test_generation_error_with_cache(self, mock_request, mock_app):
@@ -349,7 +349,7 @@ class TestHandleTtsRequest:
         response = await tts_api.handle_tts_request(request)
 
         assert response.status == 503
-        assert b"Generation error" in response.body
+        assert b"TTS generation failed" in response.body
 
 
 # =============================================================================

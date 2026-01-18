@@ -2,11 +2,16 @@
 # Data classes for TTS profile management, batch generation, and comparison
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 import hashlib
+
+
+def _utc_now() -> datetime:
+    """Return current UTC time with timezone info."""
+    return datetime.now(timezone.utc)
 
 
 class JobStatus(str, Enum):
@@ -110,8 +115,8 @@ class TTSProfile:
     is_default: bool = False
 
     # Audit
-    created_at: datetime = field(default_factory=datetime.now)
-    updated_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=_utc_now)
+    updated_at: datetime = field(default_factory=_utc_now)
     created_from_session_id: Optional[UUID] = None
 
     # Preview
@@ -152,8 +157,8 @@ class TTSProfile:
             use_case=d.get("use_case"),
             is_active=d.get("is_active", True),
             is_default=d.get("is_default", False),
-            created_at=datetime.fromisoformat(d["created_at"]) if isinstance(d.get("created_at"), str) else d.get("created_at", datetime.now()),
-            updated_at=datetime.fromisoformat(d["updated_at"]) if isinstance(d.get("updated_at"), str) else d.get("updated_at", datetime.now()),
+            created_at=datetime.fromisoformat(d["created_at"]) if isinstance(d.get("created_at"), str) else d.get("created_at", _utc_now()),
+            updated_at=datetime.fromisoformat(d["updated_at"]) if isinstance(d.get("updated_at"), str) else d.get("updated_at", _utc_now()),
             created_from_session_id=UUID(d["created_from_session_id"]) if d.get("created_from_session_id") else None,
             sample_audio_path=d.get("sample_audio_path"),
             sample_text=d.get("sample_text"),
@@ -187,7 +192,7 @@ class TTSModuleProfile:
     profile_id: UUID
     context: Optional[str] = None  # 'questions', 'explanations', 'hints', or None for all
     priority: int = 0  # Higher = preferred when multiple match
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=_utc_now)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
@@ -234,11 +239,11 @@ class TTSPregenJob:
     current_item_text: Optional[str] = None
 
     # Timing
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=_utc_now)
     started_at: Optional[datetime] = None
     paused_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    updated_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=_utc_now)
 
     # Error tracking
     last_error: Optional[str] = None
@@ -325,11 +330,11 @@ class TTSPregenJob:
             failed_items=failed_items,
             current_item_index=current_item_index,
             current_item_text=current_item_text,
-            created_at=datetime.fromisoformat(d["created_at"]) if isinstance(d.get("created_at"), str) else d.get("created_at", datetime.now()),
+            created_at=datetime.fromisoformat(d["created_at"]) if isinstance(d.get("created_at"), str) else d.get("created_at", _utc_now()),
             started_at=datetime.fromisoformat(d["started_at"]) if isinstance(d.get("started_at"), str) and d.get("started_at") else None,
             paused_at=datetime.fromisoformat(d["paused_at"]) if isinstance(d.get("paused_at"), str) and d.get("paused_at") else None,
             completed_at=datetime.fromisoformat(d["completed_at"]) if isinstance(d.get("completed_at"), str) and d.get("completed_at") else None,
-            updated_at=datetime.fromisoformat(d["updated_at"]) if isinstance(d.get("updated_at"), str) else d.get("updated_at", datetime.now()),
+            updated_at=datetime.fromisoformat(d["updated_at"]) if isinstance(d.get("updated_at"), str) else d.get("updated_at", _utc_now()),
             last_error=d.get("last_error"),
             consecutive_failures=d.get("consecutive_failures", 0),
         )
@@ -463,8 +468,8 @@ class TTSComparisonSession:
     config: Dict[str, Any]  # {samples: [...], configurations: [...]}
 
     description: Optional[str] = None
-    created_at: datetime = field(default_factory=datetime.now)
-    updated_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=_utc_now)
+    updated_at: datetime = field(default_factory=_utc_now)
 
     @property
     def sample_count(self) -> int:
@@ -505,8 +510,8 @@ class TTSComparisonSession:
             status=SessionStatus(d.get("status", "draft")),
             description=d.get("description"),
             config=d.get("config", {}),
-            created_at=datetime.fromisoformat(d["created_at"]) if isinstance(d.get("created_at"), str) else d.get("created_at", datetime.now()),
-            updated_at=datetime.fromisoformat(d["updated_at"]) if isinstance(d.get("updated_at"), str) else d.get("updated_at", datetime.now()),
+            created_at=datetime.fromisoformat(d["created_at"]) if isinstance(d.get("created_at"), str) else d.get("created_at", _utc_now()),
+            updated_at=datetime.fromisoformat(d["updated_at"]) if isinstance(d.get("updated_at"), str) else d.get("updated_at", _utc_now()),
         )
 
     @classmethod
@@ -609,7 +614,7 @@ class TTSComparisonRating:
     variant_id: UUID
     rating: Optional[int] = None  # 1-5 stars
     notes: Optional[str] = None
-    rated_at: datetime = field(default_factory=datetime.now)
+    rated_at: datetime = field(default_factory=_utc_now)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
@@ -629,7 +634,7 @@ class TTSComparisonRating:
             variant_id=UUID(d["variant_id"]) if isinstance(d["variant_id"], str) else d["variant_id"],
             rating=d.get("rating"),
             notes=d.get("notes"),
-            rated_at=datetime.fromisoformat(d["rated_at"]) if isinstance(d.get("rated_at"), str) else d.get("rated_at", datetime.now()),
+            rated_at=datetime.fromisoformat(d["rated_at"]) if isinstance(d.get("rated_at"), str) else d.get("rated_at", _utc_now()),
         )
 
     @classmethod

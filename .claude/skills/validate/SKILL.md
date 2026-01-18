@@ -20,7 +20,7 @@ Enforces the "Definition of Done" mandate by running all quality checks before w
 
 ## Workflow
 
-### 1. Lint Check
+### 1. Swift Lint Check
 ```bash
 ./scripts/lint.sh
 ```
@@ -28,7 +28,15 @@ Enforces the "Definition of Done" mandate by running all quality checks before w
 - Zero violations required
 - If violations found, report them with file:line and stop
 
-### 2. Test Execution
+### 2. Python Lint Check (if Python files changed)
+```bash
+./scripts/lint-python.sh
+```
+- ruff linter must pass
+- bandit security scan (medium+ severity)
+- Matches CI Python lint behavior
+
+### 3. Test Execution
 
 **Default (quick):**
 ```bash
@@ -107,6 +115,16 @@ Failed tests:
 
 VALIDATION FAILED - Fix failing tests before proceeding
 ```
+
+## CI Parity
+
+The validation is designed to catch issues locally that would fail in CI:
+
+- **Swift Strict Concurrency**: Test scripts use `SWIFT_STRICT_CONCURRENCY=complete` to catch Sendable violations
+- **Python Security**: bandit catches common security issues (though not as comprehensive as CodeQL)
+- **Linting**: Both Swift and Python linting match CI checks
+
+If CI fails with an issue that local validation missed, investigate and add the check to local validation.
 
 ## Integration
 

@@ -6,6 +6,8 @@
 [![iOS CI](https://github.com/UnaMentis/unamentis/actions/workflows/ios.yml/badge.svg)](https://github.com/UnaMentis/unamentis/actions/workflows/ios.yml)
 [![codecov](https://codecov.io/gh/UnaMentis/unamentis/branch/main/graph/badge.svg)](https://codecov.io/gh/UnaMentis/unamentis)
 [![Code Quality](https://img.shields.io/badge/code%20quality-A-brightgreen)](docs/quality/CODE_QUALITY_INITIATIVE.md)
+[![Backers on Open Collective](https://opencollective.com/unamentis/backers/badge.svg)](https://opencollective.com/unamentis)
+[![Sponsors on Open Collective](https://opencollective.com/unamentis/sponsors/badge.svg)](https://opencollective.com/unamentis)
 
 **Real-time bidirectional, hands free, mobile, voice learning platform that uses AI on device and on a server to provide extensive learning sessions.
 These sessions can be ad-hoc or based on proven curriculum from many well known sources.**
@@ -382,6 +384,30 @@ The fundamental core of UnaMentis will always remain open source. This ensures t
 - **Enhanced collaboration**: Multi-user learning sessions
 
 Note: Android support was explored but is not currently in active development. The focus is on delivering exceptional iOS and web experiences first.
+
+## Support the Project
+
+UnaMentis is fiscally hosted by [Open Collective Europe](https://opencollective.com/europe). Your donations directly support ongoing development, server costs, and infrastructure.
+
+<a href="https://opencollective.com/unamentis/donate" target="_blank">
+  <img src="https://opencollective.com/unamentis/donate/button@2x.png?color=blue" width="300" />
+</a>
+
+### Backers
+
+Thank you to all our backers!
+
+<a href="https://opencollective.com/unamentis">
+  <img src="https://opencollective.com/unamentis/backers.svg?width=890" />
+</a>
+
+### Sponsors
+
+Support this project by becoming a sponsor. Your logo will appear here with a link to your website.
+
+<a href="https://opencollective.com/unamentis">
+  <img src="https://opencollective.com/unamentis/sponsors.svg?width=890" />
+</a>
 
 ## Contributing
 

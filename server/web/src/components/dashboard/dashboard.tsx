@@ -39,6 +39,7 @@ import { ImportJobsPanel } from './import-jobs-panel';
 import { LatencyHarnessPanel } from './latency-harness-panel';
 import { FOVContextPanel } from './fov-context-panel';
 import { ReprocessPanel } from './reprocess-panel';
+import { ModulesPanel } from './modules-panel';
 import { ProfilesPanel } from '@/components/tts-pregen';
 import type { DashboardStats } from '@/types';
 import { getStats } from '@/lib/api-client';
@@ -62,6 +63,7 @@ const OPS_TABS = [
 ] as const;
 const CONTENT_TABS = [
   'curricula',
+  'modules',
   'sources',
   'plugins',
   'imports',
@@ -274,6 +276,13 @@ export function Dashboard() {
           {activeTab === 'curricula' && (
             <div className="animate-in fade-in duration-300">
               <CurriculaPanel />
+            </div>
+          )}
+
+          {/* Modules Tab */}
+          {activeTab === 'modules' && (
+            <div className="animate-in fade-in duration-300">
+              <ModulesPanel />
             </div>
           )}
 

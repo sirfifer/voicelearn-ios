@@ -4,7 +4,6 @@
 
 import asyncio
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -264,16 +263,19 @@ class TTSComparisonManager:
                     priority=Priority.SCHEDULED,
                 )
 
-                # Save audio file
+                # Save audio file (in thread to avoid blocking event loop)
                 filename = f"variant_{variant.sample_index}_{variant.config_index}.wav"
                 output_path = session_dir / filename
 
-                import wave
-                with wave.open(str(output_path), "wb") as wav_file:
-                    wav_file.setnchannels(1)
-                    wav_file.setsampwidth(2)  # 16-bit
-                    wav_file.setframerate(sample_rate)
-                    wav_file.writeframes(audio_data)
+                def _write_wav_file(path: Path, rate: int, data: bytes) -> None:
+                    import wave
+                    with wave.open(str(path), "wb") as wav_file:
+                        wav_file.setnchannels(1)
+                        wav_file.setsampwidth(2)  # 16-bit
+                        wav_file.setframerate(rate)
+                        wav_file.writeframes(data)
+
+                await asyncio.to_thread(_write_wav_file, output_path, sample_rate, audio_data)
 
                 # Update variant status
                 await self.repo.update_variant_status(
@@ -473,11 +475,20 @@ class TTSComparisonManager:
         if not variant or not variant.output_file:
             return None
 
-        # Verify file exists
-        if not os.path.exists(variant.output_file):
+        # Validate path stays under storage directory (prevent path traversal)
+        output_path = Path(variant.output_file)
+        try:
+            resolved = output_path.resolve()
+            resolved.relative_to(self.storage_dir.resolve())
+        except ValueError:
+            logger.error(f"Path traversal attempt detected: {variant.output_file}")
             return None
 
-        return variant.output_file
+        # Verify file exists
+        if not resolved.exists():
+            return None
+
+        return str(resolved)
 
     async def get_session_summary(self, session_id: UUID) -> Optional[Dict[str, Any]]:
         """Get a summary of session results including ratings.

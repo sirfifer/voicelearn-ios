@@ -541,7 +541,10 @@ class TestGetAudioFilePath:
     async def test_get_audio_file_path_success(self, manager, mock_repo, sample_variants, tmp_path):
         """Test getting existing audio file path."""
         variant = sample_variants[0]
-        audio_file = tmp_path / "test.wav"
+        # Create file under the manager's storage_dir (tmp_path / "comparisons")
+        storage_dir = tmp_path / "comparisons"
+        storage_dir.mkdir(exist_ok=True)
+        audio_file = storage_dir / "test.wav"
         audio_file.touch()
         variant.output_file = str(audio_file)
 
@@ -549,7 +552,7 @@ class TestGetAudioFilePath:
 
         result = await manager.get_audio_file_path(variant.id)
 
-        assert result == str(audio_file)
+        assert result == str(audio_file.resolve())
 
     @pytest.mark.asyncio
     async def test_get_audio_file_path_no_output(self, manager, mock_repo, sample_variants):

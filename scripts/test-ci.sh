@@ -65,11 +65,11 @@ log_success() {
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+    echo -e "${YELLOW}[WARN]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[FAIL]${NC} $1"
+    echo -e "${RED}[FAIL]${NC} $1" >&2
 }
 
 # Check simulator availability and find fallback if needed
@@ -240,6 +240,10 @@ main() {
     local result_bundle="${RESULT_BUNDLE_PATH:-TestResults.xcresult}"
     cmd="$cmd -resultBundlePath '$result_bundle'"
     cmd="$cmd CODE_SIGNING_ALLOWED=NO"
+
+    # Enable strict Swift concurrency checking to match CI behavior
+    # This catches Sendable violations that would fail in CI
+    cmd="$cmd SWIFT_STRICT_CONCURRENCY=complete"
 
     # Get beautify command
     local beautify_cmd

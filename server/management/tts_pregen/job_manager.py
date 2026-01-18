@@ -189,12 +189,20 @@ class JobManager:
         await self.repository.delete_job(job_id)
 
         # Clean up files
-        if job.output_dir and os.path.exists(job.output_dir):
+        if job.output_dir:
             import shutil
+            base_dir = Path(self.base_output_dir).resolve()
+            output_dir = Path(job.output_dir).resolve()
             try:
-                shutil.rmtree(job.output_dir)
-            except Exception as e:
-                logger.warning(f"Failed to clean up job directory: {e}")
+                output_dir.relative_to(base_dir)
+            except ValueError:
+                logger.error(f"Refusing to delete job directory outside base: {output_dir}")
+            else:
+                try:
+                    if output_dir.exists():
+                        shutil.rmtree(output_dir)
+                except Exception as e:
+                    logger.warning(f"Failed to clean up job directory: {e}")
 
         logger.info(f"Deleted job {job_id}")
         return True

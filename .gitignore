@@ -32,6 +32,8 @@ fastlane/test_output
 # Code coverage
 *.gcda
 *.gcno
+.coverage
+htmlcov/
 
 # macOS
 .DS_Store
@@ -58,8 +60,11 @@ venv/
 *.pyc
 __pycache__/
 
-# Hypothesis property testing (transient test data)
+# Python tool caches
 .hypothesis/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 
 # ML Models (too large for git)
 # Use explicit path to avoid matching Swift code directories like Routing/Models/
@@ -95,3 +100,10 @@ server/web/.next/
 
 # Claude draft files
 .claude/draft-commit.md
+
+# Archive files in project root
+/*.zip
+/*.tar.gz
+
+# Xcode test results
+*.xcresult

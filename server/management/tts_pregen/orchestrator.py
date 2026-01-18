@@ -233,22 +233,24 @@ class TTSPregenOrchestrator:
                     priority=Priority.SCHEDULED,
                 )
 
-                # Save to file
+                # Save to file (in thread to avoid blocking event loop)
                 filename = f"{item.item_index:05d}_{item.text_hash[:8]}.{output_format}"
                 output_path = output_dir / filename
 
                 if output_format == "wav":
-                    self._save_wav(output_path, audio_data, sample_rate)
+                    await asyncio.to_thread(self._save_wav, output_path, audio_data, sample_rate)
                 else:
                     # For other formats, just write raw audio
-                    with open(output_path, "wb") as f:
-                        f.write(audio_data)
+                    def _write_raw(path: Path, data: bytes) -> None:
+                        with open(path, "wb") as f:
+                            f.write(data)
+                    await asyncio.to_thread(_write_raw, output_path, audio_data)
 
                 # Update item with success
                 item.status = ItemStatus.COMPLETED
                 item.output_file = str(output_path)
                 item.duration_seconds = duration
-                item.file_size_bytes = os.path.getsize(output_path)
+                item.file_size_bytes = await asyncio.to_thread(os.path.getsize, output_path)
                 item.sample_rate = sample_rate
                 item.processing_completed_at = datetime.now()
                 item.last_error = None

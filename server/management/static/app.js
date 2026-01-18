@@ -408,14 +408,17 @@ function renderLogs() {
         return;
     }
 
-    const html = state.logs.map(log => `
+    const html = state.logs.map(log => {
+        const safeLevel = (log.level || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        return `
         <div class="log-entry animate-fade-in">
-            <span class="log-time">${formatLogTime(log.timestamp)}</span>
-            <span class="log-level log-level-${log.level.toLowerCase()}">${log.level}</span>
-            <span class="log-message">${escapeHtml(log.message)}</span>
-            <span class="log-source">${log.client_name || log.label || ''}</span>
+            <span class="log-time">${escapeHtml(formatLogTime(log.timestamp))}</span>
+            <span class="log-level log-level-${safeLevel}">${escapeHtml(log.level || '')}</span>
+            <span class="log-message">${escapeHtml(log.message || '')}</span>
+            <span class="log-source">${escapeHtml(log.client_name || log.label || '')}</span>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
     container.innerHTML = html;
 }

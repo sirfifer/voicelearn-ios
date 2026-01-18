@@ -213,7 +213,7 @@ struct MetricRow: View {
 
 // MARK: - Info Row
 
-struct InfoRow: View {
+private struct InfoRow: View {
     let label: String
     let value: String
 

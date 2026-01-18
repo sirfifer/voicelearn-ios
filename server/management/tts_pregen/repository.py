@@ -940,40 +940,29 @@ class TTSPregenRepository:
     # =========================================================================
 
     async def create_or_update_rating(self, rating: TTSComparisonRating) -> TTSComparisonRating:
-        """Create or update a rating for a variant."""
+        """Create or update a rating for a variant.
+
+        Uses UPSERT to atomically insert or update, avoiding TOCTOU race conditions.
+        """
         async with self.pool.acquire() as conn:
-            # Check if rating exists
-            existing = await conn.fetchrow(
-                "SELECT id FROM tts_comparison_ratings WHERE variant_id = $1",
+            # Use UPSERT to atomically insert or update
+            row = await conn.fetchrow(
+                """
+                INSERT INTO tts_comparison_ratings (id, variant_id, rating, notes, rated_at)
+                VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT (variant_id) DO UPDATE SET
+                    rating = EXCLUDED.rating,
+                    notes = EXCLUDED.notes,
+                    rated_at = EXCLUDED.rated_at
+                RETURNING id
+                """,
+                rating.id,
                 rating.variant_id,
+                rating.rating,
+                rating.notes,
+                rating.rated_at,
             )
-
-            if existing:
-                await conn.execute(
-                    """
-                    UPDATE tts_comparison_ratings SET
-                        rating = $2, notes = $3, rated_at = $4
-                    WHERE variant_id = $1
-                    """,
-                    rating.variant_id,
-                    rating.rating,
-                    rating.notes,
-                    rating.rated_at,
-                )
-                rating.id = existing["id"]
-            else:
-                await conn.execute(
-                    """
-                    INSERT INTO tts_comparison_ratings (id, variant_id, rating, notes, rated_at)
-                    VALUES ($1, $2, $3, $4, $5)
-                    """,
-                    rating.id,
-                    rating.variant_id,
-                    rating.rating,
-                    rating.notes,
-                    rating.rated_at,
-                )
-
+            rating.id = row["id"]
             return rating
 
     async def get_variant_rating(self, variant_id: UUID) -> Optional[TTSComparisonRating]:

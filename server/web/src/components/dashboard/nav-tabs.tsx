@@ -40,6 +40,7 @@ export type OpsTabId =
 // Content tabs
 export type ContentTabId =
   | 'curricula'
+  | 'modules'
   | 'sources'
   | 'plugins'
   | 'imports'
@@ -86,6 +87,7 @@ const contentTabs: {
   icon: typeof BookOpen;
 }[] = [
   { id: 'curricula', label: 'Curricula', shortLabel: 'Curricula', icon: BookOpen },
+  { id: 'modules', label: 'Modules', shortLabel: 'Modules', icon: Brain },
   { id: 'sources', label: 'Sources', shortLabel: 'Sources', icon: Library },
   { id: 'plugins', label: 'Plugins', shortLabel: 'Plugins', icon: Puzzle },
   { id: 'imports', label: 'Import Jobs', shortLabel: 'Imports', icon: Download },
