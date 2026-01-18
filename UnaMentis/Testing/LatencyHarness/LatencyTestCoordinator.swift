@@ -177,7 +177,7 @@ public actor LatencyTestCoordinator {
             suiteName: suite.name,
             suiteId: suite.id,
             clientId: clientId,
-            clientDevice: getDeviceInfo(),
+            clientDevice: await getDeviceInfo(),
             totalConfigurations: configurations.count
         )
 
@@ -693,9 +693,9 @@ public actor LatencyTestCoordinator {
 
     // MARK: - Utilities
 
-    private func getDeviceInfo() -> String {
+    private func getDeviceInfo() async -> String {
         #if os(iOS)
-        return UIDevice.current.model
+        return await MainActor.run { UIDevice.current.model }
         #else
         return "Simulator"
         #endif
