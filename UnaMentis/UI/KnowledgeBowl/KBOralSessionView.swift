@@ -626,6 +626,7 @@ final class KBOralSessionViewModel: ObservableObject {
     private let tts = KBOnDeviceTTS()
     private let stt = KBOnDeviceSTT()
     private let validator = KBAnswerValidator()
+    private let store = KBSessionStore()
 
     // MARK: - Configuration
 
@@ -745,6 +746,14 @@ final class KBOralSessionViewModel: ObservableObject {
         session.endTime = Date()
         session.isComplete = true
         state = .completed
+
+        // Save completed session
+        do {
+            try await store.save(session)
+            print("[KB] Oral session saved: \(session.id)")
+        } catch {
+            print("[KB] Failed to save oral session: \(error)")
+        }
     }
 
     // MARK: - Question Flow

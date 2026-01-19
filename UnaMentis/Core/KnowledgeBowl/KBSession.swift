@@ -205,6 +205,10 @@ final class KBWrittenSessionViewModel: ObservableObject {
     let config: KBSessionConfig
     let regionalConfig: KBRegionalConfig
 
+    // MARK: - Session Persistence
+
+    private let store = KBSessionStore()
+
     // MARK: - Computed Properties
 
     var currentQuestion: KBQuestion? {
@@ -266,6 +270,16 @@ final class KBWrittenSessionViewModel: ObservableObject {
         session.endTime = Date()
         session.isComplete = true
         state = expired ? .expired : .completed
+
+        // Save completed session
+        Task {
+            do {
+                try await store.save(session)
+                print("[KB] Written session saved: \(session.id)")
+            } catch {
+                print("[KB] Failed to save written session: \(error)")
+            }
+        }
     }
 
     // MARK: - Timer

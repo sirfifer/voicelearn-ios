@@ -92,7 +92,7 @@ actor KBOnDeviceTTS {
 
         // Stop any current speech
         if isSpeaking {
-            await MainActor.run {
+            _ = await MainActor.run {
                 self.synthesizer?.stopSpeaking(at: .immediate)
             }
         }

@@ -7,6 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DF8BA42A6CC84F5AB3373226 /* KBTokenMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BCA419BDC24FA9962E05BD /* KBTokenMatcherTests.swift */; };
+		9FFE636593894827B9FF2A24 /* KBSynonymDictionariesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0102434A2A445784E3D99E /* KBSynonymDictionariesTests.swift */; };
+		ECCAA017D97D4C34AAFFC4B1 /* KBPhoneticMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F0D38B6D3443E485DB1DE1 /* KBPhoneticMatcherTests.swift */; };
+		E7853FD8402E46AA80DBE557 /* KBNGramMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D81DBC62AE84A6AA8B720B4 /* KBNGramMatcherTests.swift */; };
+		2553603928834B849A9660C7 /* KBLinguisticMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D64E11FD221146C1A236178B /* KBLinguisticMatcherTests.swift */; };
+		422ECD51744B4069BA0A8850 /* KBEnhancedValidationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213FCD68FD2740BBB566B5D4 /* KBEnhancedValidationSetupView.swift */; };
+		B144663557414AF8A3896213 /* KBLLMValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD84D1971D094D95B2CAAA23 /* KBLLMValidator.swift */; };
+		2BA7DF4A00F14AC69189EBD8 /* KBEmbeddingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F6D21CC6BB424387C54B6D /* KBEmbeddingsService.swift */; };
+		3E545B8BD2554F94B8BE63B8 /* KBSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3BF2D4A0EF44C6B182716F /* KBSessionStore.swift */; };
+		5539AFD372D14DDE943911D8 /* KBSynonymDictionaries.swift in Sources */ = {isa = PBXBuildFile; fileRef = B995CFE5DFE147F290534336 /* KBSynonymDictionaries.swift */; };
+		F191AFCAF57A458B9552AC82 /* KBTokenMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38AF51CA0EB44FA48BB52C90 /* KBTokenMatcher.swift */; };
+		C5F26B9867664C24B7844EE6 /* KBPhoneticMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F074C3979104D8BA4A378F6 /* KBPhoneticMatcher.swift */; };
+		FE2FE2AA18524774BC43C713 /* KBNGramMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FDE1EB4721343A0B76D16BA /* KBNGramMatcher.swift */; };
+		3A6C53E18E814439AF0AFB4E /* KBLinguisticMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE94B1E72871498388C78DB7 /* KBLinguisticMatcher.swift */; };
+		1AF5EC8B8EC745B58DBDF630 /* KBPremiumFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0774A8FDA886499FA8515E70 /* KBPremiumFeatures.swift */; };
+		4CD3ACF075B8474D80BBE50C /* KBFeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0EC407EF7164733A3EECD25 /* KBFeatureFlags.swift */; };
+		00DD6B2334554EC6B7AAC457 /* DeviceCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B5A87AC7C944EDA087D9B6 /* DeviceCapability.swift */; };
 		01ABAF0927B8FB3C82CB7555 /* CurriculumEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C44C207CAFA73C1D526B473B /* CurriculumEngine.swift */; };
 		01ADC64CC30CB163B14CA62C /* StartLessonIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C84608D516291A60F987D9B /* StartLessonIntent.swift */; };
 		02D04453683695A6354A69CF /* LMAPIProviderInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA2D0F2C7B340A0F71796A7 /* LMAPIProviderInfo.swift */; };
@@ -243,6 +260,23 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B7BCA419BDC24FA9962E05BD /* KBTokenMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentisTests/Unit/KnowledgeBowl/Validation/KBTokenMatcherTests.swift"; sourceTree = SOURCE_ROOT; };
+		1E0102434A2A445784E3D99E /* KBSynonymDictionariesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentisTests/Unit/KnowledgeBowl/Validation/KBSynonymDictionariesTests.swift"; sourceTree = SOURCE_ROOT; };
+		17F0D38B6D3443E485DB1DE1 /* KBPhoneticMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentisTests/Unit/KnowledgeBowl/Validation/KBPhoneticMatcherTests.swift"; sourceTree = SOURCE_ROOT; };
+		6D81DBC62AE84A6AA8B720B4 /* KBNGramMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentisTests/Unit/KnowledgeBowl/Validation/KBNGramMatcherTests.swift"; sourceTree = SOURCE_ROOT; };
+		D64E11FD221146C1A236178B /* KBLinguisticMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentisTests/Unit/KnowledgeBowl/Validation/KBLinguisticMatcherTests.swift"; sourceTree = SOURCE_ROOT; };
+		213FCD68FD2740BBB566B5D4 /* KBEnhancedValidationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/UI/KnowledgeBowl/KBEnhancedValidationSetupView.swift"; sourceTree = SOURCE_ROOT; };
+		CD84D1971D094D95B2CAAA23 /* KBLLMValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Services/KnowledgeBowl/ML/KBLLMValidator.swift"; sourceTree = SOURCE_ROOT; };
+		31F6D21CC6BB424387C54B6D /* KBEmbeddingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Services/KnowledgeBowl/ML/KBEmbeddingsService.swift"; sourceTree = SOURCE_ROOT; };
+		CB3BF2D4A0EF44C6B182716F /* KBSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Services/KnowledgeBowl/KBSessionStore.swift"; sourceTree = SOURCE_ROOT; };
+		B995CFE5DFE147F290534336 /* KBSynonymDictionaries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Services/KnowledgeBowl/Data/KBSynonymDictionaries.swift"; sourceTree = SOURCE_ROOT; };
+		38AF51CA0EB44FA48BB52C90 /* KBTokenMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Services/KnowledgeBowl/Algorithms/KBTokenMatcher.swift"; sourceTree = SOURCE_ROOT; };
+		5F074C3979104D8BA4A378F6 /* KBPhoneticMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Services/KnowledgeBowl/Algorithms/KBPhoneticMatcher.swift"; sourceTree = SOURCE_ROOT; };
+		5FDE1EB4721343A0B76D16BA /* KBNGramMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Services/KnowledgeBowl/Algorithms/KBNGramMatcher.swift"; sourceTree = SOURCE_ROOT; };
+		AE94B1E72871498388C78DB7 /* KBLinguisticMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Services/KnowledgeBowl/Algorithms/KBLinguisticMatcher.swift"; sourceTree = SOURCE_ROOT; };
+		0774A8FDA886499FA8515E70 /* KBPremiumFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Core/Purchases/KBPremiumFeatures.swift"; sourceTree = SOURCE_ROOT; };
+		D0EC407EF7164733A3EECD25 /* KBFeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Core/Purchases/KBFeatureFlags.swift"; sourceTree = SOURCE_ROOT; };
+		97B5A87AC7C944EDA087D9B6 /* DeviceCapability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentis/Core/Device/DeviceCapability.swift"; sourceTree = SOURCE_ROOT; };
 		0036EFE850AA592D96BD5AAE /* TopicEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicEntity.swift; sourceTree = "<group>"; };
 		0122D12D71D21E39864BD351 /* RemoteLogHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteLogHandler.swift; sourceTree = "<group>"; };
 		01C496581684518021B58948 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -1028,6 +1062,23 @@
 			isa = PBXGroup;
 			children = (
 				75F12101ECC21370857E2F2F /* KBAnswerValidator.swift */,
+				B7BCA419BDC24FA9962E05BD /* KBTokenMatcherTests.swift */,
+				1E0102434A2A445784E3D99E /* KBSynonymDictionariesTests.swift */,
+				17F0D38B6D3443E485DB1DE1 /* KBPhoneticMatcherTests.swift */,
+				6D81DBC62AE84A6AA8B720B4 /* KBNGramMatcherTests.swift */,
+				D64E11FD221146C1A236178B /* KBLinguisticMatcherTests.swift */,
+				213FCD68FD2740BBB566B5D4 /* KBEnhancedValidationSetupView.swift */,
+				CD84D1971D094D95B2CAAA23 /* KBLLMValidator.swift */,
+				31F6D21CC6BB424387C54B6D /* KBEmbeddingsService.swift */,
+				CB3BF2D4A0EF44C6B182716F /* KBSessionStore.swift */,
+				B995CFE5DFE147F290534336 /* KBSynonymDictionaries.swift */,
+				38AF51CA0EB44FA48BB52C90 /* KBTokenMatcher.swift */,
+				5F074C3979104D8BA4A378F6 /* KBPhoneticMatcher.swift */,
+				5FDE1EB4721343A0B76D16BA /* KBNGramMatcher.swift */,
+				AE94B1E72871498388C78DB7 /* KBLinguisticMatcher.swift */,
+				0774A8FDA886499FA8515E70 /* KBPremiumFeatures.swift */,
+				D0EC407EF7164733A3EECD25 /* KBFeatureFlags.swift */,
+				97B5A87AC7C944EDA087D9B6 /* DeviceCapability.swift */,
 				01EA2717A830F8B961C5766A /* KBOnDeviceSTT.swift */,
 				19627423210F57757F40CCFF /* KBOnDeviceTTS.swift */,
 				D35FF2EB7DEFC6C36E775126 /* KBQuestionEngine.swift */,
@@ -1378,6 +1429,18 @@
 				A0569F0FAEBFCCBEA2B1A1AA /* HelpView.swift in Sources */,
 				4D5B79F40271572EDF52AF45 /* HistoryView.swift in Sources */,
 				D96BA7FFBE340819A8180767 /* KBAnswerValidator.swift in Sources */,
+				422ECD51744B4069BA0A8850 /* KBEnhancedValidationSetupView.swift in Sources */,
+				B144663557414AF8A3896213 /* KBLLMValidator.swift in Sources */,
+				2BA7DF4A00F14AC69189EBD8 /* KBEmbeddingsService.swift in Sources */,
+				3E545B8BD2554F94B8BE63B8 /* KBSessionStore.swift in Sources */,
+				5539AFD372D14DDE943911D8 /* KBSynonymDictionaries.swift in Sources */,
+				F191AFCAF57A458B9552AC82 /* KBTokenMatcher.swift in Sources */,
+				C5F26B9867664C24B7844EE6 /* KBPhoneticMatcher.swift in Sources */,
+				FE2FE2AA18524774BC43C713 /* KBNGramMatcher.swift in Sources */,
+				3A6C53E18E814439AF0AFB4E /* KBLinguisticMatcher.swift in Sources */,
+				1AF5EC8B8EC745B58DBDF630 /* KBPremiumFeatures.swift in Sources */,
+				4CD3ACF075B8474D80BBE50C /* KBFeatureFlags.swift in Sources */,
+				00DD6B2334554EC6B7AAC457 /* DeviceCapability.swift in Sources */,
 				2F51936EA2E9409450AC1A6F /* KBColors.swift in Sources */,
 				0D74276E3C391956ADD4CD4B /* KBDashboardView.swift in Sources */,
 				1023E4C410066067BAF51002 /* KBOnDeviceSTT.swift in Sources */,
@@ -1489,6 +1552,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				6538195C252D1D331A78ED75 /* APIKeyManagerTests.swift in Sources */,
+				DF8BA42A6CC84F5AB3373226 /* KBTokenMatcherTests.swift in Sources */,
+				9FFE636593894827B9FF2A24 /* KBSynonymDictionariesTests.swift in Sources */,
+				ECCAA017D97D4C34AAFFC4B1 /* KBPhoneticMatcherTests.swift in Sources */,
+				E7853FD8402E46AA80DBE557 /* KBNGramMatcherTests.swift in Sources */,
+				2553603928834B849A9660C7 /* KBLinguisticMatcherTests.swift in Sources */,
 				A7646430427520CB7751070E /* AnalyticsViewModelTests.swift in Sources */,
 				D6A00A90CF06357BD9FFFE37 /* AnthropicLLMServiceTests.swift in Sources */,
 				A70C76F922FBE5AD26B21C78 /* AppIntentsTests.swift in Sources */,

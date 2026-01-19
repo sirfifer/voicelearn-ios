@@ -11,12 +11,15 @@ import SwiftUI
 
 struct KBDashboardView: View {
     @State private var engine = KBQuestionEngine()
+    @State private var store = KBSessionStore()
     @State private var selectedRegion: KBRegion = .colorado
     @State private var showingWrittenSession = false
     @State private var showingOralSession = false
     @State private var showingSettings = false
     @State private var writtenSessionViewModel: KBWrittenSessionViewModel?
     @State private var oralSessionViewModel: KBOralSessionViewModel?
+    @State private var recentSessions: [KBSession] = []
+    @State private var statistics: KBStatistics?
 
     var body: some View {
         NavigationStack {
@@ -27,6 +30,16 @@ struct KBDashboardView: View {
 
                     // Quick start section
                     quickStartSection
+
+                    // Session history
+                    if !recentSessions.isEmpty {
+                        sessionHistorySection
+                    }
+
+                    // Overall statistics
+                    if let statistics = statistics {
+                        statisticsSection(statistics)
+                    }
 
                     // Region selector
                     regionSelector
@@ -49,6 +62,7 @@ struct KBDashboardView: View {
             }
             .task {
                 await loadQuestions()
+                await loadSessions()
             }
             .sheet(isPresented: $showingSettings) {
                 KBSettingsView(selectedRegion: $selectedRegion)
@@ -233,6 +247,184 @@ struct KBDashboardView: View {
         }
     }
 
+    // MARK: - Session History Section
+
+    private var sessionHistorySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Recent Practice")
+                .font(.headline)
+                .foregroundColor(.kbTextPrimary)
+
+            VStack(spacing: 8) {
+                ForEach(recentSessions.prefix(5)) { session in
+                    sessionHistoryCard(session)
+                }
+            }
+
+            if recentSessions.count > 5 {
+                Text("+ \(recentSessions.count - 5) more sessions")
+                    .font(.caption)
+                    .foregroundColor(.kbTextSecondary)
+                    .padding(.top, 4)
+            }
+        }
+    }
+
+    private func sessionHistoryCard(_ session: KBSession) -> some View {
+        HStack(spacing: 12) {
+            // Round type icon
+            Image(systemName: session.config.roundType == .written ? "pencil.and.list.clipboard" : "mic.fill")
+                .font(.title3)
+                .foregroundColor(session.config.roundType == .written ? .kbIntermediate : .kbMastered)
+                .frame(width: 40, height: 40)
+                .background(
+                    (session.config.roundType == .written ? Color.kbIntermediate : Color.kbMastered)
+                        .opacity(0.1)
+                )
+                .cornerRadius(8)
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("\(session.config.roundType == .written ? "Written" : "Oral") Practice")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.kbTextPrimary)
+
+                    Spacer()
+
+                    Text(formatAccuracy(session.accuracy))
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(session.accuracy >= 0.7 ? .kbMastered : .kbBeginner)
+                }
+
+                HStack(spacing: 12) {
+                    Text("\(session.correctCount)/\(session.attempts.count) correct")
+                        .font(.caption)
+                        .foregroundColor(.kbTextSecondary)
+
+                    if let endTime = session.endTime {
+                        Text("•")
+                            .foregroundColor(.kbTextSecondary)
+                        Text(formatRelativeDate(endTime))
+                            .font(.caption)
+                            .foregroundColor(.kbTextSecondary)
+                    }
+
+                    Text("•")
+                        .foregroundColor(.kbTextSecondary)
+                    Text(session.config.region.abbreviation)
+                        .font(.caption)
+                        .foregroundColor(.kbTextSecondary)
+                }
+            }
+        }
+        .padding()
+        .background(Color.kbBgSecondary)
+        .cornerRadius(12)
+    }
+
+    // MARK: - Statistics Section
+
+    private func statisticsSection(_ stats: KBStatistics) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Overall Progress")
+                .font(.headline)
+                .foregroundColor(.kbTextPrimary)
+
+            HStack(spacing: 12) {
+                // Overall accuracy
+                VStack(spacing: 8) {
+                    ZStack {
+                        Circle()
+                            .stroke(Color.kbBorder, lineWidth: 8)
+                            .frame(width: 80, height: 80)
+
+                        Circle()
+                            .trim(from: 0, to: stats.overallAccuracy)
+                            .stroke(
+                                stats.overallAccuracy >= 0.7 ? Color.kbMastered : Color.kbBeginner,
+                                style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                            )
+                            .frame(width: 80, height: 80)
+                            .rotationEffect(.degrees(-90))
+
+                        Text(formatAccuracy(stats.overallAccuracy))
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.kbTextPrimary)
+                    }
+
+                    Text("Overall")
+                        .font(.caption)
+                        .foregroundColor(.kbTextSecondary)
+                }
+
+                Spacer()
+
+                // Stats grid
+                VStack(alignment: .leading, spacing: 8) {
+                    statRow(label: "Sessions", value: "\(stats.totalSessions)")
+                    statRow(label: "Questions", value: "\(stats.totalQuestions)")
+                    statRow(label: "Streak", value: "\(stats.currentStreak) days")
+                }
+            }
+            .padding()
+            .background(Color.kbBgSecondary)
+            .cornerRadius(12)
+
+            // Written vs Oral breakdown
+            HStack(spacing: 12) {
+                statCard(
+                    title: "Written",
+                    value: formatAccuracy(stats.writtenAccuracy),
+                    color: .kbIntermediate
+                )
+
+                statCard(
+                    title: "Oral",
+                    value: formatAccuracy(stats.oralAccuracy),
+                    color: .kbMastered
+                )
+            }
+        }
+    }
+
+    private func statRow(label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.kbTextSecondary)
+            Spacer()
+            Text(value)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.kbTextPrimary)
+        }
+        .frame(width: 140)
+    }
+
+    private func statCard(title: String, value: String, color: Color) -> some View {
+        VStack(spacing: 4) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.kbTextSecondary)
+
+            Text(value)
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundColor(color)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.kbBgSecondary)
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(color.opacity(0.3), lineWidth: 1)
+        )
+    }
+
     // MARK: - Stats Section
 
     private var statsSection: some View {
@@ -299,6 +491,44 @@ struct KBDashboardView: View {
             try await engine.loadBundledQuestions()
         } catch {
             // Error is captured in engine.loadError
+        }
+    }
+
+    private func loadSessions() async {
+        do {
+            recentSessions = try await store.loadRecent(limit: 10)
+            statistics = try await store.calculateStatistics()
+        } catch {
+            print("[KB] Failed to load sessions: \(error)")
+        }
+    }
+
+    // MARK: - Formatting Helpers
+
+    private func formatAccuracy(_ accuracy: Double) -> String {
+        String(format: "%.0f%%", accuracy * 100)
+    }
+
+    private func formatRelativeDate(_ date: Date) -> String {
+        let now = Date()
+        let interval = now.timeIntervalSince(date)
+
+        if interval < 60 {
+            return "Just now"
+        } else if interval < 3600 {
+            let mins = Int(interval / 60)
+            return "\(mins)m ago"
+        } else if interval < 86400 {
+            let hours = Int(interval / 3600)
+            return "\(hours)h ago"
+        } else if interval < 604800 {
+            let days = Int(interval / 86400)
+            return "\(days)d ago"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .short
+            formatter.timeStyle = .none
+            return formatter.string(from: date)
         }
     }
 
