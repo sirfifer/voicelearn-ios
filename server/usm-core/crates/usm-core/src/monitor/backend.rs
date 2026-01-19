@@ -37,6 +37,20 @@ pub trait ProcessMonitor: Send + Sync {
     /// Returns the PID of the started process.
     fn start_process(&self, command: &str, working_dir: Option<&Path>) -> Result<u32>;
 
+    /// Start a process with optional port for fallback PID detection
+    ///
+    /// For services managed by system tools (brew services, systemd, etc.),
+    /// the port is used to find the PID after starting if the wrapper fails.
+    fn start_process_with_port(
+        &self,
+        command: &str,
+        working_dir: Option<&Path>,
+        _port: Option<u16>,
+    ) -> Result<u32> {
+        // Default implementation just calls start_process
+        self.start_process(command, working_dir)
+    }
+
     /// Kill a process by PID
     fn kill_process(&self, pid: u32) -> Result<()>;
 

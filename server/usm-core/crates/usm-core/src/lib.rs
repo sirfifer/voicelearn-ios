@@ -230,9 +230,11 @@ impl UsmCore {
 
         // Build and execute start command
         let command = template.build_start_command(instance);
-        let pid = self
-            .monitor
-            .start_process(&command, instance.working_dir.as_deref())?;
+        let pid = self.monitor.start_process_with_port(
+            &command,
+            instance.working_dir.as_deref(),
+            Some(instance.port),
+        )?;
 
         // Update instance state
         instance.status = service::ServiceStatus::Running;

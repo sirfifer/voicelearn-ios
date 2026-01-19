@@ -294,7 +294,11 @@ async fn start_instance(
     let command = template.build_start_command(instance);
     let pid = state
         .monitor
-        .start_process(&command, instance.working_dir.as_deref())
+        .start_process_with_port(
+            &command,
+            instance.working_dir.as_deref(),
+            Some(instance.port),
+        )
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
     // Update instance state
@@ -440,7 +444,11 @@ async fn restart_instance(
     let command = template.build_start_command(instance);
     let pid = state
         .monitor
-        .start_process(&command, instance.working_dir.as_deref())
+        .start_process_with_port(
+            &command,
+            instance.working_dir.as_deref(),
+            Some(instance.port),
+        )
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
     instance.status = ServiceStatus::Running;

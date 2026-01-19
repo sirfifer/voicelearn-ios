@@ -5,7 +5,7 @@ use std::process::Command;
 
 use anyhow::Result;
 use sysinfo::{Pid, System};
-use tracing::{debug, trace, warn};
+use tracing::{debug, info, trace, warn};
 
 use super::backend::{ProcessInfo, ProcessMonitor};
 use crate::metrics::{InstanceMetrics, SystemMetrics};
@@ -103,24 +103,121 @@ impl ProcessMonitor for MacOSMonitor {
     }
 
     fn start_process(&self, command: &str, working_dir: Option<&Path>) -> Result<u32> {
-        debug!(command = %command, working_dir = ?working_dir, "Starting process");
+        self.start_process_with_port(command, working_dir, None)
+    }
+
+    /// Start a process with optional port for fallback PID detection
+    ///
+    /// For services managed by system tools (brew services, systemd, etc.) or
+    /// already-running services, we can't capture the PID via wrapper script.
+    /// If a port is provided, we'll try to find the PID by port after starting.
+    fn start_process_with_port(
+        &self,
+        command: &str,
+        working_dir: Option<&Path>,
+        port: Option<u16>,
+    ) -> Result<u32> {
+        debug!(command = %command, working_dir = ?working_dir, port = ?port, "Starting process");
+
+        // Create temp file to capture the actual service PID
+        let pid_file = std::env::temp_dir().join(format!("usm-{}.pid", std::process::id()));
+
+        // Wrapper script that:
+        // 1. Starts the service in background
+        // 2. Captures its PID and writes to file
+        // 3. Waits so the shell doesn't exit immediately
+        let wrapper = format!(
+            r#"{{ {} }} & echo $! > "{}" && wait"#,
+            command,
+            pid_file.display()
+        );
 
         let mut cmd = Command::new("/bin/zsh");
-        cmd.args(["-c", &format!("{} &", command)]);
+        cmd.args(["-c", &wrapper]);
 
         if let Some(dir) = working_dir {
             cmd.current_dir(dir);
         }
 
-        // Detach from our process group
-        cmd.stdout(std::process::Stdio::null());
-        cmd.stderr(std::process::Stdio::null());
+        // Set PATH to include Homebrew binaries and user local bin (for node, pnpm, uv, etc.)
+        let home = std::env::var("HOME").unwrap_or_else(|_| "/Users/ramerman".to_string());
+        let path = format!(
+            "{}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+            home
+        );
+        cmd.env("PATH", &path);
 
-        let child = cmd.spawn()?;
-        let pid = child.id();
+        // Capture stdout/stderr to temp files for debugging
+        let stdout_file =
+            std::env::temp_dir().join(format!("usm-{}-stdout.log", std::process::id()));
+        let stderr_file =
+            std::env::temp_dir().join(format!("usm-{}-stderr.log", std::process::id()));
+        cmd.stdout(std::process::Stdio::from(std::fs::File::create(
+            &stdout_file,
+        )?));
+        cmd.stderr(std::process::Stdio::from(std::fs::File::create(
+            &stderr_file,
+        )?));
 
-        trace!(pid = pid, "Process started");
-        Ok(pid)
+        // Spawn the wrapper (it will wait in background)
+        let mut _child = cmd.spawn()?;
+
+        // Give shell time to write PID file (200ms should be plenty)
+        std::thread::sleep(std::time::Duration::from_millis(200));
+
+        // Read the actual service PID from file
+        let pid = if pid_file.exists() {
+            match std::fs::read_to_string(&pid_file) {
+                Ok(contents) => {
+                    let _ = std::fs::remove_file(&pid_file); // Clean up
+                    match contents.trim().parse::<u32>() {
+                        Ok(p) => p,
+                        Err(e) => {
+                            warn!("Failed to parse PID: {}", e);
+                            0 // Will trigger fallback
+                        },
+                    }
+                },
+                Err(e) => {
+                    warn!("Failed to read PID file: {}", e);
+                    0 // Will trigger fallback
+                },
+            }
+        } else {
+            warn!("PID file not created after 200ms");
+            0 // Will trigger fallback
+        };
+
+        // Verify process is actually running
+        // Wait 3 seconds to allow services like pnpm/node to fully initialize
+        // (measured at ~921ms for pnpm dev, so 3s provides safe margin)
+        std::thread::sleep(std::time::Duration::from_millis(3000));
+
+        if pid > 0 && self.is_running(pid) {
+            trace!(pid = pid, "Process started and verified running");
+            return Ok(pid);
+        }
+
+        // Fallback: If we have a port and the PID didn't work, try to find by port
+        // This handles brew services, systemd, and already-running services
+        if let Some(port) = port {
+            debug!(
+                port = port,
+                "PID tracking failed, trying to find process by port"
+            );
+            if let Some(pid) = self.find_pid_by_port(port) {
+                if self.is_running(pid) {
+                    info!(
+                        pid = pid,
+                        port = port,
+                        "Found already-running service by port"
+                    );
+                    return Ok(pid);
+                }
+            }
+        }
+
+        anyhow::bail!("Process {} started but immediately died", pid)
     }
 
     fn kill_process(&self, pid: u32) -> Result<()> {
@@ -209,8 +306,8 @@ mod tests {
         // Find some common system process
         let results = monitor.find_by_name("kernel");
 
-        // Should find at least one process
-        // (kernel_task on macOS)
-        assert!(!results.is_empty() || true); // Don't fail if not found
+        // Should find at least one process (kernel_task on macOS)
+        // Don't fail if not found since this is environment-dependent
+        let _ = results; // Acknowledge we're not asserting on the results
     }
 }
