@@ -15,6 +15,11 @@
  * - Source browser for external curriculum import (MIT OCW, Stanford, etc.)
  * - Plugin management for importers
  * - Import job monitoring and management
+ *
+ * VOICE LAB SECTION:
+ * - AI model selection (LLMs, TTS models)
+ * - TTS experimentation (Kyutai, Fish Speech)
+ * - Batch processing profiles and configuration
  */
 'use client';
 
@@ -22,7 +27,15 @@ import { useEffect, useCallback } from 'react';
 import { useQueryState, parseAsStringLiteral } from 'nuqs';
 import { Zap, CheckCircle, Users, FileText, AlertTriangle, AlertCircle } from 'lucide-react';
 import { Header } from './header';
-import { SectionNav, NavTabs, SectionId, TabId, OpsTabId, ContentTabId } from './nav-tabs';
+import {
+  SectionNav,
+  NavTabs,
+  SectionId,
+  TabId,
+  OpsTabId,
+  ContentTabId,
+  VoiceLabTabId,
+} from './nav-tabs';
 import { StatCard } from '@/components/ui/stat-card';
 import { LogsPanel, LogsPanelCompact } from './logs-panel';
 import { ServersPanelCompact, ServersPanel } from './servers-panel';
@@ -41,6 +54,8 @@ import { FOVContextPanel } from './fov-context-panel';
 import { ReprocessPanel } from './reprocess-panel';
 import { ModulesPanel } from './modules-panel';
 import { ProfilesPanel } from '@/components/tts-pregen';
+import { ModelSelectionPanel } from './model-selection-panel';
+import { TTSLabPanel } from './tts-lab-panel';
 import type { DashboardStats } from '@/types';
 import { getStats } from '@/lib/api-client';
 import { formatDuration } from '@/lib/utils';
@@ -48,7 +63,7 @@ import { useWebSocketStatus } from '@/lib/websocket-provider';
 import { useState } from 'react';
 
 // Define valid values for URL state
-const SECTIONS = ['operations', 'content'] as const;
+const SECTIONS = ['operations', 'content', 'voicelab'] as const;
 const OPS_TABS = [
   'dashboard',
   'health',
@@ -68,9 +83,9 @@ const CONTENT_TABS = [
   'plugins',
   'imports',
   'reprocess',
-  'tts-profiles',
 ] as const;
-const ALL_TABS = [...OPS_TABS, ...CONTENT_TABS] as const;
+const VOICELAB_TABS = ['model-selection', 'tts-lab', 'tts-profiles'] as const;
+const ALL_TABS = [...OPS_TABS, ...CONTENT_TABS, ...VOICELAB_TABS] as const;
 
 export function Dashboard() {
   // URL-synced state for section and tab using nuqs
@@ -108,6 +123,8 @@ export function Dashboard() {
       // Set default tab for each section
       if (section === 'operations') {
         setActiveTab('dashboard');
+      } else if (section === 'voicelab') {
+        setActiveTab('model-selection');
       } else {
         setActiveTab('curricula');
       }
@@ -318,6 +335,20 @@ export function Dashboard() {
           {activeTab === 'tts-profiles' && (
             <div className="animate-in fade-in duration-300">
               <ProfilesPanel />
+            </div>
+          )}
+
+          {/* Voice Lab: AI Model Selection Tab */}
+          {activeTab === 'model-selection' && (
+            <div className="animate-in fade-in duration-300">
+              <ModelSelectionPanel />
+            </div>
+          )}
+
+          {/* Voice Lab: TTS Lab Tab */}
+          {activeTab === 'tts-lab' && (
+            <div className="animate-in fade-in duration-300">
+              <TTSLabPanel />
             </div>
           )}
         </div>
