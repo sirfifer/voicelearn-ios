@@ -84,6 +84,7 @@ final class KBQuestionEngine {
     // MARK: - Filtering
 
     /// Filter questions by various criteria
+    /// Optimized to use single-pass filtering instead of chained filter calls
     func filter(
         domains: [KBDomain]? = nil,
         difficulty: KBDifficulty? = nil,
@@ -92,39 +93,43 @@ final class KBQuestionEngine {
         forOral: Bool? = nil,
         excludeAttempted: Bool = false
     ) -> [KBQuestion] {
-        var filtered = questions
+        // Convert domains to Set for O(1) lookup if filtering by domains
+        let domainSet: Set<KBDomain>? = domains.flatMap { $0.isEmpty ? nil : Set($0) }
 
-        // Filter by domains
-        if let domains = domains, !domains.isEmpty {
-            filtered = filtered.filter { domains.contains($0.domain) }
+        // Single-pass filtering with combined predicate
+        return questions.filter { question in
+            // Check domains
+            if let domainSet = domainSet, !domainSet.contains(question.domain) {
+                return false
+            }
+
+            // Check difficulty
+            if let difficulty = difficulty, question.difficulty != difficulty {
+                return false
+            }
+
+            // Check grade level
+            if let gradeLevel = gradeLevel, question.gradeLevel != gradeLevel {
+                return false
+            }
+
+            // Check suitability for written round
+            if let forWritten = forWritten, question.suitability.forWritten != forWritten {
+                return false
+            }
+
+            // Check suitability for oral round
+            if let forOral = forOral, question.suitability.forOral != forOral {
+                return false
+            }
+
+            // Check if already attempted
+            if excludeAttempted && attemptedQuestionIds.contains(question.id) {
+                return false
+            }
+
+            return true
         }
-
-        // Filter by difficulty
-        if let difficulty = difficulty {
-            filtered = filtered.filter { $0.difficulty == difficulty }
-        }
-
-        // Filter by grade level
-        if let gradeLevel = gradeLevel {
-            filtered = filtered.filter { $0.gradeLevel == gradeLevel }
-        }
-
-        // Filter by suitability for written round
-        if let forWritten = forWritten {
-            filtered = filtered.filter { $0.suitability.forWritten == forWritten }
-        }
-
-        // Filter by suitability for oral round
-        if let forOral = forOral {
-            filtered = filtered.filter { $0.suitability.forOral == forOral }
-        }
-
-        // Exclude already attempted questions
-        if excludeAttempted {
-            filtered = filtered.filter { !attemptedQuestionIds.contains($0.id) }
-        }
-
-        return filtered
     }
 
     // MARK: - Selection

@@ -320,8 +320,6 @@ actor KBAnswerValidator {
         let candidates = [answer.primary] + (answer.acceptable ?? [])
 
         // 1. Levenshtein fuzzy matching (baseline)
-        let threshold = max(2, Int(Double(answer.primary.count) * config.fuzzyThresholdPercent))
-
         for candidate in candidates {
             let normalizedCandidate = normalize(candidate, for: answer.answerType)
             let distance = levenshteinDistance(userAnswer, normalizedCandidate)
@@ -483,6 +481,7 @@ actor KBAnswerValidator {
     }
 
     /// Calculate Levenshtein distance between two strings
+    /// Optimized to use O(min(m,n)) space instead of O(m*n)
     nonisolated private func levenshteinDistance(_ s1: String, _ s2: String) -> Int {
         let m = s1.count
         let n = s2.count
@@ -490,30 +489,34 @@ actor KBAnswerValidator {
         if m == 0 { return n }
         if n == 0 { return m }
 
-        let s1Array = Array(s1)
-        let s2Array = Array(s2)
+        // Ensure s2 is the shorter string for space optimization
+        let (shorter, longer) = m < n ? (s1, s2) : (s2, s1)
+        let shortLen = shorter.count
+        let longLen = longer.count
 
-        var matrix = [[Int]](repeating: [Int](repeating: 0, count: n + 1), count: m + 1)
+        let shortArray = Array(shorter)
+        let longArray = Array(longer)
 
-        for i in 0...m {
-            matrix[i][0] = i
-        }
-        for j in 0...n {
-            matrix[0][j] = j
-        }
+        // Only keep two rows: previous and current
+        var previousRow = [Int](0...shortLen)
+        var currentRow = [Int](repeating: 0, count: shortLen + 1)
 
-        for i in 1...m {
-            for j in 1...n {
-                let cost = s1Array[i - 1] == s2Array[j - 1] ? 0 : 1
-                matrix[i][j] = min(
-                    matrix[i - 1][j] + 1,     // deletion
-                    matrix[i][j - 1] + 1,     // insertion
-                    matrix[i - 1][j - 1] + cost  // substitution
+        for i in 1...longLen {
+            currentRow[0] = i
+
+            for j in 1...shortLen {
+                let cost = longArray[i - 1] == shortArray[j - 1] ? 0 : 1
+                currentRow[j] = min(
+                    previousRow[j] + 1,        // deletion
+                    currentRow[j - 1] + 1,     // insertion
+                    previousRow[j - 1] + cost  // substitution
                 )
             }
+
+            swap(&previousRow, &currentRow)
         }
 
-        return matrix[m][n]
+        return previousRow[shortLen]
     }
 }
 
