@@ -38,7 +38,7 @@ actor KBSessionManager {
     /// Complete the current session and save it
     func completeSession() async throws {
         guard var session = activeSession else {
-            throw SessionError.noActiveSession
+            throw KBSessionError.noActiveSession
         }
 
         session.endTime = Date()
@@ -95,7 +95,7 @@ actor KBSessionManager {
     }
 
     /// Update session state
-    func updateSession(_ updater: (inout KBSession) -> Void) async {
+    func updateSession(_ updater: @Sendable (inout KBSession) -> Void) async {
         guard var session = activeSession else { return }
         updater(&session)
         activeSession = session
@@ -136,9 +136,9 @@ actor KBSessionManager {
     }
 }
 
-// MARK: - Session Error
+// MARK: - KB Session Error
 
-enum SessionError: Error, LocalizedError {
+enum KBSessionError: Error, LocalizedError {
     case noActiveSession
     case sessionAlreadyComplete
     case invalidQuestionIndex
@@ -159,6 +159,7 @@ enum SessionError: Error, LocalizedError {
 
 extension KBSessionManager {
     /// Create a quick practice session with default settings
+    @MainActor
     static func createQuickPractice(
         engine: KBQuestionEngine,
         region: KBRegion,

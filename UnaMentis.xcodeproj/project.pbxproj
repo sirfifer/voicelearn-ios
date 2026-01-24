@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		KB01SESSIONINTEGBUILD001 /* KBSessionIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB01SESSION1INTEGTEST001 /* KBSessionIntegrationTests.swift */; };
+		KB02ANSWERINTEGBUILD0001 /* KBAnswerValidationIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB02ANSWERVALDINTEGTEST0 /* KBAnswerValidationIntegrationTests.swift */; };
 		DF8BA42A6CC84F5AB3373226 /* KBTokenMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BCA419BDC24FA9962E05BD /* KBTokenMatcherTests.swift */; };
 		9FFE636593894827B9FF2A24 /* KBSynonymDictionariesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0102434A2A445784E3D99E /* KBSynonymDictionariesTests.swift */; };
 		ECCAA017D97D4C34AAFFC4B1 /* KBPhoneticMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F0D38B6D3443E485DB1DE1 /* KBPhoneticMatcherTests.swift */; };
@@ -237,7 +239,18 @@
 			95452C702CF0D672103151EB /* CanonicalQuestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13618044503818C4BAC20093 /* CanonicalQuestion.swift */; };
 		10EC7AA4610DF3E7F0EAA507 /* QuestionTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 891B073E3B6DF1CE69BE4E4F /* QuestionTransformer.swift */; };
 		754D7B09298D4B778740DA6F /* KBTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361D8F08CCF08396B36EC0B3 /* KBTransformer.swift */; };
+		F1E2D3C4B5A6978D0C1B2A3E /* KBSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* KBSessionManager.swift */; };
 		07270938C643A648A0FD595B /* KBTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4CF21F44D4464689D2FF90F /* KBTransformerTests.swift */; };
+		CONFMGR001BLD0000001 /* KBConferenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONFMGR001F1LE000001 /* KBConferenceManager.swift */; };
+		CONFTRN001BLD0000001 /* KBConferenceTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONFTRN001F1LE000001 /* KBConferenceTrainingView.swift */; };
+		REBSIM001BLD0000001 /* KBReboundSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = REBSIM001F1LE000001 /* KBReboundSimulator.swift */; };
+		REBTRN001BLD0000001 /* KBReboundTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = REBTRN001F1LE000001 /* KBReboundTrainingView.swift */; };
+		MTCHNG001BLD0000001 /* KBMatchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = MTCHNG001F1LE000001 /* KBMatchEngine.swift */; };
+		MTCHSM001BLD0000001 /* KBMatchSimulationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MTCHSM001F1LE000001 /* KBMatchSimulationView.swift */; };
+		KBPROGV001BLD0000001 /* KBProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KBPROGV001F1LE000001 /* KBProgressView.swift */; };
+		KBDMNMV001BLD0000001 /* KBDomainMasteryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KBDMNMV001F1LE000001 /* KBDomainMasteryView.swift */; };
+		KBTRNDC001BLD0000001 /* KBTrendChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KBTRNDC001F1LE000001 /* KBTrendChartView.swift */; };
+		KBDMDRL001BLD0000001 /* KBDomainDrillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KBDMDRL001F1LE000001 /* KBDomainDrillView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -272,6 +285,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		KB01SESSION1INTEGTEST001 /* KBSessionIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBSessionIntegrationTests.swift; sourceTree = "<group>"; };
+		KB02ANSWERVALDINTEGTEST0 /* KBAnswerValidationIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBAnswerValidationIntegrationTests.swift; sourceTree = "<group>"; };
 		B7BCA419BDC24FA9962E05BD /* KBTokenMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentisTests/Unit/KnowledgeBowl/Validation/KBTokenMatcherTests.swift"; sourceTree = SOURCE_ROOT; };
 		1E0102434A2A445784E3D99E /* KBSynonymDictionariesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentisTests/Unit/KnowledgeBowl/Validation/KBSynonymDictionariesTests.swift"; sourceTree = SOURCE_ROOT; };
 		17F0D38B6D3443E485DB1DE1 /* KBPhoneticMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentisTests/Unit/KnowledgeBowl/Validation/KBPhoneticMatcherTests.swift"; sourceTree = SOURCE_ROOT; };
@@ -501,7 +516,18 @@
 			13618044503818C4BAC20093 /* CanonicalQuestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonicalQuestion.swift; sourceTree = "<group>"; };
 		891B073E3B6DF1CE69BE4E4F /* QuestionTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionTransformer.swift; sourceTree = "<group>"; };
 		361D8F08CCF08396B36EC0B3 /* KBTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBTransformer.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* KBSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBSessionManager.swift; sourceTree = "<group>"; };
 		B4CF21F44D4464689D2FF90F /* KBTransformerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnaMentisTests/Unit/KnowledgeBowl/KBTransformerTests.swift"; sourceTree = SOURCE_ROOT; };
+		CONFMGR001F1LE000001 /* KBConferenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBConferenceManager.swift; sourceTree = "<group>"; };
+		CONFTRN001F1LE000001 /* KBConferenceTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBConferenceTrainingView.swift; sourceTree = "<group>"; };
+		REBSIM001F1LE000001 /* KBReboundSimulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBReboundSimulator.swift; sourceTree = "<group>"; };
+		REBTRN001F1LE000001 /* KBReboundTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBReboundTrainingView.swift; sourceTree = "<group>"; };
+		MTCHNG001F1LE000001 /* KBMatchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBMatchEngine.swift; sourceTree = "<group>"; };
+		MTCHSM001F1LE000001 /* KBMatchSimulationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBMatchSimulationView.swift; sourceTree = "<group>"; };
+		KBPROGV001F1LE000001 /* KBProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBProgressView.swift; sourceTree = "<group>"; };
+		KBDMNMV001F1LE000001 /* KBDomainMasteryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBDomainMasteryView.swift; sourceTree = "<group>"; };
+		KBTRNDC001F1LE000001 /* KBTrendChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBTrendChartView.swift; sourceTree = "<group>"; };
+		KBDMDRL001F1LE000001 /* KBDomainDrillView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBDomainDrillView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1111,7 +1137,11 @@
 				01EA2717A830F8B961C5766A /* KBOnDeviceSTT.swift */,
 				19627423210F57757F40CCFF /* KBOnDeviceTTS.swift */,
 				D35FF2EB7DEFC6C36E775126 /* KBQuestionEngine.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* KBSessionManager.swift */,
 				361D8F08CCF08396B36EC0B3 /* KBTransformer.swift */,
+				CONFMGR001F1LE000001 /* KBConferenceManager.swift */,
+				REBSIM001F1LE000001 /* KBReboundSimulator.swift */,
+				MTCHNG001F1LE000001 /* KBMatchEngine.swift */,
 				B4CF21F44D4464689D2FF90F /* KBTransformerTests.swift */,);
 			path = KnowledgeBowl;
 			sourceTree = "<group>";
@@ -1140,10 +1170,20 @@
 		D747429CF1D6CA3BBE6F9EEA /* Integration */ = {
 			isa = PBXGroup;
 			children = (
+				KB03INTEG1KBOWLGROUP0001 /* KnowledgeBowl */,
 				0ED7DFE0AA0EFDFDA0E2997B /* GLMASRIntegrationTests.swift */,
 				EF7213E60620156AEDEFCE8C /* VoiceSessionIntegrationTests.swift */,
 			);
 			path = Integration;
+			sourceTree = "<group>";
+		};
+		KB03INTEG1KBOWLGROUP0001 /* KnowledgeBowl */ = {
+			isa = PBXGroup;
+			children = (
+				KB02ANSWERVALDINTEGTEST0 /* KBAnswerValidationIntegrationTests.swift */,
+				KB01SESSION1INTEGTEST001 /* KBSessionIntegrationTests.swift */,
+			);
+			path = KnowledgeBowl;
 			sourceTree = "<group>";
 		};
 		D92958CB00F55C9BBE9C297A /* Resources */ = {
@@ -1210,6 +1250,13 @@
 				CBBE641F0A9FA891DAAC41B3 /* KBDashboardView.swift */,
 				0FB3532512D8489336B883E6 /* KBOralSessionView.swift */,
 				0D5E3C75F2DF9278D5BDEB5C /* KBWrittenSessionView.swift */,
+				CONFTRN001F1LE000001 /* KBConferenceTrainingView.swift */,
+				REBTRN001F1LE000001 /* KBReboundTrainingView.swift */,
+				MTCHSM001F1LE000001 /* KBMatchSimulationView.swift */,
+				KBPROGV001F1LE000001 /* KBProgressView.swift */,
+				KBDMNMV001F1LE000001 /* KBDomainMasteryView.swift */,
+				KBTRNDC001F1LE000001 /* KBTrendChartView.swift */,
+				KBDMDRL001F1LE000001 /* KBDomainDrillView.swift */,
 			);
 			path = KnowledgeBowl;
 			sourceTree = "<group>";
@@ -1475,6 +1522,7 @@
 				4D5B79F40271572EDF52AF45 /* HistoryView.swift in Sources */,
 				D96BA7FFBE340819A8180767 /* KBAnswerValidator.swift in Sources */,
 				754D7B09298D4B778740DA6F /* KBTransformer.swift in Sources */,
+				F1E2D3C4B5A6978D0C1B2A3E /* KBSessionManager.swift in Sources */,
 				422ECD51744B4069BA0A8850 /* KBEnhancedValidationSetupView.swift in Sources */,
 				B144663557414AF8A3896213 /* KBLLMValidator.swift in Sources */,
 				2BA7DF4A00F14AC69189EBD8 /* KBEmbeddingsService.swift in Sources */,
@@ -1497,6 +1545,16 @@
 				A26B130B2E6CA1F1B2C7DDD3 /* KBRegionalConfig.swift in Sources */,
 				537C4FD26B1F5359CB0D451B /* KBSession.swift in Sources */,
 				4F4C73D6CE3E66E703FBF0EF /* KBWrittenSessionView.swift in Sources */,
+				CONFMGR001BLD0000001 /* KBConferenceManager.swift in Sources */,
+				CONFTRN001BLD0000001 /* KBConferenceTrainingView.swift in Sources */,
+				REBSIM001BLD0000001 /* KBReboundSimulator.swift in Sources */,
+				REBTRN001BLD0000001 /* KBReboundTrainingView.swift in Sources */,
+				MTCHNG001BLD0000001 /* KBMatchEngine.swift in Sources */,
+				MTCHSM001BLD0000001 /* KBMatchSimulationView.swift in Sources */,
+				KBPROGV001BLD0000001 /* KBProgressView.swift in Sources */,
+				KBDMNMV001BLD0000001 /* KBDomainMasteryView.swift in Sources */,
+				KBTRNDC001BLD0000001 /* KBTrendChartView.swift in Sources */,
+				KBDMDRL001BLD0000001 /* KBDomainDrillView.swift in Sources */,
 				606486FC4527634F60886677 /* LLMEndpoint.swift in Sources */,
 				A0B7F1F73D8A304D20840717 /* LLMService.swift in Sources */,
 				F6515847BF5C9C7953D34854 /* LLMTaskType.swift in Sources */,
@@ -1646,7 +1704,9 @@
 				C5E305ECAC6D723230AABEDC /* VoiceSessionIntegrationTests.swift in Sources */,
 				C3902188850609E414EB2A66 /* WatchSessionState.swift in Sources */,
 				06C5A936CA172811A9D0D671 /* WatchSessionStateTests.swift in Sources */,
-				07270938C643A648A0FD595B /* KBTransformerTests.swift in Sources */,);
+				07270938C643A648A0FD595B /* KBTransformerTests.swift in Sources */,
+				KB01SESSIONINTEGBUILD001 /* KBSessionIntegrationTests.swift in Sources */,
+				KB02ANSWERINTEGBUILD0001 /* KBAnswerValidationIntegrationTests.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */

@@ -144,6 +144,9 @@ actor KBAnalyticsService {
         let statistics = try await sessionStore.calculateStatistics()
         let comparison = try await getRoundTypeComparison()
         let weakDomains = try await getWeakDomains()
+        let strongDomains = try await getStrongDomains()
+        let domainPerformance = try await getDomainPerformance()
+        let trend = try await getAccuracyTrend(days: 14)
 
         // Insight: Written vs Oral gap
         if comparison.writtenAccuracy > comparison.oralAccuracy + 0.15 {
@@ -152,7 +155,8 @@ actor KBAnalyticsService {
                 title: "Oral Practice Needed",
                 message: "Your written accuracy (\(Int(comparison.writtenAccuracy * 100))%) is much higher than oral (\(Int(comparison.oralAccuracy * 100))%). Focus on oral round practice.",
                 priority: .high,
-                recommendedAction: "Practice 5 oral sessions this week"
+                recommendedAction: "Practice 5 oral sessions this week",
+                navigationDestination: .oralPractice
             ))
         } else if comparison.oralAccuracy > comparison.writtenAccuracy + 0.15 {
             insights.append(KBInsight(
@@ -160,19 +164,21 @@ actor KBAnalyticsService {
                 title: "Written Practice Needed",
                 message: "Your oral accuracy (\(Int(comparison.oralAccuracy * 100))%) is much higher than written (\(Int(comparison.writtenAccuracy * 100))%). Focus on written round practice.",
                 priority: .high,
-                recommendedAction: "Practice 10 written sessions this week"
+                recommendedAction: "Practice 10 written sessions this week",
+                navigationDestination: .writtenPractice
             ))
         }
 
-        // Insight: Weak domains
-        if !weakDomains.isEmpty {
+        // Insight: Weak domains with navigation
+        if let weakestDomain = weakDomains.first {
             let domainNames = weakDomains.prefix(3).map { $0.displayName }.joined(separator: ", ")
             insights.append(KBInsight(
                 type: .domainWeakness,
                 title: "Domain Weaknesses Identified",
                 message: "You're struggling with: \(domainNames). Dedicate practice time to these domains.",
                 priority: .high,
-                recommendedAction: "Filter practice to weak domains only"
+                recommendedAction: "Drill \(weakestDomain.displayName) questions",
+                navigationDestination: .domainDrill(domain: weakestDomain)
             ))
         }
 
@@ -194,7 +200,8 @@ actor KBAnalyticsService {
                 title: "Practice Streak Broken",
                 message: "Your practice streak ended. Start a new streak today!",
                 priority: .low,
-                recommendedAction: "Complete a quick 5-question session"
+                recommendedAction: "Complete a quick 5-question session",
+                navigationDestination: .writtenPractice
             ))
         }
 
@@ -205,7 +212,97 @@ actor KBAnalyticsService {
                 title: "Excellent Performance!",
                 message: "You're maintaining \(Int(statistics.overallAccuracy * 100))% accuracy. Consider practicing harder difficulty levels.",
                 priority: .low,
-                recommendedAction: "Switch to varsity difficulty"
+                recommendedAction: "Try a match simulation",
+                navigationDestination: .matchSimulation
+            ))
+        }
+
+        // Insight: Response time improvement needed
+        let slowDomains = domainPerformance.filter { $0.value.averageResponseTime > 8.0 && $0.value.totalQuestions >= 10 }
+        if let slowestDomain = slowDomains.max(by: { $0.value.averageResponseTime < $1.value.averageResponseTime }) {
+            insights.append(KBInsight(
+                type: .responseTime,
+                title: "Speed Up Your Responses",
+                message: "Your average response time for \(slowestDomain.key.displayName) is \(String(format: "%.1f", slowestDomain.value.averageResponseTime))s. Practice to improve reaction time.",
+                priority: .medium,
+                recommendedAction: "Practice \(slowestDomain.key.displayName) under time pressure",
+                navigationDestination: .domainDrill(domain: slowestDomain.key)
+            ))
+        }
+
+        // Insight: Improvement trend
+        if trend.count >= 7 {
+            let firstHalf = trend.prefix(trend.count / 2)
+            let secondHalf = trend.suffix(trend.count / 2)
+
+            let firstAvg = firstHalf.reduce(0.0) { $0 + $1.accuracy } / Double(firstHalf.count)
+            let secondAvg = secondHalf.reduce(0.0) { $0 + $1.accuracy } / Double(secondHalf.count)
+
+            if secondAvg > firstAvg + 0.1 {
+                insights.append(KBInsight(
+                    type: .improvementTrend,
+                    title: "You're Improving!",
+                    message: "Your accuracy has improved by \(Int((secondAvg - firstAvg) * 100))% over the past two weeks. Keep up the great work!",
+                    priority: .low,
+                    recommendedAction: "View your progress details",
+                    navigationDestination: .progress
+                ))
+            } else if firstAvg > secondAvg + 0.1 {
+                insights.append(KBInsight(
+                    type: .improvementTrend,
+                    title: "Performance Dip Detected",
+                    message: "Your recent accuracy has dropped \(Int((firstAvg - secondAvg) * 100))%. Consider reviewing fundamentals.",
+                    priority: .high,
+                    recommendedAction: "Focus on your domain weaknesses",
+                    navigationDestination: .domainMastery
+                ))
+            }
+        }
+
+        // Insight: Competition readiness
+        if statistics.overallAccuracy >= 0.75 && statistics.totalQuestions >= 100 && strongDomains.count >= 4 {
+            insights.append(KBInsight(
+                type: .competitionReady,
+                title: "Ready for Competition!",
+                message: "You've mastered \(strongDomains.count) domains with \(Int(statistics.overallAccuracy * 100))% overall accuracy. You're competition-ready!",
+                priority: .medium,
+                recommendedAction: "Test yourself in a match simulation",
+                navigationDestination: .matchSimulation
+            ))
+        }
+
+        // Insight: Rebound practice suggestion
+        if comparison.oralQuestions >= 20 && comparison.oralAccuracy < 0.65 {
+            insights.append(KBInsight(
+                type: .reboundSkill,
+                title: "Practice Rebound Strategy",
+                message: "Improve your oral round performance by practicing rebound scenarios when opponents miss.",
+                priority: .medium,
+                recommendedAction: "Start rebound training",
+                navigationDestination: .reboundPractice
+            ))
+        }
+
+        // Insight: Conference practice suggestion
+        if statistics.totalSessions >= 10 && comparison.oralQuestions < comparison.writtenQuestions / 2 {
+            insights.append(KBInsight(
+                type: .conferenceSkill,
+                title: "Team Conference Skills",
+                message: "Practice conferring with teammates efficiently within the 15-second window.",
+                priority: .medium,
+                recommendedAction: "Start conference training",
+                navigationDestination: .conferencePractice
+            ))
+        }
+
+        // Insight: Difficulty progression
+        if statistics.overallAccuracy >= 0.85 && statistics.totalQuestions >= 50 {
+            insights.append(KBInsight(
+                type: .difficultyProgression,
+                title: "Increase the Challenge",
+                message: "With \(Int(statistics.overallAccuracy * 100))% accuracy, you're ready for harder questions. Try varsity-level difficulty.",
+                priority: .low,
+                recommendedAction: "Adjust difficulty settings"
             ))
         }
 
@@ -281,14 +378,70 @@ struct KBInsight: Identifiable {
     let message: String
     let priority: InsightPriority
     let recommendedAction: String
+    let navigationDestination: InsightDestination?
+
+    init(
+        type: InsightType,
+        title: String,
+        message: String,
+        priority: InsightPriority,
+        recommendedAction: String,
+        navigationDestination: InsightDestination? = nil
+    ) {
+        self.type = type
+        self.title = title
+        self.message = message
+        self.priority = priority
+        self.recommendedAction = recommendedAction
+        self.navigationDestination = navigationDestination
+    }
+
+    var icon: String { type.icon }
 }
 
-enum InsightType {
-    case performanceGap
-    case domainWeakness
-    case lowActivity
-    case streakBroken
-    case achievement
+enum InsightDestination {
+    case oralPractice
+    case writtenPractice
+    case domainDrill(domain: KBDomain)
+    case conferencePractice
+    case reboundPractice
+    case matchSimulation
+    case domainMastery
+    case progress
+}
+
+enum InsightType: String {
+    case performanceGap = "performance_gap"
+    case domainWeakness = "domain_weakness"
+    case lowActivity = "low_activity"
+    case streakBroken = "streak_broken"
+    case achievement = "achievement"
+    case responseTime = "response_time"
+    case improvementTrend = "improvement_trend"
+    case competitionReady = "competition_ready"
+    case reboundSkill = "rebound_skill"
+    case conferenceSkill = "conference_skill"
+    case difficultyProgression = "difficulty_progression"
+    case timePatterns = "time_patterns"
+    case matchPerformance = "match_performance"
+
+    var icon: String {
+        switch self {
+        case .performanceGap: return "chart.bar.xaxis"
+        case .domainWeakness: return "exclamationmark.triangle"
+        case .lowActivity: return "calendar.badge.exclamationmark"
+        case .streakBroken: return "flame.fill"
+        case .achievement: return "star.fill"
+        case .responseTime: return "timer"
+        case .improvementTrend: return "arrow.up.right"
+        case .competitionReady: return "trophy"
+        case .reboundSkill: return "arrow.uturn.backward"
+        case .conferenceSkill: return "person.3"
+        case .difficultyProgression: return "gauge.with.needle"
+        case .timePatterns: return "clock"
+        case .matchPerformance: return "flag.2.crossed"
+        }
+    }
 }
 
 enum InsightPriority: Int {

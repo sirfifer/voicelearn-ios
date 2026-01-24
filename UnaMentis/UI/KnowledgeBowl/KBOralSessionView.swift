@@ -626,7 +626,7 @@ final class KBOralSessionViewModel: ObservableObject {
     private let tts = KBOnDeviceTTS()
     private let stt = KBOnDeviceSTT()
     private let validator = KBAnswerValidator()
-    private let store = KBSessionStore()
+    private let sessionManager = KBSessionManager()
 
     // MARK: - Configuration
 
@@ -664,8 +664,9 @@ final class KBOralSessionViewModel: ObservableObject {
         self.session = KBSession(config: config)
         self.conferenceTimeRemaining = config.region.config.conferenceTime
 
-        // Initialize debug logger immediately
+        // Register session with manager for lifecycle management
         Task {
+            _ = await sessionManager.startSession(questions: questions, config: config)
         }
     }
 
@@ -751,10 +752,19 @@ final class KBOralSessionViewModel: ObservableObject {
         session.isComplete = true
         state = .completed
 
-        // Save completed session
+        // Save completed session via session manager
         do {
-            try await store.save(session)
-            print("[KB] Oral session saved: \(session.id)")
+            // Capture values locally to avoid Sendable issues
+            let localAttempts = session.attempts
+            let localEndTime = session.endTime
+            // Sync local session state to manager before completing
+            await sessionManager.updateSession { managerSession in
+                managerSession.attempts = localAttempts
+                managerSession.endTime = localEndTime
+                managerSession.isComplete = true
+            }
+            try await sessionManager.completeSession()
+            print("[KB] Oral session saved via manager: \(session.id)")
         } catch {
             print("[KB] Failed to save oral session: \(error)")
         }
@@ -892,8 +902,14 @@ final class KBOralSessionViewModel: ObservableObject {
             matchType: result.matchType
         )
 
+        // Record locally for immediate UI updates
         session.attempts.append(attempt)
         lastAnswerCorrect = result.isCorrect
+
+        // Also record with session manager for persistence
+        Task {
+            await sessionManager.recordAttempt(attempt)
+        }
 
         // Haptic feedback
         if result.isCorrect {
