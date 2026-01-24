@@ -54,6 +54,20 @@ public struct HelpView: View {
                 }
             }
 
+            // Knowledge Bowl Section
+            Section("Knowledge Bowl") {
+                NavigationLink {
+                    KBHelpSheet()
+                } label: {
+                    HelpRow(
+                        icon: "trophy.fill",
+                        iconColor: .yellow,
+                        title: "Knowledge Bowl Training",
+                        subtitle: "Competition prep and strategy"
+                    )
+                }
+            }
+
             // Tips Section
             Section("Tips") {
                 NavigationLink {

@@ -16,10 +16,20 @@ struct KBDashboardView: View {
     @State private var showingWrittenSession = false
     @State private var showingOralSession = false
     @State private var showingSettings = false
+    @State private var showingHelp = false
     @State private var writtenSessionViewModel: KBWrittenSessionViewModel?
     @State private var oralSessionViewModel: KBOralSessionViewModel?
     @State private var recentSessions: [KBSession] = []
     @State private var statistics: KBStatistics?
+
+    // Competition Training states
+    @State private var showingMatchSimulation = false
+    @State private var showingConferenceTraining = false
+    @State private var showingReboundTraining = false
+    @State private var showingDomainDrill = false
+    @State private var matchQuestions: [KBQuestion] = []
+    @State private var conferenceQuestions: [KBQuestion] = []
+    @State private var reboundQuestions: [KBQuestion] = []
 
     var body: some View {
         NavigationStack {
@@ -30,6 +40,9 @@ struct KBDashboardView: View {
 
                     // Quick start section
                     quickStartSection
+
+                    // Competition Training section
+                    competitionTrainingSection
 
                     // Session history
                     if !recentSessions.isEmpty {
@@ -54,6 +67,13 @@ struct KBDashboardView: View {
             .background(Color.kbBgPrimary)
             .navigationTitle("Knowledge Bowl")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showingHelp = true }) {
+                        Image(systemName: "questionmark.circle")
+                    }
+                    .accessibilityLabel("Help")
+                    .accessibilityHint("Opens Knowledge Bowl help and strategy guide")
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingSettings = true }) {
                         Image(systemName: "gearshape")
@@ -67,6 +87,9 @@ struct KBDashboardView: View {
             .sheet(isPresented: $showingSettings) {
                 KBSettingsView(selectedRegion: $selectedRegion)
             }
+            .sheet(isPresented: $showingHelp) {
+                KBHelpSheet()
+            }
             .navigationDestination(isPresented: $showingWrittenSession) {
                 if let viewModel = writtenSessionViewModel {
                     KBWrittenSessionView(viewModel: viewModel)
@@ -76,6 +99,18 @@ struct KBDashboardView: View {
                 if let viewModel = oralSessionViewModel {
                     KBOralSessionView(viewModel: viewModel)
                 }
+            }
+            .navigationDestination(isPresented: $showingMatchSimulation) {
+                KBMatchSimulationView(region: selectedRegion, questions: matchQuestions)
+            }
+            .navigationDestination(isPresented: $showingConferenceTraining) {
+                KBConferenceTrainingView(region: selectedRegion, questions: conferenceQuestions)
+            }
+            .navigationDestination(isPresented: $showingReboundTraining) {
+                KBReboundTrainingView(region: selectedRegion, questions: reboundQuestions)
+            }
+            .navigationDestination(isPresented: $showingDomainDrill) {
+                KBDomainDrillView()
             }
         }
     }
@@ -142,11 +177,27 @@ struct KBDashboardView: View {
 
     private var quickStartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Quick Start")
-                .font(.headline)
-                .foregroundColor(.kbTextPrimary)
+            HStack {
+                Text("Quick Start")
+                    .font(.headline)
+                    .foregroundColor(.kbTextPrimary)
+                InfoButton(
+                    title: "Quick Start",
+                    content: KBHelpContent.UIElements.quickStart
+                )
+            }
 
             HStack(spacing: 12) {
+                // Oral Practice (Voice-first)
+                quickStartButton(
+                    icon: "mic.fill",
+                    title: "Oral",
+                    subtitle: "Voice Q&A",
+                    color: .kbMastered
+                ) {
+                    startOralPractice()
+                }
+
                 // Written Practice
                 quickStartButton(
                     icon: "pencil.and.list.clipboard",
@@ -155,16 +206,6 @@ struct KBDashboardView: View {
                     color: .kbIntermediate
                 ) {
                     startWrittenPractice()
-                }
-
-                // Oral Practice
-                quickStartButton(
-                    icon: "mic.fill",
-                    title: "Oral",
-                    subtitle: "Voice Q&A",
-                    color: .kbMastered
-                ) {
-                    startOralPractice()
                 }
             }
         }
@@ -203,13 +244,147 @@ struct KBDashboardView: View {
         .disabled(engine.totalQuestionCount == 0)
     }
 
+    // MARK: - Competition Training Section
+
+    private var competitionTrainingSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Competition Training")
+                    .font(.headline)
+                    .foregroundColor(.kbTextPrimary)
+                InfoButton(
+                    title: "Competition Training",
+                    content: KBHelpContent.General.gettingStarted
+                )
+            }
+
+            // First row: Match Simulation and Conference
+            HStack(spacing: 12) {
+                trainingModeButton(
+                    icon: "trophy.fill",
+                    title: "Match",
+                    subtitle: "Full Simulation",
+                    color: .yellow
+                ) {
+                    startMatchSimulation()
+                }
+
+                trainingModeButton(
+                    icon: "person.3.fill",
+                    title: "Conference",
+                    subtitle: "Team Practice",
+                    color: .purple
+                ) {
+                    startConferenceTraining()
+                }
+            }
+
+            // Second row: Rebound and Domain Drill
+            HStack(spacing: 12) {
+                trainingModeButton(
+                    icon: "arrow.uturn.left.circle.fill",
+                    title: "Rebound",
+                    subtitle: "Second Chance",
+                    color: .orange
+                ) {
+                    startReboundTraining()
+                }
+
+                trainingModeButton(
+                    icon: "target",
+                    title: "Domain Drill",
+                    subtitle: "Focus Practice",
+                    color: .cyan
+                ) {
+                    startDomainDrill()
+                }
+            }
+        }
+    }
+
+    private func trainingModeButton(
+        icon: String,
+        title: String,
+        subtitle: String,
+        color: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 24))
+                    .foregroundColor(color)
+
+                Text(title)
+                    .font(.subheadline.bold())
+                    .foregroundColor(.kbTextPrimary)
+
+                Text(subtitle)
+                    .font(.caption2)
+                    .foregroundColor(.kbTextSecondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Color.kbBgSecondary)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(color.opacity(0.3), lineWidth: 2)
+            )
+        }
+        .disabled(engine.totalQuestionCount == 0)
+    }
+
+    // MARK: - Training Mode Start Functions
+
+    private func startMatchSimulation() {
+        // Match simulation uses a mix of written and oral questions
+        let config = KBSessionConfig.quickPractice(
+            region: selectedRegion,
+            roundType: .oral,
+            questionCount: 20
+        )
+        matchQuestions = engine.selectForSession(config: config)
+        showingMatchSimulation = true
+    }
+
+    private func startConferenceTraining() {
+        let config = KBSessionConfig.quickPractice(
+            region: selectedRegion,
+            roundType: .oral,
+            questionCount: 15
+        )
+        conferenceQuestions = engine.selectForSession(config: config)
+        showingConferenceTraining = true
+    }
+
+    private func startReboundTraining() {
+        let config = KBSessionConfig.quickPractice(
+            region: selectedRegion,
+            roundType: .oral,
+            questionCount: 20
+        )
+        reboundQuestions = engine.selectForSession(config: config)
+        showingReboundTraining = true
+    }
+
+    private func startDomainDrill() {
+        showingDomainDrill = true
+    }
+
     // MARK: - Region Selector
 
     private var regionSelector: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Competition Region")
-                .font(.headline)
-                .foregroundColor(.kbTextPrimary)
+            HStack {
+                Text("Competition Region")
+                    .font(.headline)
+                    .foregroundColor(.kbTextPrimary)
+                InfoButton(
+                    title: "Region Selection",
+                    content: KBHelpContent.UIElements.regionSelector
+                )
+            }
 
             HStack(spacing: 8) {
                 ForEach([KBRegion.colorado, .minnesota, .washington], id: \.self) { region in
@@ -251,9 +426,15 @@ struct KBDashboardView: View {
 
     private var sessionHistorySection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Recent Practice")
-                .font(.headline)
-                .foregroundColor(.kbTextPrimary)
+            HStack {
+                Text("Recent Practice")
+                    .font(.headline)
+                    .foregroundColor(.kbTextPrimary)
+                InfoButton(
+                    title: "Session History",
+                    content: KBHelpContent.UIElements.sessionHistory
+                )
+            }
 
             VStack(spacing: 8) {
                 ForEach(recentSessions.prefix(5)) { session in
@@ -373,18 +554,18 @@ struct KBDashboardView: View {
             .background(Color.kbBgSecondary)
             .cornerRadius(12)
 
-            // Written vs Oral breakdown
+            // Oral vs Written breakdown (voice-first)
             HStack(spacing: 12) {
-                statCard(
-                    title: "Written",
-                    value: formatAccuracy(stats.writtenAccuracy),
-                    color: .kbIntermediate
-                )
-
                 statCard(
                     title: "Oral",
                     value: formatAccuracy(stats.oralAccuracy),
                     color: .kbMastered
+                )
+
+                statCard(
+                    title: "Written",
+                    value: formatAccuracy(stats.writtenAccuracy),
+                    color: .kbIntermediate
                 )
             }
         }

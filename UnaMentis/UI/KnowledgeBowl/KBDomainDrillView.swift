@@ -78,16 +78,34 @@ struct KBDomainDrillView: View {
 
                     // Question count
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Questions: \(viewModel.questionCount)")
-                            .font(.subheadline)
+                        HStack {
+                            Text("Questions: \(viewModel.questionCount)")
+                                .font(.subheadline)
+                            InfoButton(
+                                title: "Question Count",
+                                content: KBHelpContent.UIElements.questionCount
+                            )
+                        }
                         Slider(value: $viewModel.questionCountDouble, in: 5...30, step: 5)
                     }
 
                     // Progressive difficulty
-                    Toggle("Progressive Difficulty", isOn: $viewModel.progressiveDifficulty)
+                    HStack {
+                        Toggle("Progressive Difficulty", isOn: $viewModel.progressiveDifficulty)
+                        InfoButton(
+                            title: "Progressive Difficulty",
+                            content: KBHelpContent.TrainingModes.domainDrillProgressive
+                        )
+                    }
 
                     // Time pressure
-                    Toggle("Time Pressure Mode", isOn: $viewModel.timePressureMode)
+                    HStack {
+                        Toggle("Time Pressure Mode", isOn: $viewModel.timePressureMode)
+                        InfoButton(
+                            title: "Time Pressure",
+                            content: KBHelpContent.TrainingModes.domainDrillTimePressure
+                        )
+                    }
                     if viewModel.timePressureMode {
                         Text("30 seconds per question")
                             .font(.caption)

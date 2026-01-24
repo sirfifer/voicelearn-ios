@@ -19,7 +19,7 @@ struct KBWatchMainView: View {
         NavigationStack {
             List {
                 // Quick Practice Section
-                Section("Quick Practice") {
+                Section {
                     NavigationLink {
                         KBWatchQuickSessionView(questionCount: 5)
                     } label: {
@@ -31,10 +31,14 @@ struct KBWatchMainView: View {
                     } label: {
                         Label("10 Questions", systemImage: "bolt.fill")
                     }
+                } header: {
+                    Text("Quick Practice")
+                } footer: {
+                    Text("Tap-to-reveal answers. Great for quick on-the-go learning.")
                 }
 
                 // Domain Drill Section
-                Section("Domain Drill") {
+                Section {
                     ForEach(viewModel.availableDomains.prefix(4), id: \.self) { domain in
                         NavigationLink {
                             KBWatchDomainDrillView(domain: domain)
@@ -42,10 +46,14 @@ struct KBWatchMainView: View {
                             Label(domain.displayName, systemImage: domain.icon)
                         }
                     }
+                } header: {
+                    Text("Domain Drill")
+                } footer: {
+                    Text("Focus on one knowledge area. Great for targeted practice during breaks.")
                 }
 
                 // Flash Cards Section
-                Section("Flash Cards") {
+                Section {
                     NavigationLink {
                         KBWatchFlashCardsView(mode: .missedQuestions)
                     } label: {
@@ -57,10 +65,14 @@ struct KBWatchMainView: View {
                     } label: {
                         Label("Random Mix", systemImage: "shuffle")
                     }
+                } header: {
+                    Text("Flash Cards")
+                } footer: {
+                    Text("Tap to flip and reveal the answer. Mark right or wrong.")
                 }
 
                 // Today's Stats Section
-                Section("Today") {
+                Section {
                     HStack {
                         Text("Questions")
                         Spacer()
@@ -74,6 +86,10 @@ struct KBWatchMainView: View {
                         Text(viewModel.todayAccuracyText)
                             .foregroundStyle(viewModel.todayAccuracyColor)
                     }
+                } header: {
+                    Text("Today")
+                } footer: {
+                    Text("Questions answered and accuracy for today.")
                 }
             }
             .navigationTitle("KB Training")

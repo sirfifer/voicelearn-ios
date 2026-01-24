@@ -1,23 +1,41 @@
 // UnaMentis - Knowledge Bowl Dashboard View
 // Main dashboard for the Knowledge Bowl training module
 //
-// Displays domain mastery radar, study session options,
-// and quick access to competition simulation.
+// Displays domain mastery, practice modes, competition training,
+// and quick access to all Knowledge Bowl features.
 
 import SwiftUI
 import Logging
 
 /// Main dashboard view for Knowledge Bowl module
 struct KBDashboardView: View {
+    // MARK: - State
+
     @State private var selectedStudyMode: KBStudyMode?
     @State private var activePracticeMode: KBStudyMode = .diagnostic
     @State private var showingDomainDetail: KBDomain?
     @State private var showingPracticeSession = false
     @State private var practiceQuestions: [KBQuestion] = []
-    @State private var pendingPracticeStart = false  // Track pending practice session launch
+    @State private var pendingPracticeStart = false
+
+    // Region selection
+    @State private var selectedRegion: KBRegion = .colorado
+
+    // Training mode presentations
+    @State private var showingWrittenSession = false
+    @State private var showingOralSession = false
+    @State private var showingMatchSimulation = false
+    @State private var showingConferenceTraining = false
+    @State private var showingReboundTraining = false
+    @State private var showingDomainDrill = false
+    @State private var showingHelpSheet = false
+
     @StateObject private var questionService = KBQuestionService.shared
     @StateObject private var statsManager = KBStatsManager.shared
     @StateObject private var moduleRegistry = ModuleRegistry.shared
+
+    // KBQuestionEngine for UI/KnowledgeBowl views (Core question format)
+    @State private var questionEngine = KBQuestionEngine()
 
     private static let logger = Logger(label: "com.unamentis.kb.dashboard")
 
@@ -50,16 +68,30 @@ struct KBDashboardView: View {
         }
     }
 
+    /// Questions for training modes (Core format for UI/KnowledgeBowl views)
+    private var coreQuestions: [KBQuestion] {
+        questionEngine.questions
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 // Hero section with mastery overview
                 heroSection
 
-                // Domain mastery radar chart
+                // Region selector
+                regionSelector
+
+                // Practice Sessions (Written & Oral)
+                practiceSessionsSection
+
+                // Competition Training
+                competitionTrainingSection
+
+                // Domain mastery
                 domainRadarSection
 
-                // Study session options
+                // Study strategies (existing modes)
                 studyModeSection
 
                 // Quick stats
@@ -70,6 +102,15 @@ struct KBDashboardView: View {
         .navigationTitle("Knowledge Bowl")
         #if os(iOS)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    showingHelpSheet = true
+                } label: {
+                    Image(systemName: "questionmark.circle")
+                }
+            }
+        }
         #endif
         .sheet(item: $selectedStudyMode) { mode in
             NavigationStack {
@@ -111,8 +152,73 @@ struct KBDashboardView: View {
                 )
             }
         }
+        // Written Session
+        .fullScreenCover(isPresented: $showingWrittenSession) {
+            NavigationStack {
+                KBWrittenSessionView(
+                    viewModel: KBWrittenSessionViewModel(
+                        questions: questionEngine.selectForSession(
+                            config: KBSessionConfig.quickPractice(region: selectedRegion, roundType: .written, questionCount: 20)
+                        ),
+                        config: KBSessionConfig.quickPractice(region: selectedRegion, roundType: .written, questionCount: 20)
+                    )
+                )
+            }
+        }
+        // Oral Session
+        .fullScreenCover(isPresented: $showingOralSession) {
+            NavigationStack {
+                KBOralSessionView(
+                    viewModel: KBOralSessionViewModel(
+                        questions: questionEngine.selectForSession(
+                            config: KBSessionConfig.quickPractice(region: selectedRegion, roundType: .oral, questionCount: 10)
+                        ),
+                        config: KBSessionConfig.quickPractice(region: selectedRegion, roundType: .oral, questionCount: 10)
+                    )
+                )
+            }
+        }
+        // Match Simulation
+        .fullScreenCover(isPresented: $showingMatchSimulation) {
+            KBMatchSimulationView(
+                region: selectedRegion,
+                questions: coreQuestions.isEmpty ? questionEngine.filter().shuffled() : coreQuestions
+            )
+        }
+        // Conference Training
+        .fullScreenCover(isPresented: $showingConferenceTraining) {
+            KBConferenceTrainingView(
+                region: selectedRegion,
+                questions: coreQuestions.isEmpty ? questionEngine.filter().shuffled() : coreQuestions
+            )
+        }
+        // Rebound Training
+        .fullScreenCover(isPresented: $showingReboundTraining) {
+            KBReboundTrainingView(
+                region: selectedRegion,
+                questions: coreQuestions.isEmpty ? questionEngine.filter().shuffled() : coreQuestions
+            )
+        }
+        // Domain Drill
+        .fullScreenCover(isPresented: $showingDomainDrill) {
+            NavigationStack {
+                KBDomainDrillView()
+            }
+        }
+        // Help Sheet
+        .sheet(isPresented: $showingHelpSheet) {
+            NavigationStack {
+                KBHelpSheet()
+            }
+        }
         .task {
             await questionService.loadQuestions()
+            // Also load questions for UI/KnowledgeBowl views
+            do {
+                try await questionEngine.loadBundledQuestions()
+            } catch {
+                Self.logger.warning("Failed to load bundled questions: \(error.localizedDescription)")
+            }
         }
         .sheet(item: $showingDomainDetail) { domain in
             NavigationStack {
@@ -125,6 +231,173 @@ struct KBDashboardView: View {
                         }
                     }
             }
+        }
+    }
+
+    // MARK: - Region Selector
+
+    @ViewBuilder
+    private var regionSelector: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Competition Region")
+                    .font(.headline)
+                Spacer()
+                InfoButton(
+                    title: "Regional Rules",
+                    content: KBHelpContent.Regional.overview
+                )
+            }
+
+            Picker("Region", selection: $selectedRegion) {
+                ForEach(KBRegion.allCases) { region in
+                    Text(region.displayName).tag(region)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            Text(selectedRegion.shortDescription)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+        }
+    }
+
+    // MARK: - Practice Sessions Section
+
+    @ViewBuilder
+    private var practiceSessionsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Practice Sessions")
+                    .font(.headline)
+                Spacer()
+                InfoButton(
+                    title: "Practice Modes",
+                    content: "Practice oral (voice) and written (MCQ) rounds to prepare for competition."
+                )
+            }
+
+            HStack(spacing: 12) {
+                // Oral Practice (Voice-first)
+                TrainingModeCard(
+                    title: "Oral",
+                    subtitle: "Voice Q&A",
+                    icon: "mic.fill",
+                    color: .green
+                ) {
+                    Self.logger.info("Starting oral practice session")
+                    showingOralSession = true
+                }
+
+                // Written Practice
+                TrainingModeCard(
+                    title: "Written",
+                    subtitle: "MCQ Practice",
+                    icon: "pencil.and.list.clipboard",
+                    color: .blue
+                ) {
+                    Self.logger.info("Starting written practice session")
+                    showingWrittenSession = true
+                }
+            }
+        }
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+        }
+    }
+
+    // MARK: - Competition Training Section
+
+    @ViewBuilder
+    private var competitionTrainingSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Competition Training")
+                    .font(.headline)
+                Spacer()
+                InfoButton(
+                    title: "Competition Training",
+                    content: KBHelpContent.TrainingModes.matchOverview
+                )
+            }
+
+            LazyVGrid(columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ], spacing: 12) {
+                // Match Simulation
+                CompactTrainingCard(
+                    title: "Match",
+                    icon: "trophy.fill",
+                    color: .yellow
+                ) {
+                    Self.logger.info("Starting match simulation")
+                    showingMatchSimulation = true
+                }
+
+                // Conference Training
+                CompactTrainingCard(
+                    title: "Conference",
+                    icon: "person.3.fill",
+                    color: .purple
+                ) {
+                    Self.logger.info("Starting conference training")
+                    showingConferenceTraining = true
+                }
+
+                // Rebound Training
+                CompactTrainingCard(
+                    title: "Rebound",
+                    icon: "arrow.uturn.backward.circle.fill",
+                    color: .orange
+                ) {
+                    Self.logger.info("Starting rebound training")
+                    showingReboundTraining = true
+                }
+            }
+
+            // Domain Drill (full width)
+            Button {
+                Self.logger.info("Starting domain drill")
+                showingDomainDrill = true
+            } label: {
+                HStack {
+                    Image(systemName: "scope")
+                        .font(.title2)
+                        .foregroundStyle(.cyan)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Domain Drill")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.primary)
+                        Text("Focus on specific knowledge areas")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(.tertiary)
+                }
+                .padding()
+                .background(Color.cyan.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
         }
     }
 
@@ -464,6 +737,65 @@ struct KBStatCard: View {
         .padding()
         .background(Color.gray.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+/// Card for practice session modes (Written/Oral)
+struct TrainingModeCard: View {
+    let title: String
+    let subtitle: String
+    let icon: String
+    let color: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.title)
+                    .foregroundStyle(color)
+
+                Text(title)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.primary)
+
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(color.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// Compact card for competition training modes
+struct CompactTrainingCard: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundStyle(color)
+
+                Text(title)
+                    .font(.caption.bold())
+                    .foregroundStyle(.primary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(color.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
     }
 }
 

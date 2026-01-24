@@ -64,8 +64,14 @@ struct KBProgressView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(viewModel.levelTitle)
-                        .font(.title3.bold())
+                    HStack {
+                        Text(viewModel.levelTitle)
+                            .font(.title3.bold())
+                        InfoButton(
+                            title: "Level Progress",
+                            content: KBHelpContent.UIElements.levelProgress
+                        )
+                    }
 
                     ProgressView(value: viewModel.levelProgress)
                         .tint(viewModel.levelColor)
@@ -84,34 +90,46 @@ struct KBProgressView: View {
     // MARK: - Quick Stats
 
     private var quickStatsCards: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            quickStatCard(
-                title: "Total Sessions",
-                value: "\(viewModel.totalSessions)",
-                icon: "list.bullet.clipboard",
-                color: Color.kbStrong
-            )
+        VStack(spacing: 12) {
+            HStack {
+                Text("Your Stats")
+                    .font(.headline)
+                Spacer()
+                InfoButton(
+                    title: "Accuracy",
+                    content: KBHelpContent.UIElements.accuracyMeter
+                )
+            }
 
-            quickStatCard(
-                title: "Questions Answered",
-                value: "\(viewModel.totalQuestions)",
-                icon: "questionmark.circle",
-                color: Color.kbExcellent
-            )
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                quickStatCard(
+                    title: "Total Sessions",
+                    value: "\(viewModel.totalSessions)",
+                    icon: "list.bullet.clipboard",
+                    color: Color.kbStrong
+                )
 
-            quickStatCard(
-                title: "Overall Accuracy",
-                value: "\(Int(viewModel.overallAccuracy * 100))%",
-                icon: "target",
-                color: accuracyColor(viewModel.overallAccuracy)
-            )
+                quickStatCard(
+                    title: "Questions Answered",
+                    value: "\(viewModel.totalQuestions)",
+                    icon: "questionmark.circle",
+                    color: Color.kbExcellent
+                )
 
-            quickStatCard(
-                title: "Practice Time",
-                value: formatDuration(viewModel.totalPracticeTime),
-                icon: "clock",
-                color: .orange
-            )
+                quickStatCard(
+                    title: "Overall Accuracy",
+                    value: "\(Int(viewModel.overallAccuracy * 100))%",
+                    icon: "target",
+                    color: accuracyColor(viewModel.overallAccuracy)
+                )
+
+                quickStatCard(
+                    title: "Practice Time",
+                    value: formatDuration(viewModel.totalPracticeTime),
+                    icon: "clock",
+                    color: .orange
+                )
+            }
         }
     }
 

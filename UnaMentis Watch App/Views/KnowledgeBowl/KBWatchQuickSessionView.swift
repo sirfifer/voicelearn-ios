@@ -87,17 +87,23 @@ struct KBWatchQuickSessionView: View {
     }
 
     private var tapToRevealButton: some View {
-        Button(action: { viewModel.revealAnswer() }) {
-            VStack(spacing: 4) {
-                Image(systemName: "eye")
-                    .font(.title2)
-                Text("Tap to Reveal")
-                    .font(.caption)
+        VStack(spacing: 4) {
+            Button(action: { viewModel.revealAnswer() }) {
+                VStack(spacing: 4) {
+                    Image(systemName: "eye")
+                        .font(.title2)
+                    Text("Tap to Reveal")
+                        .font(.caption)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
             }
-            .frame(maxWidth: .infinity)
-            .padding()
+            .buttonStyle(.bordered)
+
+            Text("Then mark right or wrong")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
         }
-        .buttonStyle(.bordered)
     }
 
     private func answerRevealView(_ question: KBWatchQuestion) -> some View {

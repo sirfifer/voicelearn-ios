@@ -40,13 +40,24 @@ struct KBDomainMasteryView: View {
     // MARK: - Mastery Grid
 
     private var masteryGrid: some View {
-        LazyVGrid(columns: [
-            GridItem(.flexible()),
-            GridItem(.flexible()),
-            GridItem(.flexible())
-        ], spacing: 12) {
-            ForEach(KBDomain.allCases) { domain in
-                domainCell(domain)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Domain Progress")
+                    .font(.headline)
+                InfoButton(
+                    title: "Domain Mastery",
+                    content: KBHelpContent.UIElements.domainMastery
+                )
+            }
+
+            LazyVGrid(columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ], spacing: 12) {
+                ForEach(KBDomain.allCases) { domain in
+                    domainCell(domain)
+                }
             }
         }
     }

@@ -166,8 +166,14 @@ struct KBReboundTrainingView: View {
                 .font(.headline)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Opponent Accuracy: \(Int(viewModel.opponentAccuracy * 100))%")
-                    .font(.subheadline)
+                HStack {
+                    Text("Opponent Accuracy: \(Int(viewModel.opponentAccuracy * 100))%")
+                        .font(.subheadline)
+                    InfoButton(
+                        title: "Opponent Accuracy",
+                        content: KBHelpContent.TrainingModes.matchOpponents
+                    )
+                }
                 Slider(value: $viewModel.opponentAccuracy, in: 0.3...0.9, step: 0.1)
                     .tint(Color.kbExcellent)
                 Text("Lower = more rebound opportunities")
@@ -176,8 +182,14 @@ struct KBReboundTrainingView: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Rebound Probability: \(Int(viewModel.reboundProbability * 100))%")
-                    .font(.subheadline)
+                HStack {
+                    Text("Rebound Probability: \(Int(viewModel.reboundProbability * 100))%")
+                        .font(.subheadline)
+                    InfoButton(
+                        title: "Rebound Probability",
+                        content: KBHelpContent.TrainingModes.reboundProbability
+                    )
+                }
                 Slider(value: $viewModel.reboundProbability, in: 0.3...0.8, step: 0.1)
                     .tint(Color.kbExcellent)
                 Text("Chance opponent buzzes first")
@@ -318,9 +330,16 @@ struct KBReboundTrainingView: View {
                     .foregroundStyle(Color.kbExcellent)
                     .symbolEffect(.pulse, options: .repeating)
 
-                Text("REBOUND OPPORTUNITY!")
-                    .font(.title2.bold())
-                    .foregroundStyle(Color.kbExcellent)
+                HStack {
+                    Text("REBOUND OPPORTUNITY!")
+                        .font(.title2.bold())
+                        .foregroundStyle(Color.kbExcellent)
+
+                    InfoButton(
+                        title: "Rebound Strategy",
+                        content: KBHelpContent.TrainingModes.reboundStrategy
+                    )
+                }
 
                 Text("\(viewModel.opponentName) got it WRONG")
                     .font(.subheadline)

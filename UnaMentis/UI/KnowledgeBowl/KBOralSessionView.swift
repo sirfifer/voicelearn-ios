@@ -121,14 +121,26 @@ struct KBOralSessionView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 configRow(icon: "number", label: "Questions", value: "\(viewModel.questions.count)")
-                configRow(icon: "timer", label: "Conference Time", value: "\(Int(viewModel.regionalConfig.conferenceTime))s")
+                HStack {
+                    configRow(icon: "timer", label: "Conference Time", value: "\(Int(viewModel.regionalConfig.conferenceTime))s")
+                    InfoButton(
+                        title: "Conference Time",
+                        content: KBHelpContent.TrainingModes.oralConference
+                    )
+                }
                 configRow(icon: "mappin", label: "Region", value: viewModel.regionalConfig.region.displayName)
                 configRow(icon: "star", label: "Points", value: "\(viewModel.regionalConfig.oralPointsPerCorrect) per correct")
-                configRow(
-                    icon: "person.2",
-                    label: "Verbal Conferring",
-                    value: viewModel.regionalConfig.verbalConferringAllowed ? "Allowed" : "Silent Only"
-                )
+                HStack {
+                    configRow(
+                        icon: "person.2",
+                        label: "Verbal Conferring",
+                        value: viewModel.regionalConfig.verbalConferringAllowed ? "Allowed" : "Silent Only"
+                    )
+                    InfoButton(
+                        title: "Conference Rules",
+                        content: KBHelpContent.Regional.conferenceDifferences
+                    )
+                }
             }
             .padding()
             .background(Color.kbBgSecondary)
@@ -241,10 +253,17 @@ struct KBOralSessionView: View {
                 }
             }
 
-            Text("Conference Time")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(.kbTextPrimary)
+            HStack {
+                Text("Conference Time")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.kbTextPrimary)
+
+                InfoButton(
+                    title: "Conference",
+                    content: KBHelpContent.TrainingModes.oralConference
+                )
+            }
 
             Text(viewModel.regionalConfig.verbalConferringAllowed
                  ? "Discuss with your team"
@@ -290,10 +309,17 @@ struct KBOralSessionView: View {
                     .foregroundColor(viewModel.isListening ? .kbMastered : .kbIntermediate)
                     .symbolEffect(.bounce, value: viewModel.isListening)
 
-                Text(viewModel.isListening ? "Listening..." : "Tap to Speak")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.kbTextPrimary)
+                HStack {
+                    Text(viewModel.isListening ? "Listening..." : "Tap to Speak")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.kbTextPrimary)
+
+                    InfoButton(
+                        title: "Voice Input",
+                        content: KBHelpContent.TrainingModes.oralVoiceInput
+                    )
+                }
             }
 
             // Error display
@@ -309,13 +335,24 @@ struct KBOralSessionView: View {
 
             // Transcript display
             if !viewModel.transcript.isEmpty {
-                Text(viewModel.transcript)
-                    .font(.title3)
-                    .foregroundColor(.kbTextPrimary)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.kbBgSecondary)
-                    .cornerRadius(12)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Your Answer")
+                            .font(.caption)
+                            .foregroundColor(.kbTextSecondary)
+                        InfoButton(
+                            title: "Transcript",
+                            content: KBHelpContent.TrainingModes.oralTranscript
+                        )
+                    }
+                    Text(viewModel.transcript)
+                        .font(.title3)
+                        .foregroundColor(.kbTextPrimary)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.kbBgSecondary)
+                .cornerRadius(12)
             }
 
             // Question card (compact)

@@ -88,16 +88,26 @@ struct KBConferenceTrainingView: View {
 
                 // Hand Signal Practice Button
                 if viewModel.config.handSignalsOnly {
-                    Button {
-                        viewModel.startSignalPractice()
-                    } label: {
-                        Label("Practice Hand Signals", systemImage: "hand.raised.fill")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.kbStrong.opacity(0.2))
-                            .foregroundStyle(Color.kbStrong)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    VStack(spacing: 8) {
+                        Button {
+                            viewModel.startSignalPractice()
+                        } label: {
+                            Label("Practice Hand Signals", systemImage: "hand.raised.fill")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.kbStrong.opacity(0.2))
+                                .foregroundStyle(Color.kbStrong)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+
+                        HStack {
+                            Spacer()
+                            InfoButton(
+                                title: "Hand Signals",
+                                content: KBHelpContent.TrainingModes.conferenceHandSignals
+                            )
+                        }
                     }
                     .padding(.horizontal)
                 }
@@ -146,8 +156,14 @@ struct KBConferenceTrainingView: View {
             Text("Training Options")
                 .font(.headline)
 
-            Toggle("Progressive Difficulty", isOn: $viewModel.progressiveDifficulty)
-                .tint(Color.kbExcellent)
+            HStack {
+                Toggle("Progressive Difficulty", isOn: $viewModel.progressiveDifficulty)
+                    .tint(Color.kbExcellent)
+                InfoButton(
+                    title: "Progressive Difficulty",
+                    content: KBHelpContent.TrainingModes.conferenceDifficulty
+                )
+            }
 
             if viewModel.progressiveDifficulty {
                 Text("Time limits: 15s \u{2192} 12s \u{2192} 10s \u{2192} 8s")
@@ -238,10 +254,16 @@ struct KBConferenceTrainingView: View {
             }
             .frame(width: 160, height: 160)
 
-            // Time limit indicator
-            Text("Time Limit: \(Int(viewModel.currentTimeLimit))s")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            // Time limit indicator with help
+            HStack {
+                Text("Time Limit: \(Int(viewModel.currentTimeLimit))s")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                InfoButton(
+                    title: "Conference Timer",
+                    content: KBHelpContent.TrainingModes.conferenceTimer
+                )
+            }
         }
     }
 

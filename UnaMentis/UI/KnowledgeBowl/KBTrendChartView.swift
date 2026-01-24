@@ -198,10 +198,10 @@ struct KBComparisonChartView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Legend
+            // Legend (voice-first)
             HStack(spacing: 16) {
-                legendItem(color: Color.kbExcellent, label: "Written")
                 legendItem(color: Color.kbStrong, label: "Oral")
+                legendItem(color: Color.kbExcellent, label: "Written")
             }
 
             // Chart

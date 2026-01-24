@@ -99,8 +99,14 @@ struct KBMatchSimulationView: View {
 
     private var formatSelectionCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Match Format")
-                .font(.headline)
+            HStack {
+                Text("Match Format")
+                    .font(.headline)
+                InfoButton(
+                    title: "Match Format",
+                    content: KBHelpContent.TrainingModes.matchFormat
+                )
+            }
 
             ForEach(KBMatchConfig.MatchFormat.allCases, id: \.self) { format in
                 Button {
@@ -140,8 +146,14 @@ struct KBMatchSimulationView: View {
 
     private var opponentSettingsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Opponent Difficulty")
-                .font(.headline)
+            HStack {
+                Text("Opponent Difficulty")
+                    .font(.headline)
+                InfoButton(
+                    title: "Opponent Difficulty",
+                    content: KBHelpContent.TrainingModes.matchOpponents
+                )
+            }
 
             ForEach(Array(viewModel.opponentStrengths.enumerated()), id: \.offset) { index, strength in
                 VStack(alignment: .leading, spacing: 8) {
@@ -386,23 +398,30 @@ struct KBMatchSimulationView: View {
                 writtenQuestionCard(question)
             }
 
-            // Buzz button
-            Button {
-                viewModel.playerBuzz()
-            } label: {
-                VStack(spacing: 8) {
-                    Image(systemName: "bell.fill")
-                        .font(.system(size: 60))
-                    Text("BUZZ!")
-                        .font(.title.bold())
+            // Buzz button with help
+            VStack(spacing: 8) {
+                Button {
+                    viewModel.playerBuzz()
+                } label: {
+                    VStack(spacing: 8) {
+                        Image(systemName: "bell.fill")
+                            .font(.system(size: 60))
+                        Text("BUZZ!")
+                            .font(.title.bold())
+                    }
+                    .frame(width: 150, height: 150)
+                    .background(Color.kbExcellent)
+                    .foregroundStyle(.white)
+                    .clipShape(Circle())
                 }
-                .frame(width: 150, height: 150)
-                .background(Color.kbExcellent)
-                .foregroundStyle(.white)
-                .clipShape(Circle())
+                .disabled(!viewModel.canBuzz)
+                .opacity(viewModel.canBuzz ? 1 : 0.5)
+
+                InfoButton(
+                    title: "Buzzing Strategy",
+                    content: KBHelpContent.TrainingModes.matchBuzzing
+                )
             }
-            .disabled(!viewModel.canBuzz)
-            .opacity(viewModel.canBuzz ? 1 : 0.5)
 
             if viewModel.buzzWinner != nil && !viewModel.playerBuzzedFirst {
                 Text("\(viewModel.buzzWinnerName) buzzed first!")
@@ -612,8 +631,8 @@ struct KBMatchSimulationView: View {
                 .font(.headline)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                statItem("Written", value: "\(stats.writtenCorrect)/\(stats.writtenTotal)")
                 statItem("Oral", value: "\(stats.oralCorrect)/\(stats.oralTotal)")
+                statItem("Written", value: "\(stats.writtenCorrect)/\(stats.writtenTotal)")
                 statItem("Accuracy", value: "\(Int(stats.overallAccuracy * 100))%")
                 statItem("Avg Time", value: String(format: "%.1fs", stats.averageResponseTime))
             }

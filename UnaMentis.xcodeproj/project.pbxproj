@@ -41,6 +41,8 @@
 		0CCB3A5AC3B71D905BD04174 /* UMCFFileHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0E2ECCCAF9A88D0850B976 /* UMCFFileHandler.swift */; };
 		0CD94962B9FD36324214C8EF /* SampleCurriculumSeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDB5A62C7C40A99571DBF01 /* SampleCurriculumSeeder.swift */; };
 		0D74276E3C391956ADD4CD4B /* KBDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBBE641F0A9FA891DAAC41B3 /* KBDashboardView.swift */; };
+		C702F61AD7D4470F822A51C6 /* KBHelpSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4653C6A1F8D4A3086E5DE71 /* KBHelpSheet.swift */; };
+		8F8033109E7F4C6A9A9B9872 /* KBHelpContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B072825C12974F55A368D028 /* KBHelpContent.swift */; };
 		0ED06879B9789F125D3AEA22 /* DebugConversationTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8871565D2C900334E4BB57B /* DebugConversationTestView.swift */; };
 		0F3F93E307337ECC5F6856EF /* AnthropicLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34AE5335D8D46F4E68958AE5 /* AnthropicLLMService.swift */; };
 		1023E4C410066067BAF51002 /* KBOnDeviceSTT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EA2717A830F8B961C5766A /* KBOnDeviceSTT.swift */; };
@@ -475,6 +477,8 @@
 		CA6A16CA0F313B0BA5AF32CB /* CurriculumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurriculumView.swift; sourceTree = "<group>"; };
 		CA835A7A6B86E694088ADD48 /* AppShortcutsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcutsProvider.swift; sourceTree = "<group>"; };
 		CBBE641F0A9FA891DAAC41B3 /* KBDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBDashboardView.swift; sourceTree = "<group>"; };
+		C4653C6A1F8D4A3086E5DE71 /* KBHelpSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBHelpSheet.swift; sourceTree = "<group>"; };
+		B072825C12974F55A368D028 /* KBHelpContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBHelpContent.swift; sourceTree = "<group>"; };
 		D06794D6625933C55B64860C /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		D35FF2EB7DEFC6C36E775126 /* KBQuestionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KBQuestionEngine.swift; sourceTree = "<group>"; };
 		D51EB452B1B3D3922B7EA16F /* Document+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Document+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -1248,6 +1252,8 @@
 			children = (
 				6C5623DB8F4F9AD34F1D0B70 /* KBColors.swift */,
 				CBBE641F0A9FA891DAAC41B3 /* KBDashboardView.swift */,
+				C4653C6A1F8D4A3086E5DE71 /* KBHelpSheet.swift */,
+				B072825C12974F55A368D028 /* KBHelpContent.swift */,
 				0FB3532512D8489336B883E6 /* KBOralSessionView.swift */,
 				0D5E3C75F2DF9278D5BDEB5C /* KBWrittenSessionView.swift */,
 				CONFTRN001F1LE000001 /* KBConferenceTrainingView.swift */,
@@ -1537,6 +1543,8 @@
 				00DD6B2334554EC6B7AAC457 /* DeviceCapability.swift in Sources */,
 				2F51936EA2E9409450AC1A6F /* KBColors.swift in Sources */,
 				0D74276E3C391956ADD4CD4B /* KBDashboardView.swift in Sources */,
+				C702F61AD7D4470F822A51C6 /* KBHelpSheet.swift in Sources */,
+				8F8033109E7F4C6A9A9B9872 /* KBHelpContent.swift in Sources */,
 				1023E4C410066067BAF51002 /* KBOnDeviceSTT.swift in Sources */,
 				DF791F95CFAA17FEB309CF1B /* KBOnDeviceTTS.swift in Sources */,
 				9F048846724C46EF818850CD /* KBOralSessionView.swift in Sources */,
