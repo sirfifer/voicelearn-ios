@@ -268,3 +268,96 @@ export interface CreateSessionData {
     settings: Partial<TTSProfileSettings>;
   }>;
 }
+
+// ============================================================================
+// Extended Types for Batch Job UI
+// ============================================================================
+
+/**
+ * Extended job creation data with Knowledge Bowl specific options
+ */
+export interface CreateBatchJobData {
+  name: string;
+  source_type: 'knowledge-bowl' | 'curriculum' | 'custom';
+  source_id?: string;
+  profile_id?: string;
+  tts_config?: Record<string, unknown>;
+  output_format?: string;
+  normalize_volume?: boolean;
+  // KB extraction options
+  include_questions?: boolean;
+  include_answers?: boolean;
+  include_hints?: boolean;
+  include_explanations?: boolean;
+  domains?: string[];
+  difficulties?: number[];
+  // Custom items (for source_type: 'custom')
+  items?: Array<{ text: string; source_ref?: string }>;
+}
+
+/**
+ * Progress information for a running batch job
+ */
+export interface JobProgress {
+  job_id: string;
+  status: JobStatus;
+  percentage: number;
+  completed_items: number;
+  failed_items: number;
+  pending_items: number;
+  total_items: number;
+  current_item_index: number;
+  current_item_text?: string;
+  estimated_time_remaining?: number;
+}
+
+/**
+ * Content extraction response for preview
+ */
+export interface ExtractResponse {
+  success: boolean;
+  items: Array<{ text: string; source_ref: string }>;
+  total_count: number;
+  stats?: {
+    total_domains?: number;
+    total_questions?: number;
+    domain_counts?: Record<string, number>;
+    type_counts?: Record<string, number>;
+  };
+  error?: string;
+}
+
+/**
+ * Request parameters for content extraction
+ */
+export interface ExtractRequest {
+  source_type: 'knowledge-bowl' | 'curriculum' | 'custom';
+  source_id?: string;
+  include_questions?: boolean;
+  include_answers?: boolean;
+  include_hints?: boolean;
+  include_explanations?: boolean;
+  domains?: string[];
+  difficulties?: number[];
+}
+
+/**
+ * Response for job items list
+ */
+export interface JobItemsResponse {
+  success: boolean;
+  items: TTSJobItem[];
+  total: number;
+  limit: number;
+  offset: number;
+  error?: string;
+}
+
+/**
+ * Response for retry-failed action
+ */
+export interface RetryFailedResponse {
+  success: boolean;
+  reset_count: number;
+  error?: string;
+}

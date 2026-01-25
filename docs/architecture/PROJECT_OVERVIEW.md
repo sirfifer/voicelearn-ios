@@ -491,7 +491,12 @@ See [USM Core README](../../server/usm-core/README.md) for detailed documentatio
 - **Voice Lab** section with:
   - **AI Model Selection** - Compare and select models for all use cases (STT, TTS, LLM)
   - **TTS Lab** - Experiment with TTS models and configurations before batch processing
-  - **Batch Profiles** - Manage TTS profiles for batch audio generation
+  - **TTS Profiles** - Manage TTS profiles for batch audio generation
+  - **Batch Jobs** - Create and manage batch TTS generation jobs for Knowledge Bowl audio files with:
+    - 4-step job creation wizard (source selection, profile selection, content preview, create)
+    - Progress polling and real-time status updates
+    - Failed item retry and individual item management
+    - Job lifecycle control (start, pause, resume, delete)
 
 ### Self-Hosted Server Support
 
@@ -1057,8 +1062,9 @@ See [CODE_QUALITY_INITIATIVE.md](../quality/CODE_QUALITY_INITIATIVE.md) for comp
 - **Knowledge Bowl 3-tier validation** (phonetic, n-gram, token, linguistic, semantic embeddings, LLM fallback)
 - **Knowledge Bowl question importers** (Qbreader, OpenTrivia, DOE Science Bowl with merge pipeline)
 - **Knowledge Bowl test suite** (15+ test files covering all validation algorithms and services)
-- **Voice Lab** (AI model selection, TTS experimentation, batch profiles in Operations Console)
+- **Voice Lab** (AI model selection, TTS experimentation, TTS profiles, batch jobs in Operations Console)
 - **TTS Lab** (model comparison, configuration tuning, batch processing pipeline)
+- **Batch TTS Jobs UI** (job creation wizard, progress polling, item management, lifecycle control)
 - **Kyutai TTS 1.6B integration** (self-hosted batch processing with 40+ voices)
 - **Kyutai Pocket TTS integration** (100M on-device neural TTS with full settings UI, 8 voices, voice cloning, Rust/Candle inference engine, UniFFI Swift bindings)
 - **USM Core** (Rust cross-platform service manager, HTTP/WebSocket API, C FFI, 47 tests)

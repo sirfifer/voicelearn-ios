@@ -92,35 +92,214 @@ The Voice Lab section contains three tabs:
 
 **Documentation:** See `docs/server/TTS_LAB_GUIDE.md` for complete guide
 
-### 3. Batch Profiles
+### 3. Batch Profiles & Jobs
 
-**Purpose:** Manage TTS profiles for batch audio generation
+**Purpose:** Manage TTS profiles and batch audio generation jobs
+
+This tab has two main areas:
+- **TTS Profiles Panel** - Create and manage voice profiles
+- **Batch Jobs Panel** - Create and monitor batch audio generation jobs
+
+---
+
+#### TTS Profiles
 
 **Features:**
 - Create and edit TTS generation profiles
 - Configure voice, speed, pitch, quality settings
 - A/B testing and comparison tools
-- Batch job management
 - Rating and quality assessment
+- Set default profile for new jobs
 
-**Use Cases:**
-- Pre-generate audio for thousands of Knowledge Bowl questions
-- Batch process Quiz Ball content
-- Pre-cache curriculum audio
-- Generate FOV context audio
+**Profile Settings:**
+- **Provider** - TTS engine (Chatterbox, VibeVoice, Fish Speech)
+- **Voice ID** - Specific voice within provider
+- **Speed** - Playback speed multiplier (0.5-2.0)
+- **Exaggeration** - Emotional expression level (0.0-1.0)
+- **CFG Coefficient** - Voice adherence strength
+- **Tags** - Labels for organization (e.g., "warm", "professional")
 
-**Workflow:**
-1. Create profile with specific TTS settings
-2. Test with sample questions
-3. Run A/B comparison with different profiles
-4. Rate and select best profile
-5. Launch batch job for production
-6. Monitor progress and quality
+---
 
-**API Integration:**
-- Uses saved configurations from TTS Lab
-- Integrates with `tts_pregen_api.py` for batch processing
-- Connects to TTS cache system for storage
+#### Batch Jobs
+
+**Purpose:** Generate audio files for large content sets (Knowledge Bowl questions, curriculum, etc.)
+
+**Features:**
+- Create batch jobs with wizard-style form
+- Monitor job progress in real-time (3-second polling)
+- Pause, resume, and retry failed items
+- View individual job items with status
+- Filter jobs by status
+
+**Job List Panel:**
+- Displays all batch jobs sorted by creation date
+- Status filter dropdown (All, Pending, Running, Paused, Completed, Failed)
+- Refresh button to reload job list
+- New Job button to create a batch job
+- Job cards show progress, status, and actions
+
+**Job Card Information:**
+- Job name and TTS profile name
+- Source type (Knowledge Bowl, Curriculum, Custom)
+- Output format (wav, mp3)
+- Progress bar with percentage
+- Completed/failed/total item counts
+- Current item being processed (when running)
+- Error message (for failed jobs)
+- Created and updated timestamps
+
+**Job Actions:**
+- **Start** - Begin processing a pending job
+- **Pause** - Pause a running job
+- **Resume** - Resume a paused job
+- **Retry Failed** - Reprocess only failed items
+- **Items** - View individual job items
+- **Delete** - Remove job and its files
+
+---
+
+#### Creating a Batch Job (4-Step Wizard)
+
+**Step 1: Content Source**
+- Select source type:
+  - **Knowledge Bowl** - Questions from KB database
+  - **Curriculum** - (Coming soon)
+  - **Custom** - (Coming soon)
+- For Knowledge Bowl, select content types:
+  - Questions - The main question text
+  - Answers - Acceptable answer text
+  - Hints - Hint text for questions
+  - Explanations - Educational explanations
+- All content types are selected by default
+
+**Step 2: TTS Profile**
+- Select from available TTS profiles
+- View profile details (provider, voice, settings)
+- Default profile is pre-selected
+- Shows profile description and tags
+
+**Step 3: Preview Content**
+- Click "Preview Content" to extract items
+- Shows total item count that will be generated
+- Displays statistics:
+  - Total questions included
+  - Breakdown by content type (questions, answers, hints, explanations)
+  - Breakdown by domain (Physics, Chemistry, etc.)
+- Sample items displayed for verification
+
+**Step 4: Create Job**
+- Enter job name (descriptive, for identification)
+- Select output format:
+  - **wav** - Uncompressed, highest quality
+  - **mp3** - Compressed, smaller files
+- Optional: Enable volume normalization
+- Review configuration summary
+- Click "Create and Start" to begin immediately
+- Click "Create" to create in pending state
+
+---
+
+#### Viewing Job Items
+
+Click the **Items** button on any job card to view individual items.
+
+**Items List Modal:**
+- Displays all items for the selected job
+- Filter by status (All, Pending, Completed, Failed)
+- Shows item text, source reference, status
+- For completed items: shows audio file path
+- For failed items: shows error message
+- Retry individual failed items
+
+**Item Statuses:**
+- **Pending** - Not yet processed
+- **Processing** - Currently being generated
+- **Completed** - Audio generated successfully
+- **Failed** - Generation failed (see error)
+- **Skipped** - Skipped (e.g., duplicate)
+
+---
+
+#### Job Statuses
+
+| Status | Description | Available Actions |
+|--------|-------------|-------------------|
+| **Pending** | Job created, not started | Start, Delete |
+| **Running** | Actively processing items | Pause, Items |
+| **Paused** | Temporarily stopped | Resume, Items, Delete |
+| **Completed** | All items processed | Items, Retry Failed (if any), Delete |
+| **Failed** | Job stopped due to errors | Items, Retry Failed, Delete |
+
+---
+
+#### API Endpoints
+
+**Job Management:**
+- `POST /api/tts/pregen/jobs` - Create new batch job
+- `GET /api/tts/pregen/jobs` - List jobs (filter by status)
+- `GET /api/tts/pregen/jobs/{id}` - Get job details
+- `DELETE /api/tts/pregen/jobs/{id}` - Delete job
+
+**Job Control:**
+- `POST /api/tts/pregen/jobs/{id}/start` - Start pending job
+- `POST /api/tts/pregen/jobs/{id}/pause` - Pause running job
+- `POST /api/tts/pregen/jobs/{id}/resume` - Resume paused job
+- `POST /api/tts/pregen/jobs/{id}/retry-failed` - Retry failed items
+
+**Job Progress & Items:**
+- `GET /api/tts/pregen/jobs/{id}/progress` - Get real-time progress
+- `GET /api/tts/pregen/jobs/{id}/items` - Get job items (filter by status)
+
+**Content Extraction:**
+- `POST /api/tts/pregen/extract` - Preview content for extraction
+
+---
+
+#### Use Cases
+
+- **Pre-generate audio for Knowledge Bowl questions** - Reduce latency during quiz sessions
+- **Batch process Quiz Ball content** - Generate audio for game modes
+- **Pre-cache curriculum audio** - Prepare audio for tutoring sessions
+- **Generate FOV context audio** - Audio for field-of-view content
+
+---
+
+#### Workflow Example: Generate KB Question Audio
+
+1. Navigate to Voice Lab → Batch Profiles tab
+2. Ensure you have a TTS profile (or create one)
+3. Click "New Job" button
+4. **Step 1:** Select "Knowledge Bowl", check all content types
+5. **Step 2:** Select your preferred TTS profile
+6. Click "Preview Content" to see item count
+7. **Step 3:** Review extraction stats (e.g., "2,500 items from 625 questions")
+8. **Step 4:** Name job "KB Audio - January 2026", select wav format
+9. Click "Create and Start"
+10. Monitor progress in job list (auto-updates every 3 seconds)
+11. If any items fail, click "Retry Failed" after completion
+12. Audio files saved to `data/tts-pregenerated/jobs/{job_id}/audio/`
+
+---
+
+#### Error Handling
+
+**Individual Item Failures:**
+- Jobs continue processing when individual items fail
+- Failed items are tracked and can be retried
+- View error messages in Items list modal
+- Use "Retry Failed" to reprocess only failed items
+
+**Job-Level Failures:**
+- Jobs fail after 5 consecutive item failures
+- Last error message shown on job card
+- Can retry failed items after fixing underlying issue
+
+**Common Errors:**
+- TTS service unavailable - Check TTS server is running
+- Rate limiting - Reduce batch concurrency
+- Invalid text - Check source content for issues
+- Output directory full - Check disk space
 
 ## Navigation
 

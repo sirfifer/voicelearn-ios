@@ -23,10 +23,10 @@ import {
   Volume2,
   FileAudio,
   RefreshCw,
-  Save,
   Trash2,
   Copy,
 } from 'lucide-react';
+import { BatchJobPanel } from '@/components/tts-pregen/batch-job-panel';
 
 /**
  * TTS Lab Panel - Experimentation Interface
@@ -169,12 +169,6 @@ export function TTSLabPanel() {
     setGeneratedAudios([]);
   };
 
-  const handleSaveConfig = () => {
-    // Save configuration to backend for batch processing
-    console.log('Saving config for batch processing:', config);
-    alert('Configuration saved for batch processing');
-  };
-
   const selectedModel = ttsModels.find((m) => m.id === config.model);
 
   return (
@@ -203,7 +197,7 @@ export function TTSLabPanel() {
           </TabsTrigger>
           <TabsTrigger value="batch">
             <Zap className="mr-2 h-4 w-4" />
-            Batch Settings
+            Batch Jobs
           </TabsTrigger>
         </TabsList>
 
@@ -520,95 +514,9 @@ export function TTSLabPanel() {
           )}
         </TabsContent>
 
-        {/* Batch Settings Tab */}
+        {/* Batch Jobs Tab */}
         <TabsContent value="batch" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Batch Processing Configuration</CardTitle>
-              <CardDescription>
-                Save current settings for batch conversion of thousands of questions
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label>Batch Size</Label>
-                <div className="flex items-center gap-4">
-                  <Slider
-                    value={config.batchSize}
-                    onValueChange={(value) => setConfig({ ...config, batchSize: value })}
-                    min={1}
-                    max={32}
-                    step={1}
-                    className="flex-1"
-                  />
-                  <span className="w-12 text-right font-medium">{config.batchSize}</span>
-                </div>
-                <p className="text-xs text-slate-400">
-                  Number of parallel audio generations (adjust based on GPU memory)
-                </p>
-              </div>
-
-              <div className="rounded-lg border border-slate-700 bg-slate-800/30 p-4">
-                <h3 className="font-semibold">Current Configuration Summary</h3>
-                <div className="mt-4 grid gap-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Model:</span>
-                    <span className="font-medium">
-                      {ttsModels.find((m) => m.id === config.model)?.name}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Voice:</span>
-                    <span className="font-medium">{config.voice}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">CFG Coefficient:</span>
-                    <span className="font-medium">{config.cfgCoef.toFixed(1)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Quantization Levels:</span>
-                    <span className="font-medium">{config.nQ}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Batch Size:</span>
-                    <span className="font-medium">{config.batchSize}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Estimated Throughput:</span>
-                    <span className="font-medium">
-                      {(config.batchSize * 3).toFixed(0)}x real-time
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button onClick={handleSaveConfig} className="flex-1">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save for Batch Processing
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setConfig(defaultConfig)}
-                  className="flex-1"
-                >
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Reset to Defaults
-                </Button>
-              </div>
-
-              <div className="rounded-lg bg-slate-800/50 p-4 text-sm">
-                <p className="font-medium">Batch Processing Pipeline</p>
-                <ol className="mt-2 space-y-1 text-slate-400">
-                  <li>1. Load questions from curriculum database</li>
-                  <li>2. Apply saved TTS configuration</li>
-                  <li>3. Generate audio files in batches of {config.batchSize}</li>
-                  <li>4. Encode with Mimi codec for storage</li>
-                  <li>5. Upload to CDN for low-latency delivery</li>
-                </ol>
-              </div>
-            </CardContent>
-          </Card>
+          <BatchJobPanel />
         </TabsContent>
       </Tabs>
     </div>
