@@ -115,13 +115,12 @@ UnaMentis/Services/TTS/PocketTTSBindings.swift - Swift FFI bindings
 - ✅ Model loading tests
 
 ### iOS Build
-- ⚠️ Compilation blocked by module import issue
-- Requires Xcode IDE configuration (see above)
+- ✅ Builds successfully in Xcode (module import issue resolved)
+- ℹ️ Xcode IDE configuration documented above for reference
 
 ### On-Device Testing
 **Prerequisites:**
-1. Fix module import issue (Xcode configuration)
-2. Copy model files to device:
+1. Copy model files to device:
    ```
    Documents/models/kyutai-pocket-ios/
    ├── model.safetensors     (225 MB)

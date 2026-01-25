@@ -241,7 +241,7 @@ extension KBEnhancedValidationSetupView {
         private let logger = Logger(subsystem: "com.unamentis", category: "KBEnhancedValidationSetup")
 
         @Published var embeddingsState: KBEmbeddingsService.ModelState = .notDownloaded
-        @Published var llmState: KBEmbeddingsService.ModelState = .notDownloaded  // Reuse enum
+        @Published var llmState: KBLLMValidator.ModelState = .notDownloaded
         @Published var isLLMFeatureEnabled = false
         @Published var showError = false
         @Published var errorMessage: String?

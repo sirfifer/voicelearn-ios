@@ -124,27 +124,29 @@ actor KBLLMValidator {
             throw KBLLMError.modelNotFound
         }
 
-        do {
-            // Initialize llama.cpp context
-            // TODO: Uncomment when llama.cpp is integrated
-            // var params = llama_context_default_params()
-            // params.n_ctx = UInt32(maxTokens)
-            // params.n_gpu_layers = 0  // CPU only for now
-            //
-            // llamaContext = llama_init_from_file(modelURL.path, params)
-            //
-            // guard llamaContext != nil else {
-            //     throw LLMError.loadFailed(NSError(domain: "LLM", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to initialize llama context"]))
-            // }
+        // Initialize llama.cpp context
+        // TODO: Uncomment and update this implementation when llama.cpp is integrated.
+        // var params = llama_context_default_params()
+        // params.n_ctx = UInt32(maxTokens)
+        // params.n_gpu_layers = 0  // CPU only for now
+        //
+        // llamaContext = llama_init_from_file(modelURL.path, params)
+        //
+        // guard llamaContext != nil else {
+        //     throw LLMError.loadFailed(NSError(domain: "LLM", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to initialize llama context"]))
+        // }
+        // state = .loaded
+        // logger.info("LLM model loaded successfully")
 
-            state = .loaded
-            logger.info("LLM model loaded successfully")
-        } catch {
-            let errorMsg = "Failed to load model: \(error.localizedDescription)"
-            logger.error("\(errorMsg)")
-            state = .error(errorMsg)
-            throw KBLLMError.loadFailed(error)
-        }
+        let errorMsg = "LLM inference not implemented: llama.cpp integration is currently disabled"
+        logger.error("\(errorMsg)")
+        state = .error(errorMsg)
+        let underlyingError = NSError(
+            domain: "KBLLMValidator",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: errorMsg]
+        )
+        throw KBLLMError.loadFailed(underlyingError)
     }
 
     /// Unload the model from memory

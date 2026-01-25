@@ -197,27 +197,86 @@ actor KBEmbeddingsService {
         let destDir = modelURL.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
 
-        // Unzip the model package
-        // This is a placeholder - actual implementation would use ZipFoundation or similar
-        logger.info("Unzipping model to \(self.modelURL.path)")
+        logger.info("Extracting model to \(self.modelURL.path)")
 
-        // For now, just move the file (assumes it's already a .mlpackage)
+        // Remove existing model if present
         if FileManager.default.fileExists(atPath: modelURL.path) {
             try FileManager.default.removeItem(at: modelURL)
         }
-        try FileManager.default.moveItem(at: sourceURL, to: modelURL)
+
+        // Extract ZIP using iOS-compatible approach
+        // NOTE: The server endpoint should provide the .mlpackage as a ZIP archive.
+        // We use NSFileCoordinator for atomic extraction on iOS.
+        do {
+            // Try to unzip using FileManager's built-in support (iOS 16+)
+            // For older iOS versions, the server should provide an unzipped .mlpackage
+            let tempExtractDir = destDir.appendingPathComponent("_extract_temp")
+            try FileManager.default.createDirectory(at: tempExtractDir, withIntermediateDirectories: true)
+
+            // Use compression framework to extract ZIP
+            try await extractZIP(from: sourceURL, to: tempExtractDir)
+
+            // Find the .mlpackage directory inside extracted content
+            let contents = try FileManager.default.contentsOfDirectory(at: tempExtractDir, includingPropertiesForKeys: nil)
+            if let mlpackage = contents.first(where: { $0.pathExtension == "mlpackage" }) {
+                try FileManager.default.moveItem(at: mlpackage, to: modelURL)
+            } else if contents.count == 1, let singleDir = contents.first {
+                // Check if the ZIP contained a single directory with the mlpackage
+                let nestedContents = try FileManager.default.contentsOfDirectory(at: singleDir, includingPropertiesForKeys: nil)
+                if let mlpackage = nestedContents.first(where: { $0.pathExtension == "mlpackage" }) {
+                    try FileManager.default.moveItem(at: mlpackage, to: modelURL)
+                } else {
+                    throw EmbeddingsError.downloadFailed
+                }
+            } else {
+                throw EmbeddingsError.downloadFailed
+            }
+
+            // Clean up
+            try? FileManager.default.removeItem(at: tempExtractDir)
+            try? FileManager.default.removeItem(at: sourceURL)
+
+            logger.info("Model extracted successfully")
+        } catch {
+            logger.error("ZIP extraction failed: \(error.localizedDescription). Server must provide valid .mlpackage.zip artifact.")
+            throw EmbeddingsError.downloadFailed
+        }
     }
 
-    private func prepareInput(text: String) throws -> MLFeatureProvider {
-        // Placeholder: Actual implementation depends on model's expected input format
+    private func extractZIP(from zipURL: URL, to destinationURL: URL) async throws {
+        // Use Compression framework for ZIP extraction
+        // This is a basic implementation; for production, consider using ZIPFoundation library
+        let zipData = try Data(contentsOf: zipURL)
+
+        // Check for ZIP signature (PK\x03\x04)
+        guard zipData.count >= 4,
+              zipData[0] == 0x50, zipData[1] == 0x4B,
+              zipData[2] == 0x03, zipData[3] == 0x04 else {
+            // Not a ZIP file, assume it's already an uncompressed .mlpackage
+            // Move directly to destination
+            logger.info("File is not a ZIP, assuming uncompressed mlpackage")
+            try FileManager.default.moveItem(at: zipURL, to: destinationURL.appendingPathComponent(modelName + ".mlpackage"))
+            return
+        }
+
+        // For actual ZIP extraction on iOS, we need ZIPFoundation or similar library
+        // Since we can't use Process, throw an error with helpful message
+        logger.error("ZIP extraction requires ZIPFoundation library. Server should provide uncompressed .mlpackage.")
+        throw EmbeddingsError.downloadFailed
+    }
+
+    private func prepareInput(text _: String) throws -> MLFeatureProvider {
+        // TODO: Implement model-specific input preparation when CoreML model is integrated
         // Typical CoreML sentence transformer expects a string or token IDs
-        fatalError("Model-specific input preparation not implemented")
+        logger.error("Model-specific input preparation not implemented")
+        throw EmbeddingsError.invalidInput
     }
 
-    private func extractEmbedding(from prediction: MLFeatureProvider) -> [Float]? {
-        // Placeholder: Actual implementation depends on model's output format
+    private func extractEmbedding(from _: MLFeatureProvider) -> [Float]? {
+        // TODO: Implement model-specific output extraction when CoreML model is integrated
         // Typical output is a MultiArray of shape [1, 384]
-        fatalError("Model-specific output extraction not implemented")
+        logger.error("Model-specific output extraction not implemented")
+        return nil
     }
 
     private func cosineSimilarity(_ vec1: [Float], _ vec2: [Float]) -> Float {

@@ -85,7 +85,7 @@ enum DeviceCapability {
         }
 
         // iPhone 12 is iPhone13,x (released 2020)
-        // Require iPhone 13 or newer
+        // Require iPhone 12 (iPhone13,x) or newer
         guard modelNum >= 13 else {
             return false
         }

@@ -235,16 +235,17 @@ final class KBWrittenSessionViewModel: ObservableObject {
         self.questions = questions
         self.config = config
         self.regionalConfig = config.region.config
-        // Initialize session via manager for consistent lifecycle
+        // Initialize with a temporary session; will be replaced by manager-backed session
         self.session = KBSession(config: config)
 
         if let timeLimit = config.timeLimit {
             self.remainingTime = timeLimit
         }
 
-        // Register session with manager
+        // Register session with manager and use its session as source of truth
         Task {
-            _ = await sessionManager.startSession(questions: questions, config: config)
+            let startedSession = await sessionManager.startSession(questions: questions, config: config)
+            self.session = startedSession
         }
     }
 

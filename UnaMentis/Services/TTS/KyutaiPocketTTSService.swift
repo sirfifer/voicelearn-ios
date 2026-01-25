@@ -133,65 +133,67 @@ public actor KyutaiPocketTTSService: TTSService {
 
         let startTime = Date()
 
+        // Perform synchronous synthesis using Rust engine BEFORE creating the stream
+        // This allows errors to be thrown normally rather than swallowed inside AsyncStream
+        let result: PocketTtsResult
+        do {
+            result = try engine.synthesize(text: text)
+        } catch let error as PocketTtsError {
+            print("🔴🔴🔴 [KyutaiPocket] PocketTtsError: \(error)")
+            logger.error("[KyutaiPocket] Synthesis failed: \(error.localizedDescription)")
+            throw error
+        } catch {
+            print("🔴🔴🔴 [KyutaiPocket] Error: \(error)")
+            logger.error("[KyutaiPocket] Synthesis failed: \(error.localizedDescription)")
+            throw error
+        }
+
+        let ttfb = Date().timeIntervalSince(startTime)
+        self.latencyValues.append(ttfb)
+        self.updateMetrics()
+        self.logger.info("[KyutaiPocket] TTFB: \(String(format: "%.3f", ttfb))s")
+
+        // Convert WAV data to raw PCM for streaming
+        let audioData = result.audioData
+        let sampleRate = result.sampleRate
+
+        // Skip WAV header (44 bytes) to get raw PCM
+        let pcmData = audioData.count > 44 ? audioData.dropFirst(44) : audioData
+
+        let totalTime = Date().timeIntervalSince(startTime)
+        self.logger.info("[KyutaiPocket] Synthesis complete: \(text.count) chars in \(String(format: "%.3f", totalTime))s, duration: \(String(format: "%.2f", result.durationSeconds))s")
+
+        // Return stream that emits chunks from already-synthesized audio
         return AsyncStream { continuation in
-            Task {
-                do {
-                    // Perform synchronous synthesis using Rust engine
-                    let result = try engine.synthesize(text: text)
+            // Emit chunks for streaming compatibility
+            let chunkSize = Int(sampleRate) / 10 * 4  // ~100ms at 24kHz, 32-bit float
+            var offset = 0
+            var sequenceNumber = 0
 
-                    let ttfb = Date().timeIntervalSince(startTime)
-                    self.latencyValues.append(ttfb)
-                    self.updateMetrics()
-                    self.logger.info("[KyutaiPocket] TTFB: \(String(format: "%.3f", ttfb))s")
+            while offset < pcmData.count {
+                let remaining = pcmData.count - offset
+                let currentChunkSize = min(chunkSize, remaining)
+                let chunkData = Data(pcmData[pcmData.startIndex.advanced(by: offset)..<pcmData.startIndex.advanced(by: offset + currentChunkSize)])
 
-                    // Convert WAV data to raw PCM for streaming
-                    let audioData = result.audioData
-                    let sampleRate = result.sampleRate
+                let isFirst = sequenceNumber == 0
+                let isLast = offset + currentChunkSize >= pcmData.count
 
-                    // Skip WAV header (44 bytes) to get raw PCM
-                    let pcmData = audioData.count > 44 ? audioData.dropFirst(44) : audioData
+                let chunk = TTSAudioChunk(
+                    audioData: chunkData,
+                    format: .pcmFloat32(sampleRate: Double(sampleRate), channels: 1),
+                    sequenceNumber: sequenceNumber,
+                    isFirst: isFirst,
+                    isLast: isLast,
+                    timeToFirstByte: isFirst ? ttfb : nil
+                )
 
-                    // Emit chunks for streaming compatibility
-                    let chunkSize = Int(sampleRate) / 10 * 4  // ~100ms at 24kHz, 32-bit float
-                    var offset = 0
-                    var sequenceNumber = 0
+                continuation.yield(chunk)
 
-                    while offset < pcmData.count {
-                        let remaining = pcmData.count - offset
-                        let currentChunkSize = min(chunkSize, remaining)
-                        let chunkData = Data(pcmData[pcmData.startIndex.advanced(by: offset)..<pcmData.startIndex.advanced(by: offset + currentChunkSize)])
-
-                        let isFirst = sequenceNumber == 0
-                        let isLast = offset + currentChunkSize >= pcmData.count
-
-                        let chunk = TTSAudioChunk(
-                            audioData: chunkData,
-                            format: .pcmFloat32(sampleRate: Double(sampleRate), channels: 1),
-                            sequenceNumber: sequenceNumber,
-                            isFirst: isFirst,
-                            isLast: isLast,
-                            timeToFirstByte: isFirst ? ttfb : nil
-                        )
-
-                        continuation.yield(chunk)
-
-                        offset += currentChunkSize
-                        sequenceNumber += 1
-                    }
-
-                    let totalTime = Date().timeIntervalSince(startTime)
-                    self.logger.info("[KyutaiPocket] Synthesis complete: \(text.count) chars in \(String(format: "%.3f", totalTime))s, duration: \(String(format: "%.2f", result.durationSeconds))s")
-
-                } catch let error as PocketTtsError {
-                    print("🔴🔴🔴 [KyutaiPocket] PocketTtsError: \(error)")
-                    self.logger.error("[KyutaiPocket] Synthesis failed: \(error.localizedDescription)")
-                } catch {
-                    print("🔴🔴🔴 [KyutaiPocket] Error: \(error)")
-                    self.logger.error("[KyutaiPocket] Synthesis failed: \(error.localizedDescription)")
-                }
-
-                continuation.finish()
+                offset += currentChunkSize
+                sequenceNumber += 1
             }
+
+            continuation.finish()
         }
     }
 
