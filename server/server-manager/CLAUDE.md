@@ -6,13 +6,15 @@ A macOS menu bar application for managing UnaMentis server components, with an H
 
 USM provides both visual and programmatic control over all UnaMentis services:
 
-1. **AI Agent API** - HTTP API on port 8767 for programmatic service control
+1. **AI Agent API** - HTTP API on port 8787 for programmatic service control
 2. **Visual Monitoring** - Menu bar UI showing status, CPU, and memory usage
 3. **Bulk Operations** - Start/stop/restart all services with one action
 
-## HTTP API (Port 8767)
+## HTTP API (Port 8787)
 
 **AI agents MUST use this API for all service control operations.** Never use bash commands like pkill.
+
+> **Note:** A legacy USM app (USMXcode) exists at port 8767 but is deprecated. The current USM uses USM Core (Rust) on port 8787.
 
 ### Endpoints
 
@@ -31,19 +33,19 @@ USM provides both visual and programmatic control over all UnaMentis services:
 
 ```bash
 # Check API is running
-curl -s http://localhost:8767/api/health
+curl -s http://localhost:8787/api/health
 
 # List all services
-curl -s http://localhost:8767/api/services | python3 -m json.tool
+curl -s http://localhost:8787/api/services | python3 -m json.tool
 
 # Restart management server after code changes
-curl -X POST http://localhost:8767/api/services/management-api/restart
+curl -X POST http://localhost:8787/api/services/management-api/restart
 
 # Start all services
-curl -X POST http://localhost:8767/api/services/start-all
+curl -X POST http://localhost:8787/api/services/start-all
 
 # Stop everything
-curl -X POST http://localhost:8767/api/services/stop-all
+curl -X POST http://localhost:8787/api/services/stop-all
 ```
 
 ### Response Format
@@ -95,7 +97,7 @@ server/server-manager/
 ## Key Components
 
 **USMApp.swift** contains:
-- `APIServer` - HTTP server on port 8767 for AI agent access
+- `APIServer` - HTTP server on port 8787 for AI agent access
 - `ServiceManager` - Manages service lifecycle (start/stop/restart)
 - `PopoverContent` - Menu bar popover UI
 - `ServiceRow` - Individual service status display
@@ -123,6 +125,6 @@ open USM.xcworkspace
 
 1. **USM must be running** for the API to work
 2. The API starts automatically when USM launches
-3. API runs on port 8767, management server on 8766
+3. API runs on port 8787, management server on 8766
 4. All service IDs must match exactly (case-sensitive)
 5. Restart operations wait for services to fully stop before starting

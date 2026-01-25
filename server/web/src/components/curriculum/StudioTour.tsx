@@ -331,12 +331,12 @@ export const STUDIO_TOUR_STEPS: TourStep[] = [
     content: (
       <div>
         <p className="mb-2">
-          UMCF is designed for conversational AI tutoring. Transcripts are broken into segments for
+          UMCF is designed for conversational AI learning. Transcripts are broken into segments for
           natural turn-by-turn dialogue.
         </p>
         <p className="text-xs text-slate-500">
           Each segment can have its own type (lecture, explanation, example, checkpoint) and
-          speaking notes for the AI tutor.
+          speaking notes for the AI.
         </p>
       </div>
     ),
@@ -353,7 +353,7 @@ export const STUDIO_TOUR_STEPS: TourStep[] = [
           specific transcript segments.
         </p>
         <p className="text-xs text-slate-500">
-          The AI tutor will display these visuals at the appropriate moments during the lesson.
+          The AI will display these visuals at the appropriate moments during the lesson.
         </p>
       </div>
     ),

@@ -58,7 +58,7 @@ public enum LMAPIProviderCategory: String, CaseIterable, Sendable {
         case .textToSpeech:
             return "Converts AI responses into natural-sounding speech"
         case .languageModel:
-            return "Powers the AI tutor's intelligence and understanding"
+            return "Powers the AI's intelligence and understanding"
         case .realtime:
             return "Enables low-latency real-time audio streaming"
         }
@@ -238,8 +238,8 @@ public enum LMAPIProviderRegistry {
                 and handles background noise well.
                 """,
             usageInApp: """
-                UnaMentis uses AssemblyAI to transcribe your voice in real-time during tutoring \
-                sessions. This allows the AI tutor to understand your questions and responses \
+                UnaMentis uses AssemblyAI to transcribe your voice in real-time during learning \
+                sessions. This allows the AI to understand your questions and responses \
                 as you speak naturally.
 
                 When enabled, audio is streamed to AssemblyAI's servers, transcribed, and the \
@@ -295,9 +295,9 @@ public enum LMAPIProviderRegistry {
                 UnaMentis uses Deepgram in two ways:
 
                 1. **Speech-to-Text (Nova-3)**: Transcribes your voice with very low latency, \
-                enabling natural conversational flow with the AI tutor.
+                enabling natural conversational flow with the AI.
 
-                2. **Text-to-Speech (Aura-2)**: Converts the AI tutor's responses into spoken \
+                2. **Text-to-Speech (Aura-2)**: Converts the AI's responses into spoken \
                 audio, providing a natural voice learning experience.
 
                 A single Deepgram API key enables both features.
@@ -350,14 +350,14 @@ public enum LMAPIProviderRegistry {
             id: .openAI,
             name: "OpenAI",
             categories: [.languageModel],
-            shortDescription: "GPT AI tutor intelligence",
+            shortDescription: "GPT AI intelligence",
             fullDescription: """
-                OpenAI's GPT models power the AI tutor's understanding and responses. GPT-4o \
-                offers the best quality for complex explanations and nuanced tutoring, while \
+                OpenAI's GPT models power the AI's understanding and responses. GPT-4o \
+                offers the best quality for complex explanations and nuanced learning, while \
                 GPT-4o-mini provides a good balance of quality and cost for simpler interactions.
                 """,
             usageInApp: """
-                UnaMentis uses OpenAI's GPT models as the "brain" of the AI tutor:
+                UnaMentis uses OpenAI's GPT models as the "brain" of the AI:
 
                 • **Understanding your questions**: Comprehends complex technical topics
                 • **Generating explanations**: Creates clear, tailored explanations
@@ -427,15 +427,15 @@ public enum LMAPIProviderRegistry {
             id: .anthropic,
             name: "Anthropic",
             categories: [.languageModel],
-            shortDescription: "Claude AI tutor intelligence",
+            shortDescription: "Claude AI intelligence",
             fullDescription: """
                 Anthropic's Claude models are known for nuanced understanding, following \
                 complex instructions, and producing well-structured educational content. \
-                Claude 3.5 Sonnet offers excellent tutoring capabilities with strong \
+                Claude 3.5 Sonnet offers excellent learning capabilities with strong \
                 reasoning abilities.
                 """,
             usageInApp: """
-                UnaMentis can use Claude as an alternative AI tutor brain:
+                UnaMentis can use Claude as an alternative AI brain:
 
                 • **Thoughtful explanations**: Known for clear, well-organized responses
                 • **Strong reasoning**: Excellent at breaking down complex concepts
@@ -512,7 +512,7 @@ public enum LMAPIProviderRegistry {
                 highest quality.
                 """,
             usageInApp: """
-                UnaMentis uses ElevenLabs to give the AI tutor a natural, engaging voice:
+                UnaMentis uses ElevenLabs to give the AI a natural, engaging voice:
 
                 • **Expressive delivery**: Natural intonation makes listening easier
                 • **Clear pronunciation**: Technical terms are spoken correctly
@@ -706,7 +706,7 @@ public enum LMAPIProviderRegistry {
 
 public struct CombinedCostEstimator {
 
-    /// Estimated total cost for a tutoring session using typical provider combination
+    /// Estimated total cost for a learning session using typical provider combination
     public struct SessionCostEstimate: Sendable {
         public let sttCost: Double
         public let llmCost: Double

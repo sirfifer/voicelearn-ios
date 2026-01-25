@@ -155,7 +155,7 @@ struct KBPracticeSessionView: View {
             VStack(spacing: 24) {
                 // Domain badge
                 if let question = engine.currentQuestion,
-                   let domain = KBDomain.allCases.first(where: { $0.rawValue.lowercased().replacingOccurrences(of: " ", with: "-") == question.domainId || $0.rawValue.lowercased().replacingOccurrences(of: " & ", with: "-") == question.domainId || question.domainId == $0.rawValue.lowercased() }) {
+                   let domain = KBDomain(rawValue: question.domainId) {
                     DomainBadge(domain: domain, subcategory: question.subcategory)
                 }
 
@@ -508,7 +508,7 @@ struct DomainBadge: View {
             Image(systemName: domain.iconName)
                 .foregroundStyle(domain.color)
 
-            Text(domain.rawValue)
+            Text(domain.displayName)
                 .font(.caption.bold())
 
             if !subcategory.isEmpty {

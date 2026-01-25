@@ -205,6 +205,10 @@ final class KBWrittenSessionViewModel: ObservableObject {
     let config: KBSessionConfig
     let regionalConfig: KBRegionalConfig
 
+    // MARK: - Session Management
+
+    private let sessionManager = KBSessionManager()
+
     // MARK: - Computed Properties
 
     var currentQuestion: KBQuestion? {
@@ -231,10 +235,17 @@ final class KBWrittenSessionViewModel: ObservableObject {
         self.questions = questions
         self.config = config
         self.regionalConfig = config.region.config
+        // Initialize with a temporary session; will be replaced by manager-backed session
         self.session = KBSession(config: config)
 
         if let timeLimit = config.timeLimit {
             self.remainingTime = timeLimit
+        }
+
+        // Register session with manager and use its session as source of truth
+        Task {
+            let startedSession = await sessionManager.startSession(questions: questions, config: config)
+            self.session = startedSession
         }
     }
 
@@ -266,6 +277,25 @@ final class KBWrittenSessionViewModel: ObservableObject {
         session.endTime = Date()
         session.isComplete = true
         state = expired ? .expired : .completed
+
+        // Save completed session via manager
+        // Capture values locally to avoid Sendable issues
+        let localAttempts = session.attempts
+        let localEndTime = session.endTime
+        Task {
+            do {
+                // Sync local session state to manager before completing
+                await sessionManager.updateSession { managerSession in
+                    managerSession.attempts = localAttempts
+                    managerSession.endTime = localEndTime
+                    managerSession.isComplete = true
+                }
+                try await sessionManager.completeSession()
+                print("[KB] Written session saved via manager: \(session.id)")
+            } catch {
+                print("[KB] Failed to save written session: \(error)")
+            }
+        }
     }
 
     // MARK: - Timer
@@ -328,9 +358,15 @@ final class KBWrittenSessionViewModel: ObservableObject {
             matchType: .exact
         )
 
+        // Record locally for immediate UI updates
         session.attempts.append(attempt)
         lastAnswerCorrect = isCorrect
         showingFeedback = true
+
+        // Also record with session manager for persistence
+        Task {
+            await sessionManager.recordAttempt(attempt)
+        }
     }
 
     func nextQuestion() {

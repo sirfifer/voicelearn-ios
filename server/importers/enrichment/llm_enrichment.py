@@ -35,7 +35,7 @@ MODELS = {
 # =============================================================================
 
 RECHUNK_SYSTEM_PROMPT = """You are an expert educational content editor. Your task is to break up
-a long piece of educational content into smaller, conversational segments suitable for voice-based tutoring.
+a long piece of educational content into smaller, conversational segments suitable for voice-based learning.
 
 Guidelines:
 - Each segment should be 150-400 words (under 2000 characters)
@@ -71,7 +71,7 @@ Output format: Return a JSON array of 2-4 objective objects, each with:
 
 Return ONLY valid JSON, no additional text."""
 
-CHECKPOINT_SYSTEM_PROMPT = """You are an expert tutor creating comprehension checks. Generate a question
+CHECKPOINT_SYSTEM_PROMPT = """You are an expert educator creating comprehension checks. Generate a question
 that verifies the learner understood the preceding content.
 
 Guidelines:

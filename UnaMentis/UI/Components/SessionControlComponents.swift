@@ -135,7 +135,7 @@ public struct SlideToStopButton: View {
         .frame(height: thumbSize + 8)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Slide to stop session")
-        .accessibilityHint("Slide right to end the tutoring session")
+        .accessibilityHint("Slide right to end the learning session")
         .accessibilityAddTraits(.allowsDirectInteraction)
     }
 
@@ -236,7 +236,7 @@ public struct SessionPauseButton: View {
         .buttonStyle(.plain)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPaused)
         .accessibilityLabel(isPaused ? "Resume session" : "Pause session")
-        .accessibilityHint(isPaused ? "Double-tap to resume the tutoring session" : "Double-tap to pause the tutoring session")
+        .accessibilityHint(isPaused ? "Double-tap to resume the learning session" : "Double-tap to pause the learning session")
         .accessibilityAddTraits(.isButton)
     }
 

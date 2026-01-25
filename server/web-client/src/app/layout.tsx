@@ -23,15 +23,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>UnaMentis - Voice AI Tutoring</title>
-        <meta name="description" content="Voice AI tutoring platform for personalized learning. Real-time bidirectional voice conversations with AI tutors for extended learning sessions." />
+        <title>UnaMentis - Voice AI Learning</title>
+        <meta name="description" content="Voice AI learning platform for personalized learning. Real-time bidirectional voice conversations for extended learning sessions." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1e3a5f" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <meta property="og:title" content="UnaMentis - Voice AI Tutoring" />
-        <meta property="og:description" content="Real-time bidirectional voice learning with AI tutors" />
+        <meta property="og:title" content="UnaMentis - Voice AI Learning" />
+        <meta property="og:description" content="Real-time bidirectional voice learning" />
         <meta property="og:image" content="/images/logo-expanded.png" />
         <meta property="og:type" content="website" />
       </head>

@@ -2050,3 +2050,341 @@ export async function setDefaultTTSProfile(
 
   return { success: true };
 }
+
+// =============================================================================
+// TTS Batch Job APIs
+// =============================================================================
+
+import type {
+  TTSPregenJob,
+  JobsResponse,
+  JobResponse,
+  JobProgress,
+  ExtractResponse,
+  ExtractRequest,
+  CreateBatchJobData,
+  JobItemsResponse,
+  RetryFailedResponse,
+} from '@/types/tts-pregen';
+
+// Mock batch jobs for demo mode
+const mockBatchJobs: TTSPregenJob[] = [];
+
+/**
+ * List TTS batch jobs with optional filters
+ */
+export async function getBatchJobs(params?: {
+  status?: string;
+  source_type?: string;
+  job_type?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<JobsResponse> {
+  const queryParams = new URLSearchParams();
+  if (params?.status) queryParams.set('status', params.status);
+  if (params?.source_type) queryParams.set('source_type', params.source_type);
+  if (params?.job_type) queryParams.set('job_type', params.job_type);
+  if (params?.limit) queryParams.set('limit', String(params.limit));
+  if (params?.offset) queryParams.set('offset', String(params.offset));
+
+  const query = queryParams.toString();
+  const endpoint = `/api/tts/pregen/jobs${query ? `?${query}` : ''}`;
+
+  return fetchWithFallback(endpoint, () => {
+    let filtered = [...mockBatchJobs];
+
+    if (params?.status) {
+      filtered = filtered.filter((j) => j.status === params.status);
+    }
+    if (params?.source_type) {
+      filtered = filtered.filter((j) => j.source_type === params.source_type);
+    }
+    if (params?.job_type) {
+      filtered = filtered.filter((j) => j.job_type === params.job_type);
+    }
+
+    const offset = params?.offset || 0;
+    const limit = params?.limit || 50;
+    const paginated = filtered.slice(offset, offset + limit);
+
+    return {
+      success: true,
+      jobs: paginated,
+      total: filtered.length,
+      limit,
+      offset,
+    };
+  });
+}
+
+/**
+ * Get a single batch job by ID
+ */
+export async function getBatchJob(jobId: string): Promise<JobResponse> {
+  return fetchWithFallback(`/api/tts/pregen/jobs/${jobId}`, () => {
+    const job = mockBatchJobs.find((j) => j.id === jobId);
+    if (!job) {
+      return { success: false, job: null as unknown as TTSPregenJob, error: 'Job not found' };
+    }
+    return { success: true, job };
+  });
+}
+
+/**
+ * Create a new TTS batch job
+ */
+export async function createBatchJob(data: CreateBatchJobData): Promise<JobResponse> {
+  if (USE_MOCK) {
+    const newJob: TTSPregenJob = {
+      id: `mock-job-${Date.now()}`,
+      name: data.name,
+      job_type: 'batch',
+      status: 'pending',
+      source_type: data.source_type,
+      source_id: data.source_id,
+      profile_id: data.profile_id,
+      tts_config: data.tts_config,
+      output_format: data.output_format || 'wav',
+      normalize_volume: data.normalize_volume || false,
+      output_dir: `/data/tts-pregenerated/jobs/mock-job-${Date.now()}/audio`,
+      total_items: 100,
+      completed_items: 0,
+      failed_items: 0,
+      current_item_index: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      consecutive_failures: 0,
+    };
+    mockBatchJobs.push(newJob);
+    return { success: true, job: newJob };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/pregen/jobs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Delete a batch job
+ */
+export async function deleteBatchJob(jobId: string): Promise<{ success: boolean; error?: string }> {
+  if (USE_MOCK) {
+    const index = mockBatchJobs.findIndex((j) => j.id === jobId);
+    if (index !== -1) {
+      mockBatchJobs.splice(index, 1);
+    }
+    return { success: true };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/pregen/jobs/${jobId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    return { success: false, error: error.error || `HTTP ${response.status}` };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Start a pending batch job
+ */
+export async function startBatchJob(jobId: string): Promise<JobResponse> {
+  if (USE_MOCK) {
+    const job = mockBatchJobs.find((j) => j.id === jobId);
+    if (job) {
+      job.status = 'running';
+      job.started_at = new Date().toISOString();
+    }
+    return { success: true, job: job! };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/pregen/jobs/${jobId}/start`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Pause a running batch job
+ */
+export async function pauseBatchJob(jobId: string): Promise<JobResponse> {
+  if (USE_MOCK) {
+    const job = mockBatchJobs.find((j) => j.id === jobId);
+    if (job) {
+      job.status = 'paused';
+      job.paused_at = new Date().toISOString();
+    }
+    return { success: true, job: job! };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/pregen/jobs/${jobId}/pause`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Resume a paused batch job
+ */
+export async function resumeBatchJob(jobId: string): Promise<JobResponse> {
+  if (USE_MOCK) {
+    const job = mockBatchJobs.find((j) => j.id === jobId);
+    if (job) {
+      job.status = 'running';
+      job.paused_at = undefined;
+    }
+    return { success: true, job: job! };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/pregen/jobs/${jobId}/resume`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Get progress for a batch job
+ */
+export async function getJobProgress(jobId: string): Promise<JobProgress> {
+  return fetchWithFallback(`/api/tts/pregen/jobs/${jobId}/progress`, () => {
+    const job = mockBatchJobs.find((j) => j.id === jobId);
+    if (!job) {
+      return {
+        job_id: jobId,
+        status: 'failed' as const,
+        percentage: 0,
+        completed_items: 0,
+        failed_items: 0,
+        pending_items: 0,
+        total_items: 0,
+        current_item_index: 0,
+      };
+    }
+    return {
+      job_id: job.id,
+      status: job.status,
+      percentage: job.total_items > 0 ? (job.completed_items / job.total_items) * 100 : 0,
+      completed_items: job.completed_items,
+      failed_items: job.failed_items,
+      pending_items: job.total_items - job.completed_items - job.failed_items,
+      total_items: job.total_items,
+      current_item_index: job.current_item_index,
+      current_item_text: job.current_item_text,
+    };
+  });
+}
+
+/**
+ * Get items for a batch job
+ */
+export async function getJobItems(
+  jobId: string,
+  params?: { status?: string; limit?: number; offset?: number }
+): Promise<JobItemsResponse> {
+  const queryParams = new URLSearchParams();
+  if (params?.status) queryParams.set('status', params.status);
+  if (params?.limit) queryParams.set('limit', String(params.limit));
+  if (params?.offset) queryParams.set('offset', String(params.offset));
+
+  const query = queryParams.toString();
+  const endpoint = `/api/tts/pregen/jobs/${jobId}/items${query ? `?${query}` : ''}`;
+
+  return fetchWithFallback(endpoint, () => ({
+    success: true,
+    items: [],
+    total: 0,
+    limit: params?.limit || 50,
+    offset: params?.offset || 0,
+  }));
+}
+
+/**
+ * Retry all failed items in a batch job
+ */
+export async function retryFailedItems(jobId: string): Promise<RetryFailedResponse> {
+  if (USE_MOCK) {
+    return { success: true, reset_count: 0 };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/pregen/jobs/${jobId}/retry-failed`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    return { success: false, reset_count: 0, error: error.error || `HTTP ${response.status}` };
+  }
+
+  return response.json();
+}
+
+/**
+ * Extract content for preview before creating a batch job
+ */
+export async function extractContent(params: ExtractRequest): Promise<ExtractResponse> {
+  if (USE_MOCK) {
+    return {
+      success: true,
+      items: [
+        { text: 'What is the speed of light?', source_ref: 'q1:question' },
+        { text: 'Approximately 299,792 km/s', source_ref: 'q1:answer' },
+        { text: 'Think about electromagnetic waves.', source_ref: 'q1:hint:0' },
+      ],
+      total_count: 100,
+      stats: {
+        total_domains: 3,
+        total_questions: 25,
+        domain_counts: { Physics: 10, Chemistry: 8, Biology: 7 },
+        type_counts: { question: 25, answer: 25, hint: 30, explanation: 20 },
+      },
+    };
+  }
+
+  const response = await fetch(`${BACKEND_URL}/api/tts/pregen/extract`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    return {
+      success: false,
+      items: [],
+      total_count: 0,
+      error: error.error || `HTTP ${response.status}`,
+    };
+  }
+
+  return response.json();
+}

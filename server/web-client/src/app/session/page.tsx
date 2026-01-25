@@ -3,7 +3,7 @@
 /**
  * Session Page
  *
- * Voice tutoring session interface with transcript and visual panel.
+ * Voice learning session interface with transcript and visual panel.
  * Uses the SessionContext for real voice interaction via OpenAI Realtime API.
  */
 
@@ -38,7 +38,7 @@ function SessionContent() {
     try {
       await session.startSession({
         voice: 'coral',
-        instructions: 'You are a helpful AI tutor. Be encouraging and clear in your explanations.',
+        instructions: 'You are a helpful AI learning assistant. Be encouraging and clear in your explanations.',
       });
     } catch (error) {
       console.error('Failed to start session:', error);
@@ -79,7 +79,7 @@ function SessionContent() {
       {/* Session Header with status */}
       <SessionHeader
         state={session.state}
-        topicTitle="General Tutoring"
+        topicTitle="General Learning"
         curriculumTitle="Open Session"
         duration={session.duration}
       />

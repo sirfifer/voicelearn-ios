@@ -107,6 +107,35 @@ struct KBRegionalConfig: Codable, Equatable, Sendable {
     }
 }
 
+// MARK: - Validation Strictness
+
+/// Validation strictness levels for answer matching
+enum KBValidationStrictness: Int, Sendable, Comparable {
+    case strict = 1     // Exact + fuzzy (Levenshtein) only
+    case standard = 2   // + phonetic + n-gram + token matching
+    case lenient = 3    // + semantic (embeddings, LLM)
+
+    static func < (lhs: KBValidationStrictness, rhs: KBValidationStrictness) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+
+    var displayName: String {
+        switch self {
+        case .strict: return "Strict"
+        case .standard: return "Standard"
+        case .lenient: return "Lenient"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .strict: return "Exact match and basic fuzzy matching only"
+        case .standard: return "Enhanced algorithms (phonetic, n-gram, token)"
+        case .lenient: return "All tiers including AI-powered validation"
+        }
+    }
+}
+
 // MARK: - Regional Configuration Factory
 
 extension KBRegionalConfig {
@@ -198,6 +227,16 @@ extension KBRegionalConfig {
     /// Default configuration (Colorado)
     static var `default`: KBRegionalConfig {
         forRegion(.colorado)
+    }
+
+    /// Validation strictness for this region
+    var validationStrictness: KBValidationStrictness {
+        switch region {
+        case .colorado, .coloradoSprings:
+            return .strict  // Colorado requires exact or near-exact matches
+        case .minnesota, .washington:
+            return .standard  // Allow enhanced algorithmic matching
+        }
     }
 }
 

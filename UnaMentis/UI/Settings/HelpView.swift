@@ -54,6 +54,20 @@ public struct HelpView: View {
                 }
             }
 
+            // Knowledge Bowl Section
+            Section("Knowledge Bowl") {
+                NavigationLink {
+                    KBHelpSheet()
+                } label: {
+                    HelpRow(
+                        icon: "trophy.fill",
+                        iconColor: .yellow,
+                        title: "Knowledge Bowl Training",
+                        subtitle: "Competition prep and strategy"
+                    )
+                }
+            }
+
             // Tips Section
             Section("Tips") {
                 NavigationLink {
@@ -143,7 +157,7 @@ struct FreeformChatHelpView: View {
         List {
             Section {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Voice conversations let you explore any topic spontaneously. Just start talking and the AI tutor will respond.")
+                    Text("Voice conversations let you explore any topic spontaneously. Just start talking and the AI will respond.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -154,13 +168,13 @@ struct FreeformChatHelpView: View {
                 HelpStepRow(number: 1, text: "Say \"Hey Siri, talk to UnaMentis\" or tap the microphone button")
                 HelpStepRow(number: 2, text: "Wait for the session to start (you'll see the waveform indicator)")
                 HelpStepRow(number: 3, text: "Ask any question or request to learn about a topic")
-                HelpStepRow(number: 4, text: "The AI tutor responds with voice, and you can continue the conversation naturally")
+                HelpStepRow(number: 4, text: "The AI responds with voice, and you can continue the conversation naturally")
             }
 
             Section("Tips") {
                 Label("Speak clearly and at a normal pace", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green, .primary)
-                Label("You can interrupt the tutor by speaking", systemImage: "hand.raised.fill")
+                Label("You can interrupt the AI by speaking", systemImage: "hand.raised.fill")
                     .foregroundStyle(.orange, .primary)
                 Label("Sessions work offline with on-device AI", systemImage: "wifi.slash")
                     .foregroundStyle(.blue, .primary)

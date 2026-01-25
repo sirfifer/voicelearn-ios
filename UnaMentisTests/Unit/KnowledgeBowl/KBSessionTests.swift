@@ -296,7 +296,7 @@ final class KBSessionTests: XCTestCase {
         ]
 
         let performance = session.performanceByDomain
-        XCTAssertEqual(performance[.science]?.averageTime, 3.0, accuracy: 0.001)
+        XCTAssertEqual(performance[.science]?.averageTime ?? 0, 3.0, accuracy: 0.001)
     }
 
     // MARK: - DomainPerformance Tests

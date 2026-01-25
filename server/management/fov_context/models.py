@@ -1,7 +1,7 @@
 """
 FOV Context Models - Server-side implementation
 
-Foveated context management for voice tutoring sessions.
+Foveated context management for voice learning sessions.
 Based on "Foveated Rendering" from VR: center of attention gets full detail,
 periphery is compressed.
 

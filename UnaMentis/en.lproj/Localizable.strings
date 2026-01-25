@@ -135,13 +135,13 @@
 // MARK: - Accessibility Labels
 
 "accessibility.session.start.label" = "Start voice session";
-"accessibility.session.start.hint" = "Double-tap to begin a conversation with your AI tutor";
+"accessibility.session.start.hint" = "Double-tap to begin a voice learning session";
 "accessibility.session.stop.label" = "End voice session";
 "accessibility.session.stop.hint" = "Double-tap to end the current conversation";
 "accessibility.session.pause.label" = "Pause session";
-"accessibility.session.pause.hint" = "Double-tap to pause the AI tutor";
+"accessibility.session.pause.hint" = "Double-tap to pause the AI";
 "accessibility.session.resume.label" = "Resume session";
-"accessibility.session.resume.hint" = "Double-tap to continue the AI tutor";
+"accessibility.session.resume.hint" = "Double-tap to continue the AI";
 
 "accessibility.transcript.user" = "You said";
 "accessibility.transcript.ai" = "AI said";

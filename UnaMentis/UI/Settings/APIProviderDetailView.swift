@@ -480,7 +480,7 @@ public struct SessionCostOverviewView: View {
                 .font(.headline)
 
             Text("""
-                UnaMentis uses multiple AI services during a tutoring session. \
+                UnaMentis uses multiple AI services during a learning session. \
                 The total cost depends on which providers you configure and how \
                 long your sessions are. Here are typical estimates.
                 """)

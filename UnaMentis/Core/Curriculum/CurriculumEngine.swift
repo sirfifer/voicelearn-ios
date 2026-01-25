@@ -148,7 +148,7 @@ public actor CurriculumEngine: ObservableObject {
     @MainActor
     public func generateContext(for topic: Topic) -> String {
         var context = """
-        You are an expert tutor conducting an extended voice-based educational session.
+        You are an expert AI learning assistant conducting an extended voice-based educational session.
 
         CURRENT TOPIC: \(topic.title ?? "Unknown Topic")
         """

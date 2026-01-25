@@ -15,6 +15,17 @@ final class TodoManagerTests: XCTestCase {
     @MainActor
     private func setUpTestEnvironment() {
         persistenceController = PersistenceController(inMemory: true)
+
+        // Ensure clean slate by deleting any existing TodoItems
+        let context = persistenceController.viewContext
+        let request = TodoItem.fetchRequest()
+        if let items = try? context.fetch(request) {
+            for item in items {
+                context.delete(item)
+            }
+            try? context.save()
+        }
+
         todoManager = TodoManager(persistenceController: persistenceController)
     }
 

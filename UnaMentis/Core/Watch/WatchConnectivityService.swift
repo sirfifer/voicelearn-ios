@@ -120,7 +120,7 @@ public final class WatchConnectivityService: NSObject, ObservableObject {
 
 // MARK: - WCSessionDelegate
 
-extension WatchConnectivityService: @preconcurrency WCSessionDelegate {
+extension WatchConnectivityService: WCSessionDelegate {
 
     nonisolated public func session(
         _ session: WCSession,

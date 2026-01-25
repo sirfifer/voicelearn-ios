@@ -2,7 +2,7 @@
   "name": "unamentis-web-client",
   "version": "0.1.0",
   "private": true,
-  "description": "UnaMentis Voice AI Tutoring - Web Client",
+  "description": "UnaMentis Voice AI Learning - Web Client",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -66,7 +66,14 @@ public final class PersistenceController: @unchecked Sendable {
         container = NSPersistentContainer(name: "UnaMentis")
 
         if inMemory {
-            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+            // Use unique in-memory store for complete isolation between test instances
+            let description = NSPersistentStoreDescription()
+            description.type = NSInMemoryStoreType
+            // Use a proper temp file URL with UUID for unique store identification
+            // This prevents any potential caching or sharing between test instances
+            let tempDir = FileManager.default.temporaryDirectory
+            description.url = tempDir.appendingPathComponent("UnaMentis-\(UUID().uuidString).sqlite")
+            container.persistentStoreDescriptions = [description]
             // In-memory stores load synchronously and quickly, safe to block
             loadStoresSynchronously()
         } else {

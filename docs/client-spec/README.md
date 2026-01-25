@@ -67,11 +67,30 @@ The app uses a 6-tab navigation:
 
 | Provider Type | Cloud Options | Self-Hosted | On-Device |
 |---------------|---------------|-------------|-----------|
-| STT (Speech-to-Text) | AssemblyAI, Deepgram | Whisper.cpp | Apple Speech |
-| TTS (Text-to-Speech) | ElevenLabs, Deepgram | Piper | Apple TTS |
-| LLM (Language Model) | OpenAI, Anthropic | Ollama | (planned) |
+| STT (Speech-to-Text) | AssemblyAI, Deepgram, Groq | Whisper.cpp, faster-whisper | Apple Speech, GLM-ASR |
+| TTS (Text-to-Speech) | ElevenLabs, Deepgram Aura | Chatterbox, VibeVoice, Piper, Kyutai TTS | Apple TTS |
+| LLM (Language Model) | OpenAI, Anthropic | Ollama, llama.cpp, vLLM | Ministral-3B, TinyLlama |
 | VAD (Voice Activity) | | | Silero VAD |
-| Embeddings | OpenAI | | |
+| Embeddings | OpenAI | | all-MiniLM-L6-v2 (KB) |
+
+### Specialized Modules
+
+Beyond general tutoring, the client supports specialized learning modules:
+
+| Module | Purpose | Status |
+|--------|---------|--------|
+| **Knowledge Bowl** | Academic competition prep (12 subject domains) | Implemented |
+| **SAT Preparation** | Digital SAT adaptive learning | Specification complete |
+
+**Knowledge Bowl Features:**
+- Written and oral round practice modes with voice-first interaction
+- 3-tier answer validation (phonetic, n-gram, token, linguistic, semantic, LLM)
+- Session persistence with pause tracking and per-question response times
+- Regional competition rules (Colorado, Minnesota, Washington strictness levels)
+- On-device STT/TTS for offline practice capability
+- Analytics dashboard with domain mastery tracking
+
+See [../modules/](../modules/) for detailed module specifications.
 
 ---
 

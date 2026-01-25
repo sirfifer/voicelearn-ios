@@ -82,7 +82,7 @@ See [Quick Start Guide](docs/QUICKSTART.md) for complete setup.
 ## Current Status
 
 **Part 1 Complete (Autonomous Implementation)**
-- All unit tests pass (103+ tests)
+- All unit tests pass (126+ tests)
 - All integration tests pass (16+ tests)
 - Core components implemented: SessionManager, AudioEngine, CurriculumEngine, TelemetryEngine
 - All UI views connected to data sources
@@ -296,7 +296,8 @@ Application and content management:
 | Provider | Model | Type | Notes |
 |----------|-------|------|-------|
 | Apple Speech | Native | On-device | Zero cost, ~150ms latency |
-| GLM-ASR | Whisper encoder + GLM-ASR-Nano | On-device | CoreML + llama.cpp, requires A19 Pro |
+| GLM-ASR | Whisper encoder + GLM-ASR-Nano | On-device | CoreML + llama.cpp, requires A17+ |
+| Groq | Whisper-large-v3-turbo | Cloud | Free tier (14,400 req/day), 300x real-time |
 | Deepgram | Nova-3 | Cloud | WebSocket streaming, ~300ms latency |
 | AssemblyAI | Universal-2 | Cloud | Word-level timestamps |
 | Self-hosted | Whisper-compatible | Local | whisper.cpp, faster-whisper |
@@ -305,9 +306,12 @@ Application and content management:
 | Provider | Model | Type | Notes |
 |----------|-------|------|-------|
 | Apple TTS | AVSpeechSynthesizer | On-device | Zero cost, ~50ms TTFB |
+| Kyutai | TTS 1.6B | Self-hosted | 40+ voices, emotion control, batch processing |
+| Kyutai | Pocket TTS (100M) | On-device/CPU | 8 voices, sub-50ms latency |
+| Chatterbox | Chatterbox-turbo (350M) | Self-hosted | Emotion control, voice cloning |
 | Deepgram | Aura-2 | Cloud | Multiple voices, 24kHz |
 | ElevenLabs | Turbo v2.5 | Cloud | Premium quality, WebSocket |
-| Microsoft | VibeVoice-Realtime-0.5B | Self-hosted | Via Piper/custom server |
+| VibeVoice | VibeVoice-Realtime-0.5B | Self-hosted | Microsoft model, real-time |
 
 ### Large Language Models (LLM)
 | Provider | Model | Type | Notes |
@@ -375,6 +379,7 @@ The fundamental core of UnaMentis will always remain open source. This ensures t
 
 - **iOS**: Primary platform, fully functional (iPhone 16/17 Pro Max optimized)
 - **Web**: Browser-based voice tutoring (Chrome, Safari, Edge recommended)
+- **Android**: In active development (separate repository, Kotlin with on-device inference)
 - **Server**: Management API and Operations Console for curriculum and infrastructure management
 
 ### Future Directions
@@ -382,8 +387,6 @@ The fundamental core of UnaMentis will always remain open source. This ensures t
 - **Desktop apps**: Native macOS and Windows applications
 - **Plugin architecture**: Extensible system for value-added capabilities
 - **Enhanced collaboration**: Multi-user learning sessions
-
-Note: Android support was explored but is not currently in active development. The focus is on delivering exceptional iOS and web experiences first.
 
 ## Support the Project
 

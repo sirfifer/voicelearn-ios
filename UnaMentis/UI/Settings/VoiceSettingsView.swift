@@ -280,6 +280,7 @@ public struct VoiceSettingsView: View {
     private var ttsSection: some View {
         Section {
             Picker("Provider", selection: $viewModel.ttsProvider) {
+                Text("Kyutai Pocket (On-Device)").tag(TTSProvider.kyutaiPocket)
                 Text("Apple TTS (On-Device)").tag(TTSProvider.appleTTS)
                 if viewModel.selfHostedEnabled {
                     Text("Piper (22kHz)").tag(TTSProvider.selfHosted)
@@ -299,7 +300,18 @@ public struct VoiceSettingsView: View {
                         Text(viewModel.voiceDisplayName(voice)).tag(voice)
                     }
                 }
-                .accessibilityHint("Select the AI tutor's voice")
+                .accessibilityHint("Select the AI's voice")
+            }
+
+            // Kyutai Pocket TTS settings (disabled - xcframework not linked)
+            if viewModel.ttsProvider == .kyutaiPocket {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundStyle(.orange)
+                    Text("Kyutai Pocket TTS is not available in this build")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             // Chatterbox-specific settings
@@ -349,6 +361,24 @@ public struct VoiceSettingsView: View {
                 }
             }
 
+            // Show on-device TTS info
+            if viewModel.ttsProvider == .kyutaiPocket {
+                HStack {
+                    Text("Sample Rate")
+                    Spacer()
+                    Text("24 kHz")
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+                HStack {
+                    Text("Model Size")
+                    Spacer()
+                    Text("~100 MB")
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Speaking Rate: \(viewModel.speakingRate, specifier: "%.1f")x")
@@ -374,6 +404,7 @@ public struct VoiceSettingsView: View {
                     Text(viewModel.ttsProvider == .selfHosted ? "Uses Piper server - Free" :
                          viewModel.ttsProvider == .vibeVoice ? "Uses VibeVoice server - Free" :
                          viewModel.ttsProvider == .chatterbox ? "Uses Chatterbox server - Free" :
+                         viewModel.ttsProvider == .kyutaiPocket ? "On-device neural TTS - Free" :
                          "Works offline - Free")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -454,6 +485,10 @@ class VoiceSettingsViewModel: ObservableObject {
     @AppStorage("chatterbox_exaggeration") var chatterboxExaggeration: Double = 0.5
     @AppStorage("chatterbox_preset") var chatterboxPresetRaw: String = "default"
 
+    // Kyutai Pocket TTS settings
+    @AppStorage("kyutai_pocket_preset") var kyutaiPocketPresetRaw: String = "default"
+    @Published var kyutaiPocketModelLoaded: Bool = false
+
     // Self-hosted
     @AppStorage("selfHostedEnabled") var selfHostedEnabled: Bool = false
 
@@ -476,6 +511,11 @@ class VoiceSettingsViewModel: ObservableObject {
     /// Chatterbox preset display name
     var chatterboxPresetName: String {
         ChatterboxPreset(rawValue: chatterboxPresetRaw)?.displayName ?? "Default"
+    }
+
+    /// Kyutai Pocket preset display name (disabled - xcframework not linked)
+    var kyutaiPocketPresetName: String {
+        "Unavailable"
     }
 
     /// Get discovered voices for the currently selected TTS provider
@@ -559,6 +599,9 @@ class VoiceSettingsViewModel: ObservableObject {
 
     /// Load async data (capabilities discovery)
     func loadAsync() async {
+        // Check Kyutai Pocket model availability
+        await checkKyutaiPocketModelStatus()
+
         if selfHostedEnabled {
             let primaryServerIP = defaults.string(forKey: "primaryServerIP") ?? ""
             if !primaryServerIP.isEmpty {
@@ -583,6 +626,14 @@ class VoiceSettingsViewModel: ObservableObject {
                     discoveredVibeVoiceVoices = capabilities.vibeVoiceVoices
                 }
             }
+        }
+    }
+
+    /// Check Kyutai Pocket TTS model availability (disabled - xcframework not linked)
+    private func checkKyutaiPocketModelStatus() async {
+        // Kyutai Pocket TTS is not available in this build
+        await MainActor.run {
+            kyutaiPocketModelLoaded = false
         }
     }
 

@@ -163,9 +163,11 @@ Server Unavailable → Fall back to on-device or cloud
 
 ## Related Documentation
 
-- [GLM_ASR_SERVER_TRD.md](../GLM_ASR_SERVER_TRD.md) - GPU-based STT server (requires CUDA)
-- [PATCH_PANEL_ARCHITECTURE.md](../PATCH_PANEL_ARCHITECTURE.md) - LLM routing system
-- [UnaMentis_TDD.md](../UnaMentis_TDD.md) - Complete technical design
+- [VOICE_LAB_GUIDE.md](./VOICE_LAB_GUIDE.md) - Voice Lab console section
+- [TTS_LAB_GUIDE.md](./TTS_LAB_GUIDE.md) - TTS experimentation and batch processing
+- [GLM_ASR_SERVER_TRD.md](../ai-ml/GLM_ASR_SERVER_TRD.md) - GPU-based STT server (requires CUDA)
+- [PATCH_PANEL_ARCHITECTURE.md](../architecture/PATCH_PANEL_ARCHITECTURE.md) - LLM routing system
+- [UnaMentis_TDD.md](../architecture/UnaMentis_TDD.md) - Complete technical design
 
 ---
 

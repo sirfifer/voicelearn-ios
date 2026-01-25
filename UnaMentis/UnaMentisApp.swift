@@ -243,7 +243,7 @@ enum AppTab: Int {
 
 // MARK: - Session Activity State
 
-/// Observable state for tracking whether a tutoring session is active
+/// Observable state for tracking whether a learning session is active
 /// Used to show/hide the tab bar during active sessions
 ///
 /// IMPORTANT: This class uses explicit change guards to prevent unnecessary
@@ -251,7 +251,7 @@ enum AppTab: Int {
 /// properties directly.
 @MainActor
 final class SessionActivityState: ObservableObject {
-    /// Whether a tutoring session is currently active (not paused)
+    /// Whether a learning session is currently active (not paused)
     @Published private(set) var isSessionActive: Bool = false
 
     /// Whether the session is paused (tab bar should be visible when paused)

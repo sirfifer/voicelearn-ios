@@ -52,11 +52,13 @@ public actor TodoManager {
     ) throws -> TodoItem {
         let context = persistenceController.viewContext
 
+        // Get max priority BEFORE creating item to avoid including the new item in the search
+        let maxPriority = try getMaxPriority(in: context)
+
         let item = TodoItem(context: context)
         item.configure(title: title, type: type, source: source, notes: notes)
 
         // Set priority to be at the end of the list
-        let maxPriority = try getMaxPriority(in: context)
         item.priority = maxPriority + 1
 
         try persistenceController.save()
@@ -90,6 +92,9 @@ public actor TodoManager {
     ) throws -> TodoItem {
         let context = persistenceController.viewContext
 
+        // Get max priority BEFORE creating item to avoid including the new item in the search
+        let maxPriority = try getMaxPriority(in: context)
+
         let itemType: TodoItemType
         switch granularity {
         case "curriculum": itemType = .curriculum
@@ -102,7 +107,6 @@ public actor TodoManager {
         item.configure(title: title, type: itemType, source: source)
         item.configureCurriculumLink(curriculumId: curriculumId, topicId: topicId, granularity: granularity)
 
-        let maxPriority = try getMaxPriority(in: context)
         item.priority = maxPriority + 1
 
         try persistenceController.save()
@@ -143,11 +147,12 @@ public actor TodoManager {
         item.configure(title: title, type: .autoResume, source: .autoResume)
         item.configureAutoResume(topicId: topicId, segmentIndex: segmentIndex, conversationContext: conversationContext)
 
+        // Shift existing items down BEFORE setting new item's priority
+        // This ensures the new item isn't included in the shift
+        try shiftPriorities(from: 0, in: context)
+
         // Auto-resume items get high priority (lower number = higher priority)
         item.priority = 0
-
-        // Shift existing items down
-        try shiftPriorities(from: 0, in: context)
 
         try persistenceController.save()
         logger.info("Created auto-resume to-do for topic: \(topicId) at segment \(segmentIndex)")
@@ -169,11 +174,13 @@ public actor TodoManager {
     ) throws -> TodoItem {
         let context = persistenceController.viewContext
 
+        // Get max priority BEFORE creating item to avoid including the new item in the search
+        let maxPriority = try getMaxPriority(in: context)
+
         let item = TodoItem(context: context)
         item.configure(title: title, type: .reinforcement, source: .reinforcement, notes: notes)
         item.sourceSessionId = sessionId
 
-        let maxPriority = try getMaxPriority(in: context)
         item.priority = maxPriority + 1
 
         try persistenceController.save()
@@ -312,7 +319,6 @@ public actor TodoManager {
     ///   - newIndex: New position index
     @MainActor
     public func moveItem(_ item: TodoItem, to newIndex: Int) throws {
-        let context = persistenceController.viewContext
         let items = try fetchActiveItems()
 
         guard newIndex >= 0 && newIndex < items.count else {
@@ -322,15 +328,16 @@ public actor TodoManager {
 
         let oldPriority = item.priority
         let newPriority = Int32(newIndex)
+        let itemId = item.id
 
         if oldPriority < newPriority {
             // Moving down: shift items between old and new position up
-            for otherItem in items where otherItem.priority > oldPriority && otherItem.priority <= newPriority {
+            for otherItem in items where otherItem.id != itemId && otherItem.priority > oldPriority && otherItem.priority <= newPriority {
                 otherItem.priority -= 1
             }
         } else if oldPriority > newPriority {
             // Moving up: shift items between new and old position down
-            for otherItem in items where otherItem.priority >= newPriority && otherItem.priority < oldPriority {
+            for otherItem in items where otherItem.id != itemId && otherItem.priority >= newPriority && otherItem.priority < oldPriority {
                 otherItem.priority += 1
             }
         }

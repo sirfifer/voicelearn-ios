@@ -341,7 +341,7 @@ enum HelpContent {
     // MARK: - Session View Help
     enum Session {
         static let overview = """
-        This is your voice conversation interface. Speak naturally and the AI tutor will respond.
+        This is your voice conversation interface. Speak naturally and the AI will respond.
         """
 
         static let statusIndicator = """
@@ -420,7 +420,7 @@ enum HelpContent {
         """
 
         static let startLesson = """
-        Tap "Start Lesson" to begin a voice-guided session. The AI tutor will speak first, introducing the topic.
+        Tap "Start Lesson" to begin a voice-guided session. The AI will speak first, introducing the topic.
         """
     }
 
@@ -583,7 +583,7 @@ enum HelpContent {
         """
 
         static let ttsVoice = """
-        Choose the AI tutor's voice. Different voices have different characteristics and personalities.
+        Choose the AI's voice. Different voices have different characteristics and personalities.
         """
 
         static let speakingRate = """
@@ -616,7 +616,7 @@ enum HelpContent {
     // MARK: - General Help
     enum General {
         static let onboarding = """
-        Welcome to UnaMentis! This app lets you learn through voice conversations with an AI tutor.
+        Welcome to UnaMentis! This app lets you learn through voice conversations with AI.
 
         Get started:
         1. Go to Settings to configure your AI providers

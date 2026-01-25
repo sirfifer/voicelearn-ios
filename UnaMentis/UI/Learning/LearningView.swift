@@ -428,126 +428,7 @@ struct CurriculumRowCompact: View {
 }
 
 // MARK: - Modules View
-
-/// Grid view showing available learning modules like Knowledge Bowl
-struct ModulesView: View {
-    @EnvironmentObject var appState: AppState
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                // Header
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Learning Modules")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-
-                    Text("Interactive learning experiences beyond traditional curriculum")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.horizontal)
-
-                // Modules grid
-                LazyVGrid(columns: [
-                    GridItem(.flexible(), spacing: 16),
-                    GridItem(.flexible(), spacing: 16)
-                ], spacing: 16) {
-                    // Knowledge Bowl Module
-                    NavigationLink(destination: KBDashboardView()) {
-                        ModuleCard(
-                            title: "Knowledge Bowl",
-                            subtitle: "Academic competition training",
-                            icon: "brain.head.profile",
-                            color: .kbMastered,
-                            status: "Available"
-                        )
-                    }
-                    .buttonStyle(PlainButtonStyle())
-
-                    // Future modules (placeholders)
-                    ModuleCard(
-                        title: "Flashcards",
-                        subtitle: "Spaced repetition study",
-                        icon: "rectangle.on.rectangle.angled",
-                        color: .blue,
-                        status: "Coming Soon"
-                    )
-                    .opacity(0.6)
-
-                    ModuleCard(
-                        title: "Practice Tests",
-                        subtitle: "Timed assessments",
-                        icon: "clock.badge.checkmark",
-                        color: .orange,
-                        status: "Coming Soon"
-                    )
-                    .opacity(0.6)
-
-                    ModuleCard(
-                        title: "Study Groups",
-                        subtitle: "Collaborative learning",
-                        icon: "person.3.fill",
-                        color: .purple,
-                        status: "Coming Soon"
-                    )
-                    .opacity(0.6)
-                }
-                .padding(.horizontal)
-            }
-            .padding(.vertical)
-        }
-        .background(Color(.systemGroupedBackground))
-    }
-}
-
-// MARK: - Module Card
-
-struct ModuleCard: View {
-    let title: String
-    let subtitle: String
-    let icon: String
-    let color: Color
-    let status: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Icon
-            Image(systemName: icon)
-                .font(.system(size: 32))
-                .foregroundColor(color)
-
-            // Title and subtitle
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-            }
-
-            Spacer()
-
-            // Status badge
-            Text(status)
-                .font(.caption2)
-                .fontWeight(.medium)
-                .foregroundColor(status == "Available" ? .white : .secondary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(status == "Available" ? color : Color.secondary.opacity(0.2))
-                .cornerRadius(4)
-        }
-        .frame(maxWidth: .infinity, minHeight: 140, alignment: .topLeading)
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
-    }
-}
+// Note: ModulesView is defined in ModulesView.swift
 
 // MARK: - Preview
 
@@ -556,15 +437,6 @@ struct LearningView_Previews: PreviewProvider {
     static var previews: some View {
         LearningView()
             .environmentObject(AppState())
-    }
-}
-
-struct ModulesView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationStack {
-            ModulesView()
-                .environmentObject(AppState())
-        }
     }
 }
 #endif

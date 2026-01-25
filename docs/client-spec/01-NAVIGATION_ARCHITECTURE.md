@@ -22,7 +22,7 @@ UnaMentis uses a 5-tab navigation structure with a "More" menu containing additi
 │                    [Main Content Area]                       │
 │                                                              │
 ├──────────┬──────────┬──────────┬──────────┬─────────────────┤
-│ Session  │Curriculum│  To-Do   │ History  │      More       │
+│ Session  │ Learning │  To-Do   │ History  │      More       │
 │   🎙️     │    📚    │    ✓     │    🕐    │      •••        │
 └──────────┴──────────┴──────────┴──────────┴─────────────────┘
 ```
@@ -32,10 +32,21 @@ UnaMentis uses a 5-tab navigation structure with a "More" menu containing additi
 | Tab | Icon | Purpose | Default State |
 |-----|------|---------|---------------|
 | Session | Microphone waveform | Voice conversations | Idle, ready to record |
-| Curriculum | Book | Content browsing | List of loaded curricula |
+| Learning | Book | Content & modules | Segmented: Curriculum / Modules |
 | To-Do | Checkmark list | Learning goals | Filter by status |
 | History | Clock | Session replay | Chronological list |
 | More | Ellipsis (•••) | Additional features | Menu with Analytics & Settings |
+
+### Learning Tab Sections
+
+The Learning tab contains a segmented control with two sections (when Modules feature flag is enabled):
+
+| Section | Icon | Purpose |
+|---------|------|---------|
+| Curriculum | Book | Browse and import UMCF curricula |
+| Modules | Stacked squares | Specialized training modules (Knowledge Bowl, SAT, etc.) |
+
+When the Modules feature is disabled, the tab displays only the Curriculum section.
 
 ### More Menu Contents
 
@@ -59,16 +70,34 @@ UnaMentis
 │   ├── Session Settings (gear icon)
 │   └── Help (question mark icon)
 │
-├── Curriculum Tab
-│   ├── Curriculum List
-│   │   └── Curriculum Detail
-│   │       ├── Topic List
-│   │       │   └── Topic Detail
-│   │       └── Visual Assets
-│   └── Import Flow (modal)
-│       ├── Source Selection
-│       ├── Import Progress
-│       └── Import Complete
+├── Learning Tab
+│   ├── [Segmented Control: Curriculum | Modules]
+│   │
+│   ├── Curriculum Section
+│   │   ├── Curriculum List
+│   │   │   └── Curriculum Detail
+│   │   │       ├── Topic List
+│   │   │       │   └── Topic Detail
+│   │   │       └── Visual Assets
+│   │   └── Import Flow (modal)
+│   │       ├── Source Selection
+│   │       ├── Import Progress
+│   │       └── Import Complete
+│   │
+│   └── Modules Section
+│       ├── Module List (server-delivered)
+│       │   └── Module Detail Sheet (modal)
+│       │       ├── Download Module
+│       │       └── Launch Module
+│       │
+│       └── Module Views (full screen)
+│           ├── Knowledge Bowl
+│           │   ├── KB Dashboard
+│           │   ├── KB Practice Launcher
+│           │   ├── KB Written Session
+│           │   ├── KB Oral Session
+│           │   └── KB Validation Setup
+│           └── SAT Preparation (future)
 │
 ├── To-Do Tab
 │   ├── To-Do List (with filters)

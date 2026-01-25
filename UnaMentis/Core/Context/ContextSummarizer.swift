@@ -63,7 +63,7 @@ public actor ContextSummarizer {
         }.joined(separator: "\n\n")
 
         let prompt = """
-        Summarize the following conversation between a student and AI tutor.
+        Summarize the following conversation between a student and the AI.
         Focus on:
         - Key topics discussed
         - Questions asked by the student
@@ -297,7 +297,7 @@ public struct SummarizerConfig: Sendable {
 
     public static let `default` = SummarizerConfig(
         systemPrompt: """
-            You are a concise summarization assistant for an educational tutoring system.
+            You are a concise summarization assistant for an educational learning system.
             Create brief, accurate summaries that preserve essential information.
             Be direct and avoid filler words.
             """,

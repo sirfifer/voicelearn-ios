@@ -110,7 +110,7 @@ List all managed services.
     "id": "usm-core",
     "name": "USM Core",
     "status": "running",
-    "port": 8767,
+    "port": 8787,
     "pid": 12346,
     "uptime_seconds": 86400,
     "memory_mb": 128,

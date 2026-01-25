@@ -36,7 +36,7 @@ export default function HomePage() {
         <div className="text-center max-w-md">
           <h1 className="text-4xl font-bold mb-4">UnaMentis</h1>
           <p className="text-lg text-muted-foreground mb-8">
-            Voice AI tutoring platform for personalized learning
+            Voice AI learning platform for personalized learning
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/login">
@@ -92,7 +92,7 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold">Start Session</h3>
             </div>
             <p className="text-muted-foreground mb-4">
-              Begin a voice tutoring session with your AI tutor.
+              Begin a voice learning session.
             </p>
             <Button className="w-full">
               <Play className="h-4 w-4 mr-2" />

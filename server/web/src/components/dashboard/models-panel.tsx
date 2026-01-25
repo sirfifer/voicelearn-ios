@@ -16,9 +16,18 @@ import {
   ChevronDown,
   ChevronUp,
   Save,
+  Server,
+  Cloud,
+  Smartphone,
+  Sparkles,
+  Info,
+  Zap,
+  DollarSign,
+  Lock,
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import type { ModelInfo, ModelConfig } from '@/types';
 import {
   getModels,
@@ -397,6 +406,247 @@ export function ModelsPanel() {
             ) : null}
           </CardContent>
         )}
+      </Card>
+
+      {/* LLM Recommendations Section */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-violet-400" />
+            LLM Recommendations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="server">
+            <TabsList className="w-full grid grid-cols-3 mb-4">
+              <TabsTrigger value="server">
+                <Server className="w-4 h-4 mr-2" />
+                Server LLMs
+              </TabsTrigger>
+              <TabsTrigger value="cloud">
+                <Cloud className="w-4 h-4 mr-2" />
+                Cloud APIs
+              </TabsTrigger>
+              <TabsTrigger value="ondevice">
+                <Smartphone className="w-4 h-4 mr-2" />
+                On-Device
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="server">
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+                  <Info className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" />
+                  <p className="text-sm text-slate-300">
+                    Server LLMs run on your local hardware via Ollama. They offer privacy and no
+                    per-token costs, but require capable hardware (16GB+ RAM recommended).
+                  </p>
+                </div>
+
+                <div className="grid gap-3">
+                  <div className="p-4 rounded-lg border border-violet-500/30 bg-violet-500/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-violet-300">Llama 3.3 70B</h4>
+                      <Badge variant="success">Recommended</Badge>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">
+                      Best balance of quality and performance for learning. Excellent reasoning and
+                      educational capabilities.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <Zap className="w-3 h-3 text-yellow-400" /> High Performance
+                      </span>
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <HardDrive className="w-3 h-3 text-emerald-400" /> ~40GB VRAM
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg border border-slate-600/50 bg-slate-800/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-slate-200">Llama 3.2 8B</h4>
+                      <Badge variant="default">Fast</Badge>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">
+                      Lightweight option for quick responses. Good for simpler learning tasks and
+                      lower-end hardware.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <Zap className="w-3 h-3 text-yellow-400" /> Very Fast
+                      </span>
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <HardDrive className="w-3 h-3 text-emerald-400" /> ~5GB VRAM
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg border border-slate-600/50 bg-slate-800/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-slate-200">Qwen 2.5 32B</h4>
+                      <Badge variant="info">Versatile</Badge>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">
+                      Strong multilingual capabilities. Excellent for STEM subjects and structured
+                      reasoning.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <Zap className="w-3 h-3 text-yellow-400" /> Balanced
+                      </span>
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <HardDrive className="w-3 h-3 text-emerald-400" /> ~20GB VRAM
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="cloud">
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+                  <Info className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" />
+                  <p className="text-sm text-slate-300">
+                    Cloud APIs provide top-tier model quality without hardware requirements. Pay per
+                    token, but offer the best reasoning and instruction-following capabilities.
+                  </p>
+                </div>
+
+                <div className="grid gap-3">
+                  <div className="p-4 rounded-lg border border-violet-500/30 bg-violet-500/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-violet-300">Claude 3.5 Sonnet</h4>
+                      <Badge variant="success">Recommended</Badge>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">
+                      Excellent for educational content. Strong reasoning, nuanced explanations, and
+                      great at adapting to student level.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <DollarSign className="w-3 h-3 text-green-400" /> $3/$15 per 1M tokens
+                      </span>
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <Lock className="w-3 h-3 text-blue-400" /> API Key Required
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg border border-slate-600/50 bg-slate-800/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-slate-200">GPT-4o</h4>
+                      <Badge variant="info">Versatile</Badge>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">
+                      OpenAI flagship model. Fast responses with strong general knowledge and coding
+                      assistance.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <DollarSign className="w-3 h-3 text-green-400" /> $2.50/$10 per 1M tokens
+                      </span>
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <Lock className="w-3 h-3 text-blue-400" /> API Key Required
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg border border-slate-600/50 bg-slate-800/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-slate-200">Gemini 1.5 Pro</h4>
+                      <Badge variant="default">Long Context</Badge>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">
+                      Google model with massive context window. Ideal for analyzing long documents
+                      and curriculum materials.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <DollarSign className="w-3 h-3 text-green-400" /> $1.25/$5 per 1M tokens
+                      </span>
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <Lock className="w-3 h-3 text-blue-400" /> API Key Required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="ondevice">
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+                  <Info className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" />
+                  <p className="text-sm text-slate-300">
+                    On-device LLMs run directly on iOS/macOS using Apple Silicon. Completely private
+                    with no network latency, but limited by device memory and capabilities.
+                  </p>
+                </div>
+
+                <div className="grid gap-3">
+                  <div className="p-4 rounded-lg border border-violet-500/30 bg-violet-500/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-violet-300">Llama 3.2 3B (MLX)</h4>
+                      <Badge variant="success">Recommended</Badge>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">
+                      Optimized for Apple Silicon. Fast inference with good quality for basic
+                      learning and quick responses.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <Smartphone className="w-3 h-3 text-blue-400" /> iPhone 15 Pro+
+                      </span>
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <HardDrive className="w-3 h-3 text-emerald-400" /> ~2GB RAM
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg border border-slate-600/50 bg-slate-800/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-slate-200">Phi-3 Mini (CoreML)</h4>
+                      <Badge variant="default">Efficient</Badge>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">
+                      Microsoft small model optimized for CoreML. Great for simple Q&A and offline
+                      use cases.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <Smartphone className="w-3 h-3 text-blue-400" /> iPhone 14+
+                      </span>
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <HardDrive className="w-3 h-3 text-emerald-400" /> ~1.5GB RAM
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg border border-amber-500/30 bg-amber-500/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-amber-300">Apple Intelligence</h4>
+                      <Badge variant="warning">Coming Soon</Badge>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">
+                      Native Apple on-device models via iOS 18+. Will provide deep system
+                      integration when available.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <Smartphone className="w-3 h-3 text-blue-400" /> iPhone 15 Pro+
+                      </span>
+                      <span className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700/50 text-slate-300">
+                        <Lock className="w-3 h-3 text-emerald-400" /> iOS 18.1+
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
       </Card>
 
       {/* Models Grid */}

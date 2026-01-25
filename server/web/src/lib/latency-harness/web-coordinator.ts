@@ -693,7 +693,7 @@ export class WebLatencyTestCoordinator {
         provider: config.provider,
         model: config.model,
         messages: [
-          { role: 'system', content: 'You are a helpful tutor. Be concise.' },
+          { role: 'system', content: 'You are a helpful AI learning assistant. Be concise.' },
           { role: 'user', content: userText },
         ],
         maxTokens: config.maxTokens,

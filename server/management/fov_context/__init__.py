@@ -1,7 +1,7 @@
 """
 FOV Context Management - Server-side implementation
 
-Foveated context management for voice tutoring sessions.
+Foveated context management for voice learning sessions.
 Manages hierarchical cognitive buffers and builds context for LLM calls.
 """
 

@@ -19,10 +19,12 @@ import {
   Brain,
   RefreshCw,
   Volume2,
+  Settings,
+  Mic,
 } from 'lucide-react';
 
 // Section types
-export type SectionId = 'operations' | 'content';
+export type SectionId = 'operations' | 'content' | 'voicelab';
 
 // Operations tabs
 export type OpsTabId =
@@ -44,11 +46,13 @@ export type ContentTabId =
   | 'sources'
   | 'plugins'
   | 'imports'
-  | 'reprocess'
-  | 'tts-profiles';
+  | 'reprocess';
+
+// Voice Lab tabs
+export type VoiceLabTabId = 'model-selection' | 'tts-lab' | 'tts-profiles';
 
 // Combined tab type
-export type TabId = OpsTabId | ContentTabId;
+export type TabId = OpsTabId | ContentTabId | VoiceLabTabId;
 
 interface SectionNavProps {
   activeSection: SectionId;
@@ -64,6 +68,7 @@ interface NavTabsProps {
 const sections: { id: SectionId; label: string; icon: typeof MonitorCog }[] = [
   { id: 'operations', label: 'Operations', icon: MonitorCog },
   { id: 'content', label: 'Content', icon: Library },
+  { id: 'voicelab', label: 'Voice Lab', icon: Volume2 },
 ];
 
 const opsTabs: { id: OpsTabId; label: string; shortLabel: string; icon: typeof LayoutDashboard }[] =
@@ -92,7 +97,17 @@ const contentTabs: {
   { id: 'plugins', label: 'Plugins', shortLabel: 'Plugins', icon: Puzzle },
   { id: 'imports', label: 'Import Jobs', shortLabel: 'Imports', icon: Download },
   { id: 'reprocess', label: 'Reprocess', shortLabel: 'Reprocess', icon: RefreshCw },
-  { id: 'tts-profiles', label: 'TTS Profiles', shortLabel: 'TTS', icon: Volume2 },
+];
+
+const voiceLabTabs: {
+  id: VoiceLabTabId;
+  label: string;
+  shortLabel: string;
+  icon: typeof FlaskConical;
+}[] = [
+  { id: 'model-selection', label: 'TTS Models', shortLabel: 'TTS', icon: FlaskConical },
+  { id: 'tts-lab', label: 'TTS Experimentation', shortLabel: 'Lab', icon: Settings },
+  { id: 'tts-profiles', label: 'Batch Profiles', shortLabel: 'Profiles', icon: Mic },
 ];
 
 export function SectionNav({ activeSection, onSectionChange }: SectionNavProps) {
@@ -127,7 +142,12 @@ export function SectionNav({ activeSection, onSectionChange }: SectionNavProps) 
 }
 
 export function NavTabs({ activeSection, activeTab, onTabChange }: NavTabsProps) {
-  const tabs = activeSection === 'operations' ? opsTabs : contentTabs;
+  const tabs =
+    activeSection === 'operations'
+      ? opsTabs
+      : activeSection === 'voicelab'
+        ? voiceLabTabs
+        : contentTabs;
 
   return (
     <nav className="bg-slate-800/50 border-b border-slate-700/50">

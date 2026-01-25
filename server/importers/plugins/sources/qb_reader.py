@@ -23,6 +23,13 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from ...core.text_cleaner import (
+    clean_quiz_bowl_text,
+    clean_science_bowl_answer,
+    generate_text_forms,
+    contains_quiz_bowl_markers,
+)
+
 
 class KBDomain(str, Enum):
     """Knowledge Bowl domains matching iOS app."""
@@ -224,7 +231,7 @@ def infer_answer_type(answer: str, question: str, category: str) -> KBAnswerType
 
 
 def transform_question(qb_question: dict[str, Any]) -> dict[str, Any] | None:
-    """Transform a QB Reader question to KB format."""
+    """Transform a QB Reader question to KB format with proper text form separation."""
     # Get question text (prefer sanitized version)
     question_text = qb_question.get("question_sanitized") or qb_question.get("question", "")
     answer_raw = qb_question.get("answer_sanitized") or qb_question.get("answer", "")
@@ -232,8 +239,13 @@ def transform_question(qb_question: dict[str, Any]) -> dict[str, Any] | None:
     if not question_text or not answer_raw:
         return None
 
-    # Clean question text
+    # Clean HTML from question text (keep QB markers for now)
     question_text = clean_html(question_text)
+
+    # Generate all text forms (pyramidal, medium, short) with proper cleaning
+    # pyramidalFull keeps QB markers for Quiz Bowl use
+    # mediumForm and shortForm are cleaned for Knowledge Bowl use
+    text_forms = generate_text_forms(question_text)
 
     # Map category
     category = qb_question.get("category", "Other Academic")
@@ -250,11 +262,14 @@ def transform_question(qb_question: dict[str, Any]) -> dict[str, Any] | None:
     difficulty = map_difficulty(qb_difficulty)
     grade_level = map_grade_level(qb_difficulty)
 
-    # Parse answer
+    # Parse answer and clean any Science Bowl prefixes
     primary, acceptable = extract_primary_answer(answer_raw)
+    primary = clean_science_bowl_answer(primary)
+    if acceptable:
+        acceptable = [clean_science_bowl_answer(a) for a in acceptable]
 
-    # Infer answer type
-    answer_type = infer_answer_type(primary, question_text, category)
+    # Infer answer type (use cleaned text for inference)
+    answer_type = infer_answer_type(primary, text_forms["mediumForm"], category)
 
     # Get source info
     set_info = qb_question.get("set", {})
@@ -270,9 +285,19 @@ def transform_question(qb_question: dict[str, Any]) -> dict[str, Any] | None:
     # Generate unique ID
     question_id = str(uuid.uuid4())
 
+    # Track whether this question has QB markers (for compatibility flags)
+    has_qb_markers = contains_quiz_bowl_markers(question_text)
+
     return {
         "id": question_id,
-        "text": question_text,
+        # Primary text field uses cleaned medium form for KB compatibility
+        "text": text_forms["mediumForm"],
+        # Content object with all text forms for multi-format support
+        "content": {
+            "pyramidalFull": text_forms["pyramidalFull"],
+            "mediumForm": text_forms["mediumForm"],
+            "shortForm": text_forms["shortForm"],
+        },
         "answer": {
             "primary": primary,
             "acceptable": acceptable,
@@ -288,6 +313,7 @@ def transform_question(qb_question: dict[str, Any]) -> dict[str, Any] | None:
             "mcqPossible": False,  # QB questions are typically short answer
             "requiresVisual": False
         },
+        "compatibleFormats": ["knowledgeBowl", "quizBowl"] if has_qb_markers else ["knowledgeBowl"],
         "mcqOptions": None,
         "source": source,
         "sourceAttribution": f"QB Reader / quizbowlpackets.com - {set_name}",

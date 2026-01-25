@@ -19,8 +19,8 @@ info:
 
     ## Base URL
     - Management API: `http://localhost:8766`
-    - USM Core: `http://localhost:8767`
-    - Web Interface: `http://localhost:3000`
+    - USM Core: `http://localhost:8787`
+    - Operations Console: `http://localhost:3000`
   version: 1.0.0
   contact:
     name: UnaMentis Support

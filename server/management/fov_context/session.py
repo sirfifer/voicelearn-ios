@@ -1,7 +1,7 @@
 """
 FOV Session Management - Server-side session state with FOV context
 
-Manages session lifecycle and integrates FOV context for voice tutoring.
+Manages session lifecycle and integrates FOV context for voice learning.
 """
 
 import logging
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 class SessionState(str, Enum):
-    """State of a voice tutoring session."""
+    """State of a voice learning session."""
     IDLE = "idle"
     PLAYING = "playing"           # Playing curriculum content
     USER_SPEAKING = "user_speaking"
@@ -151,7 +151,7 @@ class SessionEvent:
 @dataclass
 class FOVSession:
     """
-    A voice tutoring session with FOV context management.
+    A voice learning session with FOV context management.
 
     Maintains:
     - Session state and lifecycle

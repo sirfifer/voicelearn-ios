@@ -31,7 +31,7 @@ public actor MockLLMService: LLMService {
     // MARK: - Response Templates
 
     private let greetings = [
-        "Hello! I'm your AI tutor. How can I help you learn today?",
+        "Hello! I'm your AI learning assistant. How can I help you learn today?",
         "Hi there! Ready to explore some new topics together?",
         "Welcome! What would you like to learn about today?",
     ]

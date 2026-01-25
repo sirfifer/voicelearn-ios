@@ -59,7 +59,7 @@ logger = logging.getLogger(__name__)
 # MERLOT License Definitions
 # =============================================================================
 
-# Licenses that ALLOW derivatives (we can adapt for voice tutoring)
+# Licenses that ALLOW derivatives (we can adapt for voice learning)
 ALLOWED_LICENSES: Set[str] = {
     "CC0",
     "CC BY",
@@ -217,7 +217,7 @@ MATERIAL_TYPES = {
     "Learning Object": "learning_object",
 }
 
-# Priority material types for import (best for voice tutoring)
+# Priority material types for import (best for voice learning)
 PRIORITY_MATERIAL_TYPES = ["Open Textbook", "Tutorial", "Lecture", "Reference"]
 
 
@@ -918,7 +918,7 @@ class MERLOTHandler(CurriculumSourceHandler):
                 warnings=[
                     f"Cannot import: License ({license_type}) does not allow derivatives. "
                     f"Reason: {reason}. "
-                    "UnaMentis requires permission to create derivative works for voice tutoring."
+                    "UnaMentis requires permission to create derivative works for voice learning."
                 ],
                 attribution_text="",
             )

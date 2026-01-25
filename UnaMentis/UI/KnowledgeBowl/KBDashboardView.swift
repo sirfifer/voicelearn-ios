@@ -11,12 +11,25 @@ import SwiftUI
 
 struct KBDashboardView: View {
     @State private var engine = KBQuestionEngine()
+    @State private var store = KBSessionStore()
     @State private var selectedRegion: KBRegion = .colorado
     @State private var showingWrittenSession = false
     @State private var showingOralSession = false
     @State private var showingSettings = false
+    @State private var showingHelp = false
     @State private var writtenSessionViewModel: KBWrittenSessionViewModel?
     @State private var oralSessionViewModel: KBOralSessionViewModel?
+    @State private var recentSessions: [KBSession] = []
+    @State private var statistics: KBStatistics?
+
+    // Competition Training states
+    @State private var showingMatchSimulation = false
+    @State private var showingConferenceTraining = false
+    @State private var showingReboundTraining = false
+    @State private var showingDomainDrill = false
+    @State private var matchQuestions: [KBQuestion] = []
+    @State private var conferenceQuestions: [KBQuestion] = []
+    @State private var reboundQuestions: [KBQuestion] = []
 
     var body: some View {
         NavigationStack {
@@ -27,6 +40,19 @@ struct KBDashboardView: View {
 
                     // Quick start section
                     quickStartSection
+
+                    // Competition Training section
+                    competitionTrainingSection
+
+                    // Session history
+                    if !recentSessions.isEmpty {
+                        sessionHistorySection
+                    }
+
+                    // Overall statistics
+                    if let statistics = statistics {
+                        statisticsSection(statistics)
+                    }
 
                     // Region selector
                     regionSelector
@@ -41,6 +67,13 @@ struct KBDashboardView: View {
             .background(Color.kbBgPrimary)
             .navigationTitle("Knowledge Bowl")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showingHelp = true }) {
+                        Image(systemName: "questionmark.circle")
+                    }
+                    .accessibilityLabel("Help")
+                    .accessibilityHint("Opens Knowledge Bowl help and strategy guide")
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingSettings = true }) {
                         Image(systemName: "gearshape")
@@ -49,9 +82,13 @@ struct KBDashboardView: View {
             }
             .task {
                 await loadQuestions()
+                await loadSessions()
             }
             .sheet(isPresented: $showingSettings) {
                 KBSettingsView(selectedRegion: $selectedRegion)
+            }
+            .sheet(isPresented: $showingHelp) {
+                KBHelpSheet()
             }
             .navigationDestination(isPresented: $showingWrittenSession) {
                 if let viewModel = writtenSessionViewModel {
@@ -62,6 +99,18 @@ struct KBDashboardView: View {
                 if let viewModel = oralSessionViewModel {
                     KBOralSessionView(viewModel: viewModel)
                 }
+            }
+            .navigationDestination(isPresented: $showingMatchSimulation) {
+                KBMatchSimulationView(region: selectedRegion, questions: matchQuestions)
+            }
+            .navigationDestination(isPresented: $showingConferenceTraining) {
+                KBConferenceTrainingView(region: selectedRegion, questions: conferenceQuestions)
+            }
+            .navigationDestination(isPresented: $showingReboundTraining) {
+                KBReboundTrainingView(region: selectedRegion, questions: reboundQuestions)
+            }
+            .navigationDestination(isPresented: $showingDomainDrill) {
+                KBDomainDrillView()
             }
         }
     }
@@ -128,11 +177,27 @@ struct KBDashboardView: View {
 
     private var quickStartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Quick Start")
-                .font(.headline)
-                .foregroundColor(.kbTextPrimary)
+            HStack {
+                Text("Quick Start")
+                    .font(.headline)
+                    .foregroundColor(.kbTextPrimary)
+                InfoButton(
+                    title: "Quick Start",
+                    content: KBHelpContent.UIElements.quickStart
+                )
+            }
 
             HStack(spacing: 12) {
+                // Oral Practice (Voice-first)
+                quickStartButton(
+                    icon: "mic.fill",
+                    title: "Oral",
+                    subtitle: "Voice Q&A",
+                    color: .kbMastered
+                ) {
+                    startOralPractice()
+                }
+
                 // Written Practice
                 quickStartButton(
                     icon: "pencil.and.list.clipboard",
@@ -141,16 +206,6 @@ struct KBDashboardView: View {
                     color: .kbIntermediate
                 ) {
                     startWrittenPractice()
-                }
-
-                // Oral Practice
-                quickStartButton(
-                    icon: "mic.fill",
-                    title: "Oral",
-                    subtitle: "Voice Q&A",
-                    color: .kbMastered
-                ) {
-                    startOralPractice()
                 }
             }
         }
@@ -189,13 +244,147 @@ struct KBDashboardView: View {
         .disabled(engine.totalQuestionCount == 0)
     }
 
+    // MARK: - Competition Training Section
+
+    private var competitionTrainingSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Competition Training")
+                    .font(.headline)
+                    .foregroundColor(.kbTextPrimary)
+                InfoButton(
+                    title: "Competition Training",
+                    content: KBHelpContent.General.gettingStarted
+                )
+            }
+
+            // First row: Match Simulation and Conference
+            HStack(spacing: 12) {
+                trainingModeButton(
+                    icon: "trophy.fill",
+                    title: "Match",
+                    subtitle: "Full Simulation",
+                    color: .yellow
+                ) {
+                    startMatchSimulation()
+                }
+
+                trainingModeButton(
+                    icon: "person.3.fill",
+                    title: "Conference",
+                    subtitle: "Team Practice",
+                    color: .purple
+                ) {
+                    startConferenceTraining()
+                }
+            }
+
+            // Second row: Rebound and Domain Drill
+            HStack(spacing: 12) {
+                trainingModeButton(
+                    icon: "arrow.uturn.left.circle.fill",
+                    title: "Rebound",
+                    subtitle: "Second Chance",
+                    color: .orange
+                ) {
+                    startReboundTraining()
+                }
+
+                trainingModeButton(
+                    icon: "target",
+                    title: "Domain Drill",
+                    subtitle: "Focus Practice",
+                    color: .cyan
+                ) {
+                    startDomainDrill()
+                }
+            }
+        }
+    }
+
+    private func trainingModeButton(
+        icon: String,
+        title: String,
+        subtitle: String,
+        color: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 24))
+                    .foregroundColor(color)
+
+                Text(title)
+                    .font(.subheadline.bold())
+                    .foregroundColor(.kbTextPrimary)
+
+                Text(subtitle)
+                    .font(.caption2)
+                    .foregroundColor(.kbTextSecondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Color.kbBgSecondary)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(color.opacity(0.3), lineWidth: 2)
+            )
+        }
+        .disabled(engine.totalQuestionCount == 0)
+    }
+
+    // MARK: - Training Mode Start Functions
+
+    private func startMatchSimulation() {
+        // Match simulation uses a mix of written and oral questions
+        let config = KBSessionConfig.quickPractice(
+            region: selectedRegion,
+            roundType: .oral,
+            questionCount: 20
+        )
+        matchQuestions = engine.selectForSession(config: config)
+        showingMatchSimulation = true
+    }
+
+    private func startConferenceTraining() {
+        let config = KBSessionConfig.quickPractice(
+            region: selectedRegion,
+            roundType: .oral,
+            questionCount: 15
+        )
+        conferenceQuestions = engine.selectForSession(config: config)
+        showingConferenceTraining = true
+    }
+
+    private func startReboundTraining() {
+        let config = KBSessionConfig.quickPractice(
+            region: selectedRegion,
+            roundType: .oral,
+            questionCount: 20
+        )
+        reboundQuestions = engine.selectForSession(config: config)
+        showingReboundTraining = true
+    }
+
+    private func startDomainDrill() {
+        showingDomainDrill = true
+    }
+
     // MARK: - Region Selector
 
     private var regionSelector: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Competition Region")
-                .font(.headline)
-                .foregroundColor(.kbTextPrimary)
+            HStack {
+                Text("Competition Region")
+                    .font(.headline)
+                    .foregroundColor(.kbTextPrimary)
+                InfoButton(
+                    title: "Region Selection",
+                    content: KBHelpContent.UIElements.regionSelector
+                )
+            }
 
             HStack(spacing: 8) {
                 ForEach([KBRegion.colorado, .minnesota, .washington], id: \.self) { region in
@@ -231,6 +420,190 @@ struct KBDashboardView: View {
                         .stroke(isSelected ? Color.clear : Color.kbBorder, lineWidth: 1)
                 )
         }
+    }
+
+    // MARK: - Session History Section
+
+    private var sessionHistorySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Recent Practice")
+                    .font(.headline)
+                    .foregroundColor(.kbTextPrimary)
+                InfoButton(
+                    title: "Session History",
+                    content: KBHelpContent.UIElements.sessionHistory
+                )
+            }
+
+            VStack(spacing: 8) {
+                ForEach(recentSessions.prefix(5)) { session in
+                    sessionHistoryCard(session)
+                }
+            }
+
+            if recentSessions.count > 5 {
+                Text("+ \(recentSessions.count - 5) more sessions")
+                    .font(.caption)
+                    .foregroundColor(.kbTextSecondary)
+                    .padding(.top, 4)
+            }
+        }
+    }
+
+    private func sessionHistoryCard(_ session: KBSession) -> some View {
+        HStack(spacing: 12) {
+            // Round type icon
+            Image(systemName: session.config.roundType == .written ? "pencil.and.list.clipboard" : "mic.fill")
+                .font(.title3)
+                .foregroundColor(session.config.roundType == .written ? .kbIntermediate : .kbMastered)
+                .frame(width: 40, height: 40)
+                .background(
+                    (session.config.roundType == .written ? Color.kbIntermediate : Color.kbMastered)
+                        .opacity(0.1)
+                )
+                .cornerRadius(8)
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("\(session.config.roundType == .written ? "Written" : "Oral") Practice")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.kbTextPrimary)
+
+                    Spacer()
+
+                    Text(formatAccuracy(session.accuracy))
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(session.accuracy >= 0.7 ? .kbMastered : .kbBeginner)
+                }
+
+                HStack(spacing: 12) {
+                    Text("\(session.correctCount)/\(session.attempts.count) correct")
+                        .font(.caption)
+                        .foregroundColor(.kbTextSecondary)
+
+                    if let endTime = session.endTime {
+                        Text("•")
+                            .foregroundColor(.kbTextSecondary)
+                        Text(formatRelativeDate(endTime))
+                            .font(.caption)
+                            .foregroundColor(.kbTextSecondary)
+                    }
+
+                    Text("•")
+                        .foregroundColor(.kbTextSecondary)
+                    Text(session.config.region.abbreviation)
+                        .font(.caption)
+                        .foregroundColor(.kbTextSecondary)
+                }
+            }
+        }
+        .padding()
+        .background(Color.kbBgSecondary)
+        .cornerRadius(12)
+    }
+
+    // MARK: - Statistics Section
+
+    private func statisticsSection(_ stats: KBStatistics) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Overall Progress")
+                .font(.headline)
+                .foregroundColor(.kbTextPrimary)
+
+            HStack(spacing: 12) {
+                // Overall accuracy
+                VStack(spacing: 8) {
+                    ZStack {
+                        Circle()
+                            .stroke(Color.kbBorder, lineWidth: 8)
+                            .frame(width: 80, height: 80)
+
+                        Circle()
+                            .trim(from: 0, to: stats.overallAccuracy)
+                            .stroke(
+                                stats.overallAccuracy >= 0.7 ? Color.kbMastered : Color.kbBeginner,
+                                style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                            )
+                            .frame(width: 80, height: 80)
+                            .rotationEffect(.degrees(-90))
+
+                        Text(formatAccuracy(stats.overallAccuracy))
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.kbTextPrimary)
+                    }
+
+                    Text("Overall")
+                        .font(.caption)
+                        .foregroundColor(.kbTextSecondary)
+                }
+
+                Spacer()
+
+                // Stats grid
+                VStack(alignment: .leading, spacing: 8) {
+                    statRow(label: "Sessions", value: "\(stats.totalSessions)")
+                    statRow(label: "Questions", value: "\(stats.totalQuestions)")
+                    statRow(label: "Streak", value: "\(stats.currentStreak) days")
+                }
+            }
+            .padding()
+            .background(Color.kbBgSecondary)
+            .cornerRadius(12)
+
+            // Oral vs Written breakdown (voice-first)
+            HStack(spacing: 12) {
+                statCard(
+                    title: "Oral",
+                    value: formatAccuracy(stats.oralAccuracy),
+                    color: .kbMastered
+                )
+
+                statCard(
+                    title: "Written",
+                    value: formatAccuracy(stats.writtenAccuracy),
+                    color: .kbIntermediate
+                )
+            }
+        }
+    }
+
+    private func statRow(label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.kbTextSecondary)
+            Spacer()
+            Text(value)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.kbTextPrimary)
+        }
+        .frame(width: 140)
+    }
+
+    private func statCard(title: String, value: String, color: Color) -> some View {
+        VStack(spacing: 4) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.kbTextSecondary)
+
+            Text(value)
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundColor(color)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.kbBgSecondary)
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(color.opacity(0.3), lineWidth: 1)
+        )
     }
 
     // MARK: - Stats Section
@@ -299,6 +672,44 @@ struct KBDashboardView: View {
             try await engine.loadBundledQuestions()
         } catch {
             // Error is captured in engine.loadError
+        }
+    }
+
+    private func loadSessions() async {
+        do {
+            recentSessions = try await store.loadRecent(limit: 10)
+            statistics = try await store.calculateStatistics()
+        } catch {
+            print("[KB] Failed to load sessions: \(error)")
+        }
+    }
+
+    // MARK: - Formatting Helpers
+
+    private func formatAccuracy(_ accuracy: Double) -> String {
+        String(format: "%.0f%%", accuracy * 100)
+    }
+
+    private func formatRelativeDate(_ date: Date) -> String {
+        let now = Date()
+        let interval = now.timeIntervalSince(date)
+
+        if interval < 60 {
+            return "Just now"
+        } else if interval < 3600 {
+            let mins = Int(interval / 60)
+            return "\(mins)m ago"
+        } else if interval < 86400 {
+            let hours = Int(interval / 3600)
+            return "\(hours)h ago"
+        } else if interval < 604800 {
+            let days = Int(interval / 86400)
+            return "\(days)d ago"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .short
+            formatter.timeStyle = .none
+            return formatter.string(from: date)
         }
     }
 

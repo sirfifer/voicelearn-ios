@@ -256,7 +256,7 @@ export class OpenAIRealtimeProvider {
       type: 'session.update',
       session: {
         modalities: ['text', 'audio'],
-        instructions: this.config.instructions || 'You are a helpful AI tutor.',
+        instructions: this.config.instructions || 'You are a helpful AI learning assistant.',
         voice: this.config.voice || 'coral',
         input_audio_format: 'pcm16',
         output_audio_format: 'pcm16',

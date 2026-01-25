@@ -58,7 +58,7 @@ export const sessionControlsHelp: Record<string, HelpContent> = {
   startSession: {
     title: 'Start Session',
     description:
-      'Begin a new voice tutoring session. Make sure your microphone is connected and you have selected a curriculum topic.',
+      'Begin a new voice learning session. Make sure your microphone is connected and you have selected a curriculum topic.',
     shortcut: 'Space',
     tips: [
       'Grant microphone permissions when prompted',
@@ -166,7 +166,7 @@ export const curriculumHelp: Record<string, HelpContent> = {
 export const settingsHelp: Record<string, HelpContent> = {
   voiceSettings: {
     title: 'Voice Settings',
-    description: "Configure the AI tutor's voice, speed, and language preferences.",
+    description: "Configure the AI's voice, speed, and language preferences.",
     tips: [
       'Try different voices to find one you like',
       'Adjust speed if the AI speaks too fast or slow',
@@ -308,7 +308,7 @@ export const onboardingSteps: OnboardingStep[] = [
     id: 'welcome',
     title: 'Welcome to UnaMentis',
     description:
-      'UnaMentis is your personal AI tutor for voice-based learning. Let us show you around.',
+      'UnaMentis is your personal AI learning assistant for voice-based learning. Let us show you around.',
   },
   {
     id: 'curriculum',
@@ -322,7 +322,7 @@ export const onboardingSteps: OnboardingStep[] = [
     id: 'session-controls',
     title: 'Start a Session',
     description:
-      'Once you have selected a topic, click the Start button or press Space to begin a voice session with your AI tutor.',
+      'Once you have selected a topic, click the Start button or press Space to begin a voice learning session.',
     targetSelector: '[data-tour="session-controls"]',
     position: 'top',
   },
@@ -362,7 +362,7 @@ export const onboardingSteps: OnboardingStep[] = [
     id: 'complete',
     title: 'You are Ready!',
     description:
-      'That is the basics! Start a session whenever you are ready. The AI tutor will guide you through the material.',
+      'That is the basics! Start a session whenever you are ready. The AI will guide you through the material.',
   },
 ];
 
@@ -374,7 +374,7 @@ export const generalHelp: Record<string, HelpContent> = {
   voiceLearning: {
     title: 'Voice-Based Learning',
     description:
-      'UnaMentis uses voice as the primary interface for learning. Speak naturally to ask questions, request explanations, or discuss concepts with your AI tutor.',
+      'UnaMentis uses voice as the primary interface for learning. Speak naturally to ask questions, request explanations, or discuss concepts with the AI.',
     tips: [
       'Speak clearly and at a natural pace',
       'You can interrupt the AI to ask questions',
@@ -419,7 +419,7 @@ export const generalHelp: Record<string, HelpContent> = {
   onboarding: {
     title: 'Welcome to UnaMentis',
     description:
-      'This app lets you learn through voice conversations with an AI tutor. Get started by selecting a curriculum, configuring your audio settings, and starting a session.',
+      'This app lets you learn through voice conversations with the AI. Get started by selecting a curriculum, configuring your audio settings, and starting a session.',
     tips: [
       'Go to Settings to configure your audio devices',
       'Import or browse available curricula',
@@ -435,7 +435,7 @@ export const generalHelp: Record<string, HelpContent> = {
 export const sessionViewHelp: Record<string, HelpContent> = {
   overview: {
     title: 'Session Overview',
-    description: 'This is your voice conversation interface. Speak naturally and the AI tutor will respond.',
+    description: 'This is your voice conversation interface. Speak naturally and the AI will respond.',
   },
   statusIndicator: {
     title: 'Status Indicator',

@@ -194,7 +194,10 @@ export class TestHooks {
           provider: this.config.llm,
           model: this.config.llmModel,
           messages: [
-            { role: 'system', content: 'You are a helpful tutor. Be concise but informative.' },
+            {
+              role: 'system',
+              content: 'You are a helpful AI learning assistant. Be concise but informative.',
+            },
             // Include conversation history for context
             ...this.turns
               .map((t) => [

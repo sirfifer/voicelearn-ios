@@ -1,7 +1,7 @@
 /**
  * Session State Machine
  *
- * XState v5 state machine for managing voice tutoring sessions.
+ * XState v5 state machine for managing voice learning sessions.
  * Mirrors the iOS client session states for consistency.
  */
 

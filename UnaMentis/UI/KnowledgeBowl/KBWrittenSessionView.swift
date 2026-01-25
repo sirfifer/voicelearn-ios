@@ -86,6 +86,11 @@ struct KBWrittenSessionView: View {
                     isActive: viewModel.timerState.pulseSpeed != nil,
                     speed: viewModel.timerState.pulseSpeed ?? 1.0
                 ))
+
+            InfoButton(
+                title: "Timer",
+                content: KBHelpContent.TrainingModes.writtenTimer
+            )
         }
         .padding(.horizontal)
     }

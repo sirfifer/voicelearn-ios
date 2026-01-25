@@ -33,17 +33,52 @@ actor KBAnswerValidator {
     }
 
     private let config: Config
+    private let strictness: KBValidationStrictness
+
+    // MARK: - Tier 1 Algorithms
+
+    private let phoneticMatcher: KBPhoneticMatcher?
+    private let ngramMatcher: KBNGramMatcher?
+    private let tokenMatcher: KBTokenMatcher?
+    private let synonymMatcher: KBSynonymMatcher?
+    private let linguisticMatcher: KBLinguisticMatcher?
+
+    // MARK: - Tier 2 & 3 Models
+
+    private let embeddingsService: KBEmbeddingsService?
+    private let llmValidator: KBLLMValidator?
+    private let featureFlags: KBFeatureFlags?
 
     // MARK: - Initialization
 
-    init(config: Config = .standard) {
+    init(
+        config: Config = .standard,
+        strictness: KBValidationStrictness = .standard,
+        phoneticMatcher: KBPhoneticMatcher? = KBPhoneticMatcher(),
+        ngramMatcher: KBNGramMatcher? = KBNGramMatcher(),
+        tokenMatcher: KBTokenMatcher? = KBTokenMatcher(),
+        synonymMatcher: KBSynonymMatcher? = KBSynonymMatcher(),
+        linguisticMatcher: KBLinguisticMatcher? = KBLinguisticMatcher(),
+        embeddingsService: KBEmbeddingsService? = nil,
+        llmValidator: KBLLMValidator? = nil,
+        featureFlags: KBFeatureFlags? = nil
+    ) {
         self.config = config
+        self.strictness = strictness
+        self.phoneticMatcher = phoneticMatcher
+        self.ngramMatcher = ngramMatcher
+        self.tokenMatcher = tokenMatcher
+        self.synonymMatcher = synonymMatcher
+        self.linguisticMatcher = linguisticMatcher
+        self.embeddingsService = embeddingsService
+        self.llmValidator = llmValidator
+        self.featureFlags = featureFlags
     }
 
     // MARK: - Public API
 
     /// Validate a user's answer against the question's correct answer
-    nonisolated func validate(userAnswer: String, question: KBQuestion) -> KBValidationResult {
+    nonisolated func validate(userAnswer: String, question: KBQuestion) async -> KBValidationResult {
         let answer = question.answer
 
         // Normalize the user answer
@@ -79,7 +114,7 @@ actor KBAnswerValidator {
 
         // 3. Fuzzy matching (if not in strict mode)
         if !config.strictMode {
-            let fuzzyResult = fuzzyMatch(normalizedUser, against: answer)
+            let fuzzyResult = await fuzzyMatch(normalizedUser, against: answer)
             if fuzzyResult.isCorrect {
                 return fuzzyResult
             }
@@ -281,41 +316,164 @@ actor KBAnswerValidator {
 
     // MARK: - Fuzzy Matching
 
-    nonisolated private func fuzzyMatch(_ userAnswer: String, against answer: KBAnswer) -> KBValidationResult {
-        let threshold = max(2, Int(Double(answer.primary.count) * config.fuzzyThresholdPercent))
+    nonisolated private func fuzzyMatch(_ userAnswer: String, against answer: KBAnswer) async -> KBValidationResult {
+        let candidates = [answer.primary] + (answer.acceptable ?? [])
 
-        // Check against primary answer
-        let primaryDistance = levenshteinDistance(userAnswer, normalize(answer.primary, for: answer.answerType))
-        if primaryDistance <= threshold {
-            let confidence = 1.0 - (Float(primaryDistance) / Float(max(1, answer.primary.count)))
-            if confidence >= config.minimumConfidence {
-                logger.debug("Fuzzy match (distance \(primaryDistance)): \(userAnswer) -> \(answer.primary)")
-                return KBValidationResult(
-                    isCorrect: true,
-                    confidence: confidence,
-                    matchType: .fuzzy,
-                    matchedAnswer: answer.primary
-                )
+        // 1. Levenshtein fuzzy matching (baseline)
+        for candidate in candidates {
+            let normalizedCandidate = normalize(candidate, for: answer.answerType)
+            let distance = levenshteinDistance(userAnswer, normalizedCandidate)
+            let candidateThreshold = max(2, Int(Double(candidate.count) * config.fuzzyThresholdPercent))
+
+            if distance <= candidateThreshold {
+                let confidence = 1.0 - (Float(distance) / Float(max(1, candidate.count)))
+                if confidence >= config.minimumConfidence {
+                    logger.debug("Levenshtein match (distance \(distance)): \(userAnswer) -> \(candidate)")
+                    return KBValidationResult(
+                        isCorrect: true,
+                        confidence: confidence,
+                        matchType: .fuzzy,
+                        matchedAnswer: candidate
+                    )
+                }
             }
         }
 
-        // Check against acceptable alternatives
-        if let acceptable = answer.acceptable {
-            for alt in acceptable {
-                let altDistance = levenshteinDistance(userAnswer, normalize(alt, for: answer.answerType))
-                let altThreshold = max(2, Int(Double(alt.count) * config.fuzzyThresholdPercent))
-                if altDistance <= altThreshold {
-                    let confidence = 1.0 - (Float(altDistance) / Float(max(1, alt.count)))
-                    if confidence >= config.minimumConfidence {
-                        logger.debug("Fuzzy match (distance \(altDistance)): \(userAnswer) -> \(alt)")
+        // Enhanced algorithms (if strictness >= .standard)
+        guard strictness >= .standard else {
+            return KBValidationResult(isCorrect: false, confidence: 0, matchType: .none, matchedAnswer: nil)
+        }
+
+        // 2. Synonym check
+        if let synonymMatcher = synonymMatcher {
+            for candidate in candidates {
+                if synonymMatcher.areSynonyms(userAnswer, candidate, for: answer.answerType) {
+                    logger.debug("Synonym match: \(userAnswer) -> \(candidate)")
+                    return KBValidationResult(
+                        isCorrect: true,
+                        confidence: 0.95,
+                        matchType: .fuzzy,
+                        matchedAnswer: candidate
+                    )
+                }
+            }
+        }
+
+        // 3. Phonetic check (Double Metaphone)
+        if let phoneticMatcher = phoneticMatcher {
+            for candidate in candidates {
+                if phoneticMatcher.arePhoneticMatch(userAnswer, candidate) {
+                    logger.debug("Phonetic match: \(userAnswer) -> \(candidate)")
+                    return KBValidationResult(
+                        isCorrect: true,
+                        confidence: 0.90,
+                        matchType: .fuzzy,
+                        matchedAnswer: candidate
+                    )
+                }
+            }
+        }
+
+        // 4. N-gram similarity check
+        if let ngramMatcher = ngramMatcher {
+            for candidate in candidates {
+                let score = ngramMatcher.nGramScore(userAnswer, candidate)
+                if score >= 0.80 {
+                    logger.debug("N-gram match (score \(score)): \(userAnswer) -> \(candidate)")
+                    return KBValidationResult(
+                        isCorrect: true,
+                        confidence: score,
+                        matchType: .fuzzy,
+                        matchedAnswer: candidate
+                    )
+                }
+            }
+        }
+
+        // 5. Token-based similarity
+        if let tokenMatcher = tokenMatcher {
+            for candidate in candidates {
+                let score = tokenMatcher.tokenScore(userAnswer, candidate)
+                if score >= 0.80 {
+                    logger.debug("Token match (score \(score)): \(userAnswer) -> \(candidate)")
+                    return KBValidationResult(
+                        isCorrect: true,
+                        confidence: score,
+                        matchType: .fuzzy,
+                        matchedAnswer: candidate
+                    )
+                }
+            }
+        }
+
+        // 6. Linguistic matching (lemmatization)
+        if let linguisticMatcher = linguisticMatcher {
+            for candidate in candidates {
+                if linguisticMatcher.areLemmasEquivalent(userAnswer, candidate) {
+                    logger.debug("Linguistic match: \(userAnswer) -> \(candidate)")
+                    return KBValidationResult(
+                        isCorrect: true,
+                        confidence: 0.85,
+                        matchType: .fuzzy,
+                        matchedAnswer: candidate
+                    )
+                }
+            }
+        }
+
+        // Semantic algorithms (if strictness >= .lenient)
+        guard strictness >= .lenient else {
+            return KBValidationResult(isCorrect: false, confidence: 0, matchType: .none, matchedAnswer: nil)
+        }
+
+        // 7. Embeddings-based semantic matching (Tier 2)
+        if let embeddingsService = embeddingsService,
+           await embeddingsService.currentState() == .loaded {
+            do {
+                for candidate in candidates {
+                    let similarity = try await embeddingsService.similarity(userAnswer, candidate)
+                    if similarity >= 0.85 {
+                        logger.debug("Embeddings match (similarity \(similarity)): \(userAnswer) -> \(candidate)")
                         return KBValidationResult(
                             isCorrect: true,
-                            confidence: confidence,
-                            matchType: .fuzzy,
-                            matchedAnswer: alt
+                            confidence: similarity,
+                            matchType: .ai,
+                            matchedAnswer: candidate
                         )
                     }
                 }
+            } catch {
+                logger.error("Embeddings inference failed: \(error.localizedDescription)")
+                // Fall through to next tier
+            }
+        }
+
+        // 8. LLM validation (Tier 3)
+        if let llmValidator = llmValidator,
+           let featureFlags = featureFlags,
+           await llmValidator.currentState() == .loaded,
+           await featureFlags.isFeatureEnabled(.llmValidation) {
+            do {
+                // LLM validates against primary answer
+                let isCorrect = try await llmValidator.validate(
+                    userAnswer: userAnswer,
+                    correctAnswer: answer.primary,
+                    question: "",  // TODO: Pass question text from caller
+                    answerType: answer.answerType
+                )
+
+                if isCorrect {
+                    logger.debug("LLM validation match: \(userAnswer) -> \(answer.primary)")
+                    return KBValidationResult(
+                        isCorrect: true,
+                        confidence: 0.98,
+                        matchType: .ai,
+                        matchedAnswer: answer.primary
+                    )
+                }
+            } catch {
+                logger.error("LLM validation failed: \(error.localizedDescription)")
+                // Fall through to incorrect
             }
         }
 
@@ -323,6 +481,7 @@ actor KBAnswerValidator {
     }
 
     /// Calculate Levenshtein distance between two strings
+    /// Optimized to use O(min(m,n)) space instead of O(m*n)
     nonisolated private func levenshteinDistance(_ s1: String, _ s2: String) -> Int {
         let m = s1.count
         let n = s2.count
@@ -330,30 +489,34 @@ actor KBAnswerValidator {
         if m == 0 { return n }
         if n == 0 { return m }
 
-        let s1Array = Array(s1)
-        let s2Array = Array(s2)
+        // Ensure s2 is the shorter string for space optimization
+        let (shorter, longer) = m < n ? (s1, s2) : (s2, s1)
+        let shortLen = shorter.count
+        let longLen = longer.count
 
-        var matrix = [[Int]](repeating: [Int](repeating: 0, count: n + 1), count: m + 1)
+        let shortArray = Array(shorter)
+        let longArray = Array(longer)
 
-        for i in 0...m {
-            matrix[i][0] = i
-        }
-        for j in 0...n {
-            matrix[0][j] = j
-        }
+        // Only keep two rows: previous and current
+        var previousRow = [Int](0...shortLen)
+        var currentRow = [Int](repeating: 0, count: shortLen + 1)
 
-        for i in 1...m {
-            for j in 1...n {
-                let cost = s1Array[i - 1] == s2Array[j - 1] ? 0 : 1
-                matrix[i][j] = min(
-                    matrix[i - 1][j] + 1,     // deletion
-                    matrix[i][j - 1] + 1,     // insertion
-                    matrix[i - 1][j - 1] + cost  // substitution
+        for i in 1...longLen {
+            currentRow[0] = i
+
+            for j in 1...shortLen {
+                let cost = longArray[i - 1] == shortArray[j - 1] ? 0 : 1
+                currentRow[j] = min(
+                    previousRow[j] + 1,        // deletion
+                    currentRow[j - 1] + 1,     // insertion
+                    previousRow[j - 1] + cost  // substitution
                 )
             }
+
+            swap(&previousRow, &currentRow)
         }
 
-        return matrix[m][n]
+        return previousRow[shortLen]
     }
 }
 

@@ -2,16 +2,15 @@
 //  KBOnDeviceTTS.swift
 //  UnaMentis
 //
-//  On-device text-to-speech using AVSpeechSynthesizer for Knowledge Bowl oral rounds
+//  TTS adapter for Knowledge Bowl that respects user's global TTS provider setting
 //
-//  TODO: Consider full TTSService protocol conformance for provider flexibility
 
 import AVFoundation
 import OSLog
 
-// MARK: - On-Device TTS Service
+// MARK: - Knowledge Bowl TTS Adapter
 
-/// Provides offline text-to-speech capability using AVSpeechSynthesizer
+/// TTS adapter for Knowledge Bowl that delegates to the user's configured TTS provider
 actor KBOnDeviceTTS {
     // MARK: - State
 
@@ -21,12 +20,7 @@ actor KBOnDeviceTTS {
 
     // MARK: - Private State
 
-    // MainActor-only properties (AVSpeechSynthesizer requires main thread)
-    nonisolated(unsafe) private var synthesizer: AVSpeechSynthesizer?
-    nonisolated(unsafe) private var delegateHandler: TTSDelegateHandler?
-    nonisolated(unsafe) private var currentUtterance: AVSpeechUtterance?
-
-    private var completionContinuation: CheckedContinuation<Void, Never>?
+    private var ttsService: TTSService?
     private let logger = Logger(subsystem: "com.unamentis", category: "KBOnDeviceTTS")
 
     // MARK: - Configuration
@@ -62,7 +56,8 @@ actor KBOnDeviceTTS {
     // MARK: - Initialization
 
     init() {
-        logger.info("KBOnDeviceTTS initialized")
+        logger.info("KBOnDeviceTTS initialized - will use global TTS provider setting")
+        // Service is created lazily on first use to respect user settings
     }
 
     // MARK: - Public API
@@ -74,74 +69,98 @@ actor KBOnDeviceTTS {
 
     /// Speak text with custom configuration
     func speak(_ text: String, config: VoiceConfig) async {
-        // Ensure synthesizer is created on main thread
-        if synthesizer == nil {
-            await MainActor.run {
-                let synth = AVSpeechSynthesizer()
-                self.delegateHandler = TTSDelegateHandler(actor: self)
-                synth.delegate = self.delegateHandler
-                self.synthesizer = synth
-                self.configureAudioSession()
-            }
-        }
+        NSLog("🟢 KBOnDeviceTTS.speak() START - text length: \(text.count)")
 
-        guard synthesizer != nil else {
-            logger.error("Failed to create synthesizer")
+        // Ensure TTS service is configured
+        await ensureServiceConfigured()
+
+        NSLog("🟢 KBOnDeviceTTS.speak() - after ensureServiceConfigured, ttsService exists: \(ttsService != nil)")
+
+        guard let service = ttsService else {
+            logger.error("Failed to configure TTS service")
+            NSLog("🔴 KBOnDeviceTTS.speak() - NO TTS SERVICE, returning")
             return
         }
 
-        // Stop any current speech
-        if isSpeaking {
-            await MainActor.run {
-                self.synthesizer?.stopSpeaking(at: .immediate)
-            }
-        }
+        NSLog("🟢 KBOnDeviceTTS.speak() - service type: \(type(of: service))")
 
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            Task {
-                await self.startSpeech(text, config: config, continuation: continuation)
-            }
-        }
-    }
-
-    private func startSpeech(_ text: String, config: VoiceConfig, continuation: CheckedContinuation<Void, Never>) async {
-        completionContinuation = continuation
-        progress = 0
         isSpeaking = true
-        isPaused = false
+        progress = 0
 
-        logger.debug("Speaking: \(text.prefix(50))...")
+        do {
+            NSLog("🟢 KBOnDeviceTTS.speak() - calling service.synthesize()")
+            // Use the configured TTS service (respects user's global setting)
+            let audioStream = try await service.synthesize(text: text)
+            NSLog("🟢 KBOnDeviceTTS.speak() - synthesize() returned stream")
 
-        // Create and speak utterance on main thread
-        await MainActor.run {
-            let utterance = AVSpeechUtterance(string: text)
-            utterance.rate = config.rate
-            utterance.pitchMultiplier = config.pitchMultiplier
-            utterance.volume = config.volume
-            utterance.preUtteranceDelay = config.preUtteranceDelay
-            utterance.postUtteranceDelay = config.postUtteranceDelay
+            // AppleTTSService plays audio internally, others need external playback
+            if service is AppleTTSService {
+                NSLog("🟡 KBOnDeviceTTS.speak() - using AppleTTSService path")
+                // AppleTTSService handles playback internally - just track progress
+                var chunkCount = 0
+                for try await chunk in audioStream {
+                    chunkCount += 1
+                    if chunk.isFirst {
+                        progress = 0.1
+                        NSLog("🟡 First chunk received")
+                    } else if chunk.isLast {
+                        progress = 1.0
+                        NSLog("🟡 Last chunk received, total chunks: \(chunkCount)")
+                    } else {
+                        progress += 0.1
+                    }
+                }
+            } else {
+                NSLog("🟡 KBOnDeviceTTS.speak() - using Kyutai/external playback path")
+                // For services that return raw audio (e.g., Kyutai), collect and play
+                var audioChunks: [TTSAudioChunk] = []
 
-            // Select voice
-            if let voice = AVSpeechSynthesisVoice(language: config.language) {
-                utterance.voice = voice
+                for try await chunk in audioStream {
+                    audioChunks.append(chunk)
+
+                    // Update progress during collection
+                    if chunk.isFirst {
+                        progress = 0.1
+                        NSLog("🟡 First audio chunk received")
+                    } else if !chunk.isLast {
+                        progress = min(0.5, Float(audioChunks.count) * 0.05)
+                    }
+                }
+
+                NSLog("🟡 Collected \(audioChunks.count) audio chunks")
+
+                // Play the collected audio
+                if !audioChunks.isEmpty {
+                    NSLog("🟡 Playing collected audio...")
+                    await playAudioChunks(audioChunks)
+                    NSLog("🟡 Audio playback complete")
+                } else {
+                    NSLog("🔴 No audio chunks to play!")
+                }
             }
 
-            self.currentUtterance = utterance
-            self.synthesizer?.speak(utterance)
+            isSpeaking = false
+            progress = 1.0
+            NSLog("🟢 KBOnDeviceTTS.speak() COMPLETE")
+
+        } catch {
+            logger.error("TTS synthesis failed: \(error.localizedDescription)")
+            NSLog("🔴 KBOnDeviceTTS.speak() ERROR: \(error.localizedDescription)")
+            isSpeaking = false
+            progress = 0
         }
     }
 
     /// Speak a Knowledge Bowl question
     func speakQuestion(_ question: KBQuestion, config: VoiceConfig = .questionPace) async {
+        logger.info("[KB-TTS] Speaking question: \(question.text.prefix(50))...")
         await speak(question.text, config: config)
     }
 
     /// Pause speech
     func pause() {
+        // Not all TTS services support pause, but we set the flag
         guard isSpeaking, !isPaused else { return }
-        Task { @MainActor in
-            self.synthesizer?.pauseSpeaking(at: .word)
-        }
         isPaused = true
         logger.debug("Speech paused")
     }
@@ -149,92 +168,203 @@ actor KBOnDeviceTTS {
     /// Resume speech
     func resume() {
         guard isPaused else { return }
-        Task { @MainActor in
-            self.synthesizer?.continueSpeaking()
-        }
         isPaused = false
         logger.debug("Speech resumed")
     }
 
-    /// Stop speech immediately
-    func stop() {
-        Task { @MainActor in
-            self.synthesizer?.stopSpeaking(at: .immediate)
+    /// Stop speech
+    func stop() async {
+        if let service = ttsService {
+            try? await service.flush()
         }
+
         isSpeaking = false
         isPaused = false
         progress = 0
-        currentUtterance = nil
-
-        // CRITICAL: Resume continuation to prevent leak
-        if let continuation = completionContinuation {
-            continuation.resume()
-            completionContinuation = nil
-        }
-
         logger.debug("Speech stopped")
     }
 
-    // MARK: - Audio Session
+    // MARK: - Private Helpers
 
-    @MainActor
-    private func configureAudioSession() {
+    /// Play audio chunks using AVAudioPlayer
+    private func playAudioChunks(_ chunks: [TTSAudioChunk]) async {
+        guard !chunks.isEmpty else { return }
+
+        // Combine all audio data
+        var combinedData = Data()
+        var sampleRate: Double = 24000.0
+        var isFloat32 = false
+
+        for chunk in chunks {
+            combinedData.append(chunk.audioData)
+
+            // Extract format from first chunk
+            if case .pcmFloat32(let rate, _) = chunk.format {
+                sampleRate = rate
+                isFloat32 = true
+            }
+        }
+
+        guard !combinedData.isEmpty else {
+            logger.warning("No audio data to play")
+            return
+        }
+
+        NSLog("🟡 playAudioChunks: combined data size: \(combinedData.count) bytes, sampleRate: \(sampleRate), isFloat32: \(isFloat32)")
+
+        progress = 0.6
+
         do {
+            // Configure audio session for playback BEFORE creating player
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+            try session.setCategory(.playback, mode: .default)
             try session.setActive(true)
+            NSLog("🟡 Audio session configured for playback")
+
+            // Create WAV file for AVAudioPlayer
+            let wavData = createWAVFile(pcm: combinedData, sampleRate: Int(sampleRate), isFloat32: isFloat32)
+            NSLog("🟡 WAV data created: \(wavData.count) bytes")
+
+            // Write to Documents directory for analysis (DEBUG: keep file for verification)
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let tempURL = documentsURL.appendingPathComponent("kyutai_tts_output.wav")
+
+            try wavData.write(to: tempURL)
+            NSLog("🟡 WAV written to: \(tempURL.path)")
+
+            progress = 0.7
+
+            // Play using AVAudioPlayer - must be created and played on MainActor
+            let duration = await MainActor.run { () -> TimeInterval in
+                do {
+                    let player = try AVAudioPlayer(contentsOf: tempURL)
+                    player.prepareToPlay()
+                    let duration = player.duration
+                    NSLog("🟡 AVAudioPlayer duration: \(duration) seconds")
+                    player.play()
+                    return duration
+                } catch {
+                    logger.error("Failed to play audio: \(error.localizedDescription)")
+                    NSLog("🔴 AVAudioPlayer error: \(error.localizedDescription)")
+                    return 0
+                }
+            }
+
+            progress = 0.8
+
+            // Wait for playback duration plus a small buffer
+            if duration > 0 {
+                try? await Task.sleep(nanoseconds: UInt64((duration + 0.5) * 1_000_000_000))
+            }
+
+            // DEBUG: Keep WAV file for analysis - do NOT delete
+            // try? FileManager.default.removeItem(at: tempURL)
+            NSLog("🟡 WAV file preserved at: \(tempURL.path)")
+
+            progress = 1.0
+
         } catch {
-            logger.error("Failed to configure audio session: \(error.localizedDescription)")
+            logger.error("Failed to play audio: \(error.localizedDescription)")
         }
     }
 
-    // MARK: - Delegate Callbacks
+    /// Create WAV file from PCM data
+    private func createWAVFile(pcm: Data, sampleRate: Int, isFloat32: Bool) -> Data {
+        var wavData = Data()
 
-    func speechDidStart() {
-        isSpeaking = true
-        logger.debug("Speech started")
+        let numChannels: UInt16 = 1
+        let bitsPerSample: UInt16 = isFloat32 ? 32 : 16
+        let byteRate = UInt32(sampleRate) * UInt32(numChannels) * UInt32(bitsPerSample / 8)
+        let blockAlign = numChannels * (bitsPerSample / 8)
+        let audioFormat: UInt16 = isFloat32 ? 3 : 1  // 3 = IEEE float, 1 = PCM
+
+        // RIFF header
+        wavData.append("RIFF".data(using: .ascii)!)
+        wavData.append(UInt32(36 + pcm.count).littleEndianData)
+        wavData.append("WAVE".data(using: .ascii)!)
+
+        // fmt chunk
+        wavData.append("fmt ".data(using: .ascii)!)
+        wavData.append(UInt32(16).littleEndianData)
+        wavData.append(audioFormat.littleEndianData)
+        wavData.append(numChannels.littleEndianData)
+        wavData.append(UInt32(sampleRate).littleEndianData)
+        wavData.append(byteRate.littleEndianData)
+        wavData.append(blockAlign.littleEndianData)
+        wavData.append(bitsPerSample.littleEndianData)
+
+        // data chunk
+        wavData.append("data".data(using: .ascii)!)
+        wavData.append(UInt32(pcm.count).littleEndianData)
+        wavData.append(pcm)
+
+        return wavData
     }
 
-    func speechDidFinish() {
-        isSpeaking = false
-        isPaused = false
-        progress = 1.0
-        logger.debug("Speech finished")
+    /// Ensure TTS service is configured based on user settings
+    private func ensureServiceConfigured() async {
+        NSLog("🔵 KBOnDeviceTTS.ensureServiceConfigured() START")
 
-        // Resume continuation on completion
-        if let continuation = completionContinuation {
-            continuation.resume()
-            completionContinuation = nil
+        // If service already exists, reuse it
+        if ttsService != nil {
+            NSLog("🔵 TTS service already exists, reusing")
+            return
         }
-        currentUtterance = nil
-    }
 
-    func speechDidCancel() {
-        isSpeaking = false
-        isPaused = false
-        progress = 0
-        logger.debug("Speech cancelled")
+        // Read user's TTS provider setting (same key as main session)
+        let ttsProviderRaw = UserDefaults.standard.string(forKey: "ttsProvider")
+        NSLog("🔵 ttsProvider UserDefaults raw value: '\(ttsProviderRaw ?? "nil")'")
 
-        // CRITICAL: Resume continuation to prevent leak
-        if let continuation = completionContinuation {
-            continuation.resume()
-            completionContinuation = nil
+        let ttsProvider: TTSProvider
+
+        if let rawValue = ttsProviderRaw,
+           let provider = TTSProvider(rawValue: rawValue) {
+            ttsProvider = provider
+            NSLog("🔵 Parsed TTS provider: \(ttsProvider.rawValue)")
+        } else {
+            ttsProvider = .appleTTS  // Default fallback
+            NSLog("🔵 Using default TTS provider: \(ttsProvider.rawValue)")
         }
-        currentUtterance = nil
-    }
 
-    func speechProgressUpdated(_ newProgress: Float) {
-        progress = newProgress
-    }
+        logger.info("Knowledge Bowl using TTS provider: \(ttsProvider.rawValue)")
 
-    func speechDidPause() {
-        isPaused = true
-        logger.debug("Speech paused (delegate)")
-    }
+        // Create the appropriate TTS service (same logic as SessionView)
+        NSLog("🔵 Creating TTS service for provider: \(ttsProvider.rawValue)")
+        switch ttsProvider {
+        case .appleTTS:
+            logger.info("Using Apple TTS")
+            NSLog("🔵 Creating AppleTTSService")
+            ttsService = AppleTTSService()
 
-    func speechDidContinue() {
-        isPaused = false
-        logger.debug("Speech continued (delegate)")
+        case .kyutaiPocket:
+            // Kyutai Pocket TTS is not available in this build (xcframework not linked)
+            // Fall back to Apple TTS
+            logger.warning("Kyutai Pocket TTS unavailable, using Apple TTS")
+            NSLog("🔵 Kyutai Pocket unavailable, using AppleTTSService")
+            ttsService = AppleTTSService()
+
+        case .selfHosted, .vibeVoice, .chatterbox, .elevenLabsFlash, .elevenLabsTurbo, .deepgramAura2:
+            // For server-based TTS, fall back to Apple TTS for Knowledge Bowl
+            // (to avoid network dependency in timed competition setting)
+            logger.warning("Server-based TTS not supported for Knowledge Bowl, using Apple TTS")
+            NSLog("🔵 Server-based TTS, falling back to AppleTTSService")
+            ttsService = AppleTTSService()
+
+        default:
+            logger.warning("Unknown TTS provider, using Apple TTS")
+            NSLog("🔵 Unknown provider, using AppleTTSService")
+            ttsService = AppleTTSService()
+        }
+
+        NSLog("🔵 TTS service created: \(type(of: ttsService!))")
+
+        // Configure voice settings
+        if let service = ttsService {
+            await service.configure(TTSVoiceConfig(
+                voiceId: "default",
+                rate: 1.0
+            ))
+        }
     }
 
     // MARK: - Available Voices
@@ -258,77 +388,19 @@ actor KBOnDeviceTTS {
     }
 }
 
-// MARK: - Delegate Handler
+// MARK: - Helper Extensions
 
-/// Helper class to bridge AVSpeechSynthesizerDelegate to actor
-@MainActor
-private class TTSDelegateHandler: NSObject, AVSpeechSynthesizerDelegate {
-    let actor: KBOnDeviceTTS
-
-    init(actor: KBOnDeviceTTS) {
-        self.actor = actor
+extension UInt16 {
+    var littleEndianData: Data {
+        var value = self.littleEndian
+        return Data(bytes: &value, count: MemoryLayout<UInt16>.size)
     }
+}
 
-    nonisolated func speechSynthesizer(
-        _ synthesizer: AVSpeechSynthesizer,
-        didStart utterance: AVSpeechUtterance
-    ) {
-        Task {
-            await actor.speechDidStart()
-        }
-    }
-
-    nonisolated func speechSynthesizer(
-        _ synthesizer: AVSpeechSynthesizer,
-        didFinish utterance: AVSpeechUtterance
-    ) {
-        Task {
-            await actor.speechDidFinish()
-        }
-    }
-
-    nonisolated func speechSynthesizer(
-        _ synthesizer: AVSpeechSynthesizer,
-        didCancel utterance: AVSpeechUtterance
-    ) {
-        Task {
-            await actor.speechDidCancel()
-        }
-    }
-
-    nonisolated func speechSynthesizer(
-        _ synthesizer: AVSpeechSynthesizer,
-        willSpeakRangeOfSpeechString characterRange: NSRange,
-        utterance: AVSpeechUtterance
-    ) {
-        // Calculate progress synchronously to avoid data races
-        let totalLength = Float(utterance.speechString.count)
-        guard totalLength > 0 else { return }
-
-        let currentPosition = Float(characterRange.location + characterRange.length)
-        let newProgress = currentPosition / totalLength
-
-        Task {
-            await actor.speechProgressUpdated(newProgress)
-        }
-    }
-
-    nonisolated func speechSynthesizer(
-        _ synthesizer: AVSpeechSynthesizer,
-        didPause utterance: AVSpeechUtterance
-    ) {
-        Task {
-            await actor.speechDidPause()
-        }
-    }
-
-    nonisolated func speechSynthesizer(
-        _ synthesizer: AVSpeechSynthesizer,
-        didContinue utterance: AVSpeechUtterance
-    ) {
-        Task {
-            await actor.speechDidContinue()
-        }
+extension UInt32 {
+    var littleEndianData: Data {
+        var value = self.littleEndian
+        return Data(bytes: &value, count: MemoryLayout<UInt32>.size)
     }
 }
 

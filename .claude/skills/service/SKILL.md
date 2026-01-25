@@ -9,7 +9,9 @@ description: Manage UnaMentis services via USM API (never via bash kill commands
 
 Manages UnaMentis services through the USM (UnaMentis Server Manager) API. This skill enforces the mandate to NEVER use bash commands like `pkill` for service control.
 
-**Critical Rule:** ALWAYS use USM API (port 8767). NEVER use bash kill commands.
+**Critical Rule:** ALWAYS use USM API (port 8787). NEVER use bash kill commands.
+
+> **Note:** A legacy USM app exists at port 8767 but is deprecated. Always use port 8787.
 
 ## Usage
 
@@ -38,7 +40,7 @@ Manages UnaMentis services through the USM (UnaMentis Server Manager) API. This 
 
 ### 1. Check USM Running
 ```bash
-curl -s http://localhost:8767/api/health
+curl -s http://localhost:8787/api/health
 ```
 If USM is not running, inform user to start the USM menu bar app.
 
@@ -46,29 +48,29 @@ If USM is not running, inform user to start the USM menu bar app.
 
 **Status check:**
 ```bash
-curl -s http://localhost:8767/api/services
-curl -s http://localhost:8767/api/services/{service_id}
+curl -s http://localhost:8787/api/services
+curl -s http://localhost:8787/api/services/{service_id}
 ```
 
 **Start service:**
 ```bash
-curl -X POST http://localhost:8767/api/services/{service_id}/start
+curl -X POST http://localhost:8787/api/services/{service_id}/start
 ```
 
 **Stop service:**
 ```bash
-curl -X POST http://localhost:8767/api/services/{service_id}/stop
+curl -X POST http://localhost:8787/api/services/{service_id}/stop
 ```
 
 **Restart service:**
 ```bash
-curl -X POST http://localhost:8767/api/services/{service_id}/restart
+curl -X POST http://localhost:8787/api/services/{service_id}/restart
 ```
 
 ### 3. Wait for Health
 After start/restart, poll health until ready:
 ```bash
-curl -s http://localhost:8767/api/services/{service_id}
+curl -s http://localhost:8787/api/services/{service_id}
 ```
 Wait until status shows "running" (up to 30 seconds).
 

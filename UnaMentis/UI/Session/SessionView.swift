@@ -383,7 +383,7 @@ struct SessionStatusView: View {
         case .aiThinking:
             return "Processing. The AI is preparing a response."
         case .aiSpeaking:
-            return "Speaking. The AI tutor is responding."
+            return "Speaking. The AI is responding."
         case .interrupted:
             return "Interrupted. The AI paused to listen to you."
         case .paused:
@@ -1186,7 +1186,7 @@ class SessionViewModel: ObservableObject {
         === END TRANSCRIPT ===
 
         BEGIN NOW:
-        Start delivering the first segment naturally. Speak as if you're having a one-on-one tutoring session.
+        Start delivering the first segment naturally. Speak as if you're having a one-on-one learning session.
         """
     }
 
@@ -1532,6 +1532,11 @@ class SessionViewModel: ObservableObject {
                 logger.warning("Deepgram TTS API key not configured, falling back to Apple TTS")
                 ttsService = AppleTTSService()
             }
+        case .kyutaiPocket:
+            // Kyutai Pocket TTS is not available in this build (xcframework not linked)
+            // Fall back to Apple TTS
+            logger.warning("Kyutai Pocket TTS unavailable, using Apple TTS")
+            ttsService = AppleTTSService()
         default:
             logger.info("Using Apple TTS as default TTS provider")
             ttsService = AppleTTSService()
@@ -2841,7 +2846,7 @@ class SessionViewModel: ObservableObject {
         // Build context including current topic and where we paused
         let topicContext = topic?.title ?? "the current topic"
         let systemPrompt = """
-        You are a helpful tutor. The student was listening to a lecture about \(topicContext) and interrupted with a question.
+        You are a helpful AI learning assistant. The student was listening to a lecture about \(topicContext) and interrupted with a question.
         Answer their question concisely and helpfully. After answering, ask if they'd like to continue with the lecture or explore this topic further.
         Keep your response brief - this is a voice conversation.
         """
@@ -3274,7 +3279,7 @@ struct SessionHelpSheet: View {
                 // Overview Section
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Voice conversations let you learn through natural dialogue with an AI tutor. Just speak and the tutor will respond.")
+                        Text("Voice conversations let you learn through natural dialogue with AI. Just speak and the AI will respond.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -3286,7 +3291,7 @@ struct SessionHelpSheet: View {
                     StatusHelpRow(color: .gray, title: "Idle", description: "Ready to start. Tap the mic button to begin.")
                     StatusHelpRow(color: .green, title: "Listening", description: "Your voice is being heard. Speak naturally.")
                     StatusHelpRow(color: .orange, title: "Processing", description: "The AI is preparing a response.")
-                    StatusHelpRow(color: .blue, title: "Speaking", description: "The AI tutor is responding.")
+                    StatusHelpRow(color: .blue, title: "Speaking", description: "The AI is responding.")
                     StatusHelpRow(color: .yellow, title: "Interrupted", description: "You spoke while the AI was talking. It paused to listen.")
                 }
 

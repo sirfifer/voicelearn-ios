@@ -16,9 +16,9 @@ public struct StartLessonIntent: AppIntent {
     public static let title: LocalizedStringResource = "Start Lesson"
 
     public static let description = IntentDescription(
-        "Start a voice tutoring session on a specific topic",
+        "Start a voice learning session on a specific topic",
         categoryName: "Learning",
-        searchKeywords: ["learn", "study", "teach", "lesson", "tutor", "voice"]
+        searchKeywords: ["learn", "study", "teach", "lesson", "voice"]
     )
 
     /// The topic to study

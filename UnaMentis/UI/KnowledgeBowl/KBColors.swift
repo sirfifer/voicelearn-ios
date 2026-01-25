@@ -14,79 +14,8 @@
 
 import SwiftUI
 
-// MARK: - Domain Colors
-
-/// The 12 academic domains used in Knowledge Bowl competitions
-enum KBDomain: String, CaseIterable, Codable, Identifiable {
-    case science
-    case mathematics
-    case literature
-    case history
-    case socialStudies
-    case arts
-    case currentEvents
-    case language
-    case technology
-    case popCulture
-    case religionPhilosophy
-    case miscellaneous
-
-    var id: String { rawValue }
-
-    var displayName: String {
-        switch self {
-        case .science: return "Science"
-        case .mathematics: return "Mathematics"
-        case .literature: return "Literature"
-        case .history: return "History"
-        case .socialStudies: return "Social Studies"
-        case .arts: return "Arts"
-        case .currentEvents: return "Current Events"
-        case .language: return "Language"
-        case .technology: return "Technology"
-        case .popCulture: return "Pop Culture"
-        case .religionPhilosophy: return "Religion/Philosophy"
-        case .miscellaneous: return "Miscellaneous"
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .science: return "atom"
-        case .mathematics: return "function"
-        case .literature: return "book.closed"
-        case .history: return "clock.arrow.circlepath"
-        case .socialStudies: return "globe.americas"
-        case .arts: return "paintpalette"
-        case .currentEvents: return "newspaper"
-        case .language: return "textformat"
-        case .technology: return "cpu"
-        case .popCulture: return "star"
-        case .religionPhilosophy: return "sparkles"
-        case .miscellaneous: return "questionmark.circle"
-        }
-    }
-
-    /// Weight in typical Knowledge Bowl question distribution
-    var weight: Double {
-        switch self {
-        case .science: return 0.20
-        case .mathematics: return 0.15
-        case .literature: return 0.12
-        case .history: return 0.12
-        case .socialStudies: return 0.10
-        case .arts: return 0.08
-        case .currentEvents: return 0.08
-        case .language: return 0.05
-        case .technology: return 0.04
-        case .popCulture: return 0.03
-        case .religionPhilosophy: return 0.02
-        case .miscellaneous: return 0.01
-        }
-    }
-}
-
 // MARK: - Color Extension
+// Note: KBDomain is defined in Shared/KnowledgeBowl/KBDomain.swift
 
 extension Color {
     // MARK: - Domain Colors (Light Mode Primary / Dark Mode Adjusted)
@@ -254,26 +183,8 @@ extension Color {
 }
 
 // MARK: - Domain Color Access
-
-extension KBDomain {
-    /// Get the color for this domain
-    var color: Color {
-        switch self {
-        case .science: return .kbScience
-        case .mathematics: return .kbMathematics
-        case .literature: return .kbLiterature
-        case .history: return .kbHistory
-        case .socialStudies: return .kbSocialStudies
-        case .arts: return .kbArts
-        case .currentEvents: return .kbCurrentEvents
-        case .language: return .kbLanguage
-        case .technology: return .kbTechnology
-        case .popCulture: return .kbPopCulture
-        case .religionPhilosophy: return .kbReligionPhilosophy
-        case .miscellaneous: return .kbMiscellaneous
-        }
-    }
-}
+// Note: KBDomain.color is defined in Shared/KnowledgeBowl/KBDomain.swift
+// for cross-platform support (iOS and watchOS)
 
 // MARK: - Mastery Level
 

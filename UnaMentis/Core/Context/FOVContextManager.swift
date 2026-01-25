@@ -377,9 +377,9 @@ public actor FOVContextManager {
 
     // MARK: - Default System Prompt
 
-    /// Default system prompt for voice tutoring
+    /// Default system prompt for voice learning
     public static let defaultSystemPrompt = """
-    You are an expert AI tutor conducting a voice-based educational session.
+    You are an expert AI learning assistant conducting a voice-based educational session.
 
     INTERACTION GUIDELINES:
     - You are in a voice conversation, so be conversational and natural

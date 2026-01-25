@@ -38,8 +38,9 @@ This specification documents the UnaMentis server API for client developers. It 
 | Component | Port | Technology | Purpose |
 |-----------|------|------------|---------|
 | Management API | 8766 | Python/aiohttp | Content administration, API |
-| USM Core | 8767 | Rust | Service management |
-| Web Interface | 3000 | Next.js/React | Operations console |
+| USM Core | 8787 | Rust/Axum | Cross-platform service management |
+| USM (Legacy) | 8767 | Swift | macOS menu bar app (original) |
+| Operations Console | 3000 | Next.js/React | System/content management |
 
 ### Authentication
 
@@ -116,6 +117,7 @@ Token lifecycle:
 - Voice profiles
 - Pre-generation system
 - Cache management
+- TTS Lab experimentation (model selection, configuration tuning)
 
 ### Import (8 endpoints)
 - Source browsing
@@ -142,6 +144,8 @@ Token lifecycle:
 
 - **Client Feature Spec**: [../client-spec/README.md](../client-spec/README.md)
 - **Project Overview**: [../architecture/PROJECT_OVERVIEW.md](../architecture/PROJECT_OVERVIEW.md)
+- **Voice Lab Guide**: [../server/VOICE_LAB_GUIDE.md](../server/VOICE_LAB_GUIDE.md)
+- **TTS Lab Guide**: [../server/TTS_LAB_GUIDE.md](../server/TTS_LAB_GUIDE.md)
 
 ---
 

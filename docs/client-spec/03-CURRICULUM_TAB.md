@@ -1,14 +1,18 @@
-# Curriculum Tab
+# Curriculum Tab (Learning Tab - Curriculum Section)
 
-**Version:** 1.0.0
-**Last Updated:** 2026-01-16
+**Version:** 1.1.0
+**Last Updated:** 2026-01-20
 **Platform:** iOS (Swift/SwiftUI)
 
 ---
 
 ## Overview
 
-The Curriculum tab enables users to browse, import, and manage learning content. Users can explore curricula, drill down to specific topics, and select content for voice sessions.
+The Curriculum section is part of the **Learning tab**, which uses a segmented control to switch between Curriculum and Modules. This document covers the Curriculum section; for specialized training modules like Knowledge Bowl, see the Modules section in [01-NAVIGATION_ARCHITECTURE.md](01-NAVIGATION_ARCHITECTURE.md).
+
+The Curriculum section enables users to browse, import, and manage learning content. Users can explore curricula, drill down to specific topics, and select content for voice sessions.
+
+> **Note:** When the Modules feature flag is disabled, the Learning tab displays only the Curriculum section without the segmented control.
 
 ![Curriculum Empty State](screenshots/curriculum/curriculum-empty-iphone.png)
 
@@ -17,7 +21,7 @@ The Curriculum tab enables users to browse, import, and manage learning content.
 ## View Hierarchy
 
 ```
-Curriculum Tab
+Learning Tab → Curriculum Section
 ├── Curriculum List
 │   ├── Empty State (no curricula loaded)
 │   └── Curriculum Cards

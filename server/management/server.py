@@ -63,6 +63,9 @@ from tts_api import register_tts_routes
 # Import TTS pre-generation system
 from tts_pregen_api import register_tts_pregen_routes
 
+# Import TTS Lab experimentation system
+from tts_lab_api import register_tts_lab_routes
+
 # Import session-cache integration
 from session_cache_integration import SessionCacheIntegration
 
@@ -4659,6 +4662,9 @@ def create_app() -> web.Application:
 
     # TTS Pre-Generation System (Profiles, Batch Jobs, Comparison)
     register_tts_pregen_routes(app)
+
+    # TTS Lab Experimentation System (Model Testing, Configuration)
+    register_tts_lab_routes(app)
 
     # Authentication System
     # Note: Auth requires a database pool. For now, we set up the routes but

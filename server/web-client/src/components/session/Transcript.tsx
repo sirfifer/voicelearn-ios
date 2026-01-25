@@ -27,7 +27,7 @@ function MessageBubble({ message, className }: MessageBubbleProps) {
     <div
       className={cn('flex', isUser ? 'justify-end' : 'justify-start', className)}
       role="listitem"
-      aria-label={`${isUser ? 'You' : 'AI tutor'} said: ${message.content.slice(0, 50)}${message.content.length > 50 ? '...' : ''}`}
+      aria-label={`${isUser ? 'You' : 'AI'} said: ${message.content.slice(0, 50)}${message.content.length > 50 ? '...' : ''}`}
     >
       <div
         className={cn(

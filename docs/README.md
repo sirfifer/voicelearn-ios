@@ -13,10 +13,14 @@ docs/
 ├── ios/             # iOS development standards and guides
 ├── testing/         # Testing guides and automation
 ├── ai-ml/           # AI/ML features (GLM-ASR, LLM tools)
+├── modules/         # Specialized learning modules (KB, SAT)
+├── api-spec/        # Server API documentation (OpenAPI)
+├── client-spec/     # iOS client feature specification
+├── server/          # Server infrastructure docs
+├── quality/         # Code quality and development excellence
 ├── explorations/    # Research and feature explorations
 ├── planning/        # Implementation plans
-├── prompts/         # AI prompt templates
-└── server/          # Server infrastructure docs
+└── tools/           # Development tools documentation
 ```
 
 ---
@@ -98,7 +102,34 @@ docs/
 | Document | Description |
 |----------|-------------|
 | [server/README.md](server/README.md) | Server component overview |
+| [server/VOICE_LAB_GUIDE.md](server/VOICE_LAB_GUIDE.md) | Voice Lab console section guide |
+| [server/TTS_LAB_GUIDE.md](server/TTS_LAB_GUIDE.md) | TTS experimentation and batch processing |
 | [REMOTE_LOGGING.md](REMOTE_LOGGING.md) | Log server and debugging |
+
+---
+
+## Specialized Modules
+
+Specialized learning modules for high-stakes scenarios:
+
+| Document | Description |
+|----------|-------------|
+| [modules/SPECIALIZED_MODULES_FRAMEWORK.md](modules/SPECIALIZED_MODULES_FRAMEWORK.md) | Module design methodology |
+| [modules/KNOWLEDGE_BOWL_MODULE.md](modules/KNOWLEDGE_BOWL_MODULE.md) | Knowledge Bowl competition prep |
+| [modules/KNOWLEDGE_BOWL_ANSWER_VALIDATION.md](modules/KNOWLEDGE_BOWL_ANSWER_VALIDATION.md) | 3-tier answer validation system |
+| [modules/SAT_MODULE.md](modules/SAT_MODULE.md) | SAT Preparation Module |
+
+---
+
+## API & Client Specifications
+
+External-facing specifications for client and API development:
+
+| Document | Description |
+|----------|-------------|
+| [client-spec/README.md](client-spec/README.md) | **Gold standard** iOS client feature document |
+| [api-spec/README.md](api-spec/README.md) | Server API specification |
+| [api-spec/openapi.yaml](api-spec/openapi.yaml) | OpenAPI 3.0 machine-readable spec |
 
 ---
 

@@ -2,7 +2,7 @@
 FOV Context Manager - Server-side implementation
 
 Manages the hierarchical cognitive buffers and builds foveated context
-for LLM calls during voice tutoring sessions.
+for LLM calls during voice learning sessions.
 """
 
 import logging
@@ -32,8 +32,8 @@ from .models import (
 logger = logging.getLogger(__name__)
 
 
-# Default system prompt for voice tutoring
-DEFAULT_SYSTEM_PROMPT = """You are an expert AI tutor conducting a voice-based educational session.
+# Default system prompt for voice learning
+DEFAULT_SYSTEM_PROMPT = """You are an expert AI learning assistant conducting a voice-based educational session.
 
 INTERACTION GUIDELINES:
 - You are in a voice conversation, so be conversational and natural
@@ -53,7 +53,7 @@ Always maintain a supportive, encouraging tone while being intellectually rigoro
 @dataclass
 class FOVContextManager:
     """
-    Manages foveated context for voice tutoring sessions.
+    Manages foveated context for voice learning sessions.
 
     Implements a hierarchical buffer system inspired by foveated rendering:
     - Immediate Buffer: Current interaction (highest priority)

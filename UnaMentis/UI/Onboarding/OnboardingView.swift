@@ -17,7 +17,7 @@ struct OnboardingView: View {
             iconColor: .blue,
             title: "Welcome to UnaMentis",
             subtitle: "Learn Through Voice",
-            description: "Have natural voice conversations with an AI tutor. Ask questions, explore topics, and learn at your own pace.",
+            description: "Have natural voice conversations with an AI learning assistant. Ask questions, explore topics, and learn at your own pace.",
             tips: [
                 "Speak naturally, just like talking to a teacher",
                 "Ask follow-up questions anytime",

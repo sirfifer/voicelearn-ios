@@ -136,8 +136,8 @@ const OverviewSection: React.FC = () => (
       <p className="text-slate-400 leading-relaxed">
         The <strong className="text-white">Una Mentis Curriculum Format (UMCF)</strong> is a
         JSON-based specification for representing educational content optimized for conversational
-        AI tutoring. Unlike traditional e-learning formats designed for Learning Management Systems,
-        UMCF is purpose-built for voice-first, real-time tutoring interactions.
+        AI learning. Unlike traditional e-learning formats designed for Learning Management Systems,
+        UMCF is purpose-built for voice-first, real-time learning interactions.
       </p>
     </div>
 
@@ -149,7 +149,7 @@ const OverviewSection: React.FC = () => (
       />
       <InfoCard
         icon={MessageSquare}
-        title="Tutoring-First"
+        title="Learning-First"
         description="Stopping points, comprehension checks, and misconception handling built-in"
       />
       <InfoCard
@@ -194,7 +194,7 @@ const OverviewSection: React.FC = () => (
         <li className="flex items-start gap-2">
           <ChevronRight size={14} className="text-indigo-400 mt-1 flex-shrink-0" />
           <span>
-            <strong className="text-slate-300">Tutoring configuration</strong> for Socratic method,
+            <strong className="text-slate-300">Learning configuration</strong> for Socratic method,
             scaffolding, and checkpoint frequency
           </span>
         </li>
@@ -274,7 +274,7 @@ const TranscriptSection: React.FC = () => (
       <p className="text-slate-400 leading-relaxed">
         Transcripts are the heart of UMCF&apos;s voice-first design. Each transcript contains a
         sequence of <strong className="text-white">segments</strong> designed for natural
-        turn-by-turn dialogue with an AI tutor.
+        turn-by-turn AI dialogue.
       </p>
     </div>
 
@@ -300,7 +300,7 @@ const TranscriptSection: React.FC = () => (
         Speaking Notes
       </h4>
       <p className="text-sm text-slate-400 mb-3">
-        Each segment can include speaking notes to guide the AI tutor&apos;s delivery:
+        Each segment can include speaking notes to guide AI delivery:
       </p>
       <ul className="space-y-1 text-sm text-slate-400">
         <li>
@@ -327,7 +327,7 @@ const MediaSection: React.FC = () => (
       <h3 className="text-xl font-bold text-white mb-3">Media & Visual Assets</h3>
       <p className="text-slate-400 leading-relaxed">
         UMCF supports rich media assets that can be synchronized with transcript segments. The AI
-        tutor displays these visuals at appropriate moments during lessons.
+        displays these visuals at appropriate moments during lessons.
       </p>
     </div>
 
@@ -380,7 +380,7 @@ const GlossarySection: React.FC = () => (
     <div className="space-y-4">
       <GlossaryItem
         term="UMCF"
-        definition="Una Mentis Curriculum Format - a JSON-based specification for conversational AI tutoring content"
+        definition="Una Mentis Curriculum Format - a JSON-based specification for conversational AI learning content"
       />
       <GlossaryItem
         term="ContentNode"
@@ -388,7 +388,7 @@ const GlossarySection: React.FC = () => (
       />
       <GlossaryItem
         term="Transcript"
-        definition="Voice-optimized content broken into segments for turn-by-turn AI tutoring delivery."
+        definition="Voice-optimized content broken into segments for turn-by-turn AI delivery."
       />
       <GlossaryItem
         term="Segment"
@@ -403,7 +403,7 @@ const GlossarySection: React.FC = () => (
         definition="A common error in understanding, with trigger phrases that detect it and remediation content to correct it."
       />
       <GlossaryItem
-        term="Tutoring Config"
+        term="Learning Config"
         definition="Settings that control how the AI delivers content: depth, interaction mode, scaffolding level."
       />
       <GlossaryItem

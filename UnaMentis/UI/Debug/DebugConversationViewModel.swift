@@ -226,7 +226,7 @@ class DebugConversationViewModel: ObservableObject {
                 ttsService: ttsService,
                 llmService: llmService,
                 vadService: vadService,
-                systemPrompt: "You are a helpful AI tutor. Keep responses concise and conversational.",
+                systemPrompt: "You are a helpful AI learning assistant. Keep responses concise and conversational.",
                 lectureMode: false
             )
 
