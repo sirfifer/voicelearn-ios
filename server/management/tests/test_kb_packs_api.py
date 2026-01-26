@@ -776,9 +776,11 @@ class TestHandleListQuestions:
         return request
 
     @pytest.mark.asyncio
+    @patch('kb_packs_api.get_kb_repo')
     @patch('kb_packs_api.load_questions_store')
-    async def test_returns_questions(self, mock_load, mock_request):
+    async def test_returns_questions(self, mock_load, mock_get_repo, mock_request):
         """Should return list of questions."""
+        mock_get_repo.return_value = None  # Fall back to JSON store
         mock_load.return_value = {
             "questions": {
                 "q1": {
@@ -803,9 +805,11 @@ class TestHandleListQuestions:
         assert len(data["questions"]) == 1
 
     @pytest.mark.asyncio
+    @patch('kb_packs_api.get_kb_repo')
     @patch('kb_packs_api.load_questions_store')
-    async def test_filters_by_domain(self, mock_load, mock_request):
+    async def test_filters_by_domain(self, mock_load, mock_get_repo, mock_request):
         """Should filter questions by domain."""
+        mock_get_repo.return_value = None  # Fall back to JSON store
         mock_load.return_value = {
             "questions": {
                 "q1": {"id": "q1", "domain_id": "science", "status": "active", "pack_ids": []},
@@ -822,10 +826,12 @@ class TestHandleListQuestions:
         assert data["questions"][0]["domain_id"] == "science"
 
     @pytest.mark.asyncio
+    @patch('kb_packs_api.get_kb_repo')
     @patch('kb_packs_api.load_packs_registry')
     @patch('kb_packs_api.load_questions_store')
-    async def test_filters_by_pack(self, mock_load_q, mock_load_p, mock_request):
+    async def test_filters_by_pack(self, mock_load_q, mock_load_p, mock_get_repo, mock_request):
         """Should filter questions by pack_id."""
+        mock_get_repo.return_value = None  # Fall back to JSON store
         mock_load_p.return_value = {
             "packs": [
                 {"id": "pack-1", "name": "Pack 1", "question_ids": ["q1"]}
