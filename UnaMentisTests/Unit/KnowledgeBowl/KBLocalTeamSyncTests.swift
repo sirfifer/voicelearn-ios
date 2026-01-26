@@ -15,7 +15,6 @@ final class KBLocalTeamSyncTests: XCTestCase {
     private var sync: KBLocalTeamSync!
 
     override func setUp() async throws {
-        try await super.setUp()
         store = KBTeamStore()
         sync = KBLocalTeamSync(store: store)
         try await store.deleteAllData()
@@ -23,7 +22,6 @@ final class KBLocalTeamSyncTests: XCTestCase {
 
     override func tearDown() async throws {
         try await store.deleteAllData()
-        try await super.tearDown()
     }
 
     // MARK: - Protocol Properties Tests
