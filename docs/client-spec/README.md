@@ -1,8 +1,8 @@
 # UnaMentis Client Feature Specification
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Status:** Active
-**Last Updated:** 2026-01-16
+**Last Updated:** 2026-01-25
 **Reference Platform:** iOS (Swift/SwiftUI)
 
 ---
@@ -29,6 +29,7 @@ This specification defines the canonical feature set, UI patterns, and user expe
 | [08-SIRI_SHORTCUTS.md](08-SIRI_SHORTCUTS.md) | Voice integration | App intents, voice commands, deep link schemes |
 | [09-UI_COMPONENTS.md](09-UI_COMPONENTS.md) | Reusable elements | Common components, design tokens, interaction patterns |
 | [10-ACCESSIBILITY.md](10-ACCESSIBILITY.md) | A11y standards | VoiceOver, touch targets, dynamic type, reduce motion |
+| [11-KNOWLEDGE_BOWL.md](11-KNOWLEDGE_BOWL.md) | Knowledge Bowl module | Practice modes, team features, answer validation, analytics |
 
 ---
 
@@ -68,7 +69,7 @@ The app uses a 6-tab navigation:
 | Provider Type | Cloud Options | Self-Hosted | On-Device |
 |---------------|---------------|-------------|-----------|
 | STT (Speech-to-Text) | AssemblyAI, Deepgram, Groq | Whisper.cpp, faster-whisper | Apple Speech, GLM-ASR |
-| TTS (Text-to-Speech) | ElevenLabs, Deepgram Aura | Chatterbox, VibeVoice, Piper, Kyutai TTS | Apple TTS |
+| TTS (Text-to-Speech) | ElevenLabs, Deepgram Aura | Chatterbox, VibeVoice, Piper, Kyutai 1.6B | **Kyutai Pocket**, Apple TTS |
 | LLM (Language Model) | OpenAI, Anthropic | Ollama, llama.cpp, vLLM | Ministral-3B, TinyLlama |
 | VAD (Voice Activity) | | | Silero VAD |
 | Embeddings | OpenAI | | all-MiniLM-L6-v2 (KB) |
@@ -84,13 +85,16 @@ Beyond general tutoring, the client supports specialized learning modules:
 
 **Knowledge Bowl Features:**
 - Written and oral round practice modes with voice-first interaction
+- Advanced training modes: Match Simulation, Conference Training, Domain Drill, Rebound Training
 - 3-tier answer validation (phonetic, n-gram, token, linguistic, semantic, LLM)
+- Team management with domain assignments and coverage analysis
 - Session persistence with pause tracking and per-question response times
 - Regional competition rules (Colorado, Minnesota, Washington strictness levels)
-- On-device STT/TTS for offline practice capability
-- Analytics dashboard with domain mastery tracking
+- On-device STT/TTS (Kyutai Pocket) for offline practice capability
+- Analytics dashboard with domain mastery tracking and trend charts
 
-See [../modules/](../modules/) for detailed module specifications.
+See [11-KNOWLEDGE_BOWL.md](11-KNOWLEDGE_BOWL.md) for complete client specification.
+See [../modules/](../modules/) for technical module specifications.
 
 ---
 
@@ -128,13 +132,14 @@ Screenshots are organized by feature area:
 
 ```
 screenshots/
-├── navigation/     # Tab bar, app-wide navigation
-├── session/        # Voice session UI states
-├── curriculum/     # Content browsing views
-├── todo/           # Learning goals interface
-├── history/        # Session history views
-├── analytics/      # Metrics dashboard
-└── settings/       # Configuration screens
+├── navigation/       # Tab bar, app-wide navigation
+├── session/          # Voice session UI states
+├── curriculum/       # Content browsing views
+├── todo/             # Learning goals interface
+├── history/          # Session history views
+├── analytics/        # Metrics dashboard
+├── settings/         # Configuration screens
+└── knowledge-bowl/   # Knowledge Bowl module screens
 ```
 
 Screenshot naming convention: `{screen}-{state}-{device}.png`

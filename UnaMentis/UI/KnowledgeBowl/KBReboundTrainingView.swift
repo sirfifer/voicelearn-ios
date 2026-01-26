@@ -4,8 +4,10 @@
 //
 //  Rebound training mode for Knowledge Bowl.
 //  Trains students to capitalize on opponent misses.
+//  Supports both written-only and audio modes.
 //
 
+import AVFoundation
 import SwiftUI
 
 // MARK: - Rebound Training View
@@ -201,6 +203,27 @@ struct KBReboundTrainingView: View {
                 .tint(Color.kbExcellent)
 
             Stepper("Questions: \(viewModel.questionCount)", value: $viewModel.questionCount, in: 5...30, step: 5)
+
+            Divider()
+
+            // Audio mode
+            HStack {
+                Toggle("Read Questions Aloud", isOn: $viewModel.audioMode)
+                    .tint(Color.kbExcellent)
+                InfoButton(
+                    title: "Audio Mode",
+                    content: "When enabled, questions will be read aloud during the 'Reading question' phase. This simulates real competition conditions."
+                )
+            }
+            if viewModel.audioMode {
+                HStack(spacing: 6) {
+                    Image(systemName: "speaker.wave.2.fill")
+                        .foregroundStyle(Color.kbExcellent)
+                    Text("Questions spoken during reading phase")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .padding()
         .background(Color(.secondarySystemBackground))
@@ -254,11 +277,19 @@ struct KBReboundTrainingView: View {
             Spacer()
 
             VStack(spacing: 16) {
-                Image(systemName: "clock.fill")
-                    .font(.system(size: 60))
-                    .foregroundStyle(.secondary)
+                // Show speaker animation if audio mode is on and speaking
+                if viewModel.audioMode && viewModel.isSpeaking {
+                    Image(systemName: "speaker.wave.3.fill")
+                        .font(.system(size: 60))
+                        .foregroundStyle(Color.kbExcellent)
+                        .symbolEffect(.variableColor.iterative, options: .repeating)
+                } else {
+                    Image(systemName: "clock.fill")
+                        .font(.system(size: 60))
+                        .foregroundStyle(.secondary)
+                }
 
-                Text("Reading question...")
+                Text(viewModel.isSpeaking ? "Reading question aloud..." : "Reading question...")
                     .font(.title3)
                     .foregroundStyle(.secondary)
 
@@ -755,6 +786,23 @@ final class KBReboundTrainingViewModel {
     var showOpponentAnswer: Bool = true
     var questionCount: Int = 15
     var showingPracticeScenarios: Bool = false
+    var audioMode: Bool = false  // Audio toggle for TTS question reading
+
+    // Audio
+    private var speechSynthesizer: AVSpeechSynthesizer?
+    private var speechDelegate: SpeechDelegate?
+    private(set) var isSpeaking: Bool = false
+
+    /// Simple delegate class for AVSpeechSynthesizer
+    private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
+        var onFinished: (() -> Void)?
+
+        func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+            Task { @MainActor in
+                self.onFinished?()
+            }
+        }
+    }
 
     // Training state
     private(set) var currentQuestionIndex: Int = 0
@@ -823,8 +871,13 @@ final class KBReboundTrainingViewModel {
             let scenario = await simulator.generateScenario(for: question)
             currentScenario = scenario
 
-            // Simulate reading time
-            try? await Task.sleep(for: .seconds(2))
+            // Read question aloud if audio mode is enabled
+            if audioMode {
+                await speakQuestion(question.text)
+            } else {
+                // Simulate reading time without audio
+                try? await Task.sleep(for: .seconds(2))
+            }
 
             if scenario.opponentBuzzed {
                 state = .opponentAnswering
@@ -845,6 +898,47 @@ final class KBReboundTrainingViewModel {
                 state = .userTurn
             }
         }
+    }
+
+    /// Setup speech synthesizer for TTS
+    private func setupSpeechSynthesizer() {
+        if speechSynthesizer == nil {
+            speechSynthesizer = AVSpeechSynthesizer()
+            speechDelegate = SpeechDelegate()
+            speechSynthesizer?.delegate = speechDelegate
+        }
+    }
+
+    /// Speak the question text via TTS
+    private func speakQuestion(_ text: String) async {
+        setupSpeechSynthesizer()
+
+        guard let synthesizer = speechSynthesizer else {
+            return
+        }
+
+        isSpeaking = true
+
+        // Use continuation to wait for speech completion
+        await withCheckedContinuation { continuation in
+            speechDelegate?.onFinished = {
+                continuation.resume()
+            }
+
+            let utterance = AVSpeechUtterance(string: text)
+            utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.9  // Slightly slower for clarity
+            utterance.pitchMultiplier = 1.0
+            utterance.volume = 1.0
+
+            // Use a natural-sounding voice if available
+            if let voice = AVSpeechSynthesisVoice(language: "en-US") {
+                utterance.voice = voice
+            }
+
+            synthesizer.speak(utterance)
+        }
+
+        isSpeaking = false
     }
 
     func buzzOnRebound() {
@@ -944,6 +1038,9 @@ final class KBReboundTrainingViewModel {
     }
 
     func restartTraining() {
+        speechSynthesizer?.stopSpeaking(at: .immediate)
+        speechSynthesizer = nil
+        speechDelegate = nil
         trainingResult = nil
         state = .setup
     }
@@ -1034,6 +1131,9 @@ final class KBReboundTrainingViewModel {
 
     private func endTraining() {
         stopReboundTimer()
+        speechSynthesizer?.stopSpeaking(at: .immediate)
+        speechSynthesizer = nil
+        speechDelegate = nil
 
         Task {
             let stats = await simulator.endSession()

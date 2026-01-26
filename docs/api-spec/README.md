@@ -1,8 +1,8 @@
 # UnaMentis Server API Specification
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Status:** Active
-**Last Updated:** 2026-01-16
+**Last Updated:** 2026-01-25
 **Base URL:** `http://localhost:8766` (Management API)
 
 ---
@@ -28,6 +28,7 @@ This specification documents the UnaMentis server API for client developers. It 
 | [06-MEDIA.md](06-MEDIA.md) | Media generation | `/api/media/*` |
 | [07-SYSTEM.md](07-SYSTEM.md) | Health & monitoring | `/api/system/*`, `/health` |
 | [08-WEBSOCKET.md](08-WEBSOCKET.md) | Real-time protocols | `/ws` |
+| [09-KNOWLEDGE-BOWL.md](09-KNOWLEDGE-BOWL.md) | Knowledge Bowl | `/api/kb/*` |
 
 ---
 

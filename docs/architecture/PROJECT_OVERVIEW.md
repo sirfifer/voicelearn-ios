@@ -749,15 +749,17 @@ Comprehensive adaptive learning for the Digital SAT (2024+ format):
 
 ### Knowledge Bowl Module
 
-**Status:** Phase 1 Complete, Phase 2 In Progress
+**Status:** Phase 2 Complete, Phase 3 Near Complete (Team Sync Pending)
 
 Multi-subject mastery for academic quiz bowl competitions with **on-device first architecture**:
 
 **Core Features (Implemented):**
 - **12+ Subject Domains** (Science, Math, Literature, History, Arts, Current Events, Pop Culture)
 - **Written Round Practice** with MCQ training and instant feedback
-- **Oral Round Practice** with on-device TTS/STT and conference timer simulation
+- **Oral Round Practice** with on-device TTS/STT (Kyutai Pocket) and conference timer simulation
+- **Competition Training Modes:** Match Simulation, Domain Drill, Rebound Training, Conference Training
 - **Regional Compliance** (Colorado, Minnesota, Washington) with rule-specific validation
+- **Team Management** with member profiles, domain assignments, and coverage analysis (local sync)
 - **50+ Sample Questions** bundled, with expandable question bank architecture
 
 **Question Pack Management (New):**
@@ -788,11 +790,11 @@ Multi-subject mastery for academic quiz bowl competitions with **on-device first
 - **Storage optimization:** Smart content unloading based on mastery (105MB per 1,000 questions)
 
 **In Progress:**
-- Team coordination for geographically distributed practice
-- WebSocket-based real-time session synchronization
+- Team coordination for geographically distributed practice (WebSocket sync)
 - Team statistics and leaderboards
 
 See [KNOWLEDGE_BOWL_MODULE.md](../modules/KNOWLEDGE_BOWL_MODULE.md) for module specification.
+See [Knowledge Bowl Client Spec](../client-spec/11-KNOWLEDGE_BOWL.md) for UI specification.
 See [Knowledge Bowl API](../api-spec/09-KNOWLEDGE-BOWL.md) for REST API documentation.
 
 ### Future Module Candidates
@@ -1242,6 +1244,14 @@ See [CODE_QUALITY_INITIATIVE.md](../quality/CODE_QUALITY_INITIATIVE.md) for comp
 | [PATCH_PANEL_ARCHITECTURE.md](PATCH_PANEL_ARCHITECTURE.md) | LLM routing |
 | [FOV_CONTEXT_MANAGEMENT.md](FOV_CONTEXT_MANAGEMENT.md) | Foveated context for voice tutoring |
 | [FALLBACK_ARCHITECTURE.md](FALLBACK_ARCHITECTURE.md) | Graceful degradation |
+
+### API & Client Specifications
+| Document | Purpose |
+|----------|---------|
+| [api-spec/README.md](../api-spec/README.md) | Server API specification index |
+| [api-spec/openapi.yaml](../api-spec/openapi.yaml) | OpenAPI 3.0 machine-readable spec |
+| [client-spec/README.md](../client-spec/README.md) | Client feature specification index |
+| [client-spec/11-KNOWLEDGE_BOWL.md](../client-spec/11-KNOWLEDGE_BOWL.md) | Knowledge Bowl client UI specification |
 
 ### Curriculum
 | Document | Purpose |

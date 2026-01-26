@@ -270,10 +270,11 @@ actor KBLocalTeamSync: KBTeamSyncProvider {
                 if !isAlreadyPrimary && domainStats.accuracy >= 0.7 {
                     suggestions.append(KBAssignmentSuggestion(
                         memberId: member.id,
+                        memberName: member.name,
                         domain: strongestDomain,
                         suggestedType: .primary,
                         confidence: domainStats.accuracy,
-                        reason: "Highest accuracy (\(Int(domainStats.accuracy * 100))%) among practiced domains"
+                        reasoning: "Highest accuracy (\(Int(domainStats.accuracy * 100))%) among practiced domains"
                     ))
                 }
             }
@@ -286,10 +287,11 @@ actor KBLocalTeamSync: KBTeamSyncProvider {
                 if !isAlreadyAssigned && secondStats.accuracy >= 0.6 {
                     suggestions.append(KBAssignmentSuggestion(
                         memberId: member.id,
+                        memberName: member.name,
                         domain: secondDomain,
                         suggestedType: .secondary,
                         confidence: secondStats.accuracy,
-                        reason: "Second highest accuracy (\(Int(secondStats.accuracy * 100))%)"
+                        reasoning: "Second highest accuracy (\(Int(secondStats.accuracy * 100))%)"
                     ))
                 }
             }
@@ -313,10 +315,11 @@ actor KBLocalTeamSync: KBTeamSyncProvider {
             if let (member, accuracy) = bestMember, accuracy >= 0.5 {
                 suggestions.append(KBAssignmentSuggestion(
                     memberId: member.id,
+                    memberName: member.name,
                     domain: domain,
                     suggestedType: .primary,
                     confidence: accuracy,
-                    reason: "\(domain.displayName) needs coverage, \(member.name) has \(Int(accuracy * 100))% accuracy"
+                    reasoning: "\(domain.displayName) needs coverage, \(member.name) has \(Int(accuracy * 100))% accuracy"
                 ))
             }
         }

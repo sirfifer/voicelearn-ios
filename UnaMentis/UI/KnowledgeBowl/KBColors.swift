@@ -186,10 +186,11 @@ extension Color {
 // Note: KBDomain.color is defined in Shared/KnowledgeBowl/KBDomain.swift
 // for cross-platform support (iOS and watchOS)
 
-// MARK: - Mastery Level
+// MARK: - Progress Level (UI Display)
 
-/// Mastery levels for tracking student progress
-enum KBMasteryLevel: String, CaseIterable, Codable {
+/// Progress levels for tracking student progress in UI
+/// Note: KBMasteryLevel (for team domain mastery) is defined in Core/KnowledgeBowl/Team/KBMemberStats.swift
+enum KBProgressLevel: String, CaseIterable, Codable {
     case notStarted
     case beginner
     case intermediate
@@ -324,9 +325,9 @@ struct KBColorsPreview: View {
                         .font(.headline)
                 }
 
-                // Mastery Levels
+                // Progress Levels
                 Section {
-                    ForEach(KBMasteryLevel.allCases, id: \.self) { level in
+                    ForEach(KBProgressLevel.allCases, id: \.self) { level in
                         HStack {
                             Image(systemName: level.icon)
                                 .foregroundColor(level.color)
@@ -339,7 +340,7 @@ struct KBColorsPreview: View {
                         }
                     }
                 } header: {
-                    Text("Mastery Levels")
+                    Text("Progress Levels")
                         .font(.headline)
                 }
 

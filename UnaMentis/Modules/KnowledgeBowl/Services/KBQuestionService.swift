@@ -1,8 +1,8 @@
 // UnaMentis - Knowledge Bowl Question Service
 // Manages loading and filtering questions for practice sessions
 //
-// Questions are loaded from downloaded module content or fetched
-// from the server if available.
+// Questions are loaded from the bundled file first for immediate availability,
+// then optionally synced from the server in the background.
 
 import Foundation
 import Logging
@@ -14,6 +14,8 @@ final class KBQuestionService: ObservableObject {
 
     @Published private(set) var allQuestions: [KBQuestion] = []
     @Published private(set) var isLoaded = false
+    @Published private(set) var isServerConnected = false
+    @Published private(set) var serverSyncError: String?
 
     private static let logger = Logger(label: "com.unamentis.kb.questions")
 
@@ -21,18 +23,88 @@ final class KBQuestionService: ObservableObject {
 
     // MARK: - Loading
 
-    /// Load questions from the module service
+    /// Load questions - loads bundled first for immediate availability, then optionally syncs from server
     func loadQuestions() async {
-        // Try to fetch from server first
+        // Always load bundled questions first for immediate availability
+        await loadBundledQuestions()
+
+        // Then try to sync from server in background (non-blocking)
+        Task {
+            await syncFromServerIfAvailable()
+        }
+    }
+
+    /// Load questions from the bundled JSON file (same source as KBQuestionEngine)
+    private func loadBundledQuestions() async {
+        guard let url = Bundle.main.url(forResource: "kb-sample-questions", withExtension: "json") else {
+            Self.logger.warning("Bundled questions file not found, using sample questions")
+            loadSampleQuestions()
+            return
+        }
+
+        do {
+            let data = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+
+            // The bundled file uses Core/KBQuestion format, convert to Modules/KBQuestion format
+            let bundle = try decoder.decode(CoreQuestionBundle.self, from: data)
+            allQuestions = bundle.questions.map { coreQuestion in
+                convertCoreQuestion(coreQuestion)
+            }
+            isLoaded = true
+            Self.logger.info("Loaded \(allQuestions.count) questions from bundled file")
+        } catch {
+            Self.logger.error("Failed to load bundled questions: \(error.localizedDescription)")
+            loadSampleQuestions()
+        }
+    }
+
+    /// Convert Core/KBQuestion format to Modules/KBQuestion format
+    private func convertCoreQuestion(_ core: CoreQuestion) -> KBQuestion {
+        KBQuestion(
+            id: core.id.uuidString,
+            domainId: core.domain,
+            subcategory: core.subdomain ?? "",
+            questionText: core.text,
+            answerText: core.answer.primary,
+            acceptableAnswers: [core.answer.primary] + (core.answer.acceptable ?? []),
+            difficulty: convertDifficulty(core.difficulty),
+            speedTargetSeconds: core.estimatedReadTime ?? 5.0,
+            questionType: core.tags?.contains("bonus") == true ? "bonus" : "toss-up",
+            hints: [],
+            explanation: ""
+        )
+    }
+
+    /// Convert difficulty string to numeric value
+    private func convertDifficulty(_ difficulty: String) -> Int {
+        switch difficulty {
+        case "overview": return 1
+        case "foundational": return 2
+        case "intermediate": return 3
+        case "varsity": return 4
+        case "championship": return 5
+        case "research": return 6
+        default: return 3
+        }
+    }
+
+    /// Sync from server if available (non-blocking background operation)
+    private func syncFromServerIfAvailable() async {
         do {
             let questions = try await fetchQuestionsFromServer()
-            allQuestions = questions
-            isLoaded = true
-            Self.logger.info("Loaded \(questions.count) questions from server")
+            // Only update if we got more questions than bundled
+            if questions.count > allQuestions.count {
+                allQuestions = questions
+                Self.logger.info("Updated to \(questions.count) questions from server")
+            }
+            isServerConnected = true
+            serverSyncError = nil
         } catch {
-            Self.logger.error("Failed to load questions: \(error)")
-            // Load sample questions as fallback
-            loadSampleQuestions()
+            isServerConnected = false
+            serverSyncError = error.localizedDescription
+            Self.logger.info("Server sync unavailable (offline mode): \(error.localizedDescription)")
         }
     }
 
@@ -48,7 +120,7 @@ final class KBQuestionService: ObservableObject {
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.timeoutInterval = 10
+        request.timeoutInterval = 5  // Reduced timeout since we have bundled fallback
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -68,11 +140,11 @@ final class KBQuestionService: ObservableObject {
         return questions
     }
 
-    /// Load sample questions for offline/testing
+    /// Load sample questions for offline/testing (fallback only)
     private func loadSampleQuestions() {
         allQuestions = Self.sampleQuestions
         isLoaded = true
-        Self.logger.info("Loaded \(allQuestions.count) sample questions")
+        Self.logger.info("Loaded \(allQuestions.count) sample questions (fallback)")
     }
 
     // MARK: - Filtering
@@ -209,5 +281,43 @@ private struct ModuleContent: Decodable {
         let id: String
         let name: String
         let questions: [KBQuestion]
+    }
+}
+
+// MARK: - Core Question Bundle Decoding (for bundled JSON file)
+
+/// Bundle format used in kb-sample-questions.json
+private struct CoreQuestionBundle: Decodable {
+    let version: String
+    let questions: [CoreQuestion]
+}
+
+/// Core question format from bundled JSON
+private struct CoreQuestion: Decodable {
+    let id: UUID
+    let text: String
+    let answer: CoreAnswer
+    let domain: String
+    let subdomain: String?
+    let difficulty: String
+    let gradeLevel: String
+    let suitability: CoreSuitability
+    let estimatedReadTime: Double?
+    let mcqOptions: [String]?
+    let source: String?
+    let sourceAttribution: String?
+    let tags: [String]?
+
+    struct CoreAnswer: Decodable {
+        let primary: String
+        let acceptable: [String]?
+        let answerType: String
+    }
+
+    struct CoreSuitability: Decodable {
+        let forWritten: Bool
+        let forOral: Bool
+        let mcqPossible: Bool
+        let requiresVisual: Bool
     }
 }

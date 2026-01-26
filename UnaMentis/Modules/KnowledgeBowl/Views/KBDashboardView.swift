@@ -79,6 +79,11 @@ struct KBDashboardView: View {
                 // Hero section with mastery overview
                 heroSection
 
+                // Server connectivity indicator (only shown when offline)
+                if !questionService.isServerConnected && questionService.isLoaded {
+                    serverStatusBanner
+                }
+
                 // Region selector
                 regionSelector
 
@@ -212,13 +217,19 @@ struct KBDashboardView: View {
             }
         }
         .task {
-            await questionService.loadQuestions()
-            // Also load questions for UI/KnowledgeBowl views
-            do {
-                try await questionEngine.loadBundledQuestions()
-            } catch {
-                Self.logger.warning("Failed to load bundled questions: \(error.localizedDescription)")
-            }
+            // Load both question sources concurrently for best performance
+            // Both are now local-first and don't require server connectivity
+            async let serviceLoad: () = questionService.loadQuestions()
+            async let engineLoad: () = {
+                do {
+                    try await questionEngine.loadBundledQuestions()
+                } catch {
+                    Self.logger.warning("Failed to load bundled questions: \(error.localizedDescription)")
+                }
+            }()
+
+            // Wait for both to complete (both are now fast local operations)
+            _ = await (serviceLoad, engineLoad)
         }
         .sheet(item: $showingDomainDetail) { domain in
             NavigationStack {
@@ -444,6 +455,41 @@ struct KBDashboardView: View {
         .background {
             RoundedRectangle(cornerRadius: 16)
                 .fill(.ultraThinMaterial)
+        }
+    }
+
+    // MARK: - Server Status Banner
+
+    @ViewBuilder
+    private var serverStatusBanner: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "wifi.slash")
+                .font(.title3)
+                .foregroundStyle(.orange)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Offline Mode")
+                    .font(.subheadline.bold())
+                Text("Using \(questionService.allQuestions.count.formatted()) bundled questions")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            // Connection status dot
+            Circle()
+                .fill(.orange)
+                .frame(width: 8, height: 8)
+        }
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.orange.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(.orange.opacity(0.3), lineWidth: 1)
+                )
         }
     }
 
