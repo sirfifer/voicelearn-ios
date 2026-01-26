@@ -31,6 +31,18 @@ struct KBDashboardView: View {
     @State private var conferenceQuestions: [KBQuestion] = []
     @State private var reboundQuestions: [KBQuestion] = []
 
+    // Quickstart settings state
+    @State private var oralQuestionCount: Int = 5
+    @State private var writtenQuestionCount: Int = 10
+    @State private var writtenTimePerQuestion: TimeInterval = 15
+    @State private var domainMix: KBDomainMix = .default
+    @State private var selectedPackId: String?
+    @State private var localPackStore = KBLocalPackStore()
+
+    // Quickstart settings sheet states
+    @State private var showingOralSettings = false
+    @State private var showingWrittenSettings = false
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -112,6 +124,26 @@ struct KBDashboardView: View {
             .navigationDestination(isPresented: $showingDomainDrill) {
                 KBDomainDrillView()
             }
+            .sheet(isPresented: $showingOralSettings) {
+                KBQuickstartSettingsView(
+                    roundType: .oral,
+                    questionCount: $oralQuestionCount,
+                    timePerQuestion: .constant(0),  // Not used for oral
+                    domainMix: $domainMix,
+                    selectedPackId: $selectedPackId,
+                    localPackStore: localPackStore
+                )
+            }
+            .sheet(isPresented: $showingWrittenSettings) {
+                KBQuickstartSettingsView(
+                    roundType: .written,
+                    questionCount: $writtenQuestionCount,
+                    timePerQuestion: $writtenTimePerQuestion,
+                    domainMix: $domainMix,
+                    selectedPackId: $selectedPackId,
+                    localPackStore: localPackStore
+                )
+            }
         }
     }
 
@@ -189,25 +221,74 @@ struct KBDashboardView: View {
 
             HStack(spacing: 12) {
                 // Oral Practice (Voice-first)
-                quickStartButton(
+                quickStartCard(
                     icon: "mic.fill",
                     title: "Oral",
-                    subtitle: "Voice Q&A",
-                    color: .kbMastered
-                ) {
-                    startOralPractice()
-                }
+                    subtitle: "\(oralQuestionCount) questions",
+                    color: .kbMastered,
+                    onTap: { startOralPractice() },
+                    onSettings: { showingOralSettings = true }
+                )
 
                 // Written Practice
-                quickStartButton(
+                quickStartCard(
                     icon: "pencil.and.list.clipboard",
                     title: "Written",
-                    subtitle: "MCQ Practice",
-                    color: .kbIntermediate
-                ) {
-                    startWrittenPractice()
-                }
+                    subtitle: "\(writtenQuestionCount) questions",
+                    color: .kbIntermediate,
+                    onTap: { startWrittenPractice() },
+                    onSettings: { showingWrittenSettings = true }
+                )
             }
+        }
+    }
+
+    private func quickStartCard(
+        icon: String,
+        title: String,
+        subtitle: String,
+        color: Color,
+        onTap: @escaping () -> Void,
+        onSettings: @escaping () -> Void
+    ) -> some View {
+        ZStack(alignment: .topTrailing) {
+            // Main button
+            Button(action: onTap) {
+                VStack(spacing: 8) {
+                    Image(systemName: icon)
+                        .font(.system(size: 28))
+                        .foregroundColor(color)
+
+                    Text(title)
+                        .font(.headline)
+                        .foregroundColor(.kbTextPrimary)
+
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundColor(.kbTextSecondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.kbBgSecondary)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(color.opacity(0.3), lineWidth: 2)
+                )
+            }
+            .disabled(engine.totalQuestionCount == 0)
+
+            // Settings button (gear icon)
+            Button(action: onSettings) {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(.white)
+                    .padding(6)
+                    .background(color.opacity(0.8))
+                    .clipShape(Circle())
+            }
+            .offset(x: -8, y: 8)
+            .accessibilityLabel("\(title) settings")
         }
     }
 
@@ -717,9 +798,11 @@ struct KBDashboardView: View {
         let config = KBSessionConfig.quickPractice(
             region: selectedRegion,
             roundType: .written,
-            questionCount: 10
+            questionCount: writtenQuestionCount,
+            timeLimit: writtenTimePerQuestion * Double(writtenQuestionCount),
+            domainWeights: domainMix.selectionWeights
         )
-        let questions = engine.selectForSession(config: config)
+        let questions = selectQuestionsForConfig(config)
         writtenSessionViewModel = KBWrittenSessionViewModel(questions: questions, config: config)
         showingWrittenSession = true
     }
@@ -728,11 +811,36 @@ struct KBDashboardView: View {
         let config = KBSessionConfig.quickPractice(
             region: selectedRegion,
             roundType: .oral,
-            questionCount: 5  // Fewer questions for oral practice
+            questionCount: oralQuestionCount,
+            domainWeights: domainMix.selectionWeights
         )
-        let questions = engine.selectForSession(config: config)
+        let questions = selectQuestionsForConfig(config)
         oralSessionViewModel = KBOralSessionViewModel(questions: questions, config: config)
         showingOralSession = true
+    }
+
+    /// Select questions based on config and pack selection
+    private func selectQuestionsForConfig(_ config: KBSessionConfig) -> [KBQuestion] {
+        // If a pack is selected, filter to pack questions first
+        if let packId = selectedPackId {
+            // Check local packs
+            if let pack = localPackStore.localPacks.first(where: { $0.id == packId }),
+               let questionIds = pack.questionIds {
+                let packQuestionIdSet = Set(questionIds.compactMap { UUID(uuidString: $0) })
+                let packQuestions = engine.questions.filter { packQuestionIdSet.contains($0.id) }
+                if !packQuestions.isEmpty {
+                    return engine.selectWeighted(
+                        count: config.questionCount,
+                        respectDomainWeights: true,
+                        from: packQuestions
+                    )
+                }
+            }
+            // For server packs, we'd need to fetch questions (future enhancement)
+        }
+
+        // Use standard selection with domain weights
+        return engine.selectForSession(config: config)
     }
 }
 

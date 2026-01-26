@@ -192,6 +192,19 @@ enum KBDifficulty: String, Codable, CaseIterable, Comparable, Sendable {
     static func < (lhs: KBDifficulty, rhs: KBDifficulty) -> Bool {
         lhs.level < rhs.level
     }
+
+    /// Create difficulty from integer level (1-6)
+    static func from(level: Int) -> KBDifficulty {
+        switch level {
+        case 1: return .overview
+        case 2: return .foundational
+        case 3: return .intermediate
+        case 4: return .varsity
+        case 5: return .championship
+        case 6: return .research
+        default: return .varsity
+        }
+    }
 }
 
 // MARK: - Grade Level

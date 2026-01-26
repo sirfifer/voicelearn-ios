@@ -39,6 +39,7 @@ struct InfoButton: View {
 }
 
 /// Content view for help popovers
+/// Note: Keep tooltip content brief (2-3 sentences max). For detailed help, use the Help section.
 struct HelpPopoverContent: View {
     let title: String
     let content: String
@@ -65,7 +66,6 @@ struct HelpPopoverContent: View {
             Text(content)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
 
             if let url = learnMoreURL {
                 Link(destination: url) {
@@ -78,7 +78,7 @@ struct HelpPopoverContent: View {
             }
         }
         .padding()
-        .frame(minWidth: 250, maxWidth: 320)
+        .frame(minWidth: 280, maxWidth: 340)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title). \(content)")
     }
@@ -223,7 +223,7 @@ struct TooltipContent: View {
                 .foregroundStyle(.secondary)
         }
         .padding()
-        .frame(maxWidth: 280)
+        .frame(minWidth: 260, maxWidth: 320)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Tip: \(title). \(message)")
     }
@@ -345,13 +345,7 @@ enum HelpContent {
         """
 
         static let statusIndicator = """
-        The status indicator shows the current state of your conversation:
-
-        • Gray (Idle): Ready to start
-        • Green (Listening): Hearing your voice
-        • Orange (Thinking): Processing your request
-        • Blue (Speaking): AI is responding
-        • Yellow (Interrupted): You interrupted the AI
+        Shows the conversation state: gray (idle), green (listening), orange (thinking), blue (speaking), or yellow (interrupted).
         """
 
         static let progressBar = """
@@ -359,11 +353,7 @@ enum HelpContent {
         """
 
         static let vuMeter = """
-        The audio level meter shows:
-        • Blue: AI is speaking
-        • Green: Your voice is detected
-
-        Higher levels indicate louder audio.
+        Shows audio levels. Blue indicates AI speaking, green indicates your voice. Higher bars mean louder audio.
         """
 
         static let interrupt = """
@@ -398,25 +388,15 @@ enum HelpContent {
         """
 
         static let mastery = """
-        Mastery percentage shows how well you understand a topic based on:
-        • Time spent studying
-        • Questions answered correctly
-        • Content covered
-
-        Higher mastery means better retention.
+        Mastery percentage reflects your understanding based on study time, correct answers, and content covered.
         """
 
         static let topicStatus = """
-        • Not Started: Haven't begun this topic
-        • In Progress: Currently studying
-        • Completed: Finished at least once
-        • Reviewing: Revisiting for reinforcement
+        Tracks whether a topic is not started, in progress, completed, or being reviewed for reinforcement.
         """
 
         static let importing = """
-        Import curricula from:
-        • Server: Download from the management console
-        • Sample: Load built-in sample content for testing
+        Import curricula from the server or load built-in sample content for testing.
         """
 
         static let startLesson = """
@@ -470,8 +450,7 @@ enum HelpContent {
         """
 
         static let medianVsP99 = """
-        Median: The typical (50th percentile) response time.
-        P99: The worst-case (99th percentile) response time. 99% of responses are faster than this.
+        Median is the typical response time; P99 is the worst-case (99% of responses are faster).
         """
 
         static let costPerHour = """
@@ -491,12 +470,7 @@ enum HelpContent {
     enum Settings {
         // Audio Section
         static let sampleRate = """
-        Audio quality setting:
-        • 16 kHz: Lower quality, less data
-        • 24 kHz: Balanced (recommended)
-        • 48 kHz: Highest quality, more data
-
-        Higher rates use more bandwidth but sound better.
+        Audio quality setting. 24 kHz is recommended for balanced quality and bandwidth usage.
         """
 
         static let voiceProcessing = """
@@ -513,19 +487,11 @@ enum HelpContent {
 
         // VAD Section
         static let vadThreshold = """
-        How sensitive voice detection is:
-        • Lower (0.3): Detects quieter speech, may pick up noise
-        • Higher (0.9): Requires clearer speech, ignores noise
-
-        Start at 0.5 and adjust based on your environment.
+        Voice detection sensitivity. Lower values detect quieter speech but may pick up noise. Start at 0.5 and adjust.
         """
 
         static let interruptionThreshold = """
-        How loud you need to speak to interrupt the AI:
-        • Lower: Easier to interrupt
-        • Higher: Requires deliberate speech to interrupt
-
-        Higher values prevent accidental interruptions.
+        How loud you need to speak to interrupt the AI. Higher values prevent accidental interruptions.
         """
 
         static let enableInterruptions = """
@@ -534,20 +500,12 @@ enum HelpContent {
 
         // STT Section
         static let sttProvider = """
-        Speech recognition service:
-        • GLM-ASR (On-Device): Free, private, works offline
-        • Deepgram Nova-3: Cloud, fast, accurate
-        • AssemblyAI: Cloud, good accuracy
-        • Apple Speech: On-device, good for iOS
+        Speech recognition service. On-device options are free and private; cloud options offer higher accuracy.
         """
 
         // LLM Section
         static let llmProvider = """
-        Language model for AI responses:
-        • On-Device: Free, private, works offline (slower)
-        • Anthropic Claude: High quality, paid
-        • OpenAI: Fast, versatile, paid
-        • Self-Hosted: Free with your own server
+        Language model for AI responses. On-device is free and private; cloud options offer higher quality.
         """
 
         static let llmModel = """
@@ -555,31 +513,16 @@ enum HelpContent {
         """
 
         static let temperature = """
-        Controls response creativity:
-        • 0.0: Factual, deterministic
-        • 0.5: Balanced (recommended)
-        • 1.0: Creative, varied
-
-        Lower for factual topics, higher for creative discussions.
+        Controls response creativity. Lower values (0.0) are factual; higher values (1.0) are more creative. 0.5 is recommended.
         """
 
         static let maxTokens = """
-        Maximum response length. One token is roughly 4 characters.
-        • 256: Short answers
-        • 1024: Detailed explanations (recommended)
-        • 4096: Very long responses
-
-        Longer responses cost more and take more time.
+        Maximum response length. 1024 tokens recommended for detailed explanations. Longer responses cost more.
         """
 
         // TTS Section
         static let ttsProvider = """
-        Text-to-speech voice:
-        • Apple TTS: Free, on-device, robotic
-        • Piper: Free with self-hosted server, natural
-        • VibeVoice: Free with self-hosted server, high quality
-        • ElevenLabs: Paid, very natural
-        • Deepgram Aura: Paid, fast
+        Text-to-speech service. Apple TTS is free on-device; self-hosted and cloud options sound more natural.
         """
 
         static let ttsVoice = """
@@ -587,20 +530,12 @@ enum HelpContent {
         """
 
         static let speakingRate = """
-        How fast the AI speaks:
-        • 0.5x: Half speed (for complex topics)
-        • 1.0x: Normal speed
-        • 2.0x: Double speed (for review)
+        How fast the AI speaks. 1.0x is normal; use slower for complex topics or faster for review.
         """
 
         // Presets Section
         static let presets = """
-        Quick configurations for different use cases:
-        • Balanced: Good quality and speed
-        • Low Latency: Fastest responses
-        • High Quality: Best audio and AI
-        • Cost Optimized: Minimize API costs
-        • Self-Hosted: Use your own servers
+        Quick configurations optimized for different priorities: speed, quality, cost, or self-hosted privacy.
         """
 
         // Self-Hosted Section
@@ -616,14 +551,7 @@ enum HelpContent {
     // MARK: - General Help
     enum General {
         static let onboarding = """
-        Welcome to UnaMentis! This app lets you learn through voice conversations with AI.
-
-        Get started:
-        1. Go to Settings to configure your AI providers
-        2. Import or download a curriculum
-        3. Start a lesson or free conversation
-
-        Say "Hey Siri, talk to UnaMentis" for hands-free learning.
+        Learn through voice conversations with AI. Configure settings, import a curriculum, and start a lesson.
         """
 
         static let accessibility = """

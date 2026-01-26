@@ -284,6 +284,7 @@ struct KBSessionConfig: Codable, Sendable {
     let questionCount: Int
     let timeLimit: TimeInterval?
     let domains: [KBDomain]?
+    let domainWeights: [KBDomain: Double]?
     let difficulty: KBDifficulty?
     let gradeLevel: KBGradeLevel?
 
@@ -293,6 +294,7 @@ struct KBSessionConfig: Codable, Sendable {
         questionCount: Int? = nil,
         timeLimit: TimeInterval? = nil,
         domains: [KBDomain]? = nil,
+        domainWeights: [KBDomain: Double]? = nil,
         difficulty: KBDifficulty? = nil,
         gradeLevel: KBGradeLevel? = nil
     ) -> KBSessionConfig {
@@ -303,6 +305,7 @@ struct KBSessionConfig: Codable, Sendable {
             questionCount: questionCount ?? config.writtenQuestionCount,
             timeLimit: timeLimit ?? config.writtenTimeLimit,
             domains: domains,
+            domainWeights: domainWeights,
             difficulty: difficulty,
             gradeLevel: gradeLevel
         )
@@ -312,6 +315,7 @@ struct KBSessionConfig: Codable, Sendable {
         region: KBRegion,
         questionCount: Int? = nil,
         domains: [KBDomain]? = nil,
+        domainWeights: [KBDomain: Double]? = nil,
         difficulty: KBDifficulty? = nil,
         gradeLevel: KBGradeLevel? = nil
     ) -> KBSessionConfig {
@@ -322,25 +326,31 @@ struct KBSessionConfig: Codable, Sendable {
             questionCount: questionCount ?? config.oralQuestionCount,
             timeLimit: nil,  // Oral rounds don't have overall time limit
             domains: domains,
+            domainWeights: domainWeights,
             difficulty: difficulty,
             gradeLevel: gradeLevel
         )
     }
 
-    /// Quick practice with custom question count
+    /// Quick practice with custom question count and domain weights
     static func quickPractice(
         region: KBRegion,
         roundType: KBRoundType,
-        questionCount: Int = 10
+        questionCount: Int = 10,
+        timeLimit: TimeInterval? = nil,
+        domainWeights: [KBDomain: Double]? = nil
     ) -> KBSessionConfig {
         let config = region.config
-        let timePerQuestion: TimeInterval = roundType == .written ? 15 : 0
+        let defaultTimeLimit: TimeInterval? = roundType == .written
+            ? TimeInterval(questionCount) * 15
+            : nil
         return KBSessionConfig(
             region: region,
             roundType: roundType,
             questionCount: questionCount,
-            timeLimit: roundType == .written ? TimeInterval(questionCount) * timePerQuestion : nil,
+            timeLimit: timeLimit ?? defaultTimeLimit,
             domains: nil,
+            domainWeights: domainWeights,
             difficulty: nil,
             gradeLevel: nil
         )

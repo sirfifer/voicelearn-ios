@@ -254,9 +254,7 @@ enum KBHelpContent {
     enum Strategy {
         // Competition Basics
         static let writtenRoundStrategy = """
-        Work through questions systematically. Skip difficult ones and return if time permits. \
-        There's no penalty for guessing, so always submit an answer. \
-        Pace yourself: if you have 60 questions in 15 minutes, that's 15 seconds each.
+        Work systematically, skip difficult questions, and always guess since there's no penalty.
         """
 
         static let oralRoundStrategy = """
@@ -266,9 +264,7 @@ enum KBHelpContent {
         """
 
         static let conferenceStrategy = """
-        Develop a signal system with your team beforehand. \
-        Common signals: thumbs up (confident), flat hand (uncertain), point (teammate answer). \
-        Practice until signals are automatic. Every second counts in conference.
+        Develop a signal system with your team beforehand. Practice until signals are automatic.
         """
 
         static let reboundStrategyTips = """
@@ -291,9 +287,7 @@ enum KBHelpContent {
         """
 
         static let teamCommunication = """
-        Designate roles: primary answerer, backup, specialist areas. \
-        Develop hand signals before competition. \
-        Debrief after each round to adjust strategy.
+        Designate roles and develop hand signals before competition. Debrief after each round.
         """
 
         static let answerFormulation = """
@@ -313,62 +307,27 @@ enum KBHelpContent {
 
     enum Regional {
         static let coloradoRules = """
-        Colorado Knowledge Bowl:
-        - 60 written questions, 15 minutes
-        - Hand signals ONLY during conference (no verbal)
-        - 15 second conference time
-        - 5 points per oral question
-        - 4 players per team
-        - Strictest conferring rules in the nation
+        Colorado: 60 written questions in 15 min, hand signals only during 15-second conference, 4 players per team.
         """
 
         static let minnesotaRules = """
-        Minnesota Knowledge Bowl:
-        - 60 written questions (2 pts each), 15 minutes
-        - Verbal conferring ALLOWED
-        - 30 second conference time
-        - SOS (Speed of Sound) bonus for quick answers
-        - 4-6 players per team
-        - More relaxed conferring atmosphere
+        Minnesota: 60 written questions in 15 min, verbal conferring allowed during 30-second conference, 4-6 players.
         """
 
         static let washingtonRules = """
-        Washington Knowledge Bowl:
-        - 50 written questions, 45 minutes (much longer!)
-        - Verbal conferring allowed
-        - 20 second conference time
-        - 2 points per written question
-        - 3-5 players per team
-        - Longer written rounds test endurance
+        Washington: 50 written questions in 45 min, verbal conferring allowed during 20-second conference, 3-5 players.
         """
 
         static let conferenceDifferences = """
-        The biggest regional difference is conferring rules:
-        - Colorado: Hand signals only, absolutely no talking
-        - Minnesota: Full verbal discussion allowed
-        - Washington: Verbal discussion allowed
-
-        Colorado teams must master non-verbal communication!
+        Colorado requires hand signals only; Minnesota and Washington allow verbal discussion during conference.
         """
 
         static let scoringDifferences = """
-        Scoring varies by region:
-        - Colorado: 1 pt written, 5 pts oral
-        - Minnesota: 2 pts written, 5 pts oral + SOS bonus
-        - Washington: 2 pts written, variable oral
-
-        Oral rounds are weighted heavily in all regions.
+        Scoring varies by region. Oral rounds are weighted heavily in all regions (5 pts vs 1-2 pts written).
         """
 
         static let regionalComparison = """
-        Key differences at a glance:
-
-        | Rule | CO | MN | WA |
-        |------|----|----|-----|
-        | Written Qs | 60 | 60 | 50 |
-        | Written Time | 15m | 15m | 45m |
-        | Conference | Signals | Verbal | Verbal |
-        | Conf. Time | 15s | 30s | 20s |
+        Key differences: CO uses signals only (15s), MN allows verbal (30s), WA allows verbal (20s, longer written round).
         """
     }
 
@@ -411,21 +370,11 @@ enum KBHelpContent {
         """
 
         static let recommendedPath = """
-        Recommended learning path:
-        1. Oral Practice - Build voice confidence
-        2. Domain Drills - Strengthen weak areas
-        3. Conference Training - Team communication
-        4. Match Simulation - Full competition prep
-        5. Written Practice - Reinforce with MCQ format
+        Start with oral practice, then domain drills, conference training, and match simulation for full prep.
         """
 
         static let tipsForSuccess = """
-        Keys to Knowledge Bowl success:
-        - Practice consistently (20-30 min daily)
-        - Focus on weak domains
-        - Use progressive difficulty
-        - Simulate match conditions
-        - Review missed questions
+        Practice 20-30 min daily, focus on weak domains, use progressive difficulty, and review missed questions.
         """
     }
 }

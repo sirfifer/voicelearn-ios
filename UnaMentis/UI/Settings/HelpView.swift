@@ -81,6 +81,20 @@ public struct HelpView: View {
                     )
                 }
             }
+
+            // Settings Section
+            Section("Settings Reference") {
+                NavigationLink {
+                    SettingsHelpView()
+                } label: {
+                    HelpRow(
+                        icon: "gearshape.fill",
+                        iconColor: .gray,
+                        title: "Settings Guide",
+                        subtitle: "Detailed explanation of all settings"
+                    )
+                }
+            }
         }
         .navigationTitle("Help")
     }
@@ -362,11 +376,214 @@ struct HandsFreeUseCase: View {
     }
 }
 
+// MARK: - Settings Help
+
+struct SettingsHelpView: View {
+    var body: some View {
+        List {
+            // Audio Settings
+            Section("Audio Settings") {
+                SettingsHelpItem(
+                    title: "Sample Rate",
+                    details: """
+                    Audio quality setting that affects bandwidth and sound quality:
+                    • 16 kHz: Lower quality, less data usage
+                    • 24 kHz: Balanced quality and bandwidth (recommended)
+                    • 48 kHz: Highest quality, more data usage
+                    """
+                )
+
+                SettingsHelpItem(
+                    title: "Voice Processing",
+                    details: "Enhances voice clarity using Apple's audio processing. Keep enabled unless troubleshooting audio issues."
+                )
+
+                SettingsHelpItem(
+                    title: "Echo Cancellation",
+                    details: "Prevents the microphone from picking up the AI's voice playing through speakers. Essential when not using headphones."
+                )
+
+                SettingsHelpItem(
+                    title: "Noise Suppression",
+                    details: "Filters background noise like fans, traffic, or keyboard sounds. Keep enabled in noisy environments."
+                )
+            }
+
+            // Voice Detection
+            Section("Voice Detection (VAD)") {
+                SettingsHelpItem(
+                    title: "VAD Threshold",
+                    details: """
+                    How sensitive voice detection is:
+                    • Lower (0.3): Detects quieter speech, may pick up noise
+                    • Higher (0.9): Requires clearer speech, ignores noise
+
+                    Start at 0.5 and adjust based on your environment.
+                    """
+                )
+
+                SettingsHelpItem(
+                    title: "Interruption Threshold",
+                    details: """
+                    How loud you need to speak to interrupt the AI:
+                    • Lower values: Easier to interrupt
+                    • Higher values: Requires deliberate speech to interrupt
+
+                    Higher values prevent accidental interruptions from background noise.
+                    """
+                )
+
+                SettingsHelpItem(
+                    title: "Enable Interruptions",
+                    details: "When enabled, speaking while the AI talks will pause the AI so it can listen to you. Disable for lecture-style sessions where you prefer not to interrupt."
+                )
+            }
+
+            // Speech Recognition
+            Section("Speech Recognition (STT)") {
+                SettingsHelpItem(
+                    title: "STT Provider",
+                    details: """
+                    Speech recognition service options:
+                    • GLM-ASR (On-Device): Free, private, works offline
+                    • Deepgram Nova-3: Cloud-based, fast, highly accurate
+                    • AssemblyAI: Cloud-based, good accuracy
+                    • Apple Speech: On-device, good for iOS, free
+                    """
+                )
+            }
+
+            // Language Model
+            Section("Language Model (LLM)") {
+                SettingsHelpItem(
+                    title: "LLM Provider",
+                    details: """
+                    Language model for AI responses:
+                    • On-Device: Free, private, works offline (slower)
+                    • Anthropic Claude: High quality reasoning, paid
+                    • OpenAI: Fast and versatile, paid
+                    • Self-Hosted: Free with your own Ollama server
+                    """
+                )
+
+                SettingsHelpItem(
+                    title: "Model Selection",
+                    details: "Specific model to use. Larger models are smarter but slower and more expensive. Smaller models are faster and cheaper but may be less capable."
+                )
+
+                SettingsHelpItem(
+                    title: "Temperature",
+                    details: """
+                    Controls response creativity:
+                    • 0.0: Factual, deterministic responses
+                    • 0.5: Balanced (recommended for learning)
+                    • 1.0: Creative, varied responses
+
+                    Use lower values for factual topics, higher for creative discussions.
+                    """
+                )
+
+                SettingsHelpItem(
+                    title: "Max Tokens",
+                    details: """
+                    Maximum response length (1 token ≈ 4 characters):
+                    • 256: Short, concise answers
+                    • 1024: Detailed explanations (recommended)
+                    • 4096: Very long, comprehensive responses
+
+                    Longer responses cost more and take more time to generate.
+                    """
+                )
+            }
+
+            // Text-to-Speech
+            Section("Text-to-Speech (TTS)") {
+                SettingsHelpItem(
+                    title: "TTS Provider",
+                    details: """
+                    Text-to-speech voice options:
+                    • Apple TTS: Free, on-device, functional but robotic
+                    • Piper: Free with self-hosted server, natural sounding
+                    • VibeVoice: Free with self-hosted server, high quality
+                    • ElevenLabs: Paid, very natural and expressive
+                    • Deepgram Aura: Paid, fast and clear
+                    """
+                )
+
+                SettingsHelpItem(
+                    title: "Speaking Rate",
+                    details: """
+                    How fast the AI speaks:
+                    • 0.5x: Half speed (good for complex topics)
+                    • 1.0x: Normal conversational speed
+                    • 2.0x: Double speed (good for review)
+                    """
+                )
+            }
+
+            // Presets
+            Section("Presets") {
+                SettingsHelpItem(
+                    title: "Configuration Presets",
+                    details: """
+                    Quick configurations for different use cases:
+                    • Balanced: Good quality and reasonable speed
+                    • Low Latency: Fastest possible responses
+                    • High Quality: Best audio and AI quality
+                    • Cost Optimized: Minimize API costs
+                    • Self-Hosted: Use your own servers for privacy
+                    """
+                )
+            }
+
+            // Self-Hosted
+            Section("Self-Hosted") {
+                SettingsHelpItem(
+                    title: "Self-Hosted Mode",
+                    details: "Run AI services on your own Mac for free, unlimited usage with full privacy. Requires setting up Ollama and optionally Piper or VibeVoice on your computer."
+                )
+
+                SettingsHelpItem(
+                    title: "Server IP",
+                    details: "Enter your Mac's IP address (e.g., 192.168.1.100) or hostname (e.g., macbook.local). The app connects to Ollama on port 11434."
+                )
+            }
+        }
+        .navigationTitle("Settings Guide")
+        .navigationBarTitleDisplayMode(.large)
+    }
+}
+
+/// Helper view for settings help items
+struct SettingsHelpItem: View {
+    let title: String
+    let details: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.headline)
+            Text(details)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title). \(details)")
+    }
+}
+
 // MARK: - Preview
 
 #Preview {
     NavigationStack {
         HelpView()
+    }
+}
+
+#Preview("Settings Help") {
+    NavigationStack {
+        SettingsHelpView()
     }
 }
 
