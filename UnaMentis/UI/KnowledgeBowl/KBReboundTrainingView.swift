@@ -793,14 +793,26 @@ final class KBReboundTrainingViewModel {
     private var speechDelegate: SpeechDelegate?
     private(set) var isSpeaking: Bool = false
 
-    /// Simple delegate class for AVSpeechSynthesizer
-    private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
-        var onFinished: (() -> Void)?
+    /// Thread-safe delegate class for AVSpeechSynthesizer that handles completion and cancellation
+    @MainActor
+    private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate {
+        var continuation: CheckedContinuation<Void, Never>?
 
-        func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
             Task { @MainActor in
-                self.onFinished?()
+                self.finish()
             }
+        }
+
+        nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+            Task { @MainActor in
+                self.finish()
+            }
+        }
+
+        func finish() {
+            continuation?.resume()
+            continuation = nil
         }
     }
 
@@ -921,9 +933,7 @@ final class KBReboundTrainingViewModel {
 
         // Use continuation to wait for speech completion
         await withCheckedContinuation { continuation in
-            speechDelegate?.onFinished = {
-                continuation.resume()
-            }
+            speechDelegate?.continuation = continuation
 
             let utterance = AVSpeechUtterance(string: text)
             utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.9  // Slightly slower for clarity
@@ -938,6 +948,13 @@ final class KBReboundTrainingViewModel {
             synthesizer.speak(utterance)
         }
 
+        isSpeaking = false
+    }
+
+    /// Cancel any ongoing speech and clean up
+    private func cancelSpeech() {
+        speechSynthesizer?.stopSpeaking(at: .immediate)
+        speechDelegate?.finish()
         isSpeaking = false
     }
 
@@ -1038,7 +1055,7 @@ final class KBReboundTrainingViewModel {
     }
 
     func restartTraining() {
-        speechSynthesizer?.stopSpeaking(at: .immediate)
+        cancelSpeech()
         speechSynthesizer = nil
         speechDelegate = nil
         trainingResult = nil
@@ -1131,7 +1148,7 @@ final class KBReboundTrainingViewModel {
 
     private func endTraining() {
         stopReboundTimer()
-        speechSynthesizer?.stopSpeaking(at: .immediate)
+        cancelSpeech()
         speechSynthesizer = nil
         speechDelegate = nil
 

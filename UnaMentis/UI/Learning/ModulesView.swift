@@ -45,6 +45,7 @@ struct BundledModule: Identifiable {
 }
 
 /// View displaying available specialized training modules
+@MainActor
 struct ModulesView: View {
     @EnvironmentObject var appState: AppState
     @StateObject private var moduleService = ModuleService.shared

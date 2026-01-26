@@ -24,6 +24,7 @@ final class KBSessionTests: XCTestCase {
             questionCount: questionCount,
             timeLimit: timeLimit,
             domains: nil,
+            domainWeights: nil,
             difficulty: nil,
             gradeLevel: nil
         )

@@ -48,6 +48,8 @@ struct KBDomainDrillView: View {
                     Button("End") {
                         viewModel.endDrill()
                     }
+                    .accessibilityLabel("End drill")
+                    .accessibilityHint("Ends the current drill session and shows results")
                 }
             }
         }
@@ -92,6 +94,8 @@ struct KBDomainDrillView: View {
                             )
                         }
                         Slider(value: $viewModel.questionCountDouble, in: 5...30, step: 5)
+                            .accessibilityLabel("Number of questions")
+                            .accessibilityValue("\(viewModel.questionCount) questions")
                     }
 
                     // Progressive difficulty
@@ -163,6 +167,10 @@ struct KBDomainDrillView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .disabled(viewModel.selectedDomain == nil)
+                .accessibilityLabel("Start drill")
+                .accessibilityHint(viewModel.selectedDomain != nil ?
+                    "Starts a \(viewModel.selectedDomain!.displayName) domain drill" :
+                    "Select a domain first")
             }
             .padding()
         }
@@ -194,6 +202,8 @@ struct KBDomainDrillView: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Select \(domain.displayName) domain")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     // MARK: - Reading Question View (Audio Mode)
@@ -293,6 +303,8 @@ struct KBDomainDrillView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .padding()
+                .accessibilityLabel("Submit answer")
+                .accessibilityHint("Submits your answer for scoring")
             }
         }
     }
@@ -412,6 +424,9 @@ struct KBDomainDrillView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .padding()
+            .accessibilityLabel(viewModel.hasMoreQuestions ? "Next question" : "See results")
+            .accessibilityHint(viewModel.hasMoreQuestions ?
+                "Advances to the next question" : "Shows your drill results")
         }
     }
 
@@ -509,6 +524,8 @@ struct KBDomainDrillView: View {
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
+                    .accessibilityLabel("Drill again")
+                    .accessibilityHint("Starts a new drill in the same domain")
 
                     Button {
                         viewModel.resetToSetup()
@@ -516,6 +533,8 @@ struct KBDomainDrillView: View {
                         Text("Choose Different Domain")
                             .font(.subheadline)
                     }
+                    .accessibilityLabel("Choose different domain")
+                    .accessibilityHint("Returns to domain selection")
                 }
             }
             .padding()

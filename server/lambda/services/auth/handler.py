@@ -147,9 +147,20 @@ def handle_register(event: dict[str, Any], context: Any) -> dict[str, Any]:
     if errors:
         return validation_error_response("Validation failed", errors)
 
-    # TODO: Implement actual registration logic
-    # For now, return a placeholder response
-    logger.info(f"Registration attempt for: {email}")
+    # Check if placeholder auth is allowed (only in development)
+    allow_placeholder = os.environ.get("ALLOW_PLACEHOLDER_AUTH", "false").lower() == "true"
+
+    if not allow_placeholder:
+        # In production, require actual registration implementation
+        logger.warning(f"Registration attempt blocked - placeholder auth disabled: {email}")
+        return error_response(
+            "Registration not yet implemented. Set ALLOW_PLACEHOLDER_AUTH=true for development.",
+            status_code=501,
+        )
+
+    # WARNING: Placeholder implementation - no actual user creation
+    # TODO: Implement actual registration logic with database
+    logger.warning(f"PLACEHOLDER AUTH: Registration attempt for {email} - DO NOT USE IN PRODUCTION")
 
     return created_response(
         {
@@ -157,8 +168,9 @@ def handle_register(event: dict[str, Any], context: Any) -> dict[str, Any]:
             "email": email,
             "name": name,
             "message": "Registration successful. Please verify your email.",
+            "_warning": "Placeholder registration - do not use in production",
         },
-        "User registered successfully",
+        "User registered successfully (placeholder)",
     )
 
 
@@ -178,9 +190,20 @@ def handle_login(event: dict[str, Any], context: Any) -> dict[str, Any]:
             {"credentials": ["Email and password are required"]},
         )
 
-    # TODO: Implement actual login logic
-    # For now, return a placeholder response with a token
-    logger.info(f"Login attempt for: {email}")
+    # Check if placeholder auth is allowed (only in development)
+    allow_placeholder = os.environ.get("ALLOW_PLACEHOLDER_AUTH", "false").lower() == "true"
+
+    if not allow_placeholder:
+        # In production, require actual authentication implementation
+        logger.warning(f"Login attempt blocked - placeholder auth disabled: {email}")
+        return error_response(
+            "Authentication not yet implemented. Set ALLOW_PLACEHOLDER_AUTH=true for development.",
+            status_code=501,
+        )
+
+    # WARNING: Placeholder implementation - accepts any credentials
+    # TODO: Implement actual login logic with password verification
+    logger.warning(f"PLACEHOLDER AUTH: Login attempt for {email} - DO NOT USE IN PRODUCTION")
 
     # Create a placeholder JWT
     token = create_jwt(
@@ -199,8 +222,9 @@ def handle_login(event: dict[str, Any], context: Any) -> dict[str, Any]:
                 "id": "placeholder-user-id",
                 "email": email,
             },
+            "_warning": "Placeholder authentication - do not use in production",
         },
-        "Login successful",
+        "Login successful (placeholder)",
     )
 
 

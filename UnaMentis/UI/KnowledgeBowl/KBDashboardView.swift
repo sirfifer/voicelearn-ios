@@ -90,6 +90,8 @@ struct KBDashboardView: View {
                     Button(action: { showingSettings = true }) {
                         Image(systemName: "gearshape")
                     }
+                    .accessibilityLabel("Settings")
+                    .accessibilityHint("Opens Knowledge Bowl settings")
                 }
             }
             .task {

@@ -61,7 +61,7 @@ gem install xcodeproj
 
 Or using bundler (recommended):
 ```bash
-cd /Users/ramerman/dev/unamentis
+cd <repository-root>
 bundle install
 ```
 

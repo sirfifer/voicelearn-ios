@@ -144,7 +144,7 @@ struct KBAnswer: Codable, Hashable, Sendable {
 // MARK: - Answer Type
 
 /// Type of answer for specialized matching logic
-enum KBAnswerType: String, Codable, CaseIterable, Sendable {
+enum KBAnswerType: String, CaseIterable, Sendable {
     case text           // Generic text answer
     case person         // Person's name (handle first/last order, titles)
     case place          // Geographic location (handle "the", abbreviations)
@@ -153,6 +153,30 @@ enum KBAnswerType: String, Codable, CaseIterable, Sendable {
     case title          // Book/movie/work title (handle "The")
     case scientific     // Scientific term (handle formulas, abbreviations)
     case multipleChoice // MCQ letter (A, B, C, D)
+}
+
+extension KBAnswerType: Codable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+        // Handle legacy "number" value from bundled question data
+        if rawValue == "number" {
+            self = .numeric
+            return
+        }
+        guard let value = KBAnswerType(rawValue: rawValue) else {
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Unknown KBAnswerType: \(rawValue)"
+            )
+        }
+        self = value
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
 }
 
 // MARK: - Difficulty Level
