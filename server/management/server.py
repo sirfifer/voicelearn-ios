@@ -100,6 +100,9 @@ from modules_api import register_modules_routes, schedule_kb_audio_prefetch
 # Import KB Packs API for question pack management
 from kb_packs_api import register_kb_packs_routes
 
+# Import Bonjour/mDNS advertiser for client auto-discovery
+from bonjour_advertiser import start_bonjour_advertising
+
 # Import session management (for UserSession, UserVoiceConfig)
 from fov_context import SessionManager, UserVoiceConfig
 
@@ -4928,6 +4931,17 @@ def create_app() -> web.Application:
         # Schedule KB audio prefetch in background (checks coverage and generates if needed)
         app["kb_audio_prefetch_task"] = asyncio.create_task(schedule_kb_audio_prefetch(app))
 
+        # Start Bonjour/mDNS advertising for client auto-discovery
+        bonjour = await start_bonjour_advertising(
+            gateway_port=11400,  # UnaMentis gateway port
+            management_port=PORT
+        )
+        if bonjour:
+            app["bonjour_advertiser"] = bonjour
+            logger.info("[Startup] Bonjour advertising started for client auto-discovery")
+        else:
+            logger.info("[Startup] Bonjour advertising not available (zeroconf not installed)")
+
     # Cleanup hook to stop background tasks
     async def on_cleanup(app):
         # Cancel KB audio prefetch task if running
@@ -4959,6 +4973,11 @@ def create_app() -> web.Application:
         if "tts_cache" in app:
             await app["tts_cache"].shutdown()
             logger.info("[Cleanup] TTS cache saved")
+
+        # Stop Bonjour advertising
+        if "bonjour_advertiser" in app:
+            await app["bonjour_advertiser"].stop()
+            logger.info("[Cleanup] Bonjour advertising stopped")
 
         await resource_monitor.stop()
         await idle_manager.stop()

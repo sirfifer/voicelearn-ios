@@ -626,6 +626,29 @@ public class AppState: ObservableObject {
 
         await checkConfiguration()
         await initializePatchPanel()
+
+        // Auto-discover server on first launch or when no server is configured
+        await initializeServerDiscovery()
+    }
+
+    /// Initialize server discovery for self-hosted mode
+    /// Attempts auto-discovery if no servers are configured
+    private func initializeServerDiscovery() async {
+        let serverManager = ServerConfigManager.shared
+        let existingServers = await serverManager.getAllServers()
+
+        // Only auto-discover if no servers are configured
+        if existingServers.isEmpty {
+            // Check if we have a cached server first (instant)
+            if await serverManager.hasAutoDiscoveredServer {
+                return // Already have a discovered server
+            }
+
+            // Try auto-discovery in the background (non-blocking)
+            Task {
+                _ = await serverManager.connectWithAutoDiscovery()
+            }
+        }
     }
 
     // MARK: - Configuration

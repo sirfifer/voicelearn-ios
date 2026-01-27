@@ -29,6 +29,12 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_unamentis._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>UnaMentis needs local network access to discover and connect to your Mac server for voice tutoring sessions.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>UnaMentis needs microphone access for voice-based educational conversations.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

@@ -23,7 +23,7 @@ class XcodeProjectHelper
 
   # Add Swift source files to the project
   def add_source_files(file_paths, options = {})
-    target = options[:target] || @main_target
+    target = resolve_target(options[:target])
     results = []
 
     file_paths.each do |file_path|
@@ -35,9 +35,19 @@ class XcodeProjectHelper
     results
   end
 
+  # Resolve target from name or return default
+  def resolve_target(target_option)
+    return @main_target if target_option.nil?
+    return target_option unless target_option.is_a?(String)
+
+    # Look up target by name
+    found = @project.targets.find { |t| t.name == target_option }
+    found || @main_target
+  end
+
   # Add a framework or xcframework
   def add_framework(framework_path, options = {})
-    target = options[:target] || @main_target
+    target = resolve_target(options[:target])
     embed = options[:embed] || false
 
     abs_path = File.expand_path(framework_path)
