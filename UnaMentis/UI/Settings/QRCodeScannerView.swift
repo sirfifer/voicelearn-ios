@@ -153,8 +153,9 @@ class QRCodeScanner: NSObject, ObservableObject {
     func startScanning() {
         guard !isConfigured else {
             if !captureSession.isRunning {
-                DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                    self?.captureSession.startRunning()
+                let session = captureSession
+                DispatchQueue.global(qos: .userInitiated).async {
+                    session.startRunning()
                 }
             }
             return
@@ -165,8 +166,9 @@ class QRCodeScanner: NSObject, ObservableObject {
 
     func stopScanning() {
         if captureSession.isRunning {
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                self?.captureSession.stopRunning()
+            let session = captureSession
+            DispatchQueue.global(qos: .userInitiated).async {
+                session.stopRunning()
             }
         }
     }
@@ -220,8 +222,9 @@ class QRCodeScanner: NSObject, ObservableObject {
         captureSession.commitConfiguration()
         isConfigured = true
 
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            self?.captureSession.startRunning()
+        let session = captureSession
+        DispatchQueue.global(qos: .userInitiated).async {
+            session.startRunning()
         }
     }
 }

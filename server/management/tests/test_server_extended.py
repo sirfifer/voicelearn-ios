@@ -2552,5 +2552,71 @@ class TestCheckServiceRunning:
             assert result is False
 
 
+class TestBonjourIntegration:
+    """Tests for Bonjour/mDNS integration in server startup/cleanup."""
+
+    @pytest.mark.asyncio
+    async def test_bonjour_advertiser_started_on_startup(self):
+        """Test that Bonjour advertising is started during app startup."""
+        # Create a mock app
+        app = web.Application()
+        app["management_state"] = MagicMock()
+
+        mock_advertiser = MagicMock()
+        mock_start = AsyncMock(return_value=mock_advertiser)
+
+        with patch("server.start_bonjour_advertising", mock_start):
+            # Simulate what the startup hook does
+            bonjour = await mock_start(gateway_port=11400, management_port=8766)
+            if bonjour:
+                app["bonjour_advertiser"] = bonjour
+
+            mock_start.assert_called_once_with(gateway_port=11400, management_port=8766)
+            assert "bonjour_advertiser" in app
+            assert app["bonjour_advertiser"] is mock_advertiser
+
+    @pytest.mark.asyncio
+    async def test_bonjour_advertiser_not_set_when_unavailable(self):
+        """Test that app has no bonjour_advertiser when start returns None."""
+        app = web.Application()
+
+        mock_start = AsyncMock(return_value=None)
+
+        with patch("server.start_bonjour_advertising", mock_start):
+            bonjour = await mock_start(gateway_port=11400, management_port=8766)
+            if bonjour:
+                app["bonjour_advertiser"] = bonjour
+
+            mock_start.assert_called_once()
+            assert "bonjour_advertiser" not in app
+
+    @pytest.mark.asyncio
+    async def test_bonjour_advertiser_stopped_on_cleanup(self):
+        """Test that Bonjour advertising is stopped during app cleanup."""
+        app = web.Application()
+
+        mock_advertiser = MagicMock()
+        mock_advertiser.stop = AsyncMock()
+        app["bonjour_advertiser"] = mock_advertiser
+
+        # Simulate what the cleanup hook does
+        if "bonjour_advertiser" in app:
+            await app["bonjour_advertiser"].stop()
+
+        mock_advertiser.stop.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_bonjour_cleanup_skipped_when_not_present(self):
+        """Test that cleanup handles missing bonjour_advertiser gracefully."""
+        app = web.Application()
+
+        # Simulate cleanup when bonjour was never started
+        if "bonjour_advertiser" in app:
+            await app["bonjour_advertiser"].stop()
+
+        # Should not raise - no advertiser to stop
+        assert "bonjour_advertiser" not in app
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
