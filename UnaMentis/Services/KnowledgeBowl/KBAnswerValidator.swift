@@ -114,7 +114,7 @@ actor KBAnswerValidator {
 
         // 3. Fuzzy matching (if not in strict mode)
         if !config.strictMode {
-            let fuzzyResult = await fuzzyMatch(normalizedUser, against: answer)
+            let fuzzyResult = await fuzzyMatch(normalizedUser, against: answer, question: question)
             if fuzzyResult.isCorrect {
                 return fuzzyResult
             }
@@ -316,7 +316,7 @@ actor KBAnswerValidator {
 
     // MARK: - Fuzzy Matching
 
-    nonisolated private func fuzzyMatch(_ userAnswer: String, against answer: KBAnswer) async -> KBValidationResult {
+    nonisolated private func fuzzyMatch(_ userAnswer: String, against answer: KBAnswer, question: KBQuestion) async -> KBValidationResult {
         let candidates = [answer.primary] + (answer.acceptable ?? [])
 
         // 1. Levenshtein fuzzy matching (baseline)
@@ -454,12 +454,13 @@ actor KBAnswerValidator {
            await llmValidator.currentState() == .loaded,
            await featureFlags.isFeatureEnabled(.llmValidation) {
             do {
-                // LLM validates against primary answer
+                // LLM validates against primary answer with question context and guidance
                 let isCorrect = try await llmValidator.validate(
                     userAnswer: userAnswer,
                     correctAnswer: answer.primary,
-                    question: "",  // TODO: Pass question text from caller
-                    answerType: answer.answerType
+                    question: question.text,
+                    answerType: answer.answerType,
+                    guidance: answer.guidance
                 )
 
                 if isCorrect {

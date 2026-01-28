@@ -121,14 +121,20 @@ struct KBAnswer: Codable, Hashable, Sendable {
     /// Type of answer for smart matching
     let answerType: KBAnswerType
 
+    /// Guidance for evaluators on how to judge complex answers
+    /// Used by LLM validator for sentence-length answers that require judgment
+    let guidance: String?
+
     init(
         primary: String,
         acceptable: [String]? = nil,
-        answerType: KBAnswerType = .text
+        answerType: KBAnswerType = .text,
+        guidance: String? = nil
     ) {
         self.primary = primary
         self.acceptable = acceptable
         self.answerType = answerType
+        self.guidance = guidance
     }
 
     /// All valid answers including primary and alternatives

@@ -167,12 +167,14 @@ actor KBLLMValidator {
     ///   - correctAnswer: Correct answer
     ///   - question: Question text
     ///   - answerType: Answer type for domain-specific rules
+    ///   - guidance: Optional evaluation guidance for complex answers
     /// - Returns: True if LLM judges answer as correct
     func validate(
         userAnswer: String,
         correctAnswer: String,
         question: String,
-        answerType: KBAnswerType
+        answerType: KBAnswerType,
+        guidance: String? = nil
     ) async throws -> Bool {
         guard state == .loaded, llamaContext != nil else {
             logger.error("Model not loaded")
@@ -184,7 +186,8 @@ actor KBLLMValidator {
             question: question,
             correctAnswer: correctAnswer,
             userAnswer: userAnswer,
-            answerType: answerType
+            answerType: answerType,
+            guidance: guidance
         )
 
         logger.debug("LLM validation prompt: \(prompt)")
@@ -216,26 +219,44 @@ actor KBLLMValidator {
         question: String,
         correctAnswer: String,
         userAnswer: String,
-        answerType: KBAnswerType
+        answerType: KBAnswerType,
+        guidance: String? = nil
     ) -> String {
-        """
+        var prompt = """
         You are an expert Knowledge Bowl judge. Determine if the student's answer is semantically equivalent to the correct answer.
 
         Question: \(question)
         Correct Answer: \(correctAnswer)
         Student Answer: \(userAnswer)
         Answer Type: \(answerType.rawValue)
+        """
+
+        // Add guidance if provided (for complex sentence-length answers)
+        if let guidance = guidance, !guidance.isEmpty {
+            prompt += """
+
+
+        Evaluation Guidance:
+        \(guidance)
+        """
+        }
+
+        prompt += """
+
 
         Rules:
         1. Accept answers that convey the same meaning even if worded differently
         2. Accept common abbreviations and alternative names
         3. Reject close but factually incorrect answers
         4. Consider the answer type for domain-specific rules
+        5. If evaluation guidance is provided, follow it carefully
 
         Respond with exactly one word: "CORRECT" or "INCORRECT"
 
         Your judgment:
         """
+
+        return prompt
     }
 
     private func runInference(prompt: String) async throws -> String {
