@@ -159,32 +159,25 @@ struct KBEnhancedValidationSetupView: View {
             }
         } else {
             switch viewModel.llmState {
-            case .notDownloaded:
-                Button {
-                    Task {
-                        await viewModel.downloadLLM()
-                    }
-                } label: {
-                    HStack {
-                        Image(systemName: "arrow.down.circle")
-                        Text("Download LLM Model")
-                        Spacer()
-                        Text("1.5 GB")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-            case .downloading(let progress):
+            case .notConfigured:
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("Downloading...")
-                        Spacer()
-                        Text("\(Int(progress * 100))%")
-                            .font(.caption)
+                        Image(systemName: "exclamationmark.circle")
                             .foregroundStyle(.secondary)
+                        Text("LLM Service Not Configured")
                     }
-                    ProgressView(value: progress)
+                    Text("The on-device LLM service needs to be configured. This requires the Ministral or TinyLlama model to be bundled with the app.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+            case .loading:
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Loading LLM...")
+                        Spacer()
+                        ProgressView()
+                    }
                 }
 
             case .available:
@@ -241,7 +234,7 @@ extension KBEnhancedValidationSetupView {
         private let logger = Logger(subsystem: "com.unamentis", category: "KBEnhancedValidationSetup")
 
         @Published var embeddingsState: KBEmbeddingsService.ModelState = .notDownloaded
-        @Published var llmState: KBLLMValidator.ModelState = .notDownloaded
+        @Published var llmState: KBLLMValidator.ModelState = .notConfigured
         @Published var isLLMFeatureEnabled = false
         @Published var showError = false
         @Published var errorMessage: String?

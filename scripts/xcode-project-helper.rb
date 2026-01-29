@@ -23,7 +23,7 @@ class XcodeProjectHelper
 
   # Add Swift source files to the project
   def add_source_files(file_paths, options = {})
-    target = options[:target] || @main_target
+    target = resolve_target(options[:target])
     results = []
 
     file_paths.each do |file_path|
@@ -35,9 +35,22 @@ class XcodeProjectHelper
     results
   end
 
+  # Resolve target from name or return default
+  def resolve_target(target_option)
+    return @main_target if target_option.nil?
+    return target_option unless target_option.is_a?(String)
+
+    # Look up target by name
+    found = @project.targets.find { |t| t.name == target_option }
+    unless found
+      warn "Warning: Target '#{target_option}' not found; falling back to '#{@main_target.name}'"
+    end
+    found || @main_target
+  end
+
   # Add a framework or xcframework
   def add_framework(framework_path, options = {})
-    target = options[:target] || @main_target
+    target = resolve_target(options[:target])
     embed = options[:embed] || false
 
     abs_path = File.expand_path(framework_path)
@@ -49,6 +62,26 @@ class XcodeProjectHelper
     # Check if already added
     existing = find_file_reference(framework_path)
     if existing
+      # Framework exists - but check if we need to add embedding
+      if embed
+        # Check if already embedded
+        embed_phase = target.copy_files_build_phases.find { |p| p.symbol_dst_subfolder_spec == :frameworks }
+        already_embedded = embed_phase && embed_phase.files.any? { |f| f.file_ref == existing }
+
+        unless already_embedded
+          # Framework is linked but not embedded - add embedding
+          unless embed_phase
+            embed_phase = target.new_copy_files_build_phase('Embed Frameworks')
+            embed_phase.symbol_dst_subfolder_spec = :frameworks
+          end
+          embed_phase.add_file_reference(existing)
+          @project.save
+          return { success: true, path: framework_path, embedded: true, action: 'added_embedding' }
+        end
+
+        return { success: false, error: "Framework already in project and embedded: #{framework_path}" }
+      end
+
       return { success: false, error: "Framework already in project: #{framework_path}" }
     end
 
@@ -277,7 +310,8 @@ if __FILE__ == $0
     else
       if result[:success]
         embed_status = result[:embedded] ? ' (embedded)' : ''
-        puts "Added framework: #{result[:path]}#{embed_status}"
+        action = result[:action] == 'added_embedding' ? 'Added embedding to' : 'Added framework:'
+        puts "#{action} #{result[:path]}#{embed_status}"
       else
         puts "Failed: #{result[:error]}"
       end

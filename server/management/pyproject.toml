@@ -11,6 +11,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+discovery = [
+    "zeroconf>=0.131.0",  # mDNS/Bonjour for client auto-discovery
+]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",

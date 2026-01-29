@@ -4,9 +4,10 @@
 // This service provides fully on-device LLM inference with no network required.
 // Uses llama.cpp XCFramework with C++ interop for efficient inference on Apple Silicon.
 //
-// Recommended models for iPhone (bundled):
-// - Ministral-3B-Instruct-Q4_K_M (~2.1GB) - Primary model, requires llama.cpp ≥b7263
-// - TinyLlama-1.1B-Chat-v1.0-Q4_K_M (~670MB) - Fallback for low-memory devices
+// Primary model (December 2025):
+// - Ministral 3 3B (Ministral-3-3B-Instruct-2512-Q4_K_M.gguf) ~2.15GB
+//   Downloaded from Hugging Face: mistralai/Ministral-3-3B-Instruct-2512-GGUF
+//   Stored in: Documents/models/LLM/
 
 import Foundation
 import Logging
@@ -36,7 +37,7 @@ private func llama_batch_add(_ batch: inout llama_batch, _ id: llama_token, _ po
 /// - Works offline
 /// - Privacy-preserving (data never leaves device)
 /// - Low latency for short responses
-public actor OnDeviceLLMService: LLMService {
+public actor OnDeviceLLMService: LLMService, LLMLoadableService {
 
     // MARK: - Types
 
@@ -76,7 +77,17 @@ public actor OnDeviceLLMService: LLMService {
         }
 
         public static var `default`: Configuration {
-            // Primary: Ministral 3B - high quality 3B model (requires llama.cpp ≥b7263)
+            // Primary: Check Documents/models/LLM/ for downloaded Ministral 3 3B (Dec 2025)
+            let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let downloadedModelPath = documentsPath
+                .appendingPathComponent("models/LLM")
+                .appendingPathComponent(OnDeviceLLMModel.ministral3_3B.config.filename)
+
+            if FileManager.default.fileExists(atPath: downloadedModelPath.path) {
+                return Configuration(modelPath: downloadedModelPath, contextSize: 4096)
+            }
+
+            // Fallback: Check bundle for older bundled model (legacy support)
             if let bundleMinistralPath = Bundle.main.url(
                 forResource: "ministral-3b-instruct-q4_k_m",
                 withExtension: "gguf"
@@ -84,21 +95,14 @@ public actor OnDeviceLLMService: LLMService {
                 return Configuration(modelPath: bundleMinistralPath, contextSize: 4096)
             }
 
-            // Fallback to filesystem path for development
-            let ministralPath = "models/ministral-3b-instruct-q4_k_m.gguf"
-            if FileManager.default.fileExists(atPath: ministralPath) {
-                return Configuration(modelPath: URL(fileURLWithPath: ministralPath), contextSize: 4096)
+            // Development fallback: filesystem path
+            let devPath = "models/ministral-3b-instruct-q4_k_m.gguf"
+            if FileManager.default.fileExists(atPath: devPath) {
+                return Configuration(modelPath: URL(fileURLWithPath: devPath), contextSize: 4096)
             }
 
-            // Final fallback: TinyLlama 1.1B for low-memory devices
-            if let bundleTinyLlamaPath = Bundle.main.url(
-                forResource: "tinyllama-1.1b-chat-v1.0.Q4_K_M",
-                withExtension: "gguf"
-            ) {
-                return Configuration(modelPath: bundleTinyLlamaPath)
-            }
-
-            return Configuration(modelPath: URL(fileURLWithPath: "models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"))
+            // Last resort: Return path to downloaded model location (will fail if not downloaded)
+            return Configuration(modelPath: downloadedModelPath, contextSize: 4096)
         }
     }
 
@@ -516,35 +520,32 @@ extension OnDeviceLLMService {
 
     /// Check if on-device models are available
     public static var areModelsAvailable: Bool {
-        // Check for Ministral 3B in bundle (primary - requires llama.cpp ≥b7263)
+        // Primary: Check Documents/models/LLM/ for downloaded Ministral 3 3B (Dec 2025)
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let downloadedModelPath = documentsPath
+            .appendingPathComponent("models/LLM")
+            .appendingPathComponent(OnDeviceLLMModel.ministral3_3B.config.filename)
+
+        if FileManager.default.fileExists(atPath: downloadedModelPath.path) {
+            staticLogger.debug("Downloaded Ministral 3 3B found at: \(downloadedModelPath.path)")
+            return true
+        }
+
+        // Legacy: Check for older bundled Ministral 3B
         if let bundleURL = Bundle.main.url(forResource: "ministral-3b-instruct-q4_k_m", withExtension: "gguf") {
             let exists = FileManager.default.fileExists(atPath: bundleURL.path)
             staticLogger.debug("Ministral 3B bundle URL: \(bundleURL.path), exists: \(exists)")
             if exists { return true }
         }
 
-        // Check filesystem path for Ministral 3B (development)
-        let ministralPath = "models/ministral-3b-instruct-q4_k_m.gguf"
-        if FileManager.default.fileExists(atPath: ministralPath) {
-            staticLogger.debug("Ministral 3B filesystem path exists: \(ministralPath)")
+        // Development fallback
+        let devPath = "models/ministral-3b-instruct-q4_k_m.gguf"
+        if FileManager.default.fileExists(atPath: devPath) {
+            staticLogger.debug("Ministral 3B dev path exists: \(devPath)")
             return true
         }
 
-        // Fallback: check for TinyLlama 1.1B in bundle
-        if let bundleURL = Bundle.main.url(forResource: "tinyllama-1.1b-chat-v1.0.Q4_K_M", withExtension: "gguf") {
-            let exists = FileManager.default.fileExists(atPath: bundleURL.path)
-            staticLogger.debug("TinyLlama bundle URL: \(bundleURL.path), exists: \(exists)")
-            if exists { return true }
-        }
-
-        // Fallback: check filesystem path for TinyLlama (development)
-        let tinyLlamaPath = "models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
-        if FileManager.default.fileExists(atPath: tinyLlamaPath) {
-            staticLogger.debug("TinyLlama filesystem path exists: \(tinyLlamaPath)")
-            return true
-        }
-
-        staticLogger.debug("No models available")
+        staticLogger.debug("No models available - download required")
         return false
     }
 }

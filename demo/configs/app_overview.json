@@ -1,0 +1,69 @@
+{
+    "name": "UnaMentis App Overview",
+    "version": "1.0.0",
+
+    "simulator_device": "iPhone 16 Pro",
+    "app_bundle_id": "com.unamentis.app",
+    "app_scheme": "UnaMentis",
+    "project_path": "/Users/ramerman/dev/unamentis/UnaMentis.xcodeproj",
+
+    "tts_method": "unamentis",
+    "tts_voice": "nova",
+    "tts_rate": 175,
+    "tts_provider": "vibevoice",
+    "tts_server_url": "http://localhost:8766",
+
+    "shotstack_resolution": "1080",
+    "shotstack_format": "mp4",
+    "default_effect": "zoomIn",
+    "default_transition": "fade",
+    "background_color": "#0a0a0f",
+
+    "scenes": [
+        {
+            "id": "welcome",
+            "narration": "",
+            "wait_before": 2.0,
+            "capture": "screenshot",
+            "effect": "zoomIn",
+            "transition": "fade"
+        },
+        {
+            "id": "session_tab",
+            "narration": "",
+            "wait_before": 1.5,
+            "capture": "screenshot",
+            "deep_link": "unamentis://chat"
+        },
+        {
+            "id": "learning_tab",
+            "narration": "",
+            "wait_before": 1.5,
+            "capture": "screenshot",
+            "deep_link": "unamentis://learning"
+        },
+        {
+            "id": "active_session",
+            "narration": "",
+            "wait_before": 2.0,
+            "capture": "video",
+            "video_length": 5.0
+        },
+        {
+            "id": "analytics",
+            "narration": "",
+            "wait_before": 1.5,
+            "capture": "screenshot",
+            "deep_link": "unamentis://analytics"
+        },
+        {
+            "id": "closing",
+            "narration": "",
+            "wait_before": 1.0,
+            "capture": "screenshot",
+            "effect": "zoomOut"
+        }
+    ],
+
+    "output_dir": "./demo/output/app_overview"
+}

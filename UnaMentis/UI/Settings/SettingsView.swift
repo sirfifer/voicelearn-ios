@@ -71,6 +71,26 @@ public struct SettingsView: View {
                     Text("Audio, speech recognition, language model, and voice output settings.")
                 }
 
+                // On-Device AI Section
+                Section {
+                    NavigationLink {
+                        OnDeviceLLMSettingsView()
+                    } label: {
+                        HStack {
+                            Label("On-Device LLM", systemImage: "cpu")
+                            Spacer()
+                            Text(viewModel.onDeviceLLMStatus)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .accessibilityHint("Manage the on-device language model for offline AI features")
+                } header: {
+                    Text("On-Device AI")
+                } footer: {
+                    Text("Download and manage AI models that run entirely on your device.")
+                }
+
                 // Self-Hosted Server Section
                 Section {
                     Toggle("Enable Self-Hosted Server", isOn: $viewModel.selfHostedEnabled)
@@ -507,6 +527,9 @@ class SettingsViewModel: ObservableObject {
     @Published var discoveredVibeVoiceVoices: [String] = []
     @Published var serverCapabilitiesSummary: String = ""
 
+    // On-Device LLM
+    @Published var onDeviceLLMStatus: String = "Checking..."
+
     /// Get discovered voices for the currently selected TTS provider
     var discoveredVoices: [String] {
         switch ttsProvider {
@@ -626,8 +649,9 @@ class SettingsViewModel: ObservableObject {
         async let keyStatusTask: () = loadKeyStatus()
         async let curriculumTask: () = checkSampleCurriculum()
         async let serverTask: () = loadServerStatus()
+        async let llmTask: () = checkOnDeviceLLMStatus()
 
-        _ = await (keyStatusTask, curriculumTask, serverTask)
+        _ = await (keyStatusTask, curriculumTask, serverTask, llmTask)
     }
 
     /// Available models for current provider
@@ -654,6 +678,29 @@ class SettingsViewModel: ObservableObject {
         await MainActor.run {
             selfHostedServerCount = servers.filter { $0.isEnabled }.count
             healthySelfHostedCount = healthy.count
+        }
+    }
+
+    private func checkOnDeviceLLMStatus() async {
+        let manager = OnDeviceLLMModelManager()
+        let state = await manager.currentState()
+        await MainActor.run {
+            switch state {
+            case .notDownloaded:
+                onDeviceLLMStatus = "Not Downloaded"
+            case .downloading(let progress):
+                onDeviceLLMStatus = "Downloading \(Int(progress * 100))%"
+            case .verifying:
+                onDeviceLLMStatus = "Verifying..."
+            case .available:
+                onDeviceLLMStatus = "Ready"
+            case .loading:
+                onDeviceLLMStatus = "Loading..."
+            case .loaded:
+                onDeviceLLMStatus = "Active"
+            case .error:
+                onDeviceLLMStatus = "Error"
+            }
         }
     }
 

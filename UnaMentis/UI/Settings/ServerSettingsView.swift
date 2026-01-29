@@ -1,11 +1,11 @@
 // UnaMentis - Server Settings View
-// UI for configuring self-hosted servers
+// UI for configuring self-hosted servers with auto-discovery
 //
 // Part of UI/Settings
 
 import SwiftUI
 
-/// View for configuring self-hosted servers
+/// View for configuring self-hosted servers with automatic discovery
 public struct ServerSettingsView: View {
     @StateObject private var viewModel = ServerSettingsViewModel()
 
@@ -13,25 +13,46 @@ public struct ServerSettingsView: View {
 
     public var body: some View {
         List {
-            // Status Section
-            Section {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Self-Hosted Mode")
-                            .font(.headline)
-                        Text(viewModel.statusMessage)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+            // Connection Status Section
+            if viewModel.showDiscoveryProgress {
+                Section {
+                    DiscoveryProgressView(
+                        state: viewModel.discoveryState,
+                        currentTier: viewModel.currentTier,
+                        progress: viewModel.discoveryProgress,
+                        onCancel: { viewModel.cancelDiscovery() },
+                        onRetry: { Task { await viewModel.startAutoDiscovery() } },
+                        onManualSetup: { viewModel.showManualSetup = true }
+                    )
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                }
+            } else {
+                // Status Section
+                Section {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Self-Hosted Mode")
+                                .font(.headline)
+                            Text(viewModel.statusMessage)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        Circle()
+                            .fill(viewModel.overallStatus.color)
+                            .frame(width: 12, height: 12)
                     }
 
-                    Spacer()
-
-                    Circle()
-                        .fill(viewModel.overallStatus.color)
-                        .frame(width: 12, height: 12)
+                    // Connected server info with discovery badge
+                    if let connectedServer = viewModel.connectedServer {
+                        ConnectedServerRow(server: connectedServer)
+                    }
+                } header: {
+                    Text("Status")
                 }
-            } header: {
-                Text("Status")
             }
 
             // Configured Servers Section
@@ -44,6 +65,7 @@ public struct ServerSettingsView: View {
                     ForEach(viewModel.servers) { server in
                         ServerRow(
                             server: server,
+                            discoveryMethod: viewModel.discoveryMethodFor(server),
                             onToggle: { viewModel.toggleServer(server.id) },
                             onDelete: { viewModel.deleteServer(server.id) },
                             onTest: { await viewModel.testServer(server.id) }
@@ -71,27 +93,33 @@ public struct ServerSettingsView: View {
             // Discovery Section
             Section {
                 Button {
-                    Task { await viewModel.discoverServers() }
+                    Task { await viewModel.startAutoDiscovery() }
                 } label: {
                     HStack {
-                        Label("Discover Local Servers", systemImage: "antenna.radiowaves.left.and.right")
+                        Label("Auto-Discover Server", systemImage: "antenna.radiowaves.left.and.right")
                         Spacer()
-                        if viewModel.isDiscovering {
+                        if viewModel.discoveryState.isDiscovering {
                             ProgressView()
                         }
                     }
                 }
-                .disabled(viewModel.isDiscovering)
+                .disabled(viewModel.discoveryState.isDiscovering)
 
                 Button {
-                    viewModel.addDefaultServer()
+                    viewModel.showQRScanner = true
                 } label: {
-                    Label("Add Local Mac Server", systemImage: "desktopcomputer")
+                    Label("Scan QR Code", systemImage: "qrcode.viewfinder")
+                }
+
+                Button {
+                    viewModel.showManualSetup = true
+                } label: {
+                    Label("Enter Manually", systemImage: "keyboard")
                 }
             } header: {
-                Text("Quick Setup")
+                Text("Connect to Server")
             } footer: {
-                Text("Run 'server/setup.sh' on your Mac to set up the UnaMentis server stack.")
+                Text("Your Mac server will be found automatically on most networks. Use QR code or manual entry if auto-discovery fails.")
             }
 
             // Info Section
@@ -113,13 +141,20 @@ public struct ServerSettingsView: View {
         .sheet(isPresented: $viewModel.showAddServer) {
             AddServerSheet(onAdd: viewModel.addServer)
         }
-        .alert("Discovered Servers", isPresented: $viewModel.showDiscoveryResults) {
-            Button("Add All") {
-                viewModel.addDiscoveredServers()
+        .sheet(isPresented: $viewModel.showQRScanner) {
+            QRCodeScannerView(
+                onScanned: { data in
+                    Task { await viewModel.configureFromQRCode(data) }
+                },
+                onManualEntry: {
+                    viewModel.showManualSetup = true
+                }
+            )
+        }
+        .sheet(isPresented: $viewModel.showManualSetup) {
+            ManualServerEntrySheet { host, port, name in
+                Task { await viewModel.configureManually(host: host, port: port, name: name) }
             }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Found \(viewModel.discoveredServers.count) server(s). Add them to your configuration?")
         }
         .task {
             await viewModel.loadServers()
@@ -130,10 +165,42 @@ public struct ServerSettingsView: View {
     }
 }
 
+// MARK: - Connected Server Row
+
+struct ConnectedServerRow: View {
+    let server: DiscoveredServer
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+                .font(.title2)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(server.name)
+                    .font(.body)
+                    .fontWeight(.medium)
+
+                HStack(spacing: 8) {
+                    Text("\(server.host):\(server.port)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    DiscoveryMethodBadge(method: server.discoveryMethod)
+                }
+            }
+
+            Spacer()
+        }
+        .padding(.vertical, 4)
+    }
+}
+
 // MARK: - Server Row
 
 struct ServerRow: View {
     let server: ServerConfig
+    let discoveryMethod: DiscoveryMethod?
     let onToggle: () -> Void
     let onDelete: () -> Void
     let onTest: () async -> Void
@@ -148,9 +215,15 @@ struct ServerRow: View {
                 .frame(width: 24)
 
             // Server info
-            VStack(alignment: .leading, spacing: 2) {
-                Text(server.name)
-                    .font(.body)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Text(server.name)
+                        .font(.body)
+
+                    if let method = discoveryMethod {
+                        DiscoveryMethodBadge(method: method)
+                    }
+                }
 
                 HStack(spacing: 8) {
                     Text("\(server.host):\(server.port)")
@@ -380,9 +453,24 @@ struct ServerSetupGuideView: View {
 
                 Divider()
 
+                // Auto Discovery
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Auto Discovery", systemImage: "4.circle.fill")
+                        .font(.headline)
+
+                    Text("When your Mac server is running, this app will automatically find it on your local network using Bonjour.")
+                        .font(.subheadline)
+
+                    Text("If auto-discovery doesn't work (common on school/corporate networks), use the QR code on your Mac's menu bar app, or enter the IP address manually.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                Divider()
+
                 // Commands
                 VStack(alignment: .leading, spacing: 12) {
-                    Label("Control Commands", systemImage: "4.circle.fill")
+                    Label("Control Commands", systemImage: "5.circle.fill")
                         .font(.headline)
 
                     CodeBlock("""
@@ -452,10 +540,19 @@ struct PortRow: View {
 @MainActor
 class ServerSettingsViewModel: ObservableObject {
     @Published var servers: [ServerConfig] = []
-    @Published var isDiscovering = false
     @Published var showAddServer = false
-    @Published var showDiscoveryResults = false
-    @Published var discoveredServers: [ServerConfig] = []
+    @Published var showQRScanner = false
+    @Published var showManualSetup = false
+    @Published var showDiscoveryProgress = false
+
+    // Discovery state from DeviceDiscoveryManager
+    @Published var discoveryState: DiscoveryState = .idle
+    @Published var currentTier: DiscoveryTier?
+    @Published var discoveryProgress: Double = 0
+    @Published var connectedServer: DiscoveredServer?
+
+    // Map server IDs to discovery methods
+    private var serverDiscoveryMethods: [UUID: DiscoveryMethod] = [:]
 
     var overallStatus: ServerHealthStatus {
         let enabledServers = servers.filter { $0.isEnabled }
@@ -466,21 +563,111 @@ class ServerSettingsViewModel: ObservableObject {
     }
 
     var statusMessage: String {
+        if let connected = connectedServer {
+            return "Connected to \(connected.name)"
+        }
         let healthy = servers.filter { $0.isEnabled && $0.healthStatus.isUsable }.count
         let total = servers.filter { $0.isEnabled }.count
         if total == 0 { return "No servers configured" }
         return "\(healthy)/\(total) servers available"
     }
 
+    func discoveryMethodFor(_ server: ServerConfig) -> DiscoveryMethod? {
+        serverDiscoveryMethods[server.id]
+    }
+
     func loadServers() async {
         let serverManager = ServerConfigManager.shared
         servers = await serverManager.getAllServers()
+
+        // Check for connected server from discovery manager
+        connectedServer = DeviceDiscoveryManager.shared.connectedServer
     }
 
     func refreshServers() async {
         let serverManager = ServerConfigManager.shared
         await serverManager.checkAllServersHealth()
         servers = await serverManager.getAllServers()
+    }
+
+    func startAutoDiscovery() async {
+        showDiscoveryProgress = true
+        let discoveryManager = DeviceDiscoveryManager.shared
+
+        // Start observing discovery state
+        Task {
+            while showDiscoveryProgress {
+                discoveryState = discoveryManager.state
+                currentTier = discoveryManager.currentTier
+                discoveryProgress = discoveryManager.progress
+                try? await Task.sleep(for: .milliseconds(100))
+            }
+        }
+
+        // Run discovery
+        if let discovered = await discoveryManager.startDiscovery() {
+            connectedServer = discovered
+            serverDiscoveryMethods[UUID()] = discovered.discoveryMethod
+
+            // Add to server config
+            let serverManager = ServerConfigManager.shared
+            _ = await serverManager.connectWithAutoDiscovery()
+            await loadServers()
+        }
+
+        // Update final state
+        discoveryState = discoveryManager.state
+        showDiscoveryProgress = discoveryState.isDiscovering
+
+        // Hide progress after a brief delay if connected
+        if case .connected = discoveryState {
+            try? await Task.sleep(for: .seconds(1.5))
+            showDiscoveryProgress = false
+        }
+    }
+
+    func cancelDiscovery() {
+        Task {
+            await DeviceDiscoveryManager.shared.cancelDiscovery()
+            showDiscoveryProgress = false
+            discoveryState = .idle
+        }
+    }
+
+    func configureFromQRCode(_ data: Data) async {
+        let serverManager = ServerConfigManager.shared
+        if let config = await serverManager.configureServerFromQRCode(data) {
+            serverDiscoveryMethods[config.id] = .qrCode
+            await loadServers()
+
+            // Update connected server display
+            connectedServer = DiscoveredServer(
+                name: config.name,
+                host: config.host,
+                port: config.port,
+                discoveryMethod: .qrCode
+            )
+        }
+    }
+
+    func configureManually(host: String, port: Int, name: String?) async {
+        let serverManager = ServerConfigManager.shared
+        if let config = await serverManager.configureServerManually(
+            host: host,
+            port: port,
+            name: name
+        ) {
+            serverDiscoveryMethods[config.id] = .manual
+            await loadServers()
+
+            // Update connected server display
+            connectedServer = DiscoveredServer(
+                name: config.name,
+                host: config.host,
+                port: config.port,
+                discoveryMethod: .manual
+            )
+        }
     }
 
     func toggleServer(_ id: UUID) {
@@ -498,6 +685,7 @@ class ServerSettingsViewModel: ObservableObject {
         Task {
             let serverManager = ServerConfigManager.shared
             await serverManager.removeServer(id)
+            serverDiscoveryMethods.removeValue(forKey: id)
             await loadServers()
         }
     }
@@ -512,36 +700,7 @@ class ServerSettingsViewModel: ObservableObject {
         Task {
             let serverManager = ServerConfigManager.shared
             await serverManager.addServer(config)
-            await loadServers()
-        }
-    }
-
-    func addDefaultServer() {
-        Task {
-            let serverManager = ServerConfigManager.shared
-            await serverManager.addDefaultServer()
-            await loadServers()
-        }
-    }
-
-    func discoverServers() async {
-        isDiscovering = true
-        let serverManager = ServerConfigManager.shared
-        discoveredServers = await serverManager.discoverLocalServers()
-        isDiscovering = false
-
-        if !discoveredServers.isEmpty {
-            showDiscoveryResults = true
-        }
-    }
-
-    func addDiscoveredServers() {
-        Task {
-            let serverManager = ServerConfigManager.shared
-            for server in discoveredServers {
-                await serverManager.addServer(server)
-            }
-            discoveredServers = []
+            serverDiscoveryMethods[config.id] = .manual
             await loadServers()
         }
     }

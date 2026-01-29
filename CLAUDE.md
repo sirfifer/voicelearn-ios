@@ -32,6 +32,7 @@ This repository contains multiple components, each with its own CLAUDE.md:
 | Curriculum | `curriculum/` | UMCF format specification |
 | Latency Test Harness | `server/latency_harness/` | Automated latency testing CLI |
 | iOS Test Harness | `UnaMentis/Testing/LatencyHarness/` | High-precision iOS latency testing |
+| Demo Video Generator | `demo/` | Automated iOS demo video creation |
 
 See the CLAUDE.md in each directory for component-specific instructions.
 
@@ -238,6 +239,34 @@ Before marking any work "complete", run:
 
 See `.claude/skills/validate/SKILL.md` for the complete validation workflow.
 
+## Pre-Commit Hook: Quality Enforcement
+
+The pre-commit hook enforces code quality through multiple checks.
+
+### Mock Test Detection
+
+Enforces the "Real Over Mock" testing philosophy by blocking commits with forbidden mock patterns:
+
+| Language | Forbidden Patterns | Allowed Exceptions |
+|----------|-------------------|-------------------|
+| Python | `class Mock*`, `MagicMock()`, `AsyncMock()` | `# ALLOWED: <reason>` comment |
+| TypeScript | `vi.mock('@/lib/...')` | `// ALLOWED: <reason>` comment |
+| Swift | `class/actor/struct Mock*` outside `MockServices.swift` | `// ALLOWED: <reason>` comment |
+| Rust | `mockall` crate, `mock!` macro, `struct Mock*` | `// ALLOWED: <reason>` comment |
+
+**Swift exception:** Mocks for paid external APIs (LLM, STT, TTS, Embeddings) are allowed in `UnaMentisTests/Helpers/MockServices.swift`.
+
+**Remediation:** Use real implementations with fixtures. See `docs/testing/MOCK_VIOLATIONS_INVENTORY.md` for patterns.
+
+### Dependency Vulnerability Scanning
+
+When `requirements*.txt` or `package.json`/`pnpm-lock.yaml` are staged, the hook scans for known vulnerabilities:
+
+- **Python:** Uses `pip-audit` (install: `pip install pip-audit`)
+- **Node.js:** Uses `pnpm audit` or `npm audit`
+
+These checks are **warning-only** and won't block commits. CI enforces strictly.
+
 ## MANDATORY: Tool Trust Doctrine
 
 **All findings from security and quality tools are presumed legitimate until proven otherwise through rigorous analysis.**
@@ -286,6 +315,13 @@ Proven false positive? → Document WHY in detail
 See `docs/quality/TOOL_TRUST_DOCTRINE.md` and the "Tool Trust Doctrine" section in `AGENTS.md` for full documentation and case studies.
 
 ## Key Technical Requirements
+
+**Hands-Free First Design:**
+- Voice-centric activities (oral practice, learning sessions) must support 100% hands-free operation
+- Voice-first is automatic when entering activities, no toggle needed
+- App-wide voice navigation is a separate accessibility feature (opt-in)
+- All voice work must follow accessibility standards (VoiceOver compatible, consistent commands)
+- See `docs/design/HANDS_FREE_FIRST_DESIGN.md` for complete specification
 
 **Testing Philosophy (Real Over Mock):**
 - Only mock paid external APIs (LLM, STT, TTS, Embeddings)
@@ -511,6 +547,7 @@ Skills are focused workflows that provide consistency and predictability. Invoke
 | `/comms` | Post to Slack/Trello with natural language | Team communication |
 | `/worktree` | Manage git worktrees for parallel development | Parallel task isolation |
 | `/xcode-project` | Add files/frameworks to Xcode projects | After creating Swift files |
+| `/demo-video` | Generate iOS demo videos autonomously | Marketing, App Store previews |
 
 ### Key Skills
 
@@ -552,5 +589,15 @@ Skills are focused workflows that provide consistency and predictability. Invoke
 /worktree cleanup              # Clean DerivedData from inactive worktrees
 /worktree remove kb-feature    # Remove worktree (with safety checks)
 ```
+
+**`/demo-video`** - Automated iOS demo video generation
+```
+/demo-video                    # Show status and available configs
+/demo-video generate app_overview  # Full pipeline: capture → TTS → assemble
+/demo-video capture app_overview   # Capture only (test navigation)
+/demo-video script app_overview    # View narration script for editing
+```
+
+Prerequisites: `/service status` shows management-api running, `SHOTSTACK_API_KEY` set.
 
 See `.claude/skills/*/SKILL.md` for detailed documentation on each skill.

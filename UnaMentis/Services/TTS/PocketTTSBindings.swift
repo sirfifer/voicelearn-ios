@@ -549,6 +549,8 @@ public protocol PocketTtsEngineProtocol: AnyObject {
 
     func configure(config: TtsConfig) throws
 
+    func decodeLatents(latentsData: Data, numFrames: UInt32) throws -> SynthesisResult
+
     func getConfig() -> TtsConfig
 
     func isReady() -> Bool
@@ -559,7 +561,7 @@ public protocol PocketTtsEngineProtocol: AnyObject {
 
     func setReferenceAudio(audioData: Data, sampleRate: UInt32) throws
 
-    func startStreaming(text: String, handler: TtsEventHandler) throws
+    func startTrueStreaming(text: String, handler: TtsEventHandler) throws
 
     func synthesize(text: String) throws -> SynthesisResult
 
@@ -641,6 +643,14 @@ open class PocketTtsEngine:
     }
     }
 
+    open func decodeLatents(latentsData: Data, numFrames: UInt32) throws -> SynthesisResult {
+        return try FfiConverterTypeSynthesisResult.lift(rustCallWithError(FfiConverterTypePocketTTSError.lift) {
+            uniffi_pocket_tts_ios_fn_method_pocketttsengine_decode_latents(self.uniffiClonePointer(),
+                                                                           FfiConverterData.lower(latentsData),
+                                                                           FfiConverterUInt32.lower(numFrames), $0)
+        })
+    }
+
     open func getConfig() -> TtsConfig {
         return try! FfiConverterTypeTTSConfig.lift(try! rustCall {
             uniffi_pocket_tts_ios_fn_method_pocketttsengine_get_config(self.uniffiClonePointer(), $0)
@@ -672,10 +682,10 @@ open class PocketTtsEngine:
     }
     }
 
-    open func startStreaming(text: String, handler: TtsEventHandler) throws { try rustCallWithError(FfiConverterTypePocketTTSError.lift) {
-        uniffi_pocket_tts_ios_fn_method_pocketttsengine_start_streaming(self.uniffiClonePointer(),
-                                                                        FfiConverterString.lower(text),
-                                                                        FfiConverterCallbackInterfaceTtsEventHandler.lower(handler), $0)
+    open func startTrueStreaming(text: String, handler: TtsEventHandler) throws { try rustCallWithError(FfiConverterTypePocketTTSError.lift) {
+        uniffi_pocket_tts_ios_fn_method_pocketttsengine_start_true_streaming(self.uniffiClonePointer(),
+                                                                             FfiConverterString.lower(text),
+                                                                             FfiConverterCallbackInterfaceTtsEventHandler.lower(handler), $0)
     }
     }
 
@@ -1405,6 +1415,9 @@ nonisolated(unsafe) private var initializationResult: InitializationResult = {
     if uniffi_pocket_tts_ios_checksum_method_pocketttsengine_configure() != 6099 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_pocket_tts_ios_checksum_method_pocketttsengine_decode_latents() != 32770 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_pocket_tts_ios_checksum_method_pocketttsengine_get_config() != 11199 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -1420,7 +1433,7 @@ nonisolated(unsafe) private var initializationResult: InitializationResult = {
     if uniffi_pocket_tts_ios_checksum_method_pocketttsengine_set_reference_audio() != 45329 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_pocket_tts_ios_checksum_method_pocketttsengine_start_streaming() != 6826 {
+    if uniffi_pocket_tts_ios_checksum_method_pocketttsengine_start_true_streaming() != 40839 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_pocket_tts_ios_checksum_method_pocketttsengine_synthesize() != 33210 {

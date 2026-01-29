@@ -105,6 +105,27 @@ var body: some View {
 }
 ```
 
+### 1.4 Hands-Free First Design
+
+UnaMentis implements a **two-tier voice interaction model** to support hands-free operation:
+
+**Tier 1: Activity-Mode Voice-First**
+- Automatic when entering voice-centric activities (oral practice, learning sessions)
+- Complete activities entirely hands-free (e.g., while driving)
+- No toggle needed; entering the activity activates voice-first mode
+
+**Tier 2: App-Wide Voice Navigation**
+- Accessibility feature for vision-impaired users
+- Opt-in via Accessibility settings
+- Extends voice control to all app navigation
+
+**Key Requirement:** All voice-first work MUST follow accessibility standards:
+- Commands consistent across both tiers ("next" means "next" everywhere)
+- VoiceOver compatibility required
+- Audio feedback has visual equivalents
+
+See [HANDS_FREE_FIRST_DESIGN.md](../design/HANDS_FREE_FIRST_DESIGN.md) for complete specification.
+
 ---
 
 ## 2. Internationalization (i18n)
