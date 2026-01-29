@@ -316,6 +316,13 @@ See `docs/quality/TOOL_TRUST_DOCTRINE.md` and the "Tool Trust Doctrine" section 
 
 ## Key Technical Requirements
 
+**Hands-Free First Design:**
+- Voice-centric activities (oral practice, learning sessions) must support 100% hands-free operation
+- Voice-first is automatic when entering activities, no toggle needed
+- App-wide voice navigation is a separate accessibility feature (opt-in)
+- All voice work must follow accessibility standards (VoiceOver compatible, consistent commands)
+- See `docs/design/HANDS_FREE_FIRST_DESIGN.md` for complete specification
+
 **Testing Philosophy (Real Over Mock):**
 - Only mock paid external APIs (LLM, STT, TTS, Embeddings)
 - Use real implementations for all internal services

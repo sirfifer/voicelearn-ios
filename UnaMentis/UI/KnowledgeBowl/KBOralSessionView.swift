@@ -155,17 +155,30 @@ struct KBOralSessionView: View {
                     .foregroundColor(.kbFocusArea)
             }
 
+            // Loading indicator while prewarming TTS
+            if viewModel.isPrewarming {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                    Text("Preparing voice engine...")
+                        .font(.caption)
+                        .foregroundColor(.kbTextSecondary)
+                }
+                .padding(.bottom, 8)
+            }
+
             Button(action: {
                 Task { await viewModel.startSession() }
             }) {
-                Text("Start Practice")
+                Text(viewModel.isPrewarming ? "Preparing..." : "Start Practice")
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.kbMastered)
+                    .background(viewModel.isPrewarming ? Color.gray : Color.kbMastered)
                     .cornerRadius(12)
             }
+            .disabled(viewModel.isPrewarming)
             .padding(.horizontal)
             .padding(.bottom)
         }
@@ -642,6 +655,7 @@ final class KBOralSessionViewModel: ObservableObject {
     // TTS State
     @Published var ttsProgress: Float = 0
     @Published var isSpeaking = false
+    @Published var isPrewarming = true  // Track TTS prewarm status
 
     // STT State
     @Published var transcript = ""
@@ -655,6 +669,10 @@ final class KBOralSessionViewModel: ObservableObject {
     @Published var lastAnswerCorrect: Bool?
     @Published var hasPermissions = false
 
+    // Voice Command State (Hands-Free First)
+    @Published var voiceCommandFeedback: String = ""
+    @Published var lastRecognizedCommand: VoiceCommand?
+
     // Response Time Tracking
     private var questionStartTime: Date?
 
@@ -664,6 +682,10 @@ final class KBOralSessionViewModel: ObservableObject {
     private let stt = KBOnDeviceSTT()
     private let validator: KBAnswerValidator
     private let sessionManager = KBSessionManager()
+
+    // Voice-First Services (see docs/design/HANDS_FREE_FIRST_DESIGN.md)
+    private let commandRecognizer = VoiceCommandRecognizer()
+    private let voiceFeedback = VoiceActivityFeedback()
 
     /// Create answer validator with on-device LLM if available
     private static func createValidator() -> KBAnswerValidator {
@@ -688,6 +710,11 @@ final class KBOralSessionViewModel: ObservableObject {
     private var conferenceTask: Task<Void, Never>?
     private var sttStreamTask: Task<Void, Never>?
     private var ttsProgressTask: Task<Void, Never>?
+    private var voiceCommandTask: Task<Void, Never>?
+
+    // Silence tracking for auto-submit
+    private var silenceStartTime: Date?
+    private let autoSubmitSilenceThreshold: TimeInterval = 2.5
 
     // MARK: - Computed Properties
 
@@ -727,6 +754,8 @@ final class KBOralSessionViewModel: ObservableObject {
         let prepareStart = CFAbsoluteTimeGetCurrent()
         NSLog("⏱️ [KBOralSession] prepareServices() START")
 
+        isPrewarming = true
+
         // Set up TTS observation using Combine
         setupTTSObservation()
 
@@ -736,6 +765,8 @@ final class KBOralSessionViewModel: ObservableObject {
 
         // Check if STT is available
         hasPermissions = KBOnDeviceSTT.isAvailable
+
+        isPrewarming = false
 
         let prepareTime = (CFAbsoluteTimeGetCurrent() - prepareStart) * 1000
         NSLog("⏱️ [KBOralSession] prepareServices() COMPLETE - took %.1fms", prepareTime)
@@ -796,6 +827,10 @@ final class KBOralSessionViewModel: ObservableObject {
             return
         }
 
+        // Start voice command monitoring (Hands-Free First)
+        startVoiceCommandMonitoring()
+        voiceFeedback.announceActivityStarted("Oral Practice")
+
         NSLog("⏱️ [KBOralSession] startSession() - starting reading question...")
         state = .readingQuestion
         await readCurrentQuestion()
@@ -807,6 +842,7 @@ final class KBOralSessionViewModel: ObservableObject {
     func endSession() async {
         conferenceTask?.cancel()
         ttsProgressTask?.cancel()
+        stopVoiceCommandMonitoring()
 
         await tts.stop()
 
@@ -817,6 +853,11 @@ final class KBOralSessionViewModel: ObservableObject {
         session.endTime = Date()
         session.isComplete = true
         state = .completed
+
+        // Announce completion (Hands-Free First)
+        let score = session.correctCount
+        let total = session.attempts.count
+        voiceFeedback.announceActivityCompleted("Session complete. \(score) of \(total) correct.")
 
         // Save completed session via session manager
         do {
@@ -865,6 +906,13 @@ final class KBOralSessionViewModel: ObservableObject {
         conferenceProgress = 1.0
         state = .conferenceTime
 
+        // Announce conference time start (Hands-Free First)
+        let totalSeconds = Int(regionalConfig.conferenceTime)
+        voiceFeedback.announceCountdownStart(seconds: totalSeconds, context: "Conference time")
+
+        // Track which milestones have been announced
+        var announcedMilestones: Set<Int> = []
+
         conferenceTask = Task {
             let totalTime = regionalConfig.conferenceTime
 
@@ -875,12 +923,35 @@ final class KBOralSessionViewModel: ObservableObject {
                     guard let self = self else { return }
                     self.conferenceTimeRemaining -= 0.1
                     self.conferenceProgress = max(0, self.conferenceTimeRemaining / totalTime)
+
+                    // Audio countdown milestones (Hands-Free First)
+                    let secondsRemaining = Int(self.conferenceTimeRemaining.rounded())
+
+                    // Announce milestones: 15s, 10s
+                    if secondsRemaining == 15 && !announcedMilestones.contains(15) {
+                        announcedMilestones.insert(15)
+                        self.voiceFeedback.announceCountdownMilestone(seconds: 15)
+                    } else if secondsRemaining == 10 && !announcedMilestones.contains(10) {
+                        announcedMilestones.insert(10)
+                        self.voiceFeedback.announceCountdownMilestone(seconds: 10)
+                    }
+
+                    // Countdown ticks for final 5 seconds
+                    if secondsRemaining <= 5 && secondsRemaining > 0 && !announcedMilestones.contains(secondsRemaining) {
+                        announcedMilestones.insert(secondsRemaining)
+                        self.voiceFeedback.playCountdownTick()
+                    }
                 }
             }
 
             if !Task.isCancelled {
                 await MainActor.run { [weak self] in
-                    self?.startListeningPhase()
+                    guard let self = self else { return }
+                    // Announce ready to answer
+                    self.voiceFeedback.announceCountdownComplete(context: "Ready to answer")
+                    Task {
+                        await self.startListeningPhase()
+                    }
                 }
             }
         }
@@ -888,13 +959,16 @@ final class KBOralSessionViewModel: ObservableObject {
 
     func skipConference() async {
         conferenceTask?.cancel()
-        startListeningPhase()
+        await startListeningPhase()
     }
 
-    private func startListeningPhase() {
+    private func startListeningPhase() async {
         transcript = ""
         questionStartTime = Date()  // Start timing from when user can answer
         state = .listeningForAnswer
+
+        // Auto-start listening when entering the listening phase
+        await toggleListening()
     }
 
     // MARK: - Voice Input
@@ -980,14 +1054,138 @@ final class KBOralSessionViewModel: ObservableObject {
             await sessionManager.recordAttempt(attempt)
         }
 
-        // Haptic feedback
+        // Audio and haptic feedback (Hands-Free First)
         if result.isCorrect {
-            KBHapticFeedback.success()
+            voiceFeedback.announceCorrect()
         } else {
-            KBHapticFeedback.error()
+            voiceFeedback.announceIncorrect(correctAnswer: question.answer.allValidAnswers.first)
         }
 
         state = .showingFeedback
+    }
+
+    // MARK: - Voice Command Handling (Hands-Free First)
+
+    /// Start continuous voice command monitoring for the session
+    private func startVoiceCommandMonitoring() {
+        voiceCommandTask?.cancel()
+        voiceCommandTask = Task { @MainActor [weak self] in
+            guard let self = self else { return }
+
+            // Monitor transcript changes for commands
+            while !Task.isCancelled && self.state != .completed {
+                try? await Task.sleep(nanoseconds: 200_000_000)  // Check every 200ms
+
+                // Skip command detection during answer listening (transcript is answer content)
+                guard self.state != .listeningForAnswer else {
+                    // During listening, check for explicit submit/done commands
+                    await self.checkForSubmitCommand()
+                    continue
+                }
+
+                // Check transcript for commands in other states
+                guard !self.transcript.isEmpty else { continue }
+
+                await self.processVoiceCommand(transcript: self.transcript)
+            }
+        }
+    }
+
+    /// Stop voice command monitoring
+    private func stopVoiceCommandMonitoring() {
+        voiceCommandTask?.cancel()
+        voiceCommandTask = nil
+    }
+
+    /// Check for submit/done command during answer listening
+    private func checkForSubmitCommand() async {
+        guard state == .listeningForAnswer, !transcript.isEmpty else { return }
+
+        // Only check the last few words for submit command
+        let words = transcript.lowercased().split(separator: " ")
+        let lastWords = words.suffix(3).joined(separator: " ")
+
+        let validCommands: Set<VoiceCommand> = [.submit, .skip]
+        if let result = await commandRecognizer.recognize(transcript: lastWords, validCommands: validCommands),
+           result.shouldExecute {
+            await handleVoiceCommand(result.command)
+        }
+    }
+
+    /// Process transcript for voice commands based on current state
+    private func processVoiceCommand(transcript: String) async {
+        let validCommands = validCommandsForState(state)
+        guard !validCommands.isEmpty else { return }
+
+        if let result = await commandRecognizer.recognize(transcript: transcript, validCommands: validCommands),
+           result.shouldExecute {
+            await handleVoiceCommand(result.command)
+        }
+    }
+
+    /// Get valid commands for current state
+    private func validCommandsForState(_ state: KBOralSessionState) -> Set<VoiceCommand> {
+        switch state {
+        case .notStarted:
+            return [.ready, .quit]
+        case .readingQuestion:
+            return [.skip, .quit]
+        case .conferenceTime:
+            return [.ready, .quit]
+        case .listeningForAnswer:
+            return [.submit, .skip]  // Handled separately in checkForSubmitCommand
+        case .showingFeedback:
+            return [.next, .quit]
+        case .completed:
+            return [.quit]
+        }
+    }
+
+    /// Handle a recognized voice command
+    private func handleVoiceCommand(_ command: VoiceCommand) async {
+        // Provide immediate feedback
+        voiceFeedback.announceCommandRecognized(command)
+        lastRecognizedCommand = command
+        voiceCommandFeedback = "Command: \(command.displayName)"
+
+        // Clear feedback after delay
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            self.voiceCommandFeedback = ""
+            self.lastRecognizedCommand = nil
+        }
+
+        // Execute command based on state
+        switch (state, command) {
+        case (.notStarted, .ready):
+            await startSession()
+
+        case (.readingQuestion, .skip):
+            // Skip TTS and go to conference time
+            await tts.stop()
+
+        case (.conferenceTime, .ready):
+            await skipConference()
+
+        case (.listeningForAnswer, .submit):
+            await submitAnswer()
+
+        case (.listeningForAnswer, .skip):
+            // Mark as skipped and move to feedback
+            lastAnswerCorrect = false
+            state = .showingFeedback
+            voiceFeedback.announceIncorrect(correctAnswer: currentQuestion?.answer.allValidAnswers.first)
+
+        case (.showingFeedback, .next):
+            await nextQuestion()
+
+        case (_, .quit):
+            await endSession()
+
+        default:
+            // Invalid command for state
+            voiceFeedback.playTone(.commandInvalid)
+        }
     }
 
     func nextQuestion() async {
@@ -996,6 +1194,8 @@ final class KBOralSessionViewModel: ObservableObject {
 
         if currentQuestionIndex < questions.count - 1 {
             currentQuestionIndex += 1
+            // Announce question number (Hands-Free First)
+            voiceFeedback.announceNextQuestion(number: currentQuestionIndex + 1, total: questions.count)
             await readCurrentQuestion()
         } else {
             await endSession()
